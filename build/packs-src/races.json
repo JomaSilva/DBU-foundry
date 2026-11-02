@@ -1,0 +1,1638 @@
+[
+ {
+  "_type": "Folder",
+  "_id": "rLPT9w7imRX11Fzf",
+  "name": "Raças jogáveis",
+  "type": "Item",
+  "folder": null,
+  "sorting": "a",
+  "color": null,
+  "sort": 0,
+  "description": "",
+  "flags": {}
+ },
+ {
+  "_type": "Folder",
+  "_id": "7EE62IV8I1lFCTWr",
+  "name": "Raças de Minion",
+  "type": "Item",
+  "folder": null,
+  "sorting": "a",
+  "color": null,
+  "sort": 0,
+  "description": "",
+  "flags": {}
+ },
+ {
+  "_type": "Item",
+  "_id": "3VAcZaEdQuPvecvy",
+  "name": "Androids",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 2,
+    "te": 2,
+    "sc": 0,
+    "in": 1,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "fo;te",
+    "plus1": "in"
+   },
+   "increaseRule": "",
+   "rlm": 4,
+   "saves": [
+    "cognitive"
+   ],
+   "saveChoice": false,
+   "skillRanks": 3,
+   "sizes": [],
+   "minion": false,
+   "unnatural": true,
+   "traits": [
+    "Technological Being",
+    "Energy Core",
+    "Lock On",
+    "Damage Inhibitor",
+    "Functional Purpose"
+   ],
+   "summary": "RLM +4 · cognitive · 3 ranks · +2 fo / te · +1 in",
+   "source": {
+    "slug": "androids",
+    "section": "Androids",
+    "url": "https://dbu-rpg.com/androids/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/androids/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/androids</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Technological Being</li><li>Traço: Energy Core</li><li>Traço: Lock On</li><li>Traço: Damage Inhibitor</li><li>Traço: Functional Purpose</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "androids"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "BopM9uKAvwA9i8vu",
+  "name": "Angels",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 2,
+    "fo": 0,
+    "te": 1,
+    "sc": 0,
+    "in": 2,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "in;ag",
+    "plus1": "te"
+   },
+   "increaseRule": "",
+   "rlm": 4,
+   "saves": [
+    "impulsive"
+   ],
+   "saveChoice": false,
+   "skillRanks": 6,
+   "sizes": [],
+   "minion": false,
+   "unnatural": false,
+   "traits": [
+    "Discarded Divinity",
+    "Lingering Instincts",
+    "Angelic Defense",
+    "Angelic Offense",
+    "Divine Physique"
+   ],
+   "summary": "RLM +4 · impulsive · 6 ranks · +2 in / ag · +1 te",
+   "source": {
+    "slug": "angels",
+    "section": "Angels",
+    "url": "https://dbu-rpg.com/angels/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/angels/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/angels</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Discarded Divinity</li><li>Traço: Lingering Instincts</li><li>Traço: Angelic Defense</li><li>Traço: Angelic Offense</li><li>Traço: Divine Physique</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "angels"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "jP1GY8Tym481Go3r",
+  "name": "Arcosians",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 2,
+    "fo": 1,
+    "te": 2,
+    "sc": 0,
+    "in": 0,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "te;ag",
+    "plus1": "fo"
+   },
+   "increaseRule": "",
+   "rlm": 5,
+   "saves": [
+    "corporeal"
+   ],
+   "saveChoice": false,
+   "skillRanks": 2,
+   "sizes": [],
+   "minion": false,
+   "unnatural": false,
+   "traits": [
+    "Overwhelming Fighter",
+    "Survivor",
+    "Overwhelming Assault",
+    "Surprising Resilience",
+    "Overwhelming Pressure"
+   ],
+   "summary": "RLM +5 · corporeal · 2 ranks · +2 te / ag · +1 fo",
+   "source": {
+    "slug": "arcosians",
+    "section": "Arcosians",
+    "url": "https://dbu-rpg.com/arcosians/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/arcosians/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/arcosians</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Overwhelming Fighter</li><li>Traço: Survivor</li><li>Traço: Overwhelming Assault</li><li>Traço: Surprising Resilience</li><li>Traço: Overwhelming Pressure</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "arcosians"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "M5S6P48tKG5wVVPP",
+  "name": "Bio Androids",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 0,
+    "te": 0,
+    "sc": 0,
+    "in": 0,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "*;*",
+    "plus1": "*"
+   },
+   "increaseRule": "!fo+ma",
+   "rlm": 3,
+   "saves": [
+    "corporeal"
+   ],
+   "saveChoice": false,
+   "skillRanks": 3,
+   "sizes": [],
+   "minion": false,
+   "unnatural": true,
+   "traits": [
+    "Artificial Warrior",
+    "Uncanny Monster",
+    "Combat Blueprint",
+    "Offensive Design",
+    "Defensive Design"
+   ],
+   "summary": "RLM +3 · corporeal · 3 ranks · +2 * / * · +1 *",
+   "source": {
+    "slug": "bio-android",
+    "section": "Bio Androids",
+    "url": "https://dbu-rpg.com/bio-android/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/bio-android/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/bio-android</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Artificial Warrior</li><li>Traço: Uncanny Monster</li><li>Traço: Combat Blueprint</li><li>Traço: Offensive Design</li><li>Traço: Defensive Design</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "bio-android"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "uvqTHDLpFLNLAriq",
+  "name": "Cerealians",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 2,
+    "fo": 0,
+    "te": 0,
+    "sc": 0,
+    "in": 2,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "in;ag",
+    "plus1": "fo|ma"
+   },
+   "increaseRule": "",
+   "rlm": 3,
+   "saves": [
+    "impulsive"
+   ],
+   "saveChoice": false,
+   "skillRanks": 3,
+   "sizes": [],
+   "minion": false,
+   "unnatural": false,
+   "traits": [
+    "Evolved Right Eye",
+    "Pinpoint Combat",
+    "Patient Sniper",
+    "Scarlet Spotter",
+    "Critical Point"
+   ],
+   "summary": "RLM +3 · impulsive · 3 ranks · +2 in / ag · +1 fo|ma",
+   "source": {
+    "slug": "cerealians",
+    "section": "Cerealians",
+    "url": "https://dbu-rpg.com/cerealians/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/cerealians/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/cerealians</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Evolved Right Eye</li><li>Traço: Pinpoint Combat</li><li>Traço: Patient Sniper</li><li>Traço: Scarlet Spotter</li><li>Traço: Critical Point</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "cerealians"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "IhEkr6ZQNBlZGpe0",
+  "name": "Demons",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 0,
+    "te": 0,
+    "sc": 0,
+    "in": 2,
+    "ma": 0,
+    "pe": 1
+   },
+   "allowed": {
+    "plus2": "fo|ma;in",
+    "plus1": "pe"
+   },
+   "increaseRule": "",
+   "rlm": 4,
+   "saves": [
+    "cognitive"
+   ],
+   "saveChoice": false,
+   "skillRanks": 3,
+   "sizes": [],
+   "minion": false,
+   "unnatural": false,
+   "traits": [
+    "Demonic Combat",
+    "Demonic Pressure",
+    "Demonic Resilience",
+    "Demonic Creativity",
+    "Denizen of the Demon Realm",
+    "Demons of the Makyo Star",
+    "Fallen Idol"
+   ],
+   "summary": "RLM +4 · cognitive · 3 ranks · +2 fo|ma / in · +1 pe",
+   "source": {
+    "slug": "demons",
+    "section": "Demons",
+    "url": "https://dbu-rpg.com/demons/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/demons/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/demons</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Demonic Combat</li><li>Traço: Demonic Pressure</li><li>Traço: Demonic Resilience</li><li>Traço: Demonic Creativity</li><li>Traço: Denizen of the Demon Realm</li><li>Traço: Demons of the Makyo Star</li><li>Traço: Fallen Idol</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "demons"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "yvxcilSIlxUaSwsN",
+  "name": "Earthlings",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 0,
+    "te": 0,
+    "sc": 0,
+    "in": 2,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "in;ag|te",
+    "plus1": "sc|pe"
+   },
+   "increaseRule": "",
+   "rlm": 4,
+   "saves": [
+    "morale"
+   ],
+   "saveChoice": false,
+   "skillRanks": 4,
+   "sizes": [],
+   "minion": false,
+   "unnatural": false,
+   "traits": [
+    "Earthling Resolve",
+    "Quick to Master",
+    "Experienced Fighter",
+    "Eye of the Dragon"
+   ],
+   "summary": "RLM +4 · morale · 4 ranks · +2 in / ag|te · +1 sc|pe",
+   "source": {
+    "slug": "earthlings",
+    "section": "Earthlings",
+    "url": "https://dbu-rpg.com/earthlings/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/earthlings/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/earthlings</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Earthling Resolve</li><li>Traço: Quick to Master</li><li>Traço: Experienced Fighter</li><li>Traço: Eye of the Dragon</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "earthlings"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "zBwQur9sDvZG819k",
+  "name": "Glass Tribe",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 0,
+    "te": 2,
+    "sc": 0,
+    "in": 2,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "in;te",
+    "plus1": "fo|ma"
+   },
+   "increaseRule": "",
+   "rlm": 2,
+   "saves": [
+    "corporeal"
+   ],
+   "saveChoice": false,
+   "skillRanks": 4,
+   "sizes": [],
+   "minion": false,
+   "unnatural": false,
+   "traits": [
+    "Body of Glass",
+    "Heart of Glass",
+    "Warriors of Glass",
+    "Glass Combat",
+    "Glass Mastery",
+    "Glass Shards"
+   ],
+   "summary": "RLM +2 · corporeal · 4 ranks · +2 in / te · +1 fo|ma",
+   "source": {
+    "slug": "glass-tribe",
+    "section": "Glass Tribe",
+    "url": "https://dbu-rpg.com/glass-tribe/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/glass-tribe/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/glass-tribe</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Body of Glass</li><li>Traço: Heart of Glass</li><li>Traço: Warriors of Glass</li><li>Traço: Glass Combat</li><li>Traço: Glass Mastery</li><li>Traço: Glass Shards</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "glass-tribe"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "PEURGu7fqAYDzXr0",
+  "name": "Herans",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 0,
+    "te": 2,
+    "sc": 0,
+    "in": 1,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "te;fo|ma",
+    "plus1": "in"
+   },
+   "increaseRule": "",
+   "rlm": 2,
+   "saves": [
+    "corporeal"
+   ],
+   "saveChoice": false,
+   "skillRanks": 3,
+   "sizes": [],
+   "minion": false,
+   "unnatural": false,
+   "traits": [
+    "Greed of the Hera",
+    "Brigand Combat",
+    "Power of the Hera",
+    "Cutthroat Teamwork",
+    "Galaxy at the Brink"
+   ],
+   "summary": "RLM +2 · corporeal · 3 ranks · +2 te / fo|ma · +1 in",
+   "source": {
+    "slug": "herans",
+    "section": "Herans",
+    "url": "https://dbu-rpg.com/herans/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/herans/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/herans</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Greed of the Hera</li><li>Traço: Brigand Combat</li><li>Traço: Power of the Hera</li><li>Traço: Cutthroat Teamwork</li><li>Traço: Galaxy at the Brink</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "herans"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "jYylnrDpVQXzt7Fj",
+  "name": "Konatsians",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 1,
+    "fo": 0,
+    "te": 0,
+    "sc": 0,
+    "in": 2,
+    "ma": 0,
+    "pe": 2
+   },
+   "allowed": {
+    "plus2": "in;pe",
+    "plus1": "ag"
+   },
+   "increaseRule": "",
+   "rlm": 3,
+   "saves": [
+    "morale"
+   ],
+   "saveChoice": false,
+   "skillRanks": 3,
+   "sizes": [],
+   "minion": false,
+   "unnatural": false,
+   "traits": [
+    "Battle Tension",
+    "Vocation Training",
+    "Questing Wisdom",
+    "Heart of Courage",
+    "Fight against Power"
+   ],
+   "summary": "RLM +3 · morale · 3 ranks · +2 in / pe · +1 ag",
+   "source": {
+    "slug": "konatsians",
+    "section": "Konatsians",
+    "url": "https://dbu-rpg.com/konatsians/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/konatsians/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/konatsians</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Battle Tension</li><li>Traço: Vocation Training</li><li>Traço: Questing Wisdom</li><li>Traço: Heart of Courage</li><li>Traço: Fight against Power</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "konatsians"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "sxjqmN6nZt1IDchV",
+  "name": "Majins",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 0,
+    "te": 1,
+    "sc": 0,
+    "in": 0,
+    "ma": 0,
+    "pe": 2
+   },
+   "allowed": {
+    "plus2": "pe;fo|ma",
+    "plus1": "te"
+   },
+   "increaseRule": "",
+   "rlm": 3,
+   "saves": [
+    "morale"
+   ],
+   "saveChoice": false,
+   "skillRanks": 2,
+   "sizes": [],
+   "minion": false,
+   "unnatural": true,
+   "traits": [
+    "Rubbery Body",
+    "Majin Regeneration",
+    "Bouncy Physique",
+    "Burrowed Strike",
+    "Dangerous Liquid",
+    "Disarming Demeanor",
+    "Elastic Tentacle",
+    "Magical Being",
+    "Majin Malice",
+    "Majin Mass-Shift",
+    "Majin Mentality",
+    "Majin See, Majin Do",
+    "Majin Style",
+    "Quick Sleep",
+    "Revenge Bomber",
+    "Snack Motivated",
+    "Steaming Fury",
+    "Transfiguration Beam"
+   ],
+   "summary": "RLM +3 · morale · 2 ranks · +2 pe / fo|ma · +1 te",
+   "source": {
+    "slug": "majins",
+    "section": "Majins",
+    "url": "https://dbu-rpg.com/majins/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/majins/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/majins</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Rubbery Body</li><li>Traço: Majin Regeneration</li><li>Traço: Bouncy Physique</li><li>Traço: Burrowed Strike</li><li>Traço: Dangerous Liquid</li><li>Traço: Disarming Demeanor</li><li>Traço: Elastic Tentacle</li><li>Traço: Magical Being</li><li>Traço: Majin Malice</li><li>Traço: Majin Mass-Shift</li><li>Traço: Majin Mentality</li><li>Traço: Majin See, Majin Do</li><li>Traço: Majin Style</li><li>Traço: Quick Sleep</li><li>Traço: Revenge Bomber</li><li>Traço: Snack Motivated</li><li>Traço: Steaming Fury</li><li>Traço: Transfiguration Beam</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "majins"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "1RALnILKgzREZoMJ",
+  "name": "Namekians",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 0,
+    "te": 2,
+    "sc": 0,
+    "in": 2,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "te;in",
+    "plus1": "fo|ma"
+   },
+   "increaseRule": "",
+   "rlm": 5,
+   "saves": [
+    "corporeal"
+   ],
+   "saveChoice": false,
+   "skillRanks": 3,
+   "sizes": [],
+   "minion": false,
+   "unnatural": false,
+   "traits": [
+    "Namekian Biology",
+    "Intelligent Fighter",
+    "Namekian Techniques",
+    "Telepathic Warning",
+    "Refined Combat",
+    "Spirit of Namek"
+   ],
+   "summary": "RLM +5 · corporeal · 3 ranks · +2 te / in · +1 fo|ma",
+   "source": {
+    "slug": "namekians",
+    "section": "Namekians",
+    "url": "https://dbu-rpg.com/namekians/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/namekians/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/namekians</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Namekian Biology</li><li>Traço: Intelligent Fighter</li><li>Traço: Namekian Techniques</li><li>Traço: Telepathic Warning</li><li>Traço: Refined Combat</li><li>Traço: Spirit of Namek</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "namekians"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "05xROxQ4cvkhleDh",
+  "name": "Neko Majins",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 0,
+    "te": 0,
+    "sc": 0,
+    "in": 0,
+    "ma": 0,
+    "pe": 2
+   },
+   "allowed": {
+    "plus2": "pe;fo|ma",
+    "plus1": "te|in"
+   },
+   "increaseRule": "",
+   "rlm": 4,
+   "saves": [
+    "cognitive",
+    "morale"
+   ],
+   "saveChoice": false,
+   "skillRanks": 3,
+   "sizes": [],
+   "minion": false,
+   "unnatural": false,
+   "traits": [
+    "Neko Majin-Dama",
+    "Neko Mimicry",
+    "Feline Build",
+    "Quick Thinking",
+    "Whimsical Magic"
+   ],
+   "summary": "RLM +4 · cognitive, morale · 3 ranks · +2 pe / fo|ma · +1 te|in",
+   "source": {
+    "slug": "neko-majins",
+    "section": "Neko Majins",
+    "url": "https://dbu-rpg.com/neko-majins/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/neko-majins/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/neko-majins</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Neko Majin-Dama</li><li>Traço: Neko Mimicry</li><li>Traço: Feline Build</li><li>Traço: Quick Thinking</li><li>Traço: Whimsical Magic</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "neko-majins"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "vTlhN8cQliCqTZrY",
+  "name": "Neo-Tuffles",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 0,
+    "te": 2,
+    "sc": 0,
+    "in": 2,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "te;in",
+    "plus1": "sc|pe"
+   },
+   "increaseRule": "",
+   "rlm": 4,
+   "saves": [
+    "cognitive"
+   ],
+   "saveChoice": false,
+   "skillRanks": 3,
+   "sizes": [],
+   "minion": false,
+   "unnatural": false,
+   "traits": [
+    "Energy of Revenge",
+    "Tuffle Superiority",
+    "Legacy of the Scholars",
+    "Violent Rebuke",
+    "Hate Empowerment",
+    "Parasitic Biology"
+   ],
+   "summary": "RLM +4 · cognitive · 3 ranks · +2 te / in · +1 sc|pe",
+   "source": {
+    "slug": "neo-tuffles",
+    "section": "Neo-Tuffles",
+    "url": "https://dbu-rpg.com/neo-tuffles/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/neo-tuffles/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/neo-tuffles</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Energy of Revenge</li><li>Traço: Tuffle Superiority</li><li>Traço: Legacy of the Scholars</li><li>Traço: Violent Rebuke</li><li>Traço: Hate Empowerment</li><li>Traço: Parasitic Biology</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "neo-tuffles"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "epAhZERCXFlfEJep",
+  "name": "Saiyans",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 1,
+    "fo": 2,
+    "te": 2,
+    "sc": 0,
+    "in": 0,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "fo;te",
+    "plus1": "ag"
+   },
+   "increaseRule": "",
+   "rlm": 3,
+   "saves": [
+    "corporeal"
+   ],
+   "saveChoice": false,
+   "skillRanks": 2,
+   "sizes": [],
+   "minion": false,
+   "unnatural": false,
+   "traits": [
+    "Born for Battle",
+    "Saiyan Heritage",
+    "Warrior’s Pride",
+    "Blood of the Warrior",
+    "Powerful Physique"
+   ],
+   "summary": "RLM +3 · corporeal · 2 ranks · +2 fo / te · +1 ag",
+   "source": {
+    "slug": "saiyans",
+    "section": "Saiyans",
+    "url": "https://dbu-rpg.com/saiyans/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/saiyans/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/saiyans</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Born for Battle</li><li>Traço: Saiyan Heritage</li><li>Traço: Warrior’s Pride</li><li>Traço: Blood of the Warrior</li><li>Traço: Powerful Physique</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "saiyans"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "ewmpobirJIedDYFo",
+  "name": "Shadow Dragons",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 0,
+    "te": 2,
+    "sc": 0,
+    "in": 0,
+    "ma": 0,
+    "pe": 1
+   },
+   "allowed": {
+    "plus2": "te;fo|ma",
+    "plus1": "pe"
+   },
+   "increaseRule": "",
+   "rlm": 7,
+   "saves": [
+    "morale"
+   ],
+   "saveChoice": false,
+   "skillRanks": 2,
+   "sizes": [],
+   "minion": false,
+   "unnatural": false,
+   "traits": [
+    "Negative Ki",
+    "Personified Dragon Ball",
+    "Draconic Physique",
+    "Karmic Reflection",
+    "Wrath of the Dragon"
+   ],
+   "summary": "RLM +7 · morale · 2 ranks · +2 te / fo|ma · +1 pe",
+   "source": {
+    "slug": "shadow-dragons",
+    "section": "Shadow Dragons",
+    "url": "https://dbu-rpg.com/shadow-dragons/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/shadow-dragons/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/shadow-dragons</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Negative Ki</li><li>Traço: Personified Dragon Ball</li><li>Traço: Draconic Physique</li><li>Traço: Karmic Reflection</li><li>Traço: Wrath of the Dragon</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "shadow-dragons"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "GDtVbuTRC6L6JXOj",
+  "name": "Shinjin",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 0,
+    "te": 0,
+    "sc": 0,
+    "in": 2,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "in;fo|ma",
+    "plus1": "*"
+   },
+   "increaseRule": "",
+   "rlm": 4,
+   "saves": [
+    "cognitive"
+   ],
+   "saveChoice": false,
+   "skillRanks": 2,
+   "sizes": [],
+   "minion": false,
+   "unnatural": false,
+   "traits": [
+    "Divine Magic",
+    "Skill of the Watcher",
+    "Celestial Potential",
+    "Cosmic Efficiency",
+    "Flow of Combat"
+   ],
+   "summary": "RLM +4 · cognitive · 2 ranks · +2 in / fo|ma · +1 *",
+   "source": {
+    "slug": "shinjin",
+    "section": "Shinjin",
+    "url": "https://dbu-rpg.com/shinjin/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/shinjin/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/shinjin</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Divine Magic</li><li>Traço: Skill of the Watcher</li><li>Traço: Celestial Potential</li><li>Traço: Cosmic Efficiency</li><li>Traço: Flow of Combat</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "shinjin"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "tkP28B1wCK4nLUXB",
+  "name": "Yardrats",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 2,
+    "fo": 0,
+    "te": 0,
+    "sc": 0,
+    "in": 2,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "in;ag",
+    "plus1": "sc|pe"
+   },
+   "increaseRule": "",
+   "rlm": 1,
+   "saves": [
+    "cognitive",
+    "impulsive"
+   ],
+   "saveChoice": false,
+   "skillRanks": 3,
+   "sizes": [],
+   "minion": false,
+   "unnatural": false,
+   "traits": [
+    "People of the Spirit",
+    "Power of the Weak",
+    "Masters of Movement",
+    "Conduit of Spirit",
+    "Spiritual Warrior",
+    "Spiritual Pacifist"
+   ],
+   "summary": "RLM +1 · cognitive, impulsive · 3 ranks · +2 in / ag · +1 sc|pe",
+   "source": {
+    "slug": "yardrats",
+    "section": "Yardrats",
+    "url": "https://dbu-rpg.com/yardrats/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/yardrats/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/yardrats</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: People of the Spirit</li><li>Traço: Power of the Weak</li><li>Traço: Masters of Movement</li><li>Traço: Conduit of Spirit</li><li>Traço: Spiritual Warrior</li><li>Traço: Spiritual Pacifist</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "yardrats"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "ueaSOBMuQpMPTQbo",
+  "name": "Custom Species",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 0,
+    "te": 0,
+    "sc": 0,
+    "in": 0,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "*;*",
+    "plus1": "*"
+   },
+   "increaseRule": "save: escolha",
+   "rlm": 3,
+   "saves": [],
+   "saveChoice": true,
+   "skillRanks": 2,
+   "sizes": [],
+   "minion": false,
+   "unnatural": false,
+   "traits": [],
+   "summary": "RLM +3 · teste à escolha · 2 ranks · +2 * / * · +1 *",
+   "source": {
+    "slug": "custom-species",
+    "section": "Custom Species",
+    "url": "https://dbu-rpg.com/custom-species/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/custom-species/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/custom-species</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "rLPT9w7imRX11Fzf",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "custom-species"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "wWc85wnqleXzSkRs",
+  "name": "Aliens",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 0,
+    "te": 0,
+    "sc": 0,
+    "in": 0,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "",
+    "plus1": "*;*;*"
+   },
+   "increaseRule": "save: escolha",
+   "rlm": 1,
+   "saves": [],
+   "saveChoice": true,
+   "skillRanks": 2,
+   "sizes": [
+    "small",
+    "medium",
+    "large"
+   ],
+   "minion": true,
+   "unnatural": false,
+   "traits": [
+    "Nameless Horde",
+    "From the Stars"
+   ],
+   "summary": "RLM +1 · teste à escolha · 2 ranks · +2 — · +1 * / * / *",
+   "source": {
+    "slug": "aliens",
+    "section": "Aliens",
+    "url": "https://dbu-rpg.com/aliens/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/aliens/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/aliens</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Nameless Horde</li><li>Traço: From the Stars</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "7EE62IV8I1lFCTWr",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "aliens"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "5paZEuUG8MOul3NZ",
+  "name": "Animals",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 1,
+    "te": 0,
+    "sc": 0,
+    "in": 1,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "",
+    "plus1": "fo;in;te|ag"
+   },
+   "increaseRule": "",
+   "rlm": 2,
+   "saves": [
+    "impulsive"
+   ],
+   "saveChoice": false,
+   "skillRanks": 0,
+   "sizes": [
+    "nano",
+    "tiny",
+    "small",
+    "medium",
+    "large",
+    "enormous",
+    "gigantic",
+    "colossal"
+   ],
+   "minion": true,
+   "unnatural": false,
+   "traits": [
+    "Beast of a Kind",
+    "Fight or Flight",
+    "Ferocious Assault",
+    "Bestial Presence"
+   ],
+   "summary": "RLM +2 · impulsive · 0 ranks · +2 — · +1 fo / in / te|ag",
+   "source": {
+    "slug": "animals",
+    "section": "Animals",
+    "url": "https://dbu-rpg.com/animals/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/animals/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/animals</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Beast of a Kind</li><li>Traço: Fight or Flight</li><li>Traço: Ferocious Assault</li><li>Traço: Bestial Presence</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "7EE62IV8I1lFCTWr",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "animals"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "km1VTQCdHFfLnqaa",
+  "name": "Arlians",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 1,
+    "te": 1,
+    "sc": 0,
+    "in": 0,
+    "ma": 0,
+    "pe": 1
+   },
+   "allowed": {
+    "plus2": "",
+    "plus1": "te;fo;pe"
+   },
+   "increaseRule": "",
+   "rlm": 2,
+   "saves": [
+    "corporeal"
+   ],
+   "saveChoice": false,
+   "skillRanks": 2,
+   "sizes": [
+    "small",
+    "medium",
+    "large"
+   ],
+   "minion": true,
+   "unnatural": false,
+   "traits": [
+    "Insect Shell",
+    "Pieces of the Hive",
+    "Difference in Shell",
+    "Caste Combat"
+   ],
+   "summary": "RLM +2 · corporeal · 2 ranks · +2 — · +1 te / fo / pe",
+   "source": {
+    "slug": "arlians",
+    "section": "Arlians",
+    "url": "https://dbu-rpg.com/arlians/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/arlians/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/arlians</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Insect Shell</li><li>Traço: Pieces of the Hive</li><li>Traço: Difference in Shell</li><li>Traço: Caste Combat</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "7EE62IV8I1lFCTWr",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "arlians"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "afJVCWKzKFGMiDYo",
+  "name": "Creatures",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 0,
+    "te": 2,
+    "sc": 0,
+    "in": 1,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "te",
+    "plus1": "in"
+   },
+   "increaseRule": "",
+   "rlm": 3,
+   "saves": [
+    "corporeal"
+   ],
+   "saveChoice": false,
+   "skillRanks": 0,
+   "sizes": [
+    "nano",
+    "tiny",
+    "small",
+    "medium",
+    "large",
+    "enormous",
+    "gigantic",
+    "colossal"
+   ],
+   "minion": true,
+   "unnatural": false,
+   "traits": [
+    "Monstrous Vitality",
+    "Violent Mental State",
+    "Weaponized Vitality",
+    "Mind for Combat"
+   ],
+   "summary": "RLM +3 · corporeal · 0 ranks · +2 te · +1 in",
+   "source": {
+    "slug": "creatures",
+    "section": "Creatures",
+    "url": "https://dbu-rpg.com/creatures/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/creatures/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/creatures</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Monstrous Vitality</li><li>Traço: Violent Mental State</li><li>Traço: Weaponized Vitality</li><li>Traço: Mind for Combat</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "7EE62IV8I1lFCTWr",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "creatures"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "fj9hTsO0Cgye36UR",
+  "name": "Oni",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 1,
+    "fo": 0,
+    "te": 1,
+    "sc": 0,
+    "in": 0,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "",
+    "plus1": "ag;te;fo|ma"
+   },
+   "increaseRule": "",
+   "rlm": 2,
+   "saves": [
+    "corporeal"
+   ],
+   "saveChoice": false,
+   "skillRanks": 3,
+   "sizes": [
+    "small",
+    "medium",
+    "large",
+    "enormous"
+   ],
+   "minion": true,
+   "unnatural": false,
+   "traits": [
+    "Afterlife Officials",
+    "Life Among the Dead",
+    "Skilled Ogre",
+    "Bureaucratic Beatdown"
+   ],
+   "summary": "RLM +2 · corporeal · 3 ranks · +2 — · +1 ag / te / fo|ma",
+   "source": {
+    "slug": "oni",
+    "section": "Oni",
+    "url": "https://dbu-rpg.com/oni/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/oni/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/oni</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Afterlife Officials</li><li>Traço: Life Among the Dead</li><li>Traço: Skilled Ogre</li><li>Traço: Bureaucratic Beatdown</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "7EE62IV8I1lFCTWr",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "oni"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "iFHYVsolRaOz6gcH",
+  "name": "Robots",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 0,
+    "fo": 1,
+    "te": 1,
+    "sc": 0,
+    "in": 1,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "",
+    "plus1": "fo;in;te"
+   },
+   "increaseRule": "",
+   "rlm": 3,
+   "saves": [
+    "corporeal"
+   ],
+   "saveChoice": false,
+   "skillRanks": 1,
+   "sizes": [
+    "tiny",
+    "small",
+    "medium",
+    "large",
+    "enormous"
+   ],
+   "minion": true,
+   "unnatural": false,
+   "traits": [
+    "Lifeless Weapon",
+    "Purpose",
+    "Combat Mode",
+    "Full Metal Body"
+   ],
+   "summary": "RLM +3 · corporeal · 1 ranks · +2 — · +1 fo / in / te",
+   "source": {
+    "slug": "robots",
+    "section": "Robots",
+    "url": "https://dbu-rpg.com/robots/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/robots/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/robots</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Lifeless Weapon</li><li>Traço: Purpose</li><li>Traço: Combat Mode</li><li>Traço: Full Metal Body</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "7EE62IV8I1lFCTWr",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "robots"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "okztrs8xUSmeWSIN",
+  "name": "Saibamen",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 1,
+    "fo": 1,
+    "te": 0,
+    "sc": 0,
+    "in": 1,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "",
+    "plus1": "ag;fo;in"
+   },
+   "increaseRule": "",
+   "rlm": 1,
+   "saves": [
+    "impulsive"
+   ],
+   "saveChoice": false,
+   "skillRanks": 0,
+   "sizes": [
+    "small"
+   ],
+   "minion": true,
+   "unnatural": false,
+   "traits": [
+    "Seedling Biology",
+    "Savagery",
+    "Surprise Tactics",
+    "Desperate Grip"
+   ],
+   "summary": "RLM +1 · impulsive · 0 ranks · +2 — · +1 ag / fo / in",
+   "source": {
+    "slug": "saibamen",
+    "section": "Saibamen",
+    "url": "https://dbu-rpg.com/saibamen/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/saibamen/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/saibamen</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Seedling Biology</li><li>Traço: Savagery</li><li>Traço: Surprise Tactics</li><li>Traço: Desperate Grip</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "7EE62IV8I1lFCTWr",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "saibamen"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "RGbs0A7cM0J7AGUg",
+  "name": "Tuffles",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 1,
+    "fo": 0,
+    "te": 0,
+    "sc": 0,
+    "in": 0,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "sc|in",
+    "plus1": "ag"
+   },
+   "increaseRule": "",
+   "rlm": -2,
+   "saves": [
+    "cognitive"
+   ],
+   "saveChoice": false,
+   "skillRanks": 3,
+   "sizes": [
+    "small"
+   ],
+   "minion": true,
+   "unnatural": false,
+   "traits": [
+    "Petite Genius",
+    "Need for Revenge",
+    "Skills of a Genius",
+    "Team Reliance"
+   ],
+   "summary": "RLM -2 · cognitive · 3 ranks · +2 sc|in · +1 ag",
+   "source": {
+    "slug": "tuffles",
+    "section": "Tuffles",
+    "url": "https://dbu-rpg.com/tuffles/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/tuffles/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/tuffles</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Petite Genius</li><li>Traço: Need for Revenge</li><li>Traço: Skills of a Genius</li><li>Traço: Team Reliance</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "7EE62IV8I1lFCTWr",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "tuffles"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "cdvT3pVVnomt6sqy",
+  "name": "Zooners",
+  "type": "race",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+   "increases": {
+    "ag": 1,
+    "fo": 1,
+    "te": 0,
+    "sc": 0,
+    "in": 1,
+    "ma": 0,
+    "pe": 0
+   },
+   "allowed": {
+    "plus2": "",
+    "plus1": "ag;fo;in"
+   },
+   "increaseRule": "",
+   "rlm": 0,
+   "saves": [
+    "impulsive"
+   ],
+   "saveChoice": false,
+   "skillRanks": 2,
+   "sizes": [
+    "small",
+    "medium",
+    "large"
+   ],
+   "minion": true,
+   "unnatural": false,
+   "traits": [
+    "Reinforced Suit",
+    "Nice Shooting",
+    "Raised Gravity",
+    "Shooting Mindset"
+   ],
+   "summary": "RLM +0 · impulsive · 2 ranks · +2 — · +1 ag / fo / in",
+   "source": {
+    "slug": "zooners",
+    "section": "Zooners",
+    "url": "https://dbu-rpg.com/zooners/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/zooners/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/zooners</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Reinforced Suit</li><li>Traço: Nice Shooting</li><li>Traço: Raised Gravity</li><li>Traço: Shooting Mindset</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "7EE62IV8I1lFCTWr",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "zooners"
+   }
+  }
+ }
+]

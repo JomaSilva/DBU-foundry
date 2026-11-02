@@ -1,0 +1,88 @@
+<section class="tab {{tab.cssClass}}" data-tab="techniques" data-group="primary">
+  <div class="dbu-tp-line">
+    <span><i class="fa-solid fa-coins"></i> TP: <strong>{{progression.tpLeft}}</strong> {{localize "DBU.TP.Left"}} ({{progression.tpSpent}} / {{progression.tpTotal}})</span>
+    <span>{{localize "DBU.Sig.ChargeDice" dice=chargeDice sig=sigChargeDice}}</span>
+  </div>
+
+  <h3 class="dbu-section">Signature Techniques
+    <a class="dbu-add" data-action="itemCreate" data-type="signature" data-tooltip="{{localize 'DBU.Sig.New'}}"><i class="fa-solid fa-plus"></i></a>
+  </h3>
+  <table class="dbu-table dbu-items">
+    <thead><tr><th></th><th>{{localize "DBU.Name"}}</th><th>{{localize "DBU.Sig.LevelLabel"}}</th><th>{{localize "DBU.Attack.Profile"}}</th><th>TP</th><th>KP</th><th>{{localize "DBU.DamageCat.label"}}</th><th></th></tr></thead>
+    <tbody>
+      {{#each signatures as |s|}}
+      <tr data-item-id="{{s.item.id}}" class="draggable {{#if s.problems}}dbu-error-row{{/if}}">
+        <td><img src="{{s.item.img}}" alt="" width="28" height="28"></td>
+        <td>
+          <a data-action="itemEdit">{{s.item.name}}</a>
+          {{#if s.item.system.free}}<span class="tag">{{localize "DBU.Sig.Free"}}</span>{{/if}}
+          {{#if s.item.system.granted}}<span class="tag">{{localize "DBU.Granted"}}</span>{{/if}}
+          {{#if s.item.system.usedThisEncounter}}<span class="tag warn">{{localize "DBU.Used"}}</span>{{/if}}
+          {{#if s.problems}}<i class="fa-solid fa-triangle-exclamation error" data-tooltip="{{localize 'DBU.Sig.HasProblems'}}"></i>{{/if}}
+        </td>
+        <td>{{s.level}}</td>
+        <td>{{s.profile}} <small>({{localize (concat "DBU.Foundation." s.item.system.foundation)}})</small></td>
+        <td class="center">{{s.c.tp}}</td>
+        <td class="center">{{s.kp}}</td>
+        <td>{{localize (concat "DBU.DamageCatN." s.c.damageCategory)}}</td>
+        <td class="dbu-controls">
+          <a data-action="itemUse" data-tooltip="{{localize 'DBU.Attack.Roll'}}"><i class="fa-solid fa-dice-d10"></i></a>
+          <a data-action="itemChat" data-tooltip="{{localize 'DBU.Item.ToChat'}}"><i class="fa-solid fa-comment"></i></a>
+          <a data-action="itemDelete" data-tooltip="{{localize 'Delete'}}"><i class="fa-solid fa-trash"></i></a>
+        </td>
+      </tr>
+      {{else}}
+      <tr><td colspan="8" class="dbu-empty">{{localize "DBU.Sig.None"}}</td></tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <h3 class="dbu-section">Unique Abilities
+    <a class="dbu-add" data-action="itemCreate" data-type="uniqueAbility"><i class="fa-solid fa-plus"></i></a>
+    <a class="dbu-add" data-action="openCompendium" data-pack="unique-abilities" data-tooltip="{{localize 'DBU.OpenCompendium'}}"><i class="fa-solid fa-book"></i></a>
+  </h3>
+  <table class="dbu-table dbu-items">
+    <thead><tr><th></th><th>{{localize "DBU.Name"}}</th><th>{{localize "DBU.Type"}}</th><th>{{localize "DBU.UA.Maneuver"}}</th><th>KP</th><th>TP</th><th></th></tr></thead>
+    <tbody>
+      {{#each uas as |u|}}
+      <tr data-item-id="{{u.item.id}}" class="draggable {{#if u.problems.length}}dbu-error-row{{/if}}">
+        <td><img src="{{u.item.img}}" alt="" width="28" height="28"></td>
+        <td><a data-action="itemEdit">{{u.item.name}}</a>
+          {{#if u.item.system.granted}}<span class="tag">{{localize "DBU.Granted"}}</span>{{/if}}
+          {{#each u.problems as |p|}}<div class="dbu-mini-error">{{p}}</div>{{/each}}</td>
+        <td>{{u.item.system.abilityType}}</td>
+        <td>{{u.item.system.maneuverType}} ({{u.item.system.actionCost}})</td>
+        <td>{{u.item.system.kpCost}}</td>
+        <td class="center">{{u.tp}}</td>
+        <td class="dbu-controls">
+          <a data-action="itemChat"><i class="fa-solid fa-comment"></i></a>
+          <a data-action="itemDelete"><i class="fa-solid fa-trash"></i></a>
+        </td>
+      </tr>
+      {{else}}
+      <tr><td colspan="7" class="dbu-empty">—</td></tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <h3 class="dbu-section">{{localize "DBU.SpecialManeuvers"}}
+    <a class="dbu-add" data-action="itemCreate" data-type="maneuver"><i class="fa-solid fa-plus"></i></a>
+    <a class="dbu-add" data-action="openCompendium" data-pack="maneuvers"><i class="fa-solid fa-book"></i></a>
+  </h3>
+  <table class="dbu-table dbu-items">
+    <tbody>
+      {{#each maneuvers as |m|}}
+      <tr data-item-id="{{m.id}}" class="draggable">
+        <td><img src="{{m.img}}" alt="" width="24" height="24"></td>
+        <td><a data-action="itemEdit">{{m.name}}</a> <small>{{m.system.frequency}}</small></td>
+        <td>{{m.system.maneuverType}}</td>
+        <td>{{m.system.actionCost}}</td>
+        <td>KP {{m.system.kpCost}}</td>
+        <td class="dbu-controls"><a data-action="itemChat"><i class="fa-solid fa-comment"></i></a> <a data-action="itemDelete"><i class="fa-solid fa-trash"></i></a></td>
+      </tr>
+      {{else}}
+      <tr><td class="dbu-empty">{{localize "DBU.SpecialManeuversHint"}}</td></tr>
+      {{/each}}
+    </tbody>
+  </table>
+</section>

@@ -1,0 +1,16 @@
+<div class="dbu-card dbu-info">
+  <header class="dbu-card-header">
+    {{#if img}}<img src="{{img}}" alt="" width="32" height="32">{{/if}}
+    <div>
+      <h3>{{title}}</h3>
+      {{#if subtitle}}<div class="dbu-card-sub">{{subtitle}}</div>{{/if}}
+    </div>
+  </header>
+  {{#if lines.length}}<ul class="dbu-lines">{{#each lines as |l|}}<li>{{l}}</li>{{/each}}</ul>{{/if}}
+  {{{extraHTML}}}
+  {{#if buttons.length}}
+  <div class="dbu-card-buttons">
+    {{#each buttons as |b|}}<button type="button" data-dbu-action="{{b.action}}" {{#if b.actorUuid}}data-actor-uuid="{{b.actorUuid}}"{{/if}} {{#if b.payload}}data-payload="{{b.payload}}"{{/if}}><i class="{{b.icon}}"></i> {{b.label}}</button>{{/each}}
+  </div>
+  {{/if}}
+</div>

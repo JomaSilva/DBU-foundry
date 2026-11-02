@@ -1,0 +1,23 @@
+<div class="dbu-rules-list standard-form">
+  <p class="dbu-hint">{{localize "DBU.Settings.OptionalRules.Intro"}}</p>
+  {{#each groups as |g|}}
+  <fieldset>
+    <legend>{{g.label}}</legend>
+    {{#each g.list as |r|}}
+    <div class="dbu-rule-row">
+      <label class="dbu-rule-check">
+        <input type="checkbox" name="rules.{{r.key}}" {{checked r.enabled}}>
+        <strong>{{r.label}}</strong>
+        <span class="tag auto-{{r.auto}}">{{localize (concat "DBU.Opt.Auto." r.auto)}}</span>
+      </label>
+      <p class="hint">{{r.hint}} <a href="{{r.url}}" target="_blank" rel="noopener"><i class="fa-solid fa-up-right-from-square"></i></a></p>
+      {{#if (eq r.key "gravity")}}
+      <label class="dbu-inline-field">{{localize "DBU.Gravity.World"}}
+        <input type="number" name="gravity" value="{{@root.gravity}}" min="0" max="6" step="1">
+      </label>
+      {{/if}}
+    </div>
+    {{/each}}
+  </fieldset>
+  {{/each}}
+</div>

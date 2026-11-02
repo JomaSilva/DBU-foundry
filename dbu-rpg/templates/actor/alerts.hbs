@@ -1,0 +1,14 @@
+<div class="dbu-alerts {{#unless system.alerts.length}}empty{{/unless}}">
+  {{#each system.alerts as |a|}}
+  <div class="dbu-alert level-{{a.level}}">
+    <i class="fa-solid {{#if (eq a.level 'urgent')}}fa-bell{{else if (eq a.level 'warning')}}fa-triangle-exclamation{{else}}fa-circle-info{{/if}}"></i>
+    <span class="msg">{{a.message}}</span>
+    {{#if a.action}}{{#if @root.owner}}
+    <button type="button" data-action="alert" data-alert="{{a.action}}"><i class="{{a.icon}}"></i> {{a.actionLabel}}</button>
+    {{/if}}{{/if}}
+    {{#if (eq a.key "stressTest")}}{{#if @root.owner}}
+    <a class="dismiss" data-action="dismissPending" data-key="stressTest" data-tooltip="{{localize 'DBU.Alert.Dismiss'}}"><i class="fa-solid fa-xmark"></i></a>
+    {{/if}}{{/if}}
+  </div>
+  {{/each}}
+</div>

@@ -1,0 +1,282 @@
+Lock On | startOfTurn | Triggered/Start of Turn, Ruling | Target an Opponent, they become your 'Target' until the start of your next turn
+Patient Sniper | startOfRound | Triggered/Start of Combat Round, 3/Encounter | Target an Ally with a lower Initiative than you
+Demonic Combat | startOfTurn | Triggered/Start of Turn, 1/Round | You may spend 4(bT) Ki Points to target an Opponent who is not at Long Range and make a Clash (Cognitive) against that Opponent
+Experienced Fighter | startOfRound | Triggered/Start of Combat Round | If you had used 2+ Attacking Maneuvers but didn't Ki Wager and none of your Attacking Maneuvers possessed more than 1 Energy Charge during the last Combat Round
+Warriors of Glass | startOfTurn | Triggered/Start of Turn | If a Glass Soldier is occupying a Square with the Glass Environmental Quality, it regains all of its Life Points
+Glass Mastery | startOfTurn | Triggered/Start of Turn | If every Square within a Large Sphere AoE (centered on you) has the Glass Environmental Quality or is occupied by a Feature with the Glass Feature Quality, rega
+Glass Mastery | startOfEncounter | Triggered/Start of Combat Encounter | If you are in the Healthy Health Threshold, use the Glassification Maneuver as an Out-of-Sequence Maneuver as if you spent 3 Actions for its effects
+Greed of the Hera | startOfTurn | Automatic/Start of Turn | You lose all stacks of Power (after applying any effects or Aspects that apply at the start of your turn) and regain 2(bT) Ki Points for all stacks of Power los
+Heart of Courage | startOfTurn | Triggered/Start of Turn, 1/Encounter | Ignore the effects of all Combat Conditions (except Pinned, Prone, Suffocating, or Transfigured) you are suffering from until the end of your next turn
+Feline Build | startOfTurn | Triggered/Start of Turn | While you have an Integrated Majin-Dama, regain 5(bT) Ki Points
+Tuffle Superiority | startOfRound | Triggered/Start of Combat Round, Ruling | Target an Opponent
+Blood of the Warrior | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you have 6+ stacks of Battle Born, or you are below the Injured Health Threshold, you may increase your Tier of Power by +1 (see
+Negative Ki | startOfRound | Triggered/Start of Combat Round, Resource | Reduce your Life Points by up to 8(bT)
+Negative Ki | startOfTurn | Triggered/Start of Turn | As an Instant Maneuver, spend any amount of Negative Energy to make a Morale Clash against an equal number of Opponents that are not at Long Range
+Personified Dragon Ball | startOfTurn | Triggered/Start of Turn | If you are in your Ball Form, you may exit your Ball Form and return to normal
+Skill of the Watcher | startOfRound | Triggered/Start of Combat Round | You may spend 1 Action to gain 2 Counter Actions
+Flow of Combat | startOfTurn | Triggered/Start of Turn | If you have taken no Damage since the end of your last turn, you may use Combat Recovery as if you spent 1 Action as an Out-of-Sequence Maneuver
+Masters of Movement | startOfTurn | Triggered/Start of Turn | Select a Square within the Battlefield
+Caste Combat | startOfTurn | Triggered/Start of Turn | Regain Ki Points equal to your Insect Shell's Apparel Bonus if you have at least 1 adjacent Ally
+Monstrous Vitality | startOfEncounter | Triggered/Start of Combat Encounter | Use a Healing Surge as an Out-of-Sequence Maneuver
+Purpose — opção: Aid Robot | startOfTurn | Triggered/Start of Turn | All Allies within a Large Sphere AoE (centered on you) regain 2(bT) Life and Ki Points
+Seedling Biology | startOfTurn | Triggered/Start of Turn | Regain Life Points equal to x(bT)
+Savagery | startOfRound | Triggered/Start of Combat Round | Make a Basic Attack Maneuver against the closest Opponent as an Out-of-Sequence Maneuver
+Petite Genius | startOfRound | Triggered/Start of Combat Round | Use the Movement Maneuver as an Out-of-Sequence Maneuver
+Angel-Raised | startOfRound | Triggered/Start of Combat Round | You may spend a Counter Action to use the Movement Maneuver or Power Up Maneuver as an Out-of-Sequence Maneuver
+Namekian-Raised | startOfRound | Triggered/Start of Combat Round | Select an Opponent
+Neo-Tuffle-Raised | startOfRound | Triggered/Start of Combat Round | Select an Opponent
+Shinjin-Raised | startOfRound | Triggered/Start of Combat Round | You may spend 1 Action to gain 2 Counter Actions
+Were-Beast | startOfRound | Triggered/Start of Combat Round | You may choose to either; regain access to your Normal Trait until the end of the Combat Round, OR gain access to your Were-Traits until the end of this Combat 
+Cloaking System | startOfTurn | Automatic/Start of Turn | If you are in the Invisible State due to the 3rd effect of Cloaking System, reduce your Ki Points and Capacity by 8(bT)
+Mental Supercomputer | startOfTurn | Triggered/Start of Turn, 1/Encounter | Use the Power Up Maneuver as an Out-of-Sequence Maneuver
+Nanomachine Repair | startOfRound | Triggered/Start of Combat Round | Increase this amount by 1(bT) for every Health Threshold you are below
+Onboard Computer | startOfRound | Triggered/Start of Combat Round | Target an Opponent
+Bio-Berserker | startOfTurn | Automatic/Start of Turn | If you have any Opponents within your Field of Aggression, roll a 1d10
+Genetic Focus: Glass | startOfTurn | Triggered/Start of Turn | Spend 3 Adaptation Points to enter the Surging State until the end of your turn
+Genetic Focus: Neo-Tuffle | startOfRound | Triggered/Start of Combat Round, Ruling | Target an Opponent
+Genetic Focus: Saiyan | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you have triggered the 3rd effect of Genetic Focus: Saiyan at least 2 times previously during this Combat Encounter, you may gain a stack of Battle Creation
+Demon Genes [Cognitive] | startOfTurn | Triggered/Start of Turn | Roll a 1d10
+Glass Genes [Any – you decide] | startOfTurn | Triggered/Start of Turn | If you are occupying a Square with the Glass Environmental Quality and all adjacent Squares possess the Glass Environmental Quality or are occupied by a Feature
+Heran Genes [Any – you decide] | startOfTurn | Triggered/Start of Turn | Lose up to 2 stacks of Power
+Shadow Dragon Genes [Morale] | startOfTurn | Triggered/Start of Turn | You may reduce your Life Points by up to 8(bT) to regain an equal amount of Ki Points
+Three-Eyes | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you are below the Injured Health Threshold, you may reduce your Life Points to 1 below the Critical Health Threshold (ignoring Reduced Momentum)
+Greedy Rabbit | startOfTurn | Triggered/Start of Turn | Regain 2(bT) Ki Points for every Integrated Majin-Dama you possess (max. 10(bT))
+Adapted Saibaman | startOfTurn | Triggered/Start of Turn | Regain Ki Points equal to x(bT)
+Masterful Strike | startOfTurn | Triggered/Start of Turn, 1/Encounter | Until the end of your turn, ignore all penalties to your Strike Rolls
+Buddy System | startOfEncounter | Triggered/Start of Combat Encounter | You may spend 1 Karma Point to gain a Buddy of your choice (you cannot choose a Special Buddy)
+Masterful Dodge | startOfTurn | Triggered/Start of Turn, 1/Encounter | Until the start of your next turn, ignore all penalties to your Dodge Rolls
+Judo Training | startOfTurn | Triggered/Start of Turn | If you are in a Grapple as the Grappler, you may use the Basic Attack Maneuver or the Launch Maneuver as an Out-of-Sequence Maneuver
+Personal Space | startOfTurn | Triggered/Start of Turn | Make a Grapple Check to escape a Grapple you are in as the Grappled
+Alert | startOfRound | Triggered/Start of Combat Round, 1/Encounter | If you have Initiative Advantage, gain 1 Counter Action
+Speedblitz | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you have Initiative Advantage, you may use the Movement Maneuver or Basic Attack Maneuver as an Out-of-Sequence Maneuver
+Lightning Initiative | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you have Initiative Advantage, gain an additional Action to spend during your turn this Combat Round
+Minion Mark | startOfRound | 1/Round, Ruling | As an Instant Maneuver, select one of your Minions that is not a Special Minion
+Multi-Type Specialist | startOfTurn | Triggered/Start of Turn | Trigger the effect of Multi-Type Attacker
+Feline Rally | startOfTurn | Triggered/Start of Turn | While you have an Integrated Majin-Dama, all of your Allies regain 3(bT) Ki Points
+Mutualism | startOfRound | Triggered/Start of Combat Round | If you are a Possessing Character of a Character that is not being controlled by you, that Character may regain Life or Ki Points (you decide) equal to 1/2 of y
+Yaki Master | startOfRound | Triggered/Start of Combat Round | If you are not Bonded, target one of your Yaki Minions
+Counter Jury-rigging | startOfRound | Triggered/Start of Combat Round | Select a Weapon you possess and apply an applicable Weapon Quality that takes up 1 Weapon Slot to that Weapon until the end of the Combat Round (this can exceed
+Enhanced Search | startOfTurn | Triggered/Start of Turn, Ruling, 1/Round | Target a Character
+Slow Starter | startOfEncounter | Triggered/Start of Combat Encounter | Use the Holding Back Maneuver as an Out-of-Sequence Maneuver
+Jump Start | startOfTurn | Triggered/Start of Turn, 1/Encounter | Use the Power Up Maneuver as an Out-of-Sequence Maneuver
+Jump Start | startOfRound | Triggered/Start of Combat Round, 1/Encounter | Take your Turn immediately, ignoring the current Initiative Order
+All-Out Start | startOfTurn | Triggered/Start of Turn, 1/Encounter | Use the Transformation Maneuver immediately as an Out-of-Sequence Maneuver
+All-Out Start | startOfEncounter | Triggered/Start of Combat Encounter | Increase your Soak Value and Combat Rolls by 1(bT) for 2 Combat Rounds
+Eternal Rival | startOfRound | Triggered/Start of Combat Round, 1/Encounter | If you are adjacent to your Rival, you may request that they also trigger this effect
+Self Control | startOfTurn | Triggered/Start of Turn | If you are in a Transformation with the Rampaging Aspect, roll a 1d10 and reduce the Dice Score by the level of the Rampaging Aspect
+Weapon Fixer | startOfTurn | Triggered/Start of Turn | If you have a Weapon, you can spend any number of Ki Points to have that Weapon regain Life Points equal to 2x the amount of Ki Points spent
+Experienced Drunk | startOfTurn | Triggered/Start of Turn | You may use the Sake Bottle as an Out-of-Sequence Maneuver
+Experienced Drunk | startOfEncounter | Triggered/Start of Combat Encounter | If you are not a Minion, gain a Sake Bottle, or if you already possess one, you may instead completely refill that Sake Bottle
+Snack Fiend | startOfEncounter | Triggered/Start of Combat Encounter | If you are not a Minion, gain a Snack Basic Item
+Swaggering Wager | startOfTurn | Triggered/Start of Turn | Select up to 3 of the effects below, they apply until the start of your next turn:
+Assimilated Power | startOfTurn | Automatic/Start of Turn | If a stack of Absorption is a Temporary Awakening, make a Clash (Cognitive) against the Absorbed Character, but reduce your Dice Score by 1(bT) for each Health 
+Assimilated Power | startOfTurn | Automatic/Start of Turn | If you are Defeated, lose all stacks of Absorption you possess
+Honed Monster | startOfTurn | Triggered/Start of Turn | If you are in Monster Form and below the Bruised Health Threshold, gain a stack of Progress
+Rampaging Hunger | startOfTurn | Automatic/Start of Turn | Make an Urgent Clash (Morale) against yourself (roll 2 times and compare the results)
+All-Out Power | startOfTurn | Automatic/Start of Turn | If you lose 2+ stacks of Focused Power through this effect, you may use the Power Up Maneuver as an Out-of-Sequence Maneuver
+Special Analysis | startOfTurn | Triggered/Start of Turn, 1/Encounter | All Opponents stop being Analyzed, and you regain Ki Points equal to double your Scholarship Modifier
+Celestial Perfection | startOfTurn | Triggered/Start of Turn | You may spend 1 Counter Action to enter the God Ki Special State until the start of your next turn
+In the Realm of Angels | startOfTurn | Triggered/Start of Turn | You may spend 3(bT) Divine Ki Points to remove a Combat Condition you are suffering from (except Pinned, Suffocating, Transfigured, or Poisoned)
+Spirit of Battle | startOfTurn | Triggered/Start of Turn | Use the Power Up Maneuver as an Out-of-Sequence Maneuver
+Snapping Fury | startOfTurn | Automatic/Start of Turn | You lose all stacks of Power
+Utmost Divinity | startOfTurn | Triggered/Start of Turn | Regain x(bT) Life Points, where x is equal to your current number of Divine Battle Born stacks
+Full Power Divine Super Saiyan (2) | startOfTurn | Triggered/Start of Turn | Use the Power Up Maneuver or Energy Charge Maneuver as an Out-of-Sequence Maneuver
+Divine Aura | startOfTurn | Triggered/Start of Turn | Spend 2(bT) Divine Ki Points to use the Power Up Maneuver as an Out-of-Sequence Maneuver
+Extremely Lucky | startOfTurn | Triggered/Start of Turn | Roll a 1d10
+My Ideal Body | startOfEncounter | Triggered/Start of Combat Encounter | You may use the Possess Maneuver as an Out-of-Sequence Maneuver
+Warrior’s Alliance | startOfTurn | Triggered/Start of Turn | Target a Character within a Large Sphere AoE (centered on you) who is your Partner and/or Rival
+Mind of the Conqueror | startOfTurn | Triggered/Start of Turn | While in your Form with the highest Tier of Power Requirement, gain a stack of Overwhelm
+Power for a Price | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you are below the Injured Health Threshold, you may reduce your Life Points to be 1 below the Critical Health Threshold, ignoring the effects of Reduced Mome
+High Risk | startOfTurn | Triggered/Start of Turn | Reduce your Life Points by up to 10(bT)
+Perfectly Brilliant (Perfect Warrior) | startOfTurn | Triggered/Start of Turn | Instead of a stack of Overwhelm, you may gain a stack of Over-Maximum through the 2nd effect of Perfect Warrior
+Energy Concentration | startOfTurn | Triggered/Start of Turn | If you have 1+ stacks of Concentrated Energy, you may use the Energy Charge Maneuver as an Out-of-Sequence Maneuver
+Excited for Battle | startOfTurn | Triggered/Start of Turn, 1/Encounter | You may remove all of your Holding Back stacks
+Pretty One | startOfTurn | Triggered/Start of Turn | Use the Hype Maneuver as an Out-of-Sequence Maneuver
+Blitzkrieg Commander | startOfTurn | Triggered/Start of Turn | Target up to 3 of your Minions
+Strong Bond | startOfRound | Triggered/Start of Combat Round | If your only Minion possesses the Ascended Minion Minion Class Trait, that Minion gains 1 Action
+Balanced Wrath | startOfTurn | Triggered/Start of Turn | Regain ML(bT) Ki Points
+Syrupy Covering (1) | startOfTurn | Automatic/Start of Turn | Reduce your Life Points by 1/20th of your Maximum Life Points
+Syrupy Covering (1) | startOfTurn | Automatic/Start of Turn | If you are occupying a Square in the Underwater Environment, gain a stack of Slowed and Broken until the start of your next turn
+Lifeforce of the Dark King | startOfEncounter | Triggered/Start of Combat Encounter, Resource | Gain 1(bT) stacks of Dark Lifeforce
+Lifeforce of the Dark King | startOfTurn | Triggered/Start of Turn, 1/Round | Spend a stack of Dark Lifeforce to make a Might Clash against all Opponents
+Dragon Ball Rampage | startOfTurn | Triggered/Start of Turn | If you do, you may select whoever you desire as your target
+Disorientating Darkness (Villainous Form) | startOfTurn | Triggered/Start of Turn | You may spend up to 3(bT) Life Points to regain an equal amount of Evil Points
+Disorientating Darkness (Villainous Form) | startOfRound | Triggered/Power, 1/Encounter | Spend 3(bT) Evil Points to enter the Raging State until you leave this Transformation
+Zzz | startOfTurn | Triggered/Start of Turn | You cannot stop suffering from the Sleeping Combat Condition except by the effects of the Sleeping Combat Condition until the start of your next turn
+Terror of the Demon God | startOfTurn | Triggered/Start of Turn, 1/Encounter | When you trigger the 1st effect of Danger of the Demon God, you may target all Opponents
+Devilish Divinity | startOfTurn | Triggered/Start of Turn, 1/Encounter | You may spend 6(bT) Divine Ki Points to enter the Surging State until the start of your next turn
+Danger of the Demon God | startOfTurn | Triggered/Start of Turn | Target an Opponent who is not at Long Range and make a Clash (Cognitive) against them
+Double or Nothing | startOfTurn | Triggered/Start of Turn | Roll a 1d10
+Astral Ascension | startOfTurn | Triggered/Start of Turn, 1/Encounter | Use a Ki Surge as an Out-of-Sequence Maneuver
+Life or Death Gamble | startOfTurn | Triggered/Start of Turn, Ruling, 1/Encounter | Declare that you're 'Feeling Lucky' until the start of your next turn
+Demonic Pride | startOfTurn | Triggered/Start of Turn | Make a Pressure Check
+Demonic Cheat | startOfTurn | Triggered/Start of Turn | You may spend a stack of Banked Power to gain a stack of Demonic Power
+Blue Blaze of Resolve | startOfTurn | Triggered/Start of Turn | If you have 3+ stacks of Divine Warrior Blood, you may use the Combat Recovery Maneuver as an Out-of-Sequence Maneuver as if you spent 1 Action
+Blue Blaze of Resolve | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you are below the Injured Health Threshold, you may enter the Surging State until you leave this Transformation
+Anything to Win | startOfTurn | Triggered/Start of Turn | If an Opponent is on an adjacent Square to you, you may use the Dirty Trick Maneuver as an Out-of-Sequence Maneuver
+Awakened to Divine Power | startOfTurn | Triggered/Start of Turn | If you are in a Legendary Form or Transcended Enhancement with a Tier of Power Requirement of 4+, regain 3(bT) Divine Ki Points
+Observe and Support | startOfRound | Triggered/Start of Combat Round | Ignore the 5th effect of the Spectator State for this effect
+Song of Hope | startOfRound | Triggered/Start of Combat Round, Resource | If you would gain a stack of Battle Born through the first effect of Born for Battle, gain a stack of 'Divine Battle Born' (max. 3) instead
+Warrior of the Eternal Dragon | startOfRound | Triggered/Start of Combat Round, 1/Encounter | If your Life Points are below the Injured Health Threshold, you may use a Healing Surge as an Out-of-Sequence Maneuver
+Single-Minded Elemental Focus | startOfEncounter | Triggered/Start of Combat Encounter, 1/Encounter | Use the Basic Attack Maneuver as an Out-of-Sequence Maneuver
+Explosive Fury | startOfTurn | Triggered/Transform, Triggered/Start of Turn | If you do, enter the next level of the Raging State until you leave this Transformation
+Explosive Fury | startOfTurn | Automatic/Start of Turn | If you do not trigger the 1st effect of Explosive Fury, return to the Angry level of the Raging State
+Permanent Connection | startOfTurn | Triggered/Start of Turn, 1/Encounter | You may use the Copy Being Unique Ability as an Out-of-Sequence Maneuver (even if you do not have access to it)
+DarkSaiya Power (Villainous Form) | startOfRound | Passive | While this Transformation is used in conjunction with a Transformation with the 'Saiyan' Racial Requirement:
+Evil of Legend | startOfTurn | Triggered/Start of Turn | Evil Saiyan stops being Transcended
+Evolved Form | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you are below the Injured Health Threshold, you may enter the Combat Realization Special State until the end of your next turn
+Angelic Patience | startOfTurn | Triggered/Start of Turn | Transfer 1 of your Counter Actions to an Ally of your choice
+I Suppose I Must Act | startOfTurn | Triggered/Start of Turn | You may spend 3 Counter Actions to enter the Superior State until the start of your next turn
+Efficiency is Power | startOfTurn | Triggered/Start of Turn | While you possess a stack of Holding Back, regain 3(bT) Ki Points
+Sudden Strength | startOfTurn | Automatic/Start of Turn | Before you apply any other effects that trigger at the start of your turn, lose all stacks of Power Explosion
+Paws Off | startOfEncounter | Triggered/Start of Combat Encounter, 1/Encounter | Create a Signature Technique with a TP Cost up to the maximum TP Cost for a Signature Technique at your base Tier of Power
+Ultimate Defender | startOfRound | Triggered/Start of Combat Round | Trigger effects as if you entered a Mode
+The Genki’s Fading…! | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you are below the Injured Health Threshold and possess 3+ stacks of Lifeforce, you may remove all stacks of Lifeforce and stop suffering from the effects of 
+Sparking Limit Break | startOfTurn | Triggered/Start of Turn, 1/Encounter | If no other Character has taken their turn yet during this Combat Round, you may enter the Superior State for the duration of that turn
+You Can’t Destroy What I Am! | startOfTurn | Triggered/Start of Turn, Triggered/Transform | If you are in a Desperate Battle, enter the Desperate Hero Special State until the Combat Encounter stops being treated as a Desperate Battle or you leave this 
+End Justifies the Means | startOfTurn | Triggered/Transform, Triggered/Start of Turn, Resource | You may spend up to 9(bT) Ki Points to gain a stack of Justice Charge for every 3(bT) Ki points spent
+Hero Revolution | startOfTurn | Triggered/Start of Turn | You may spend 2 Justice Charges to enter the Surging State until the end of your turn
+Stand Against Evil (S-Cells) | startOfTurn | Triggered/Start of Turn, Triggered/Transform | If you are in a Desperate Battle, enter the Desperate Hero Special State until the Combat Encounter stops being treated as a Desperate Battle or you leave this 
+Power of the Space Raider | startOfTurn | Triggered/Start of Turn, 1/Encounter | Ignore the 7th effect of Greed of the Hera
+Overcharge (Android) | startOfRound | Triggered/Start of Combat Round | Reduce your Ki Points by 6(bT) to increase your Damage Reduction by 2(bT) until the end of the Combat Round
+Super Battle for the Whole Planet (Custom Species) — opção: Lovely Fixation | startOfRound | Triggered/Start of Combat Round | Choose an Opponent
+Draconic Perfection (Shadow Dragon) | startOfRound | Triggered/Start of Combat Round | For each stack of Power you possess, Opponents within a Sphere AoE (centered on you) have their Life Points reduced by 3(bT)
+Glass Annihilation | startOfTurn | Triggered/Start of Turn | You may reduce the Life Points of your Refractive Dragon by 1/10th of your Maximum Life Points to enter the Surging State until the end of your turn
+Reflective Power (Overflowing Power) | startOfTurn | Triggered/Start of Turn | Remove the Glass Environmental Quality from all Squares within a Minor Sphere AoE (centered on you)
+Divine Class | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you were already in the God Ki Special State when you used this effect, regain Divine Ki Points equal to 1/4 of your maximum (this can allow you to exceed yo
+Realm of the Gods | startOfTurn | Triggered/Start of Turn | Apply one of the following effects:
+Divine Energy | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you are not in the God Ki Special State, you gain access to your Divine Ki Points until the start of your next turn
+Secrets of the Master | startOfTurn | Automatic/Start of Turn | If you are in the Void Stance, reduce your Life and Ki Points by 5(bT)
+Champion(!) of the Universe | startOfRound | Automatic/Transform, Automatic/Start of Combat Round | Make a Clash (Bluff/Persuasion vs Intuition) against all Characters in the Combat Encounter
+Processed Grudge | startOfTurn | Triggered/Start of Turn | While in Computer Form, you may spend up to 12(bT) Ki Points
+Warrior Bearing Grudges | startOfRound | Triggered/Start of Combat Round | If you have at least 1 Ghost Warrior Data, gain a Revenge Point
+Challenge-Focused | startOfTurn | Triggered/Start of Turn, Triggered/Transform, Ruling | Target an Opponent
+Defender of Truth, Protector of the Innocent! | startOfTurn | Triggered/Start of Turn | Regain x(bT) Ki Points for each Justice Point you possess
+Songs of Heroism | startOfTurn | Automatic/Start of Turn | If you possess a Sealed Opponent, make a Clash (Morale) against that Opponent
+Songs of Heroism | startOfTurn | Triggered/Start of Turn, 1/Encounter | You may use the Copy Being Unique Ability as an Out-of-Sequence Maneuver (even if you do not have access to it)
+Beauty, Love, Hype | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you are Hyped, you can stop being Hyped to regain Ki Points equal to double your Personality Modifier
+Support Units | startOfRound | Passive | Supports ignore the Follower rule for Minions, and are treated as additional Characters that you control (they are still considered Minions), but they only gain
+Unlocked Energy | startOfTurn | Triggered/Start of Turn, 1/Encounter | Use a Ki Surge as an Out-of-Sequence Maneuver
+Every Conceivable Advantage | startOfTurn | Triggered/Start of Turn, 1/Encounter | Use the Intuit Maneuver as an Out-of-Sequence Maneuver
+Jacket Crafter | startOfEncounter | Automatic/Start of Combat Encounter | If you only possess a single Battle Jacket, double its Maximum Life Points and then that Battle Jacket regains Life Points equal to 1/2 of its Maximum Life Poin
+Evil Magic | startOfTurn | Triggered/Start of Turn | Create a Super Signature Technique with a TP Cost up to the maximum Technique Point Cost for your base Tier of Power
+Jellybean Junction | startOfEncounter | Triggered/Start of Combat Encounter | You can create up to 1(bT) Jellybean Features within a Destructive Sphere AoE (centered on you)
+Paranormal Perception | startOfRound | Triggered/Start of Combat Round, Ruling | Select an Opponent
+Evil Concentrate | startOfTurn | Triggered/Transform, Triggered/Start of Turn | If you are in the Healthy Health Threshold, enter either the Superior State or the Surging State until the start of your turn
+Dangerous Empowerment | startOfTurn | Automatic/Start of Turn | If the character who gave you this Awakening through the effects of Mystic Talisman is Defeated, lose this Awakening
+Unstoppable Force | startOfTurn | Triggered/Transform, Triggered/Start of Turn | Target an Opponent
+Dark Power | startOfTurn | Triggered/Start of Turn | If you are not in a Transformation with the Rampaging Aspect, select an Opponent
+Master of Energy | startOfTurn | Triggered/Start of Turn, 1/Encounter | Use a Ki Surge
+Maximum Konatsian Power (3) | startOfTurn | Triggered/Start of Turn, 1/Encounter | You may spend 2 stacks of Power to enter the Entrusted State until the end of your turn
+Buried for 3 Years (Percentage of Power) | startOfTurn | Triggered/Start of Turn | For each Maturation Point you possess, regain 1(bT) Life and Ki Points (max. 5(bT))
+Sought-After Capabilities | startOfEncounter | Triggered/Start of Combat Encounter, Resource | Gain a number of 'Sought Points' equal to the total of your SKI plus STR
+Unlimited Power | startOfTurn | Automatic/Start of Turn | Reduce your Life Points by 1/10th of your Maximum Life Points to use a Ki Surge as an Out-of-Sequence Maneuver
+Weapon of Determination | startOfTurn | Triggered/Start of Turn | Your Infused Weapon regains 4(bT) Life Points
+Speed Star | startOfTurn | Triggered/Start of Turn | If you have not been hit by an Attacking Maneuver since the end of your last turn, increase your Strike and Dodge Rolls by 1/2 (rounded up) of G(T) until the st
+FTL | startOfTurn | Triggered/Start of Turn | If you are in the first Grade of Lightspeed Mode, regain 3(bT) Ki Points
+Roaring Flames that Scorches Creation | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you are Power Spiked and below the Injured Health Threshold, you may enter the Determined State until the end of your turn
+Planet of Metal | startOfTurn | Triggered/Start of Turn | If you are occupying a Square that does not possess the Metallic Environmental Quality, it gains the Metallic Environmental Quality
+Metal Dominion | startOfTurn | Triggered/Start of Turn | If you cannot trigger the 8th effect of Planet of Metal because you are already occupying a Square that possesses the Metallic Environmental Quality, regain 3(b
+Forcing an Opening | startOfRound | Triggered/Start of Combat Round, Ruling | Target an Opponent
+Mind Power ~ Ki | startOfRound | Triggered/Start of Combat Round, 1/Encounter | If you are Defeated and the Combat Encounter is a Desperate Battle, you may set your Life Points to 1 below the Critical Health Threshold
+Prince of Destruction | startOfTurn | Triggered/Start of Turn | Reduce your Life Points by 4(bT) to increase your Combat Rolls by 1(T) until the start of your next turn
+High Majin Power (2) | startOfTurn | Triggered/Start of Turn | If you are in the Healthy Health Threshold and have no stacks of Power, you may reduce your Life Points by 4(bT) to use the Power Up Maneuver as an Out-of-Seque
+Blood, Sweat and Tears | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you are below the Bruised Health Threshold, you may use a Surge of your choice as an Out-of-Sequence Maneuver
+Martial Arts Practitioner | startOfEncounter | Triggered/Start of Combat Encounter | Use the Stance Maneuver as an Out-of-Sequence Maneuver
+A Powerful Servant | startOfRound | Triggered/Start of Combat Round | Spend all of your Actions to make a Clash (Cognitive/Morale) against your Marvelous Servant
+Slayer (Martial Artist) | startOfTurn | Triggered/Start of Turn, 1/Encounter | You may use the Roar Special Maneuver as an Out-of-Sequence Maneuver
+Dark Warrior (Warrior) | startOfTurn | Triggered/Start of Turn, 1/Encounter | You may use the Draconic Infusion Special Maneuver as an Out-of-Sequence Maneuver
+Shadow Knight (Warrior) | startOfTurn | Triggered/Start of Turn, 1/Encounter | You may use the Draconic Infusion Special Maneuver as an Out-of-Sequence Maneuver
+Healing Bishop (Cleric) | startOfTurn | Triggered/Start of Turn, 1/Encounter | You may use the Divine Blessing Special Maneuver as an Out-of-Sequence Maneuver
+Summoning Bishop (Cleric) | startOfTurn | Triggered/Start of Turn, 1/Encounter | You may use the Divine Blessing Special Maneuver as an Out-of-Sequence Maneuver
+Ultimate (Mighty) | startOfTurn | Triggered/Start of Turn, 1/Round | Target a Mighty Ally (before they stop being Mighty)
+Ultimate (Mighty) | startOfTurn | Triggered/Start of Turn, 1/Encounter | You may use the Mighty Breeze Special Maneuver as an Out-of-Sequence Maneuver
+Grand Chef (Mighty) | startOfTurn | Triggered/Start of Turn, 1/Round | Target a Mighty Ally
+Grand Chef (Mighty) | startOfTurn | Triggered/Start of Turn, 1/Encounter | You may use the Mighty Breeze Special Maneuver as an Out-of-Sequence Maneuver
+Plasma (Wonder) | startOfTurn | Triggered/Start of Turn, 1/Encounter | You may use the Dark Beam Special Maneuver as an Out-of-Sequence Maneuver
+Karma (Wonder) | startOfTurn | Triggered/Start of Turn, 1/Encounter | You may use the Dark Beam Special Maneuver as an Out-of-Sequence Maneuver
+Suppression of Power | startOfRound | Triggered/Start of Combat Round, 1/Encounter | You may immediately take your Turn for this Combat Round, ignoring the Initiative Order
+Birth of the Mightiest Majin | startOfTurn | Automatic/Start of Turn | If you have no stacks of Absorption, stop benefiting from all effects of Birth of the Mightiest Majin
+Birth of the Mightiest Majin | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you have an Absorbed Character, you may select one of their Secondary Racial Traits
+Serene Heart | startOfTurn | Triggered/Start of Turn | If you have not taken Damage from an Attacking Maneuver since the end of your last turn, enter the next level of the Mindful State until you leave this Transfor
+Power Awakening (Depth of Potential) | startOfTurn | Automatic/Start of Turn | If you lose stacks of Power at the start of this turn, you cannot gain Power Stacks, and you suffer from the Drained and Fatigued Combat Conditions for the dura
+Awakened Potential (Slumbering Potential) | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you possess no stacks of Power, you may use the Power Up Maneuver or a Healing Surge as an Out-of-Sequence Maneuver
+Fear the Negative Energy | startOfTurn | Triggered/Start of Turn | Make a Clash (Morale vs Impulsive/Corporeal/Cognitive/Morale) against all Opponents within your Negativity Zone
+Dragon Ball Collector | startOfRound | Triggered/Start of Combat Round, 1/Encounter | If you have 6+ stacks of Unified, or a stack of Unified as a Temporary Awakening, use the Power Up Maneuver as an Out-of-Sequence Maneuver
+Monkey Mastery (2) | startOfTurn | Triggered/Transform, Triggered/Start of Turn | Enter the Raging and/or Feral State(s) until the end of your turn
+I BECOME YOU | startOfTurn | Automatic/Start of Turn | If this Awakening is a Temporary Awakening, make an Urgent Clash (Cognitive) against the Possessing Character
+I BECOME YOU | startOfTurn | Automatic/Start of Turn | If you or your Possessing Character are Defeated, lose this Awakening
+Chosen by Durability | startOfRound | Triggered/Start of Combat Round | Target an Opponent
+Controlling the Battlefield | startOfTurn | Triggered/Start of Turn | If no Opponents occupy the Squares adjacent to you, and no Opponents are at Long Range, increase your Combat Rolls by 1(T) until the start of your next turn
+Long-Awaited Perfection (2) | startOfTurn | Triggered/Start of Turn, 1/Encounter | You may spend 3 Adaptation Points to gain 1 Action
+Just Perform | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you are Hyped, you may spend 4 stacks of Rhythm to gain an Action
+Depth of Potential | startOfTurn | Automatic/Start of Turn | If you lose stacks of Power at the start of this turn, you cannot gain Power Stacks, and you suffer from the Impediment and Fatigued Combat Conditions for the d
+Slumbering Potential | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you possess no stacks of Power, you may use the Power Up Maneuver as an Out-of-Sequence Maneuver
+Overflowing Power | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you have your maximum number of Power stacks, you may enter the Superior State or Surging State until the end of your turn
+In the Realm of Destroyers | startOfTurn | Triggered/Start of Turn | You may spend 3(bT) Divine Ki Points to remove a Combat Condition you are suffering from (except Pinned, Suffocating, Transfigured, or Poisoned)
+Focusing of Abilities | startOfRound | Automatic/Start of Combat Round | Use the Precognition Unique Ability as an Out-of-Sequence Maneuver
+Erratic Majin | startOfRound | Triggered/Start of Combat Round | Reroll your Initiative
+Erratic Majin | startOfRound | Automatic/Start of Combat Round, Ruling | Roll a 1d6
+Unpredictable | startOfRound | Triggered/Start of Combat Round | Spend 2 stacks of Channeled Chaos
+Unpredictable | startOfRound | Triggered/Start of Combat Round | Spend 3 stacks of Channeled Chaos
+Unpredictable | startOfRound | Triggered/Start of Combat Round | If you are in the Superior State, instead of gaining a Counter Action, you may gain an additional Action
+Combat Imprinting | startOfTurn | Triggered/Start of Turn, Resource | If you are in a Combat Encounter with an Opponent who has used an Attacking Maneuver during the last Combat Round and has a Power Level that is equal to or grea
+Combat Imprinting | startOfTurn | Triggered/Start of Turn, 1/Encounter | While you have 6 stacks of Progress, you may spend an Action to enter the Flow State for the remainder of the Combat Encounter
+Red-Eyed Style | startOfRound | Triggered/Start of Combat Round, 1/Encounter | Select either 'Opponents' or 'Allies', all Characters classified as your selection become Studied until the end of the Combat Round
+Choosing your Moment | startOfTurn | Triggered/Start of Turn, Resource | If you are in the Spectator State due to using the 6th effect of Choosing your Moment and you did not use the second effect of the Spectator Special State this 
+Choosing your Moment | startOfEncounter | Triggered/Start of Combat Encounter | Enter the Spectator Special State
+Commander of Chronology | startOfRound | Triggered/Start of Combat Round, 1/Encounter | Decide the Initiative Order of all Characters for this Combat Round (the Initiative Order will return to normal after this Combat Round concludes)
+Combat Shifter | startOfTurn | Triggered/Start of Turn | You may spend 2(bT) Ki Points to exchange the Attribute Score of two of your Attributes (either AG/FO/TE/MA) until the start of your next turn
+Combat Shifter | startOfTurn | Triggered/Start of Turn | You may spend 2(bT) Ki Points to declare a Profile with 'Elemental' in the name
+Combat Shifter | startOfTurn | Triggered/Start of Turn | You may spend 2(bT) Ki Points to create a Weapon with a Craftsmanship Grade equal to your base Tier of Power
+Combat Shifter | startOfRound | Triggered/Start of Combat Round | Select 2 Attributes (except SC and PE)
+Combat Shifter | startOfRound | Triggered/Start of Combat Round, 1/Encounter | The increase to the Attribute Modifier Bonus of this Transformation through the 6th effect of Combat Shifter is increased to 1(bT) for the duration of this Comb
+Honored Training | startOfRound | Triggered/Start of Combat Round, 1/Encounter | Use the Power Up Maneuver as an Out-of-Sequence Maneuver
+Awoken Embers | startOfTurn | Triggered/Start of Turn | If you are in a Transformation with the God Ki Aspect, regain 2(bT) Divine Ki Points
+Powerful Aura | startOfTurn | Triggered/Start of Turn | If you have no stacks of Power, you may spend 6(bT) Ki Points to use the Power Up Maneuver as an Out-of-Sequence Maneuver
+Burning Aura | startOfTurn | Triggered/Start of Turn | All other Characters within your Burning Zone have their Life Points reduced by twice your Burn Attribute
+Hazardous Aura | startOfTurn | Triggered/Transform, Triggered/Start of Turn | Until the start of your next turn, all Squares in your Hazardous Zone suffer from the Unnatural Weather Tier of your chosen Aura Weather
+Power of Life Itself | startOfTurn | Triggered/Start of Turn | Regain Life and Ki Points equal to your Life Power
+Perfect Clone | startOfRound | Triggered/Start of Combat Round | You can change the Magnitude of your Field of Aggression to any Magnitude between Standard and Destructive until the end of the Combat Round
+Beautiful Reflection | startOfRound | Triggered/Start of Combat Round | If your Beloved Reflection is on a Square that does not possess the Glass Environmental Quality, apply the Glass Environmental Quality to all Squares within a M
+Fiendish Evolution (2) | startOfTurn | Triggered/Start of Turn, 1/Encounter | Ignore the 3rd effect of Demonic Pressure
+Powerful Evolution (1) | startOfTurn | Triggered/Start of Turn, M/Encounter | Apply the effects of Legend Realized if you do not have access to the Emperor Mutation Trait
+Armed Form | startOfTurn | Triggered/Start of Turn | Select a Weapon you possess and a qualifying Weapon Quality for that Weapon (except a Special Weapon Quality) with 1 Quality Slot
+Mindful Form | startOfTurn | Triggered/Start of Turn | If you are below the Injured Health Threshold, enter the next level of the Mindful State until the start of your next turn
+Raging Form | startOfTurn | Triggered/Start of Turn | If you are below the Injured Health Threshold, enter the next level of the Raging State until the start of your next turn
+All-Consuming Grievance | startOfRound | Triggered/Start of Combat Round | Your turn becomes the last turn in the Initiative Order
+All-Consuming Grievance | startOfTurn | Triggered/Start of Turn, 1/Encounter | If an Inferior is within a Large Sphere AoE (centered on you), use a Vengeful Surge as an Out-of-Sequence Maneuver
+Vengeful Being | startOfTurn | Triggered/Start of Turn | For each Inferior you have, gain a Revenge Point (min. 2)
+Surging Grudge (1) | startOfTurn | Triggered/Start of Turn, 1/Round | If you are below the Injured Health Threshold and have not used a Vengeful Surge during this Combat Round, you may use a Vengeful Surge as an Out-of-Sequence Ma
+Tension at its Peak | startOfTurn | Constant/Start of Turn | If you possess 5+ Tension, you may use the Transformation Maneuver as an Out-of-Sequence Maneuver to enter Super High Tension
+Superior Captain (Mind) | startOfTurn | Triggered/Start of Turn | If you are not Hyped, you may use the Hype Maneuver as an Out-of-Sequence Maneuver
+Superior Tactician (Mind) | startOfTurn | Triggered/Start of Turn | If you have no Analyzed Opponent, you may use the Analysis Maneuver as an Out-of-Sequence Maneuver
+Supreme Emperor (Body) | startOfTurn | Triggered/Start of Turn | While in your Form with the highest Tier of Power Requirement, gain a stack of Overwhelm
+I’m Shining!! (S-Cells) | startOfRound | Triggered/Transform, Triggered/Start of Combat Round, Resource | Gain a stack of Dama Charge (max
+Super Genetic Transformation | startOfRound | Triggered/Start of Combat Round | Regain 2(bT) Life and Ki Points for every Repeated Aspect you possess
+Chaotic Genes (Majin) | startOfRound | Triggered/Start of Combat Round | Roll the Chaos Dice and gain its effects (see
+Sparking Momentum | startOfRound | Triggered/Start of Combat Round, 1/Encounter | Take your Turn immediately, ignoring the current Initiative Order
+Azure Rage | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you are in the Apoplectic level of the Raging State, you may enter the Surging State until the end of your turn
+History of a Technique | startOfTurn | Triggered/Start of Turn, 1/Encounter | Create a Signature Technique of the same Foundation as your Favored Technique and with a TP Cost equal or lower than that of your Favored Technique
+Dedicated Team | startOfTurn | Triggered/Start of Turn | If a member of your Team is within your Melee Range, or within the Melee Range of an Opponent that is within your Melee Range, regain 3(bT) Ki Points
+Hero Vocation | startOfRound | Triggered/Start of Combat Round | Regain x(bT) Life and Ki Points, where x is equal to how many stacks of Tension you possess (max. 3(bT))
+Time Control | startOfTurn | Automatic/Start of Turn | If you are not in the God Ki Special State, reduce your Life Points by 1/10th of your Maximum Life Points
+Over the Over | startOfTurn | Triggered/Start of Turn, 1/Encounter | Until the start of your next turn, you have no limit to your number of Overwhelm or Over-Maximum stacks
+Saiyan God (Battle of Gods) | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you have 3+ stacks of Divine Battle Born, enter the Blazing God State until you leave the Divine Saiyan Transformation Line
+Energy of a Universe | startOfRound | Triggered/Start of Combat Round, Resource | Gain an Ultimate Action (max. 1)
+Thoughts of Destruction | startOfTurn | Triggered/Start of Turn | If you have 2+ stacks of Ego, enter the first level of the Egotistical Special State until the start of your next turn
+Reaching a Deeper Instinct | startOfTurn | Triggered/Start of Turn | If you have 2+ stacks of Instinct, enter the first level of the Instinctual Special State until the start of your next turn
+Completion of Ultra Instinct | startOfTurn | Automatic/Start of Turn | If you are in the Raging State, leave this Transformation and suffer from Stress Exhaustion until the end of your next turn
+Completion of Ultra Instinct | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you have 6 stacks of Instinct, trigger the Burst Limit of Autonomous Ultra Instinct (even if you have triggered a Burst Limit previously this Combat Encounte
+Frontline Fighter | startOfTurn | Triggered/Start of Turn | If this effect triggers before any other Character has taken a turn this Combat Round, increase your Strike and Wound Rolls by 1(T) and 2(T) respectively until 
+Frontline Fighter | startOfEncounter | Triggered/Start of Combat Encounter | If you trigger the second effect of Jump Start, it does not count for its [1/Encounter] Keyword
+Additional Vocation | startOfTurn | Triggered/Start of Turn | Select and gain access to one of your Extra Vocations
+Master of Magic | startOfTurn | Triggered/Start of Turn, 1/Encounter | Use a Ki Surge
+Reactionary Warrior | startOfTurn | Triggered/Start of Turn | If you only possess 1 Action, you may spend that Action to use a Surge of your choice as an Out-of-Sequence Maneuver
+Reactionary Warrior | startOfTurn | Triggered/Start of Turn | If you only possess 1 Action, you may spend that Action to target an Opponent within your Melee Range
+Superior Being | startOfRound | Triggered/Start of Combat Round | For every Opponent (except Minions) in your Combat Encounter that has a lower Tier of Power than you, regain 2(bT) Ki Points
+Superior Being | startOfTurn | Triggered/Start of Turn | If your Tier of Power is higher than every other character in this Combat Encounter, gain a Standard Action
+Mystic Talisman | startOfEncounter | Triggered/Start of Combat Encounter, Resource | Gain 2 Talismans for every Skill Rank you have in Use Magic
+Mystic Talisman | startOfTurn | Triggered/Start of Turn | You may spend 1 Talisman to select a Profile with 'Elemental' in the name and have it become a Favored Element until the end of your turn
+Mystic Talisman | startOfTurn | Triggered/Start of Turn | You may spend 1 Talisman to enter the Invisible State until the start of your next turn
+Primal Battle (Primal Resilience) | startOfTurn | Triggered/Start of Turn | If you are at your Primal Peak, enter the Surging State until the end of your turn

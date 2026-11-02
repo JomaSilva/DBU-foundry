@@ -1,0 +1,62 @@
+<section class="tab {{tab.cssClass}}" data-tab="gear" data-group="primary">
+  <div class="dbu-tp-line">
+    <span>{{localize "DBU.Gear.Penalties" apparel=system.apparel.penalty weights=system.apparel.weights weapon=system.weapons.penalty}}</span>
+    <span>{{localize "DBU.Gear.EP" ep=epTotal}}</span>
+    <a data-action="openCompendium" data-pack="equipment"><i class="fa-solid fa-book"></i> {{localize "DBU.OpenCompendium"}}</a>
+  </div>
+
+  <h3 class="dbu-section">{{localize "DBU.Gear.Weapons"}} <a class="dbu-add" data-action="itemCreate" data-type="weapon"><i class="fa-solid fa-plus"></i></a></h3>
+  <table class="dbu-table dbu-items">
+    <thead><tr><th></th><th>{{localize "DBU.Name"}}</th><th>{{localize "DBU.Type"}}</th><th>{{localize "DBU.WeaponSize.label"}}</th><th>{{localize "DBU.Category"}}</th><th>Grade</th><th>{{localize "DBU.Gear.Wielded"}}</th><th></th></tr></thead>
+    <tbody>
+      {{#each weapons as |w|}}
+      <tr data-item-id="{{w.id}}" class="draggable">
+        <td><img src="{{w.img}}" alt="" width="24" height="24"></td>
+        <td><a data-action="itemEdit">{{w.name}}</a>{{#if w.system.integrated}} <span class="tag">Integrated</span>{{/if}}</td>
+        <td>{{localize (concat "DBU.Foundation." w.system.weaponType)}}</td>
+        <td>{{localize (concat "DBU.WeaponSize." w.system.size)}}</td>
+        <td>{{w.system.category}}</td>
+        <td class="center">{{w.system.craftsmanship}}</td>
+        <td class="center"><a data-action="itemToggle" data-field="system.equipped"><i class="fa-solid fa-toggle-{{#if w.system.equipped}}on{{else}}off{{/if}}"></i></a></td>
+        <td class="dbu-controls"><a data-action="itemChat"><i class="fa-solid fa-comment"></i></a> <a data-action="itemDelete"><i class="fa-solid fa-trash"></i></a></td>
+      </tr>
+      {{else}}<tr><td colspan="8" class="dbu-empty">—</td></tr>{{/each}}
+    </tbody>
+  </table>
+
+  <h3 class="dbu-section">{{localize "DBU.Gear.Apparel"}} <a class="dbu-add" data-action="itemCreate" data-type="apparel"><i class="fa-solid fa-plus"></i></a></h3>
+  <table class="dbu-table dbu-items">
+    <thead><tr><th></th><th>{{localize "DBU.Name"}}</th><th>{{localize "DBU.Category"}}</th><th>{{localize "DBU.Gear.LayerLabel"}}</th><th>Grade</th><th>Break</th><th>{{localize "DBU.Gear.Worn"}}</th><th></th></tr></thead>
+    <tbody>
+      {{#each apparel as |a|}}
+      <tr data-item-id="{{a.id}}" class="draggable">
+        <td><img src="{{a.img}}" alt="" width="24" height="24"></td>
+        <td><a data-action="itemEdit">{{a.name}}</a>{{#if a.system.natural}} <span class="tag">Natural</span>{{/if}}</td>
+        <td>{{localize (concat "DBU.Apparel." a.system.category)}}</td>
+        <td>{{localize (concat "DBU.Gear.Layer." a.system.layer)}}</td>
+        <td class="center">{{a.system.craftsmanship}}</td>
+        <td class="center">{{a.system.breakValue}}/3</td>
+        <td class="center"><a data-action="itemToggle" data-field="system.equipped"><i class="fa-solid fa-toggle-{{#if a.system.equipped}}on{{else}}off{{/if}}"></i></a></td>
+        <td class="dbu-controls"><a data-action="itemChat"><i class="fa-solid fa-comment"></i></a> <a data-action="itemDelete"><i class="fa-solid fa-trash"></i></a></td>
+      </tr>
+      {{else}}<tr><td colspan="8" class="dbu-empty">—</td></tr>{{/each}}
+    </tbody>
+  </table>
+  <p class="dbu-hint">{{localize "DBU.Gear.ApparelHint" dr=system.apparel.armorDR dv=system.apparel.combatClothingDV}}</p>
+
+  <h3 class="dbu-section">{{localize "DBU.Gear.Items"}} <a class="dbu-add" data-action="itemCreate" data-type="item"><i class="fa-solid fa-plus"></i></a></h3>
+  <table class="dbu-table dbu-items">
+    <tbody>
+      {{#each gear as |g|}}
+      <tr data-item-id="{{g.id}}" class="draggable">
+        <td><img src="{{g.img}}" alt="" width="24" height="24"></td>
+        <td><a data-action="itemEdit">{{g.name}}</a> <small>{{g.system.details}}</small></td>
+        <td>{{localize (concat "DBU.Gear.ItemType." g.system.itemType)}}</td>
+        <td class="center">×{{g.system.quantity}}</td>
+        <td class="center">{{#if (eq g.system.itemType "accessory")}}<a data-action="itemToggle" data-field="system.equipped"><i class="fa-solid fa-toggle-{{#if g.system.equipped}}on{{else}}off{{/if}}"></i></a>{{/if}}</td>
+        <td class="dbu-controls"><a data-action="itemChat"><i class="fa-solid fa-comment"></i></a> <a data-action="itemDelete"><i class="fa-solid fa-trash"></i></a></td>
+      </tr>
+      {{else}}<tr><td class="dbu-empty">—</td></tr>{{/each}}
+    </tbody>
+  </table>
+</section>

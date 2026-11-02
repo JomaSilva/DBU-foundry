@@ -1,0 +1,59 @@
+<section class="tab {{tab.cssClass}}" data-tab="progression" data-group="primary">
+  <div class="dbu-columns">
+    <div class="dbu-col">
+      <h3 class="dbu-section">{{localize "DBU.Prog.Title" pl=system.pl}}</h3>
+      <table class="dbu-table dbu-budget">
+        <tbody>
+          <tr><td>{{localize "DBU.Prog.CharacterPerks"}}</td><td class="center">{{progression.perksUsed}} / {{progression.perksAvailable}}</td></tr>
+          <tr><td colspan="2">
+            <div class="dbu-perks">
+              <label>{{localize "DBU.Prog.PerkAttribute"}} <input type="number" name="system.perks.attribute" value="{{source.perks.attribute}}" min="0" data-dtype="Number"></label>
+              <label>{{localize "DBU.Prog.PerkTalent"}} <input type="number" name="system.perks.talent" value="{{source.perks.talent}}" min="0" data-dtype="Number"></label>
+              <label>{{localize "DBU.Prog.PerkSkill"}} <input type="number" name="system.perks.skill" value="{{source.perks.skill}}" min="0" data-dtype="Number"></label>
+            </div>
+          </td></tr>
+          <tr><td>{{localize "DBU.Prog.AttributeAdditions"}}</td><td class="center">{{progression.attributeAdditions}} → {{progression.attributePointsSpent}} / {{progression.attributePoints}} pts</td></tr>
+          <tr><td>{{localize "DBU.Prog.TalentAdditions"}}</td><td class="center">{{talents.length}} / {{progression.talentAdditions}}</td></tr>
+          <tr><td>{{localize "DBU.Prog.SkillImprovements"}}</td><td class="center">{{progression.skillImprovements}} → {{progression.skillRanksSpent}} / {{progression.skillRanksFromSI}} ranks</td></tr>
+          <tr><td>{{localize "DBU.Prog.RacialRanks"}}</td><td class="center">{{progression.racialRanksSpent}} / {{progression.racialRanks}}</td></tr>
+          <tr><td>{{localize "DBU.Prog.TP"}}</td><td class="center">{{progression.tpSpent}} / {{progression.tpTotal}} <small>({{progression.tpPerSI}}/SI)</small></td></tr>
+          <tr><td>{{localize "DBU.Prog.TPBonus"}}</td><td><input type="number" name="system.tp.bonus" value="{{source.tp.bonus}}" data-dtype="Number"></td></tr>
+          <tr><td>{{localize "DBU.Prog.TPOther"}}</td><td><input type="number" name="system.tp.spentOther" value="{{source.tp.spentOther}}" data-dtype="Number"></td></tr>
+          <tr><td>{{localize "DBU.Prog.SigCap"}}</td><td class="center">{{lookup config.SIGNATURE_TP_CAP system.top.base}} TP</td></tr>
+          <tr><td>{{localize "DBU.Prog.ScoreLimit"}}</td><td class="center">{{system.scoreLimit}}</td></tr>
+          <tr><td>{{localize "DBU.Prog.SkillCap"}}</td><td class="center">{{system.skillRankCap}}</td></tr>
+        </tbody>
+      </table>
+      <label class="check"><input type="checkbox" name="system.settings.validate" {{checked source.settings.validate}}> {{localize "DBU.Prog.ValidateToggle"}}</label>
+    </div>
+
+    <div class="dbu-col">
+      <h3 class="dbu-section">{{localize "DBU.Val.Title"}}</h3>
+      {{#unless source.settings.validate}}<p class="dbu-hint">{{localize "DBU.Val.Disabled"}}</p>{{/unless}}
+      <ul class="dbu-validation">
+        {{#each errors as |v|}}<li class="error"><i class="fa-solid fa-circle-xmark"></i> {{v.message}}</li>{{/each}}
+        {{#each warnings as |v|}}<li class="warning"><i class="fa-solid fa-triangle-exclamation"></i> {{v.message}}</li>{{/each}}
+        {{#each infos as |v|}}<li class="info"><i class="fa-solid fa-circle-info"></i> {{v.message}}</li>{{/each}}
+        {{#unless validation.length}}{{#if source.settings.validate}}<li class="ok"><i class="fa-solid fa-circle-check"></i> {{localize "DBU.Val.AllGood"}}</li>{{/if}}{{/unless}}
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="dbu-section">{{localize "DBU.CustomModifiers"}} <a class="dbu-add" data-action="addModifier"><i class="fa-solid fa-plus"></i></a></h3>
+  <p class="dbu-hint">{{localize "DBU.CustomModifiersHint"}}</p>
+  <table class="dbu-table dbu-modifiers">
+    <thead><tr><th></th><th>{{localize "DBU.Mod.Label"}}</th><th>{{localize "DBU.TargetLabel"}}</th><th>{{localize "DBU.Mod.Value"}}</th><th>{{localize "DBU.Mod.Condition"}}</th><th></th></tr></thead>
+    <tbody>
+      {{#each source.customModifiers as |m i|}}
+      <tr>
+        <td><input type="checkbox" name="system.customModifiers.{{i}}.active" {{checked m.active}}></td>
+        <td><input type="text" name="system.customModifiers.{{i}}.label" value="{{m.label}}"></td>
+        <td><select name="system.customModifiers.{{i}}.target">{{selectOptions @root.modifierTargets selected=m.target valueAttr="value" labelAttr="label"}}</select></td>
+        <td><input type="text" name="system.customModifiers.{{i}}.value" value="{{m.value}}" placeholder="1(T)"></td>
+        <td><input type="text" name="system.customModifiers.{{i}}.condition" value="{{m.condition}}" placeholder="@power >= 2"></td>
+        <td><a data-action="removeModifier" data-index="{{i}}"><i class="fa-solid fa-trash"></i></a></td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</section>

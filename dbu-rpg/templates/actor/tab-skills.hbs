@@ -1,0 +1,47 @@
+<section class="tab {{tab.cssClass}}" data-tab="skills" data-group="primary">
+  <div class="dbu-skill-toolbar">
+    <span>{{localize "DBU.Skill.RankCap" cap=system.skillRankCap top=system.top.base}}</span>
+    <span>{{localize "DBU.Skill.Budget" spent=progression.skillRanksSpent max=progression.skillRanksFromSI racial=progression.racialRanksSpent racialMax=progression.racialRanks}}</span>
+    <label>{{localize "DBU.Difficulty.label"}}
+      <select name="dbuDifficulty"><option value="">—</option>{{selectOptions difficultyOptions valueAttr="value" labelAttr="label"}}</select>
+    </label>
+  </div>
+  <table class="dbu-table dbu-skills">
+    <thead>
+      <tr>
+        <th>{{localize "DBU.Skill.label"}}</th>
+        <th>{{localize "DBU.Attribute"}}</th>
+        <th data-tooltip="{{localize 'DBU.Skill.RacialTip'}}">{{localize "DBU.Racial"}}</th>
+        <th data-tooltip="{{localize 'DBU.Skill.SITip'}}">{{localize "DBU.Skill.SI"}}</th>
+        <th data-tooltip="{{localize 'DBU.Skill.BonusRanksTip'}}">{{localize "DBU.Skill.Extra"}}</th>
+        <th>{{localize "DBU.Bonus"}}</th>
+        <th>Total</th>
+        <th>Crit</th>
+        <th>{{localize "DBU.Skill.Maneuver"}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each skills as |s|}}
+      <tr class="{{#if s.overCap}}dbu-error-row{{/if}} {{#if s.group}}group-{{s.group}}{{/if}}">
+        <td>
+          <a data-action="roll" data-type="skill" data-key="{{s.key}}">
+            {{#if s.custom}}{{localize "DBU.Skill.knowledgeOther"}}{{else}}{{s.label}}{{/if}}{{#if s.required}} <small>(R)</small>{{/if}}
+          </a>
+          {{#if s.custom}}<input class="dbu-inline" type="text" name="system.skills.{{s.key}}.label" value="{{s.label}}" placeholder="{{localize 'DBU.Skill.SpecialtyName'}}">{{/if}}
+        </td>
+        <td class="center">{{s.attr}}</td>
+        <td class="center"><input type="checkbox" name="system.skills.{{s.key}}.racial" {{checked s.racial}} data-dtype="Number" value="1"></td>
+        <td><input type="number" name="system.skills.{{s.key}}.ranks" value="{{s.ranks}}" min="0" data-dtype="Number"></td>
+        <td><input type="number" name="system.skills.{{s.key}}.bonusRanks" value="{{s.bonusRanks}}" min="0" data-dtype="Number"></td>
+        <td><input type="number" name="system.skills.{{s.key}}.bonus" value="{{s.bonus}}" data-dtype="Number"></td>
+        <td class="center dbu-total {{#if s.autoFail}}autofail{{/if}}" data-tooltip="{{s.attrBonus}} ({{s.attr}}/2) + {{s.rankBonus}} ({{s.effectiveRanks}} rank(s))">
+          {{#if s.autoFail}}<i class="fa-solid fa-ban" data-tooltip="{{localize 'DBU.Skill.RequiredTip'}}"></i>{{else}}+{{s.total}}{{/if}}
+        </td>
+        <td class="center">{{s.crit}}+</td>
+        <td class="dbu-maneuver {{#if s.unlocked}}unlocked{{/if}}">{{s.maneuver}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  <p class="dbu-hint">{{localize "DBU.Skill.Footer"}}</p>
+</section>

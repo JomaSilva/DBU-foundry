@@ -1,0 +1,2091 @@
+[
+ {
+  "_type": "Item",
+  "_id": "FD21d4QMp356m9Au",
+  "name": "Absorb Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "2 Actions",
+   "kpCost": "N/A",
+   "frequency": "2/Round",
+   "minions": "Non-Minion",
+   "summary": "Standard Maneuver · 2 Actions · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Absorb Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "iNxfNzZJpbajAwun",
+  "name": "Analysis Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "Free",
+   "summary": "Standard Maneuver · 1 Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Analysis Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "vpeLcIblrphOf8ja",
+  "name": "Attack Absorption Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Out-of-Sequence Maneuver",
+   "actionCost": "N/A",
+   "kpCost": "N/A",
+   "frequency": "",
+   "minions": "N/A",
+   "summary": "Out-of-Sequence Maneuver · N/A · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Attack Absorption Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "HEOBMhDOZyhQipbK",
+  "name": "Bite Attack",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "2(T)",
+   "frequency": "1/Round",
+   "minions": "Free",
+   "summary": "Standard Maneuver · 1 Action · KP 2(T)",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Bite Attack",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "9duKHIMGBr7kzRCb",
+  "name": "Block Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Counter Maneuver",
+   "actionCost": "1 Counter Action",
+   "kpCost": "N/A",
+   "frequency": "",
+   "minions": "N/A",
+   "summary": "Counter Maneuver · 1 Counter Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Block Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "FN2C7CdaICsyENVo",
+  "name": "Brace Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "Free",
+   "summary": "Standard Maneuver · 1 Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Brace Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "aOdiXvZzBIqF6F2k",
+  "name": "Dirty Trick Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "N/A",
+   "summary": "Standard Maneuver · 1 Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Dirty Trick Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "BILEDqUTIcSfjgIr",
+  "name": "Eject Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Instant Maneuver",
+   "actionCost": "N/A",
+   "kpCost": "N/A",
+   "frequency": "1/Encounter",
+   "minions": "N/A",
+   "summary": "Instant Maneuver · N/A · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Eject Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "YJHH0abOTTobNuX1",
+  "name": "Feint Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Instant Maneuver",
+   "actionCost": "N/A",
+   "kpCost": "2(T)",
+   "frequency": "1/Round",
+   "minions": "N/A",
+   "summary": "Instant Maneuver · N/A · KP 2(T)",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Feint Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "qKP1mn9neR6afxjD",
+  "name": "Flip Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "Free",
+   "summary": "Standard Maneuver · 1 Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Flip Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "nwCppMcihjYr5VlZ",
+  "name": "Hide Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "Free",
+   "summary": "Standard Maneuver · 1 Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Hide Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "eizOqqXDsWzJ9pUw",
+  "name": "Hijack Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "N/A",
+   "summary": "Standard Maneuver · 1 Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Hijack Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Xp6gOLDXlECat555",
+  "name": "Holding Back Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Instant Maneuver",
+   "actionCost": "N/A",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "Free",
+   "summary": "Instant Maneuver · N/A · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Holding Back Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "RdcfyG0cyuv89Nn1",
+  "name": "Hype Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "Free",
+   "summary": "Standard Maneuver · 1 Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Hype Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "nsNHklzaAUR2Jlxc",
+  "name": "Insult Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "N/A",
+   "summary": "Standard Maneuver · 1 Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Insult Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "zKEzUSmv0lOCrxKj",
+  "name": "Internal Attack Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "2 Actions",
+   "kpCost": "6(T)",
+   "frequency": "1/Round",
+   "minions": "Non-Minion",
+   "summary": "Standard Maneuver · 2 Actions · KP 6(T)",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Internal Attack Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "GqjNXtrdj3glhRqN",
+  "name": "Intuit Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "N/A",
+   "summary": "Standard Maneuver · 1 Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Intuit Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "RBrnc4e5x2f06FoU",
+  "name": "Liquid Form Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Instant Maneuver",
+   "actionCost": "N/A",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "N/A",
+   "summary": "Instant Maneuver · N/A · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Liquid Form Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "0yhbLGpwQ7st28gp",
+  "name": "Magic Trick Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "N/A",
+   "summary": "Standard Maneuver · 1 Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Magic Trick Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "nao4UKLh7OkPky5U",
+  "name": "Possess Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "2 Actions",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "Non-Minion",
+   "summary": "Standard Maneuver · 2 Actions · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Possess Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "BWl0WPppnpqHpsiB",
+  "name": "Power Drain Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "Variable",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "N/A",
+   "summary": "Standard Maneuver · Variable · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Power Drain Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "hVB1qEDnbDDTYY8i",
+  "name": "Repair Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "2 Actions",
+   "kpCost": "N/A",
+   "frequency": "1/Encounter",
+   "minions": "N/A",
+   "summary": "Standard Maneuver · 2 Actions · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Repair Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Ju5rfPnuzvCohCSI",
+  "name": "Search Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "Free",
+   "summary": "Standard Maneuver · 1 Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Search Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "GuWQeQxy0kBR3481",
+  "name": "Sense Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "Free",
+   "summary": "Standard Maneuver · 1 Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Sense Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "vC6Q1EwlMuIZ8YTR",
+  "name": "Snatch Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "N/A",
+   "summary": "Standard Maneuver · 1 Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Snatch Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "o5UDCovE0GOgU0oP",
+  "name": "Soar Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "Free",
+   "summary": "Standard Maneuver · 1 Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Soar Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "DQVEdoIMk3jQen87",
+  "name": "Tail Attack Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Instant Maneuver",
+   "actionCost": "N/A",
+   "kpCost": "2(T)",
+   "frequency": "1/Round",
+   "minions": "Free",
+   "summary": "Instant Maneuver · N/A · KP 2(T)",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Tail Attack Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "RvU02vQFG3oMdaH1",
+  "name": "Talk Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "Non-Minion",
+   "summary": "Standard Maneuver · 1 Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Talk Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "ZnLPSw2IGMhDz73a",
+  "name": "Terrify Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "N/A",
+   "summary": "Standard Maneuver · 1 Action · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Terrify Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "m37XEjy3trPIHRVb",
+  "name": "Treatment Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "2 Actions",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "N/A",
+   "summary": "Standard Maneuver · 2 Actions · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Treatment Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "qErLO6GEF1N7Wb85",
+  "name": "Unify Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "3 Actions",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "minions": "N/A",
+   "summary": "Standard Maneuver · 3 Actions · KP N/A",
+   "source": {
+    "slug": "special-maneuvers",
+    "section": "Unify Maneuver",
+    "url": "https://dbu-rpg.com/special-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "special-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Folder",
+  "_id": "oL4LgVZ032vZ62pi",
+  "name": "Manobras básicas",
+  "type": "Item",
+  "folder": null,
+  "sorting": "a",
+  "color": null,
+  "sort": 0,
+  "description": "",
+  "flags": {}
+ },
+ {
+  "_type": "Item",
+  "_id": "0E9jh8LMWDRGHnXR",
+  "name": "Arrogant Declaration Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Encounter",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Arrogant Declaration Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "9hwNa4us03mK4c59",
+  "name": "Basic Attack Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "Varies (uses the Ki Point Cost of the chosen Profile)",
+   "frequency": "",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP Varies (uses the Ki Point Cost of the chosen Profile)",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Basic Attack Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "wrDtyKahW0UcEUCA",
+  "name": "Combat Recovery",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "Variable (2~3 Actions)",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "requirement": "",
+   "summary": "Standard · Variable (2~3 Actions) · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Combat Recovery",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "9SeZiPN8akrkAWTM",
+  "name": "Disarm Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Disarm Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "4tyzoQJbiDfmkZLN",
+  "name": "Empower",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "Variable",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "requirement": "",
+   "summary": "Standard · Variable · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Empower",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "hEbBL3lCHuyvZNR4",
+  "name": "Energy Charge Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "2(bT)",
+   "frequency": "",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP 2(bT)",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Energy Charge Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "q9oO783tSAV97Jk3",
+  "name": "Feature Thrust",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Feature Thrust",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "HhxFUr8wAVWEiwvS",
+  "name": "Grapple Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Grapple Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "nopBUf0zcgZe45Sq",
+  "name": "Launch Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Launch Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "1aMS9o5X3tesB8Q0",
+  "name": "Movement Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "2/Round",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Movement Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Hg4S67CJgRxJxNAN",
+  "name": "Pin Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "2 Actions",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "requirement": "",
+   "summary": "Standard · 2 Actions · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Pin Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "LB6qzscSxVYvJSMw",
+  "name": "Power Up Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "2/Round",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Power Up Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "QP3LwkvaBfwwFqQt",
+  "name": "Revert Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Revert Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "0TTbU1GoJl5sTTzK",
+  "name": "Ride Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "2/Round",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Ride Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "3CPUKkJh1uu4dIa1",
+  "name": "Signature Technique Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "Varies (each Signature Technique will have their own KP Cost - that is the KP Cost you pay for this Maneuver)",
+   "frequency": "1/Round",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP Varies (each Signature Technique will have their own KP Cost - that is the KP Cost you pay for this Maneuver)",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Signature Technique Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "F769lVkUGXIvTBmG",
+  "name": "Terrain Lift Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Terrain Lift Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "JOMEFJnxUGD2gay3",
+  "name": "Throw Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Throw Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "zp7uWPrjZmOWAmwF",
+  "name": "Thrust Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Thrust Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "2fMZJ3aXlpmRqTLl",
+  "name": "Toss Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Toss Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "FlSyHToyJttZmzML",
+  "name": "Transformation Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "",
+   "requirement": "",
+   "summary": "Standard · 1 Action · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Transformation Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "j6SKoT31Qbj17akn",
+  "name": "Command",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Instant",
+   "actionCost": "N/A",
+   "kpCost": "N/A",
+   "frequency": "",
+   "requirement": "",
+   "summary": "Instant · N/A · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Command",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "kOw1mheVUpqe6xBB",
+  "name": "No Effort Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Instant",
+   "actionCost": "N/A",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "requirement": "",
+   "summary": "Instant · N/A · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "No Effort Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "62E5lpMrvdMGVX8Q",
+  "name": "Surge Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Instant",
+   "actionCost": "N/A",
+   "kpCost": "N/A",
+   "frequency": "1/Encounter",
+   "requirement": "",
+   "summary": "Instant · N/A · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Surge Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "lpJm44rCc2uByCou",
+  "name": "United Attack Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Instant",
+   "actionCost": "N/A",
+   "kpCost": "Varies (equal to the cost of the Profile or Signature Technique used)",
+   "frequency": "1/Round",
+   "requirement": "",
+   "summary": "Instant · N/A · KP Varies (equal to the cost of the Profile or Signature Technique used)",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "United Attack Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Veo4muYMvo7T7QDT",
+  "name": "Blockade Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter",
+   "kpCost": "2(T)",
+   "frequency": "",
+   "requirement": "",
+   "summary": "Counter · 1 Counter · KP 2(T)",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Blockade Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "JNUBn3T12HZz4Y8i",
+  "name": "Defend Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter",
+   "kpCost": "Varies (depends on chosen effect)",
+   "frequency": "",
+   "requirement": "",
+   "summary": "Counter · 1 Counter · KP Varies (depends on chosen effect)",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Defend Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Arbvv9ZD80AuITDE",
+  "name": "Duel Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter",
+   "kpCost": "N/A",
+   "frequency": "",
+   "requirement": "",
+   "summary": "Counter · 1 Counter · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Duel Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "gj1l8Ul0UoIRGasq",
+  "name": "Duel Escape Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter",
+   "kpCost": "N/A",
+   "frequency": "",
+   "requirement": "",
+   "summary": "Counter · 1 Counter · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Duel Escape Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "sNtb3WdJHZVlyb5o",
+  "name": "Energy Cancel",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "requirement": "",
+   "summary": "Counter · 1 Counter · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Energy Cancel",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "rdtlbE2S0XF8nqZw",
+  "name": "Exploit Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter",
+   "kpCost": "N/A",
+   "frequency": "",
+   "requirement": "",
+   "summary": "Counter · 1 Counter · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Exploit Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "abY4DK8wMliM8oTt",
+  "name": "Intervene Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter",
+   "kpCost": "Varies (depends on chosen effect)",
+   "frequency": "",
+   "requirement": "",
+   "summary": "Counter · 1 Counter · KP Varies (depends on chosen effect)",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Intervene Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "W0kBFqC3KzoBwoj8",
+  "name": "Sudden Stop Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter",
+   "kpCost": "N/A",
+   "frequency": "",
+   "requirement": "",
+   "summary": "Counter · 1 Counter · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Sudden Stop Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "4mFkX5iV0LDeNPnq",
+  "name": "Reflect Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Out-of-Sequence",
+   "actionCost": "N/A",
+   "kpCost": "5(T)",
+   "frequency": "",
+   "requirement": "",
+   "summary": "Out-of-Sequence · N/A · KP 5(T)",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Reflect Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "unAsifbMdJJ7j5Q5",
+  "name": "Called Shot",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Modifier",
+   "actionCost": "1 Action",
+   "kpCost": "2(T)",
+   "frequency": "1/Round",
+   "requirement": "Any Attacking Maneuver.",
+   "summary": "Modifier · 1 Action · KP 2(T)",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Called Shot",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "oME8DykSsdiujcBT",
+  "name": "Triggered Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Modifier",
+   "actionCost": "N/A",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "requirement": "Any Maneuver",
+   "summary": "Modifier · N/A · KP N/A",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Triggered Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "4E0eMf6Yq0olUA0V",
+  "name": "Modifier ManeuversDraining Attack Maneuver",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Modifier",
+   "actionCost": "1 Action",
+   "kpCost": "2(T)",
+   "frequency": "1/Round",
+   "requirement": "Basic Attack Maneuver (Unarmed Physical Attack, not an AoE, no Ki Wager).",
+   "summary": "Modifier · 1 Action · KP 2(T)",
+   "source": {
+    "slug": "actions-maneuvers",
+    "section": "Modifier ManeuversDraining Attack Maneuver",
+    "url": "https://dbu-rpg.com/actions-maneuvers/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/actions-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/actions-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "oL4LgVZ032vZ62pi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "actions-maneuvers"
+   }
+  }
+ }
+]

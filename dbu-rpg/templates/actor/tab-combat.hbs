@@ -1,0 +1,120 @@
+<section class="tab {{tab.cssClass}}" data-tab="combat" data-group="primary">
+  <div class="dbu-columns">
+    <div class="dbu-col">
+      <h3 class="dbu-section">{{localize "DBU.Maneuvers"}}</h3>
+      <div class="dbu-maneuver-grid">
+        <button type="button" data-action="attack"><i class="fa-solid fa-hand-fist"></i> {{localize "DBU.Attack.Basic"}}</button>
+        <button type="button" data-action="maneuver" data-maneuver="powerUp" data-tooltip="{{localize 'DBU.Power.UpTip'}}"><i class="fa-solid fa-arrow-up"></i> Power Up <small>{{source.combat.powerUps}}/2</small></button>
+        <button type="button" data-action="maneuver" data-maneuver="energyCharge"><i class="fa-solid fa-bolt"></i> Energy Charge</button>
+        <button type="button" data-action="maneuver" data-maneuver="healingSurge"><i class="fa-solid fa-heart-pulse"></i> Healing Surge</button>
+        <button type="button" data-action="maneuver" data-maneuver="kiSurge"><i class="fa-solid fa-fire"></i> Ki Surge</button>
+        <button type="button" data-action="maneuver" data-maneuver="combatRecovery"><i class="fa-solid fa-mug-hot"></i> Combat Recovery</button>
+        <button type="button" data-action="roll" data-type="clash" data-key="might"><i class="fa-solid fa-dumbbell"></i> Might Clash</button>
+        <button type="button" data-action="roll" data-type="stress"><i class="fa-solid fa-bolt-lightning"></i> Stress Test</button>
+        <button type="button" data-action="maneuver" data-maneuver="revertAll"><i class="fa-solid fa-rotate-left"></i> Revert</button>
+      </div>
+
+      <h3 class="dbu-section">{{localize "DBU.CombatTrackers"}}</h3>
+      <div class="dbu-trackers">
+        <label>{{localize "DBU.Actions"}} <input type="number" name="system.combat.actions" value="{{source.combat.actions}}" min="0" data-dtype="Number"> <small>/ {{system.actionsPerRound}}</small></label>
+        <label>Counter <input type="number" name="system.combat.counters" value="{{source.combat.counters}}" min="0" max="6" data-dtype="Number"> <small>/ {{system.countersPerRound}}</small></label>
+        <div class="dbu-power-boxes" data-tooltip="{{localize 'DBU.Power.BoxesTip'}}">
+          <span>Power</span>
+          {{#each powerBoxes as |b|}}<input type="checkbox" data-action="powerBox" data-n="{{b.n}}" {{checked b.on}} data-tooltip="{{b.tip}}">{{/each}}
+          {{#if powerCanExceed}}<a data-action="powerBox" data-n="{{powerNext}}" data-tooltip="{{localize 'DBU.Power.Exceed'}}"><i class="fa-solid fa-plus"></i></a>{{/if}}
+        </div>
+        <label>Super Stacks <input type="number" name="system.combat.superStacks" value="{{source.combat.superStacks}}" min="0" max="3" data-dtype="Number"> <small>({{localize "DBU.Total"}} {{system.superStacks}})</small></label>
+        <label>Energy Charges <input type="number" name="system.combat.energyCharges" value="{{source.combat.energyCharges}}" min="0" data-dtype="Number"></label>
+        <label>Dim. Defense <input type="number" name="system.combat.dimDefense" value="{{source.combat.dimDefense}}" min="0" data-dtype="Number"> <small>+{{system.dimDefensePerAttack}}/{{localize "DBU.PerAttack"}}</small></label>
+        <label data-tooltip="{{localize 'DBU.DimOffenseTip'}}">{{localize "DBU.AttacksThisRound"}} <input type="number" name="system.combat.attacksThisRound" value="{{source.combat.attacksThisRound}}" min="0" data-dtype="Number"></label>
+        <label>Holding Back <input type="number" name="system.combat.holdingBack" value="{{source.combat.holdingBack}}" min="0" max="{{system.top.base}}" data-dtype="Number"></label>
+        <label>DOT <input type="number" name="system.combat.dot" value="{{source.combat.dot}}" min="0" data-dtype="Number"></label>
+        <label data-tooltip="{{localize 'DBU.TopBoostTip'}}">Breakthrough (+ToP) <input type="number" name="system.combat.topBoost" value="{{source.combat.topBoost}}" data-dtype="Number"></label>
+        <label>Stress Bonus + <input type="number" name="system.combat.stressBonus" value="{{source.combat.stressBonus}}" data-dtype="Number"></label>
+        <label class="check"><input type="checkbox" name="system.combat.hidden" {{checked source.combat.hidden}}> Hidden</label>
+        <label class="check"><input type="checkbox" name="system.combat.momentumUsed" {{checked source.combat.momentumUsed}}> Bonus Momentum</label>
+        <label class="check"><input type="checkbox" name="system.combat.surgeUsed" {{checked source.combat.surgeUsed}}> Surge {{localize "DBU.Used"}}</label>
+      </div>
+      <div class="dbu-maneuver-grid small">
+        <button type="button" data-action="maneuver" data-maneuver="resetRound"><i class="fa-solid fa-arrows-rotate"></i> {{localize "DBU.NewRound"}}</button>
+        <button type="button" data-action="maneuver" data-maneuver="instantRecovery"><i class="fa-solid fa-flag-checkered"></i> {{localize "DBU.EndEncounter"}}</button>
+        <button type="button" data-action="maneuver" data-maneuver="fullRest"><i class="fa-solid fa-bed"></i> {{localize "DBU.FullRest"}}</button>
+      </div>
+
+      <h3 class="dbu-section">{{localize "DBU.DamageCalc"}}</h3>
+      <div class="dbu-damage-calc">
+        <label>Wound <input type="number" name="dbuDmgWound" value="0" data-dtype="Number"></label>
+        <label>{{localize "DBU.DamageCat.label"}}
+          <select name="dbuDmgCat">
+            <option value="1">{{localize "DBU.DamageCat.standard"}}</option>
+            <option value="2">{{localize "DBU.DamageCat.direct"}}</option>
+            <option value="3">{{localize "DBU.DamageCat.lethal"}}</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" name="dbuDmgRaw"> {{localize "DBU.Damage.Raw"}}</label>
+        <button type="button" data-action="manualDamage"><i class="fa-solid fa-burst"></i> {{localize "DBU.Damage.Apply"}}</button>
+      </div>
+      <p class="dbu-hint">Soak {{system.aptitudes.soak}} · {{localize "DBU.DR"}} {{system.aptitudes.dr}} · {{localize "DBU.Damage.TakenMods" cat=system.damageCategoryTaken extra=system.damageTaken}}</p>
+    </div>
+
+    <div class="dbu-col">
+      <h3 class="dbu-section">{{localize "DBU.Conditions"}}</h3>
+      <div class="dbu-condition-grid">
+        {{#each conditions as |c|}}
+        <div class="dbu-condition {{#if c.active}}active{{/if}}" data-tooltip="{{c.hint}}">
+          <a data-action="condition" data-key="{{c.key}}"><img src="{{c.img}}" alt=""> {{c.label}}</a>
+          {{#if c.pips}}<span class="pips">{{#each c.pips as |p|}}<a class="pip {{#if p.on}}on{{/if}}" data-action="condition" data-key="{{c.key}}" data-n="{{p.n}}"></a>{{/each}}</span>{{/if}}
+        </div>
+        {{/each}}
+      </div>
+
+      <h3 class="dbu-section">{{localize "DBU.States"}}</h3>
+      <div class="dbu-condition-grid">
+        {{#each states as |s|}}
+        <div class="dbu-condition state {{#if s.active}}active{{/if}} {{#if s.special}}special{{/if}}" data-tooltip="{{s.hint}}">
+          <a data-action="state" data-key="{{s.key}}"><img src="{{s.img}}" alt=""> {{s.label}}{{#if (gt s.effective s.value)}} <small>(aspect)</small>{{/if}}</a>
+          {{#if s.pips}}<span class="pips">{{#each s.pips as |p|}}<a class="pip {{#if p.on}}on{{/if}}" data-action="state" data-key="{{s.key}}" data-n="{{p.n}}"></a>{{/each}}</span>{{/if}}
+        </div>
+        {{/each}}
+      </div>
+
+      {{> "systems/dbu-rpg/templates/parts/triggers.hbs" path="system.customTriggers" rows=source.customTriggers addAction="addTrigger" removeAction="removeTrigger"}}
+
+      <h3 class="dbu-section">{{localize "DBU.Resources"}} <a class="dbu-add" data-action="addResource" data-tooltip="{{localize 'DBU.AddResource'}}"><i class="fa-solid fa-plus"></i></a></h3>
+      <p class="dbu-hint">{{localize "DBU.ResourcesHint"}}</p>
+      <div class="dbu-resources">
+        {{#each resourceRows as |row|}}
+        <div class="dbu-resource {{#if row.split}}split{{/if}} {{#if row.unassigned}}pending{{/if}}">
+          <div class="dbu-trigger-line">
+            <input type="text" class="label" name="system.resources.{{row.i}}.name" value="{{row.r.name}}">
+            <label class="check" data-tooltip="{{localize 'DBU.Split.ToggleTip'}}"><input type="checkbox" name="system.resources.{{row.i}}.split" {{checked row.r.split}}> {{localize "DBU.Split.Toggle"}}</label>
+            <span class="dbu-res-total" data-tooltip="{{localize 'DBU.Stacks'}}">{{row.total}}{{#if row.r.max}}/{{row.r.max}}{{/if}}</span>
+            <a data-action="resourceStack" data-index="{{row.i}}" data-delta="1" data-tooltip="{{localize 'DBU.Split.Gain'}}"><i class="fa-solid fa-plus"></i></a>
+            <a data-action="resourceStack" data-index="{{row.i}}" data-delta="-1" data-tooltip="{{localize 'DBU.Split.Lose'}}"><i class="fa-solid fa-minus"></i></a>
+            <a data-action="removeResource" data-index="{{row.i}}"><i class="fa-solid fa-trash"></i></a>
+          </div>
+          {{#if row.split}}
+          <div class="dbu-trigger-line">
+            {{#each row.rolls as |x|}}
+            <label class="{{#if x.over}}dbu-warn{{/if}} {{#if x.forced}}forced{{/if}}">{{x.label}} <input type="number" name="{{x.name}}" value="{{x.n}}" min="0" data-dtype="Number"> <small>/ {{x.cap}}</small></label>
+            {{/each}}
+            <label>{{localize "DBU.PerStack"}} <input type="text" name="system.resources.{{row.i}}.perStack" value="{{row.r.perStack}}"></label>
+            <label data-tooltip="{{localize 'DBU.Split.CapTip'}}">{{localize "DBU.Split.Cap"}} <input type="number" name="system.resources.{{row.i}}.cap" value="{{row.r.cap}}" min="0" data-dtype="Number"></label>
+            {{#if row.unassigned}}<button type="button" data-action="allocate" data-index="{{row.i}}"><i class="fa-solid fa-hand-pointer"></i> {{localize "DBU.Split.Place" n=row.unassigned}}</button>{{/if}}
+          </div>
+          {{else}}
+          <div class="dbu-trigger-line">
+            <label>{{localize "DBU.Stacks"}} <input type="number" name="system.resources.{{row.i}}.value" value="{{row.r.value}}" min="0" data-dtype="Number"></label>
+            <label>Max <input type="number" name="system.resources.{{row.i}}.max" value="{{row.r.max}}" min="0" data-dtype="Number"></label>
+            <label>{{localize "DBU.TargetLabel"}} <select name="system.resources.{{row.i}}.target"><option value="">—</option>{{selectOptions @root.modifierTargets selected=row.r.target valueAttr="value" labelAttr="label"}}</select></label>
+            <label>{{localize "DBU.PerStack"}} <input type="text" name="system.resources.{{row.i}}.perStack" value="{{row.r.perStack}}"></label>
+          </div>
+          {{/if}}
+        </div>
+        {{else}}
+        <p class="dbu-empty">—</p>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+</section>

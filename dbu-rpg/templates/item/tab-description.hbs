@@ -1,0 +1,8 @@
+<section class="tab {{tab.cssClass}}" data-tab="description" data-group="primary">
+  <div class="dbu-source-row">
+    <label>{{localize "DBU.Item.SourceSlug"}} <input type="text" name="system.source.slug" value="{{source.source.slug}}" placeholder="saiyans"></label>
+    <label>{{localize "DBU.Item.SourceSection"}} <input type="text" name="system.source.section" value="{{source.source.section}}" placeholder="{{item.name}}"></label>
+    <button type="button" data-action="fetchText" data-tooltip="{{localize 'DBU.Item.FetchTip'}}"><i class="fa-solid fa-cloud-arrow-down"></i> {{localize "DBU.Item.Fetch"}}</button>
+  </div>
+  <prose-mirror name="system.description" value="{{source.description}}" toggled data-document-u-u-i-d="{{item.uuid}}">{{{enrichedDescription}}}</prose-mirror>
+</section>

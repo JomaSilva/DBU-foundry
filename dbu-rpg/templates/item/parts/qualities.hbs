@@ -1,0 +1,12 @@
+<h4>{{localize "DBU.Gear.Qualities"}} <a data-action="addRow" data-path="system.qualities"><i class="fa-solid fa-plus"></i></a></h4>
+<table class="dbu-table">
+  {{#each source.qualities as |q i|}}
+  <tr>
+    <td><input type="text" name="system.qualities.{{i}}.name" value="{{q.name}}" list="dbu-quality-list-{{../item.type}}"></td>
+    <td><input type="number" name="system.qualities.{{i}}.slots" value="{{q.slots}}" min="0" max="4" data-dtype="Number"> slot(s)</td>
+    <td><a data-action="removeRow" data-path="system.qualities" data-index="{{i}}"><i class="fa-solid fa-trash"></i></a></td>
+  </tr>
+  {{else}}
+  <tr><td class="dbu-empty">—</td></tr>
+  {{/each}}
+</table>

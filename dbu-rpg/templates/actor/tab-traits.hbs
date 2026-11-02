@@ -1,0 +1,70 @@
+<section class="tab {{tab.cssClass}}" data-tab="traits" data-group="primary">
+  <h3 class="dbu-section">{{localize "DBU.RaceLabel"}}
+    <a class="dbu-add" data-action="openCompendium" data-pack="races" data-tooltip="{{localize 'DBU.OpenCompendium'}}"><i class="fa-solid fa-book"></i></a>
+  </h3>
+  {{#if race}}
+  <div class="dbu-race-card" data-item-id="{{race.id}}">
+    <img src="{{race.img}}" alt="" width="48" height="48">
+    <div>
+      <a data-action="itemEdit"><strong>{{race.name}}</strong></a>
+      <div class="dbu-small">RLM {{race.system.rlm}} · {{localize "DBU.Saves"}}: {{#each race.system.saves as |s|}}{{localize (concat "DBU.Save." s)}} {{/each}}
+        · {{localize "DBU.Skill.RacialRanks"}}: {{race.system.skillRanks}}</div>
+      <div class="dbu-small">{{localize "DBU.Race.Increases"}}: {{#each attributes as |a|}}{{#if a.racial}}{{a.abbr}} +{{a.racial}} {{/if}}{{/each}}
+        {{#if race.system.increaseRule}}<em>({{race.system.increaseRule}})</em>{{/if}}</div>
+    </div>
+    <div class="dbu-controls"><a data-action="itemChat"><i class="fa-solid fa-comment"></i></a> <a data-action="itemDelete"><i class="fa-solid fa-trash"></i></a></div>
+  </div>
+  {{else}}
+  <p class="dbu-empty">{{localize "DBU.Race.DropHint"}}</p>
+  {{/if}}
+
+  <h3 class="dbu-section">{{localize "DBU.RacialTraits"}}
+    <a class="dbu-add" data-action="itemCreate" data-type="racialTrait"><i class="fa-solid fa-plus"></i></a>
+    <a class="dbu-add" data-action="openCompendium" data-pack="racial-traits"><i class="fa-solid fa-book"></i></a>
+  </h3>
+  <table class="dbu-table dbu-items">
+    <tbody>
+      {{#each racialTraits as |t|}}
+      <tr data-item-id="{{t.id}}" class="draggable {{#unless t.system.active}}dbu-dim{{/unless}}">
+        <td><img src="{{t.img}}" alt="" width="24" height="24"></td>
+        <td><a data-action="itemEdit">{{t.name}}</a> <small>{{t.system.race}}</small></td>
+        <td><span class="tag">{{localize (concat "DBU.TraitTier." t.system.tier)}}</span> <span class="tag">{{localize (concat "DBU.TraitCat." t.system.category)}}</span></td>
+        <td class="dbu-small">{{t.system.summary}}</td>
+        <td class="dbu-controls">
+          <a data-action="itemToggle" data-field="system.active"><i class="fa-solid fa-toggle-{{#if t.system.active}}on{{else}}off{{/if}}"></i></a>
+          <a data-action="itemChat"><i class="fa-solid fa-comment"></i></a>
+          <a data-action="itemDelete"><i class="fa-solid fa-trash"></i></a>
+        </td>
+      </tr>
+      {{else}}
+      <tr><td class="dbu-empty">{{localize "DBU.RacialTraitsHint"}}</td></tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <h3 class="dbu-section">{{localize "DBU.Talents"}} <small>({{talents.length}} / {{progression.talentAdditions}})</small>
+    <a class="dbu-add" data-action="itemCreate" data-type="talent"><i class="fa-solid fa-plus"></i></a>
+    <a class="dbu-add" data-action="openCompendium" data-pack="talents"><i class="fa-solid fa-book"></i></a>
+  </h3>
+  <table class="dbu-table dbu-items">
+    <thead><tr><th></th><th>{{localize "DBU.Name"}}</th><th>{{localize "DBU.Category"}}</th><th>{{localize "DBU.PrereqLabel"}}</th><th>PL</th><th></th></tr></thead>
+    <tbody>
+      {{#each talents as |t|}}
+      <tr data-item-id="{{t.item.id}}" class="draggable {{#if t.problems.length}}dbu-error-row{{/if}}">
+        <td><img src="{{t.item.img}}" alt="" width="24" height="24"></td>
+        <td><a data-action="itemEdit">{{t.item.name}}</a>{{#if t.item.system.granted}} <span class="tag">{{localize "DBU.Granted"}}</span>{{/if}}
+          {{#each t.problems as |p|}}<div class="dbu-mini-error">{{p}}</div>{{/each}}</td>
+        <td>{{t.item.system.category}}</td>
+        <td class="dbu-small">{{t.item.system.prerequisites}}</td>
+        <td class="center">{{t.item.system.takenAt}}</td>
+        <td class="dbu-controls">
+          <a data-action="itemChat"><i class="fa-solid fa-comment"></i></a>
+          <a data-action="itemDelete"><i class="fa-solid fa-trash"></i></a>
+        </td>
+      </tr>
+      {{else}}
+      <tr><td colspan="6" class="dbu-empty">—</td></tr>
+      {{/each}}
+    </tbody>
+  </table>
+</section>

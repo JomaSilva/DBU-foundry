@@ -1,0 +1,24 @@
+<h4 class="dbu-section">{{localize "DBU.Trigger.Title"}} <a data-action="{{addAction}}" data-path="{{path}}"><i class="fa-solid fa-plus"></i></a></h4>
+<p class="dbu-hint">{{localize "DBU.Trigger.Hint"}}</p>
+<div class="dbu-triggers">
+  {{#each rows as |t i|}}
+  <div class="dbu-trigger {{#unless t.active}}off{{/unless}}">
+    <div class="dbu-trigger-line">
+      <input type="checkbox" name="{{../path}}.{{i}}.active" {{checked t.active}} data-tooltip="{{localize 'DBU.Active'}}">
+      <input type="text" class="label" name="{{../path}}.{{i}}.label" value="{{t.label}}" placeholder="{{localize 'DBU.Mod.Label'}}">
+      <select name="{{../path}}.{{i}}.event" data-tooltip="{{localize 'DBU.Trigger.When'}}">{{selectOptions @root.triggerEvents selected=t.event valueAttr="value" labelAttr="label"}}</select>
+      <select name="{{../path}}.{{i}}.effect" data-tooltip="{{localize 'DBU.Trigger.What'}}">{{selectOptions @root.triggerEffects selected=t.effect valueAttr="value" labelAttr="label"}}</select>
+      <select name="{{../path}}.{{i}}.mode" data-tooltip="{{localize 'DBU.Trigger.ModeLabel'}}">{{selectOptions @root.triggerModes selected=t.mode valueAttr="value" labelAttr="label"}}</select>
+      <a data-action="{{../removeAction}}" data-path="{{../path}}" data-index="{{i}}"><i class="fa-solid fa-trash"></i></a>
+    </div>
+    <div class="dbu-trigger-line">
+      <label>{{localize "DBU.Mod.Value"}} <input type="text" name="{{../path}}.{{i}}.value" value="{{t.value}}" placeholder="3(bT)"></label>
+      <label>{{localize "DBU.Trigger.Resource"}} <input type="text" name="{{../path}}.{{i}}.resource" value="{{t.resource}}" placeholder="Battle Born / surging / guardDown"></label>
+      <label>{{localize "DBU.Mod.Condition"}} <input type="text" name="{{../path}}.{{i}}.condition" value="{{t.condition}}" placeholder="@round % 2 == 0"></label>
+      <label>{{localize "DBU.Trigger.DurationLabel"}} <select name="{{../path}}.{{i}}.duration">{{selectOptions @root.triggerDurations selected=t.duration valueAttr="value" labelAttr="label"}}</select></label>
+    </div>
+  </div>
+  {{else}}
+  <p class="dbu-empty">{{localize "DBU.Trigger.None"}}</p>
+  {{/each}}
+</div>

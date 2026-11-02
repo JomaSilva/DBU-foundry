@@ -1,0 +1,124 @@
+<section class="tab {{tab.cssClass}}" data-tab="optional" data-group="primary">
+  <div class="dbu-tp-line">
+    <span>{{localize "DBU.Opt.SheetHint"}}</span>
+    {{#if isGM}}<a data-action="openOptionalRules"><i class="fa-solid fa-list-check"></i> {{localize "DBU.Settings.OptionalRules.Label"}}</a>{{/if}}
+  </div>
+
+  {{#unless optionalEnabled.length}}<p class="dbu-empty">{{localize "DBU.Opt.NoneEnabled"}}</p>{{/unless}}
+  {{#if optionalEnabled.length}}
+  <ul class="dbu-optional-tags">{{#each optionalEnabled as |r|}}<li><a href="{{r.url}}" target="_blank" rel="noopener">{{r.label}}</a></li>{{/each}}</ul>
+  {{/if}}
+
+  {{#if rules.age}}
+  <h3 class="dbu-section">{{localize "DBU.Opt.age"}}</h3>
+  <div class="dbu-form-grid">
+    <label>{{localize "DBU.Age.physical"}} <select name="system.optional.physicalAge">{{selectOptions ageOptions selected=source.optional.physicalAge valueAttr="value" labelAttr="label"}}</select></label>
+    <label>{{localize "DBU.Age.mental"}} <select name="system.optional.mentalAge">{{selectOptions ageOptions selected=source.optional.mentalAge valueAttr="value" labelAttr="label"}}</select></label>
+    <label>Mini <input type="number" name="system.optional.mini" value="{{source.optional.mini}}" min="0" data-dtype="Number"></label>
+  </div>
+  <p class="dbu-hint">{{localize "DBU.Age.Hint"}}</p>
+  {{/if}}
+
+  {{#if rules.gravity}}
+  <h3 class="dbu-section">{{localize "DBU.Opt.gravity"}} <small>GI {{worldGravity}} → {{localize "DBU.Gravity.Effective"}} {{system.gravityIntensity}}</small></h3>
+  <div class="dbu-form-grid">
+    <label>{{localize "DBU.Gravity.GA"}} <input type="number" name="system.optional.gravityAcclimatization" value="{{source.optional.gravityAcclimatization}}" min="0" max="6" data-dtype="Number"></label>
+    <label>{{localize "DBU.Gravity.Override"}} <input type="number" name="system.optional.gravityOverride" value="{{source.optional.gravityOverride}}" min="-1" max="6" data-dtype="Number"></label>
+  </div>
+  <p class="dbu-hint">{{localize "DBU.Gravity.Hint"}}</p>
+  {{/if}}
+
+  {{#if rules.injurySystem}}
+  <h3 class="dbu-section">{{localize "DBU.Opt.injurySystem"}} <a class="dbu-add" data-action="addInjury"><i class="fa-solid fa-plus"></i></a></h3>
+  <table class="dbu-table">
+    {{#each source.optional.injuries as |inj i|}}
+    <tr>
+      <td><select name="system.optional.injuries.{{i}}.type">{{selectOptions @root.injuryOptions selected=inj.type valueAttr="value" labelAttr="label"}}</select></td>
+      <td><select name="system.optional.injuries.{{i}}.severity">
+        <option value="minor" {{#if (eq inj.severity "minor")}}selected{{/if}}>{{localize "DBU.Injury.minor"}}</option>
+        <option value="major" {{#if (eq inj.severity "major")}}selected{{/if}}>{{localize "DBU.Injury.major"}}</option></select></td>
+      <td><label class="check"><input type="checkbox" name="system.optional.injuries.{{i}}.ignored" {{checked inj.ignored}}> {{localize "DBU.Injury.Ignored"}}</label></td>
+      <td><a data-action="removeInjury" data-index="{{i}}"><i class="fa-solid fa-trash"></i></a></td>
+    </tr>
+    {{else}}<tr><td class="dbu-empty">—</td></tr>{{/each}}
+  </table>
+  <p class="dbu-hint">{{localize "DBU.Injury.Hint"}}</p>
+  {{/if}}
+
+  {{#if rules.stamina}}
+  <h3 class="dbu-section">{{localize "DBU.Opt.stamina"}} <small>{{staminaLabel}}</small></h3>
+  <label class="check"><input type="checkbox" name="system.optional.burstOfPower" {{checked source.optional.burstOfPower}}> Burst of Power ({{localize "DBU.Stamina.Burst"}})</label>
+  {{/if}}
+
+  {{#if rules.fightingStyles}}
+  <h3 class="dbu-section">{{localize "DBU.Opt.fightingStyles"}}</h3>
+  <div class="dbu-form-grid">
+    <label>Stance <select name="system.optional.stance"><option value="">—</option>{{selectOptions stanceOptions selected=source.optional.stance valueAttr="value" labelAttr="label"}}</select></label>
+    <label>{{localize "DBU.Stance.StyleTalents"}} <input type="number" name="system.optional.styleTalents" value="{{source.optional.styleTalents}}" min="0" max="2" data-dtype="Number"></label>
+  </div>
+  <p class="dbu-hint">{{localize "DBU.Stance.Hint"}}</p>
+  {{/if}}
+
+  {{#if rules.pathToPower}}
+  <h3 class="dbu-section">{{localize "DBU.Opt.pathToPower"}}</h3>
+  <label>Martial Level <input type="number" name="system.optional.martialLevel" value="{{source.optional.martialLevel}}" min="0" max="5" data-dtype="Number"> <small>(0 = {{localize "DBU.Off"}})</small></label>
+  <p class="dbu-hint">{{localize "DBU.PathToPower.Hint"}}</p>
+  {{/if}}
+
+  {{#if rules.pathToGodhood}}
+  <h3 class="dbu-section">{{localize "DBU.Opt.pathToGodhood"}}</h3>
+  <div class="dbu-form-grid">
+    <label>God Level <input type="number" name="system.optional.godLevel" value="{{source.optional.godLevel}}" min="0" max="10" data-dtype="Number"></label>
+    <label>Legend Perk → Honed Self <input type="number" name="system.optional.legendPerks.self" value="{{source.optional.legendPerks.self}}" min="0" data-dtype="Number"></label>
+    <label>Legend Perk → Honed Technique <input type="number" name="system.optional.legendPerks.technique" value="{{source.optional.legendPerks.technique}}" min="0" data-dtype="Number"></label>
+    <label>Legend Perk → Honed Talent <input type="number" name="system.optional.legendPerks.talent" value="{{source.optional.legendPerks.talent}}" min="0" data-dtype="Number"></label>
+    <label>Legend Perk → Honed Exceed <input type="number" name="system.optional.legendPerks.exceed" value="{{source.optional.legendPerks.exceed}}" min="0" data-dtype="Number"></label>
+  </div>
+  <p class="dbu-hint">{{localize "DBU.Godhood.Hint"}}</p>
+  {{/if}}
+
+  {{#if rules.altLifePoints}}
+  <h3 class="dbu-section">{{localize "DBU.Opt.altLifePoints"}}</h3>
+  <div class="dbu-form-grid">
+    <label>{{localize "DBU.AltLife.Total"}} <input type="number" name="system.optional.rolledLife" value="{{source.optional.rolledLife}}" min="0" data-dtype="Number"></label>
+    <button type="button" data-action="altLife"><i class="fa-solid fa-dice"></i> {{localize "DBU.AltLife.Roll"}}</button>
+  </div>
+  {{/if}}
+
+  {{#if rules.profileBuyout}}
+  <h3 class="dbu-section">{{localize "DBU.Opt.profileBuyout"}}</h3>
+  <multi-select name="system.optional.boughtProfiles">{{selectOptions buyoutOptions selected=source.optional.boughtProfiles valueAttr="value" labelAttr="label"}}</multi-select>
+  <p class="dbu-hint">{{localize "DBU.Buyout.Hint" cost=progression.profileBuyoutCost}}</p>
+  {{/if}}
+
+  {{#if rules.flight}}
+  <h3 class="dbu-section">{{localize "DBU.Opt.flight"}}</h3>
+  <label>Verticality <input type="number" name="system.optional.verticality" value="{{source.optional.verticality}}" min="0" data-dtype="Number"></label>
+  {{/if}}
+
+  {{#if rules.generations}}
+  <h3 class="dbu-section">{{localize "DBU.Opt.generations"}}</h3>
+  <label class="check"><input type="checkbox" name="system.optional.ngCharacter" {{checked source.optional.ngCharacter}}> {{localize "DBU.Generations.NG"}}</label>
+  {{/if}}
+
+  {{#if rules.gagRules}}
+  <h3 class="dbu-section">{{localize "DBU.Opt.gagRules"}}</h3>
+  <button type="button" data-action="gag"><i class="fa-solid fa-face-grin-tongue-squint"></i> Gag Maneuver</button>
+  {{/if}}
+
+  {{#if rules.desperation}}
+  <h3 class="dbu-section">{{localize "DBU.Opt.desperation"}}</h3>
+  <label class="check"><input type="checkbox" name="system.optional.desperationUsed" {{checked source.optional.desperationUsed}}> {{localize "DBU.Used"}} ({{localize "DBU.PerEncounter"}})</label>
+  {{/if}}
+
+  {{#if rules.roles}}
+  <h3 class="dbu-section">{{localize "DBU.Opt.roles"}}</h3>
+  <label>Role <input type="text" name="system.optional.role" value="{{source.optional.role}}"></label>
+  {{/if}}
+
+  {{#if rules.hordeBattles}}{{#if isNPC}}
+  <h3 class="dbu-section">{{localize "DBU.Opt.hordeBattles"}}</h3>
+  <label class="check"><input type="checkbox" name="system.optional.horde" {{checked source.optional.horde}}> Horde Minion</label>
+  {{#if source.optional.horde}}<p class="dbu-hint">{{hordeLabel}}</p>{{/if}}
+  {{/if}}{{/if}}
+</section>

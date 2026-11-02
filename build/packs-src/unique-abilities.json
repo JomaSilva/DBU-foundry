@@ -1,0 +1,3501 @@
+[
+ {
+  "_type": "Item",
+  "_id": "XmnKA0skw5jwCfru",
+  "name": "Afterimage Technique",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Agility Score 4+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "ag"
+      ],
+      "min": 4
+     }
+    ]
+   },
+   "tpCost": 8,
+   "kpCost": "2(T)",
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter Action",
+   "advancements": [
+    {
+     "name": "Wild Sense",
+     "tp": 6,
+     "prerequisite": "Insight Score 6+",
+     "owned": false
+    },
+    {
+     "name": "Afterimage Strike",
+     "tp": 10,
+     "prerequisite": "Agility Score 8+",
+     "owned": false
+    },
+    {
+     "name": "Sonic Sway",
+     "tp": 6,
+     "prerequisite": "Wild Sense",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "8 TP · KP 2(T) · Counter",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Afterimage Technique",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Wild Sense, Afterimage Strike, Sonic Sway</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "O3dhZJ58Lfcs8YIg",
+  "name": "Atmospheric Bubble",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "2+ Skill Ranks in Use Magic",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 10,
+   "kpCost": "4(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Big Bubble",
+     "tp": 5,
+     "prerequisite": "3+ Skill Ranks in Use Magic",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "10 TP · KP 4(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Atmospheric Bubble",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Big Bubble</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "OJI7uS5WLu20AMtF",
+  "name": "Barrier",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Force or Magic Score of 4+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "fo",
+       "ma"
+      ],
+      "min": 4
+     }
+    ]
+   },
+   "tpCost": 15,
+   "kpCost": "10(T)",
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter Action",
+   "advancements": [
+    {
+     "name": "Efficient Barrier",
+     "tp": 5,
+     "prerequisite": "N/A",
+     "owned": false
+    },
+    {
+     "name": "Massive Barrier",
+     "tp": 15,
+     "prerequisite": "Insight Score 6+",
+     "owned": false
+    },
+    {
+     "name": "Ally Barrier",
+     "tp": 15,
+     "prerequisite": "Insight Score 6+",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP 10(T) · Counter",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Barrier",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Efficient Barrier, Massive Barrier, Ally Barrier</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "eHg41kLVKgTJb9be",
+  "name": "Binding",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Force or Magic Score of 8+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "fo",
+       "ma"
+      ],
+      "min": 8
+     }
+    ]
+   },
+   "tpCost": 20,
+   "kpCost": "10(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Psychic Grip",
+     "tp": 5,
+     "prerequisite": "Telekinesis, Force or Magic Score 8+",
+     "owned": false
+    },
+    {
+     "name": "Binding Volley",
+     "tp": 10,
+     "prerequisite": "Force or Magic Score 10+",
+     "owned": false
+    },
+    {
+     "name": "Binding Volleyball",
+     "tp": 10,
+     "prerequisite": "Binding Volley",
+     "owned": false
+    },
+    {
+     "name": "Energy Web",
+     "tp": 10,
+     "prerequisite": "Insight Score 6+",
+     "owned": false
+    },
+    {
+     "name": "Psycho Thread",
+     "tp": 10,
+     "prerequisite": "Insight Score 10+",
+     "owned": false
+    }
+   ],
+   "restrictions": [
+    {
+     "name": "Gentle Hold",
+     "tp": 5,
+     "applied": false
+    },
+    {
+     "name": "Weak Hold",
+     "tp": 5,
+     "applied": false
+    }
+   ],
+   "modifiers": [],
+   "summary": "20 TP · KP 10(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Binding",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Psychic Grip, Binding Volley, Binding Volleyball, Energy Web, Psycho Thread</li><li>Restrictions: Gentle Hold, Weak Hold</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "rXcj0C1KbMLdDt1t",
+  "name": "Bluff Attack",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "2+ Skill Ranks in Bluff Skill",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 15,
+   "kpCost": "2(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP 2(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Bluff Attack",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "RANNCESCl90P8vf2",
+  "name": "Body Change",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "N/A",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 50,
+   "kpCost": "Your entire Capacity",
+   "maneuverType": "Standard",
+   "actionCost": "3 Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "50 TP · KP Your entire Capacity · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Body Change",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "EAKOA8hFzPziSCcS",
+  "name": "Bound Battlefield",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "10+ Force or Magic Score",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 20,
+   "kpCost": "6(bT)",
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "3 Actions",
+   "advancements": [
+    {
+     "name": "Powerful Barrier",
+     "tp": 12,
+     "prerequisite": "12+ Force or Magic Score",
+     "owned": false
+    },
+    {
+     "name": "Variable Battlefield",
+     "tp": 8,
+     "prerequisite": "8+ Insight Score",
+     "owned": false
+    },
+    {
+     "name": "Shrinking Battlefield",
+     "tp": 4,
+     "prerequisite": "Variable Battlefield Advancement",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "20 TP · KP 6(bT) · Standard Maneuver",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Bound Battlefield",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Powerful Barrier, Variable Battlefield, Shrinking Battlefield</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "AP7k8rd4n7oDKp7I",
+  "name": "Cage of Light",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Force or Magic Score 10+, Insight Score 8+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "fo",
+       "ma"
+      ],
+      "min": 10
+     },
+     {
+      "attrs": [
+       "in"
+      ],
+      "min": 8
+     }
+    ]
+   },
+   "tpCost": 16,
+   "kpCost": "10(T)",
+   "maneuverType": "Standard",
+   "actionCost": "All of your remaining Actions (Min. 2)",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "16 TP · KP 10(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Cage of Light",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "3sAfCV54hyjKgrUl",
+  "name": "Copy Being",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "4+ Skill Ranks in Use Magic",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 50,
+   "kpCost": "N/A",
+   "maneuverType": "Standard",
+   "actionCost": "3",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "50 TP · KP N/A · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Copy Being",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "zoAmvxFmNJRwjUTd",
+  "name": "Copy Clone",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Copy Being",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 20,
+   "kpCost": "8(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "1",
+   "advancements": [
+    {
+     "name": "Mirrored Attack",
+     "tp": 10,
+     "prerequisite": "N/A",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "20 TP · KP 8(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Copy Clone",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Mirrored Attack</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "TeW0XKOd8PRUofMT",
+  "name": "Cyclone Energy",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Insight Score of 8+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "in"
+      ],
+      "min": 8
+     }
+    ]
+   },
+   "tpCost": 20,
+   "kpCost": "2(T)",
+   "maneuverType": "Out-of-Sequence",
+   "actionCost": "N/A",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "20 TP · KP 2(T) · Out-of-Sequence",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Cyclone Energy",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "L6oMRBqWZPrjTTiV",
+  "name": "Dead Zone",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "2+ Skill Ranks in Use Magic",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 30,
+   "kpCost": "10(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "3 Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "30 TP · KP 10(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Dead Zone",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "64Ohhn1ksbz0cagV",
+  "name": "Desperate Dodge",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Agility Score 4+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "ag"
+      ],
+      "min": 4
+     }
+    ]
+   },
+   "tpCost": 8,
+   "kpCost": "N/A",
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "8 TP · KP N/A · Counter",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Desperate Dodge",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "ZNOm8WfBqJtjM8fR",
+  "name": "Devilmite Beam",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Insight Score 6+, Personality Score 4+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "in"
+      ],
+      "min": 6
+     },
+     {
+      "attrs": [
+       "pe"
+      ],
+      "min": 4
+     }
+    ]
+   },
+   "tpCost": 50,
+   "kpCost": "12(T)",
+   "maneuverType": "Standard",
+   "actionCost": "3 Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "50 TP · KP 12(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Devilmite Beam",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "OejnCfzU3DR4KNad",
+  "name": "Dragon Dash",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Access to the Soar Maneuver",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 5,
+   "kpCost": "2(T)",
+   "maneuverType": "Out-of-Sequence",
+   "actionCost": "N/A",
+   "advancements": [
+    {
+     "name": "Deadly Chaser",
+     "tp": 10,
+     "prerequisite": "N/A",
+     "owned": false
+    },
+    {
+     "name": "Z-Burst Dash",
+     "tp": 5,
+     "prerequisite": "N/A",
+     "owned": false
+    },
+    {
+     "name": "Spread Shot Retreat",
+     "tp": 10,
+     "prerequisite": "N/A",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [
+    {
+     "target": "speed.boosted",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Dragon Dash (Passive Bonus)",
+     "active": true,
+     "always": false
+    }
+   ],
+   "summary": "5 TP · KP 2(T) · Out-of-Sequence",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Dragon Dash",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Deadly Chaser, Z-Burst Dash, Spread Shot Retreat</li><li>Restrictions: —</li><li>Passive Bonus: automatizado</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "IzRcV7tloGl12MET",
+  "name": "Down Burst",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Force or Magic Score of 4+, 2+ Skill Ranks in Concealment",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "fo",
+       "ma"
+      ],
+      "min": 4
+     }
+    ]
+   },
+   "tpCost": 10,
+   "kpCost": "4(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Ki Deception",
+     "tp": 10,
+     "prerequisite": "2+ Skill Ranks in Bluff",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "10 TP · KP 4(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Down Burst",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Ki Deception</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "z7P2yvxlrEvZ0NRj",
+  "name": "Energy Gathering",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "2+ Skill Ranks in Clairvoyance",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 20,
+   "kpCost": "N/A",
+   "maneuverType": "Standard",
+   "actionCost": "1~3 Actions",
+   "advancements": [
+    {
+     "name": "Combat Gatherer",
+     "tp": 10,
+     "prerequisite": "5+ Skill Ranks in Clairvoyance",
+     "owned": false
+    },
+    {
+     "name": "Distant Energy Gatherer",
+     "tp": 10,
+     "prerequisite": "4+ Skill Ranks in Clairvoyance",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "20 TP · KP N/A · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Energy Gathering",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Combat Gatherer, Distant Energy Gatherer</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "tdE6XB4qZiEwScUX",
+  "name": "Environment Shift",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "N/A",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 10,
+   "kpCost": "4(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "10 TP · KP 4(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Environment Shift",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "jNwVeGgwjQME7erY",
+  "name": "Explosion Sorcery",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "2+ Skill Ranks in Use Magic",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 20,
+   "kpCost": "6(T) for each Action spent",
+   "maneuverType": "Standard",
+   "actionCost": "Variable (1~3 Actions)",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "20 TP · KP 6(T) for each Action spent · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Explosion Sorcery",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "2dWp6PMl27r9P9LM",
+  "name": "Explosive Wave",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Force or Magic Score of 6+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "fo",
+       "ma"
+      ],
+      "min": 6
+     }
+    ]
+   },
+   "tpCost": 10,
+   "kpCost": "4(T)",
+   "maneuverType": "Instant",
+   "actionCost": "N/A",
+   "advancements": [
+    {
+     "name": "Mighty Explosive Wave",
+     "tp": 10,
+     "prerequisite": "Force or Magic Score of 8+",
+     "owned": false
+    },
+    {
+     "name": "Super Explosive Wave",
+     "tp": 5,
+     "prerequisite": "Mighty Explosive Wave",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "10 TP · KP 4(T) · Instant",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Explosive Wave",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Mighty Explosive Wave, Super Explosive Wave</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "QJV2lMhu7NmrAeQM",
+  "name": "Extra Arms",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Agility Score 6+, Insight Score 5+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "ag"
+      ],
+      "min": 6
+     },
+     {
+      "attrs": [
+       "in"
+      ],
+      "min": 5
+     }
+    ]
+   },
+   "tpCost": 12,
+   "kpCost": "6(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "100 Arm Technique",
+     "tp": 4,
+     "prerequisite": "Agility Score of 8+",
+     "owned": false
+    },
+    {
+     "name": "Four Witches Grip",
+     "tp": 4,
+     "prerequisite": "Insight Score of 6+",
+     "owned": false
+    }
+   ],
+   "restrictions": [
+    {
+     "name": "Faked Extra Arms",
+     "tp": 2,
+     "applied": false
+    }
+   ],
+   "modifiers": [],
+   "summary": "12 TP · KP 6(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Extra Arms",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: 100 Arm Technique, Four Witches Grip</li><li>Restrictions: Faked Extra Arms</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "pZnMI1eAevkYHhzL",
+  "name": "Fake Death",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Personality Score 4+, 2+ Bluff Skill Ranks",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "pe"
+      ],
+      "min": 4
+     }
+    ]
+   },
+   "tpCost": 8,
+   "kpCost": "4(bT)",
+   "maneuverType": "Out-of-Sequence",
+   "actionCost": "N/A",
+   "advancements": [
+    {
+     "name": "Surprise Strike",
+     "tp": 7,
+     "prerequisite": "Insight Score 4+, Personality Score 6+",
+     "owned": false
+    },
+    {
+     "name": "Stealth Crawl",
+     "tp": 2,
+     "prerequisite": "3+ Bluff Skill Ranks.",
+     "owned": false
+    },
+    {
+     "name": "Like the Dead",
+     "tp": 4,
+     "prerequisite": "Tenacity Score 7+",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "8 TP · KP 4(bT) · Out-of-Sequence",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Fake Death",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Surprise Strike, Stealth Crawl, Like the Dead</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "OWrTWPUXkGKQJEn5",
+  "name": "Fake Moon",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Force or Magic Score 4+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "fo",
+       "ma"
+      ],
+      "min": 4
+     }
+    ]
+   },
+   "tpCost": 10,
+   "kpCost": "6(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Lasting Moon",
+     "tp": 5,
+     "prerequisite": "Force or Magic Score of 8+",
+     "owned": false
+    },
+    {
+     "name": "Moon Guardian",
+     "tp": 5,
+     "prerequisite": "N/A",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "10 TP · KP 6(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Fake Moon",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Lasting Moon, Moon Guardian</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "K3vUN7AwbKhOzNxN",
+  "name": "False Courage",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Personality Score of 4+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "pe"
+      ],
+      "min": 4
+     }
+    ]
+   },
+   "tpCost": 8,
+   "kpCost": "4(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Bring it On!",
+     "tp": 12,
+     "prerequisite": "Personality Score of 8+",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "8 TP · KP 4(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "False Courage",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Bring it On!</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "wM0HRdYeWOP6X0ou",
+  "name": "Finish Sign",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 0,
+   "kpCost": "",
+   "maneuverType": "",
+   "actionCost": "",
+   "advancements": [
+    {
+     "name": "Aggressive Taunt",
+     "tp": 10,
+     "prerequisite": "Insight Score of 8+",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": " TP · KP  · ",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Finish Sign",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Aggressive Taunt</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "5puF1h6LQkEzQn4R",
+  "name": "Flooding Technique",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "N/A",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 15,
+   "kpCost": "6(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "2 Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP 6(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Flooding Technique",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Mf1zfkGFbyM5JqpK",
+  "name": "God Meteor",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Force or Magic Score 10+, access to the God Ki Special State, Tier of Power 4+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "fo",
+       "ma"
+      ],
+      "min": 10
+     }
+    ]
+   },
+   "tpCost": 40,
+   "kpCost": "15(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "3 Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [
+    {
+     "target": "wound",
+     "value": "1(T)",
+     "condition": "@states.godKi >= 1",
+     "label": "God Meteor (Passive Bonus)",
+     "active": true,
+     "always": false
+    }
+   ],
+   "summary": "40 TP · KP 15(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "God Meteor",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: automatizado</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "PV89aSO2P0aRgdTy",
+  "name": "Healing Hands",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "2+ Skill Ranks in Use Magic",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 10,
+   "kpCost": "5(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Healing Expertise",
+     "tp": 6,
+     "prerequisite": "Magic Score of 8+",
+     "owned": false
+    },
+    {
+     "name": "Overexertion",
+     "tp": 5,
+     "prerequisite": "Personality Score of 4+",
+     "owned": false
+    },
+    {
+     "name": "Desperate Heal",
+     "tp": 10,
+     "prerequisite": "Overexertion",
+     "owned": false
+    },
+    {
+     "name": "Energy Zone",
+     "tp": 10,
+     "prerequisite": "Magic Score of 10+",
+     "owned": false
+    },
+    {
+     "name": "Patch-Up",
+     "tp": 4,
+     "prerequisite": "Magical Materialization",
+     "owned": false
+    }
+   ],
+   "restrictions": [
+    {
+     "name": "Natural Healing Hands",
+     "tp": 2,
+     "applied": false
+    },
+    {
+     "name": "Minimal Healing",
+     "tp": 5,
+     "applied": false
+    }
+   ],
+   "modifiers": [],
+   "summary": "10 TP · KP 5(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Healing Hands",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Healing Expertise, Overexertion, Desperate Heal, Energy Zone, Patch-Up</li><li>Restrictions: Natural Healing Hands, Minimal Healing</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "wOyqGUqgWuDjf6nh",
+  "name": "Holstein Shock",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "N/A",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 5,
+   "kpCost": "N/A",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Controlled Shock",
+     "tp": 10,
+     "prerequisite": "Insight Score of 6+",
+     "owned": false
+    },
+    {
+     "name": "Revitalizing Shock",
+     "tp": 5,
+     "prerequisite": "Controlled Shock Advancement",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "5 TP · KP N/A · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Holstein Shock",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Controlled Shock, Revitalizing Shock</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "2DMotc0x1WjgCPpZ",
+  "name": "Illusion",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Magic Score of 4+, 2+ Use Magic Skill Ranks, 2+ Bluff Skill Ranks",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "ma"
+      ],
+      "min": 4
+     }
+    ]
+   },
+   "tpCost": 14,
+   "kpCost": "4(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Expanded Illusion",
+     "tp": 10,
+     "prerequisite": "4+ Use Magic Skill Ranks",
+     "owned": false
+    },
+    {
+     "name": "Combat Illusion",
+     "tp": 6,
+     "prerequisite": "4+ Bluff Skill Ranks",
+     "owned": false
+    }
+   ],
+   "restrictions": [
+    {
+     "name": "Close Range Illusions",
+     "tp": 4,
+     "applied": false
+    }
+   ],
+   "modifiers": [],
+   "summary": "14 TP · KP 4(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Illusion",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Expanded Illusion, Combat Illusion</li><li>Restrictions: Close Range Illusions</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Ub8twaDfbZE09Co1",
+  "name": "Illusion Smash",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Portal Creation",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 10,
+   "kpCost": "3(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Combo Portal",
+     "tp": 6,
+     "prerequisite": "Insight Score of 10+",
+     "owned": false
+    },
+    {
+     "name": "Portal Control",
+     "tp": 8,
+     "prerequisite": "N/A",
+     "owned": false
+    },
+    {
+     "name": "Smash Barrage",
+     "tp": 10,
+     "prerequisite": "Insight Score of 14+",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "10 TP · KP 3(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Illusion Smash",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Combo Portal, Portal Control, Smash Barrage</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "MDx9Rqt8IIaw7JmW",
+  "name": "Internal Assault",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Telekinesis Unique Ability",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 15,
+   "kpCost": "11(T)",
+   "maneuverType": "Standard",
+   "actionCost": "2 Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP 11(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Internal Assault",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "TktsXFSbSmh2qiFq",
+  "name": "Judo Toss",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Insight Score of 5+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "in"
+      ],
+      "min": 5
+     }
+    ]
+   },
+   "tpCost": 10,
+   "kpCost": "N/A",
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter Action",
+   "advancements": [
+    {
+     "name": "Redirected Might",
+     "tp": 7,
+     "prerequisite": "Insight Score of 8+",
+     "owned": false
+    },
+    {
+     "name": "Opening Flip",
+     "tp": 7,
+     "prerequisite": "Insight Score of 8+",
+     "owned": false
+    },
+    {
+     "name": "Punishing Toss",
+     "tp": 6,
+     "prerequisite": "Opening Flip",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "10 TP · KP N/A · Counter",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Judo Toss",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Redirected Might, Opening Flip, Punishing Toss</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "JtK83Jfkx6dHUcYG",
+  "name": "Ki Avatar",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Insight Score of 8+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "in"
+      ],
+      "min": 8
+     }
+    ]
+   },
+   "tpCost": 20,
+   "kpCost": "8(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "20 TP · KP 8(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Ki Avatar",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "L7zCdubD4KLumBse",
+  "name": "Lullaby Fist",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "2+ Skill Ranks in Bluff and Use Magic",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 12,
+   "kpCost": "8(T)",
+   "maneuverType": "Standard",
+   "actionCost": "2 Actions",
+   "advancements": [
+    {
+     "name": "Multi-Sleep",
+     "tp": 5,
+     "prerequisite": "N/A",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "12 TP · KP 8(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Lullaby Fist",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Multi-Sleep</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "dK8BE5WpsWM4pU3v",
+  "name": "Magical Enhancement",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Magic Score of 6+, 2+ Skill Ranks in Use Magic",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "ma"
+      ],
+      "min": 6
+     }
+    ]
+   },
+   "tpCost": 10,
+   "kpCost": "2(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Deeper Enhancement",
+     "tp": 5,
+     "prerequisite": "Magic Score of 10+, 3+ Skill Ranks in Use Magic",
+     "owned": false
+    },
+    {
+     "name": "Unleash Dormant Power",
+     "tp": 20,
+     "prerequisite": "5 Skill Ranks in Use Magic",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "10 TP · KP 2(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Magical Enhancement",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Deeper Enhancement, Unleash Dormant Power</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "PzGeJzCFMCU7Ojj3",
+  "name": "Magical Materialization",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "2+ Skill Ranks in Use Magic",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 10,
+   "kpCost": "6(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Weapon Summoner",
+     "tp": 5,
+     "prerequisite": "Insight Score 8+",
+     "owned": false
+    },
+    {
+     "name": "Power Builder",
+     "tp": 2,
+     "prerequisite": "Force Score 4+",
+     "owned": false
+    },
+    {
+     "name": "Projectile Materialization",
+     "tp": 2,
+     "prerequisite": "Insight Score 4+",
+     "owned": false
+    },
+    {
+     "name": "Restrictive Weights",
+     "tp": 6,
+     "prerequisite": "Projectile Materialization",
+     "owned": false
+    },
+    {
+     "name": "Dematerialize",
+     "tp": 6,
+     "prerequisite": "Scholarship or Magic Score 7+",
+     "owned": false
+    },
+    {
+     "name": "Magic Crafter",
+     "tp": 5,
+     "prerequisite": "Scholarship or Insight Score of 8+",
+     "owned": false
+    },
+    {
+     "name": "Tech Materialization",
+     "tp": 5,
+     "prerequisite": "2+ Skill Ranks in Craft (Basic Item)",
+     "owned": false
+    },
+    {
+     "name": "Food Materialization",
+     "tp": 5,
+     "prerequisite": "2+ Skill Ranks in Cooking",
+     "owned": false
+    }
+   ],
+   "restrictions": [
+    {
+     "name": "Limited Creation",
+     "tp": 5,
+     "applied": false
+    }
+   ],
+   "modifiers": [],
+   "summary": "10 TP · KP 6(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Magical Materialization",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Weapon Summoner, Power Builder, Projectile Materialization, Restrictive Weights, Dematerialize, Magic Crafter, Tech Materialization, Food Materialization</li><li>Restrictions: Limited Creation</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "OaS2Y7I0sEmH0Enl",
+  "name": "Metamoran Fusion Dance",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "2+ Skill Ranks in Performance",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 15,
+   "kpCost": "N/A",
+   "maneuverType": "Standard",
+   "actionCost": "3 Actions",
+   "advancements": [
+    {
+     "name": "Five-Way Fusion",
+     "tp": 30,
+     "prerequisite": "N/A",
+     "owned": false
+    },
+    {
+     "name": "Skill in Fusion",
+     "tp": 5,
+     "prerequisite": "4+ Skill Ranks in Performance",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP N/A · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Metamoran Fusion Dance",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Five-Way Fusion, Skill in Fusion</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "VWcMwK6fPVdGZK2w",
+  "name": "Mind Control",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "2+ Skill Ranks in Use Magic",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 20,
+   "kpCost": "12(T)",
+   "maneuverType": "Standard",
+   "actionCost": "2 Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "20 TP · KP 12(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Mind Control",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Qym5nKWkTLKjINWW",
+  "name": "Mind Reading",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Insight Score of 6+, 2+ Skill Ranks in Clairvoyance",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "in"
+      ],
+      "min": 6
+     }
+    ]
+   },
+   "tpCost": 10,
+   "kpCost": "N/A",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Combat Telepath",
+     "tp": 5,
+     "prerequisite": "Force or Magic Score of 6+",
+     "owned": false
+    }
+   ],
+   "restrictions": [
+    {
+     "name": "Limited Range Reading",
+     "tp": 2,
+     "applied": false
+    }
+   ],
+   "modifiers": [],
+   "summary": "10 TP · KP N/A · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Mind Reading",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Combat Telepath</li><li>Restrictions: Limited Range Reading</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "UzBeQR9KIEWDDVB1",
+  "name": "Multi-Form Technique",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "N/A",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 10,
+   "kpCost": "8(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "2 Actions",
+   "advancements": [
+    {
+     "name": "Mass Multi-Form",
+     "tp": 15,
+     "prerequisite": "N/A",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "10 TP · KP 8(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Multi-Form Technique",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Mass Multi-Form</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "okAO4bdWxHFzYwff",
+  "name": "Para Para Dance",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "2+ Skill Ranks in Performance",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 10,
+   "kpCost": "4(bT) per Action spent",
+   "maneuverType": "Standard",
+   "actionCost": "Variable (1~3 Actions)",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "10 TP · KP 4(bT) per Action spent · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Para Para Dance",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "NKoHrxVmC5DYLQEY",
+  "name": "Petrification",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Magic Score of 8+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "ma"
+      ],
+      "min": 8
+     }
+    ]
+   },
+   "tpCost": 20,
+   "kpCost": "10(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Petrification Barrage",
+     "tp": 10,
+     "prerequisite": "Tier of Power 4+",
+     "owned": false
+    },
+    {
+     "name": "Practiced Petrification",
+     "tp": 10,
+     "prerequisite": "Tier of Power 4+, Magic Score of 12+",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "20 TP · KP 10(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Petrification",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Petrification Barrage, Practiced Petrification</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "ByB0y5U2tc1wxznk",
+  "name": "Physical Retreat",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Agility and Insight Score of 8+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "ag"
+      ],
+      "min": 8
+     },
+     {
+      "attrs": [
+       "in"
+      ],
+      "min": 8
+     }
+    ]
+   },
+   "tpCost": 10,
+   "kpCost": "2(T)",
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "10 TP · KP 2(T) · Counter",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Physical Retreat",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "sS2NV5HzvVrwt55M",
+  "name": "Portal Creation",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "3+ Skill Ranks in Use Magic and Clairvoyance",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 20,
+   "kpCost": "5(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Warp Zone",
+     "tp": 6,
+     "prerequisite": "4+ Skill Ranks in Use Magic and Clairvoyance",
+     "owned": false
+    },
+    {
+     "name": "Dimensional Hole",
+     "tp": 10,
+     "prerequisite": "4+ Skill Ranks in Use Magic",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "20 TP · KP 5(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Portal Creation",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Warp Zone, Dimensional Hole</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "wqArs4g40H97b7Wn",
+  "name": "Position Change",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "2+ Skill Ranks of Use Magic, Insight Score of 4+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "ma"
+      ],
+      "min": 4
+     },
+     {
+      "attrs": [
+       "in"
+      ],
+      "min": 4
+     }
+    ]
+   },
+   "tpCost": 12,
+   "kpCost": "5(T)",
+   "maneuverType": "Instant",
+   "actionCost": "N/A",
+   "advancements": [
+    {
+     "name": "Item Swap",
+     "tp": 6,
+     "prerequisite": "2+ Skill Ranks of Thievery",
+     "owned": false
+    },
+    {
+     "name": "People Swap",
+     "tp": 5,
+     "prerequisite": "3+ Skill Ranks in Use Magic",
+     "owned": false
+    },
+    {
+     "name": "Sacrifice Play",
+     "tp": 4,
+     "prerequisite": "N/A",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "12 TP · KP 5(T) · Instant",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Position Change",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Item Swap, People Swap, Sacrifice Play</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "o8t0FrNHN8zfcMtx",
+  "name": "Precognition",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Insight Score of 7+, 2+ Skill Ranks in Use Magic",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "in"
+      ],
+      "min": 7
+     }
+    ]
+   },
+   "tpCost": 30,
+   "kpCost": "N/A",
+   "maneuverType": "Instant",
+   "actionCost": "N/A",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "30 TP · KP N/A · Instant",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Precognition",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "AwQowL7BOq8WM2iV",
+  "name": "Punisher Guard",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Personality Score of 8+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "pe"
+      ],
+      "min": 8
+     }
+    ]
+   },
+   "tpCost": 15,
+   "kpCost": "3(bT)",
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Violent Punishment",
+     "tp": 10,
+     "prerequisite": "Force or Magic Score of 8+",
+     "owned": false
+    },
+    {
+     "name": "Cowardly Opponent",
+     "tp": 10,
+     "prerequisite": "N/A",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP 3(bT) · Standard Maneuver",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Punisher Guard",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Violent Punishment, Cowardly Opponent</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "16EIW2Jzi7S0C8Ok",
+  "name": "Sealing",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Force or Magic Score of 4+ and an Insight Score of 6+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "fo",
+       "ma"
+      ],
+      "min": 4
+     },
+     {
+      "attrs": [
+       "in"
+      ],
+      "min": 6
+     }
+    ]
+   },
+   "tpCost": 25,
+   "kpCost": "12(T)",
+   "maneuverType": "Standard",
+   "actionCost": "2 Actions",
+   "advancements": [
+    {
+     "name": "Weapon Seal",
+     "tp": 5,
+     "prerequisite": "3+ Skill Ranks in Use Magic",
+     "owned": false
+    }
+   ],
+   "restrictions": [
+    {
+     "name": "Mafuba",
+     "tp": 5,
+     "applied": false
+    }
+   ],
+   "modifiers": [],
+   "summary": "25 TP · KP 12(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Sealing",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Weapon Seal</li><li>Restrictions: Mafuba</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "APjBnAyl0NPjOp73",
+  "name": "Second Sight",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "2+ Skill Ranks of the Clairvoyance Skill, 2+ Skill Ranks of the Use Magic Skill",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 20,
+   "kpCost": "N/A",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "20 TP · KP N/A · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Second Sight",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "xI5QXp9kyI7MbLVw",
+  "name": "Shapeshift",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Personality or Scholarship Score of 6+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "pe",
+       "sc"
+      ],
+      "min": 6
+     }
+    ]
+   },
+   "tpCost": 20,
+   "kpCost": "8(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "Variable (1~3 Actions)",
+   "advancements": [
+    {
+     "name": "Shapeshift Diploma",
+     "tp": 5,
+     "prerequisite": "N/A",
+     "owned": false
+    },
+    {
+     "name": "Quick Shift",
+     "tp": 15,
+     "prerequisite": "Personality or Scholarship Score of 14+",
+     "owned": false
+    },
+    {
+     "name": "Vehicle Shift",
+     "tp": 5,
+     "prerequisite": "N/A",
+     "owned": false
+    },
+    {
+     "name": "Weapon Shift",
+     "tp": 5,
+     "prerequisite": "N/A",
+     "owned": false
+    }
+   ],
+   "restrictions": [
+    {
+     "name": "Specific Form",
+     "tp": 5,
+     "applied": false
+    }
+   ],
+   "modifiers": [],
+   "summary": "20 TP · KP 8(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Shapeshift",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Shapeshift Diploma, Quick Shift, Vehicle Shift, Weapon Shift</li><li>Restrictions: Specific Form</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Uz9iuGJbZYvliv9N",
+  "name": "Solar Flare",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Force Score of 4+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "fo"
+      ],
+      "min": 4
+     }
+    ]
+   },
+   "tpCost": 10,
+   "kpCost": "5(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Solar Flare x100",
+     "tp": 8,
+     "prerequisite": "Force Score of 10+",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "10 TP · KP 5(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Solar Flare",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Solar Flare x100</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "RPGFAKyT3aHiY74Q",
+  "name": "Spirit Sword",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Force or Magic Score of 8+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "fo",
+       "ma"
+      ],
+      "min": 8
+     }
+    ]
+   },
+   "tpCost": 15,
+   "kpCost": "3(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Spirit Sword Rush",
+     "tp": 5,
+     "prerequisite": "Agility Score of 6+",
+     "owned": false
+    },
+    {
+     "name": "Galaxy Spirit Sword",
+     "tp": 5,
+     "prerequisite": "Force or Magic Score of 10+",
+     "owned": false
+    },
+    {
+     "name": "Spirit Excalibur",
+     "tp": 10,
+     "prerequisite": "Insight Score of 6+",
+     "owned": false
+    },
+    {
+     "name": "Super Spirit Sword",
+     "tp": 15,
+     "prerequisite": "Force or Magic Score of 12+",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP 3(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Spirit Sword",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Spirit Sword Rush, Galaxy Spirit Sword, Spirit Excalibur, Super Spirit Sword</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "EgByIUsBlVN1sYsL",
+  "name": "Stardust Barrier",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Insight Score of 4+, Force Score of 8+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "in"
+      ],
+      "min": 4
+     },
+     {
+      "attrs": [
+       "fo"
+      ],
+      "min": 8
+     }
+    ]
+   },
+   "tpCost": 15,
+   "kpCost": "2(bT)",
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP 2(bT) · Counter",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Stardust Barrier",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "QtKSa8OtXyyR7Z89",
+  "name": "Super Ghost Kamikaze Attack",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical/Technical",
+   "prerequisites": "Force or Magic Score 10+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "fo",
+       "ma"
+      ],
+      "min": 10
+     }
+    ]
+   },
+   "tpCost": 20,
+   "kpCost": "Variable (3(bT) for each Kamikaze Ghost)",
+   "maneuverType": "Standard",
+   "actionCost": "Variable (1~3 Actions)",
+   "advancements": [
+    {
+     "name": "Balloon Flash Bomber",
+     "tp": 10,
+     "prerequisite": "Force or Magic Score 16+",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "20 TP · KP Variable (3(bT) for each Kamikaze Ghost) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Super Ghost Kamikaze Attack",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Balloon Flash Bomber</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "VmrtkJGnOTmbli6q",
+  "name": "Technique Block",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Insight Score of 8+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "in"
+      ],
+      "min": 8
+     }
+    ]
+   },
+   "tpCost": 4,
+   "kpCost": "Varies",
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "4 TP · KP Varies · Counter",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Technique Block",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "uN9QuYkcpSVI3JDU",
+  "name": "Telekinesis",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Force or Magic Score of 4+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "fo",
+       "ma"
+      ],
+      "min": 4
+     }
+    ]
+   },
+   "tpCost": 15,
+   "kpCost": "6(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Psychic Counter",
+     "tp": 4,
+     "prerequisite": "N/A",
+     "owned": false
+    },
+    {
+     "name": "Weapon Fixer",
+     "tp": 5,
+     "prerequisite": "Magical Materialization",
+     "owned": false
+    },
+    {
+     "name": "Advanced Telekinesis",
+     "tp": 8,
+     "prerequisite": "Force or Magic Score of 10+",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP 6(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Telekinesis",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Psychic Counter, Weapon Fixer, Advanced Telekinesis</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "35KmaHpoNlm8YxdU",
+  "name": "Telekinetic Cushion",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Telekinesis Unique Ability",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 10,
+   "kpCost": "2(T)",
+   "maneuverType": "Counter Maneuver",
+   "actionCost": "1 Counter Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "10 TP · KP 2(T) · Counter Maneuver",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Telekinetic Cushion",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "k3ufCXmRA6lk1XUl",
+  "name": "Telepathy",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "2+ Skill Ranks in Clairvoyance",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 8,
+   "kpCost": "N/A",
+   "maneuverType": "Instant",
+   "actionCost": "N/A",
+   "advancements": [
+    {
+     "name": "Wide-Range Telepathy",
+     "tp": 4,
+     "prerequisite": "4+ Skill Ranks in Clairvoyance",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "8 TP · KP N/A · Instant",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Telepathy",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Wide-Range Telepathy</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "8Av95pfWI3tHh70h",
+  "name": "Threaded Energy",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Energy Web Advancement",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 12,
+   "kpCost": "6(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Web Save",
+     "tp": 6,
+     "prerequisite": "N/A",
+     "owned": false
+    },
+    {
+     "name": "Casting a Wide Net",
+     "tp": 7,
+     "prerequisite": "Force or Magic Score of 12+",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "12 TP · KP 6(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Threaded Energy",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Web Save, Casting a Wide Net</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "vl9tAaNGGbXzaBfb",
+  "name": "Time Freeze",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Magic Score 8+, 2+ Skill Ranks in Use Magic",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "ma"
+      ],
+      "min": 8
+     }
+    ]
+   },
+   "tpCost": 40,
+   "kpCost": "14(bT)",
+   "maneuverType": "Instant",
+   "actionCost": "N/A",
+   "advancements": [
+    {
+     "name": "Improved Time Freeze",
+     "tp": 10,
+     "prerequisite": "5+ Skill Ranks in Use Magic",
+     "owned": false
+    }
+   ],
+   "restrictions": [
+    {
+     "name": "Pained Time",
+     "tp": 10,
+     "applied": false
+    },
+    {
+     "name": "Limited Time Freeze",
+     "tp": 10,
+     "applied": false
+    },
+    {
+     "name": "Straining Time Freeze",
+     "tp": 5,
+     "applied": false
+    },
+    {
+     "name": "Difficult Time Freeze",
+     "tp": 5,
+     "applied": false
+    }
+   ],
+   "modifiers": [],
+   "summary": "40 TP · KP 14(bT) · Instant",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Time Freeze",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Improved Time Freeze</li><li>Restrictions: Pained Time, Limited Time Freeze, Straining Time Freeze, Difficult Time Freeze</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "UxZ4f7ANo8JfV7C0",
+  "name": "Tornado Attack",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Agility Score of 6+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "ag"
+      ],
+      "min": 6
+     }
+    ]
+   },
+   "tpCost": 12,
+   "kpCost": "4(T)",
+   "maneuverType": "Standard",
+   "actionCost": "2 Actions",
+   "advancements": [
+    {
+     "name": "Spin to Win",
+     "tp": 4,
+     "prerequisite": "N/A",
+     "owned": false
+    },
+    {
+     "name": "Tornado Chaser",
+     "tp": 4,
+     "prerequisite": "Spin to Win",
+     "owned": false
+    },
+    {
+     "name": "Massive Tornado",
+     "tp": 4,
+     "prerequisite": "Insight Score of 6+",
+     "owned": false
+    },
+    {
+     "name": "Hyper Tornado",
+     "tp": 6,
+     "prerequisite": "Agility Score of 10+",
+     "owned": false
+    }
+   ],
+   "restrictions": [
+    {
+     "name": "Dizziness",
+     "tp": 4,
+     "applied": false
+    }
+   ],
+   "modifiers": [],
+   "summary": "12 TP · KP 4(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Tornado Attack",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Spin to Win, Tornado Chaser, Massive Tornado, Hyper Tornado</li><li>Restrictions: Dizziness</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "BBZYyQSMEfSXwb9G",
+  "name": "Trap Attack",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Insight Score 4+, Force or Magic Score 4+",
+   "prereq": {
+    "scores": [
+     {
+      "attrs": [
+       "in"
+      ],
+      "min": 4
+     },
+     {
+      "attrs": [
+       "fo",
+       "ma"
+      ],
+      "min": 4
+     }
+    ]
+   },
+   "tpCost": 15,
+   "kpCost": "5(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP 5(T) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Trap Attack",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "8siBMc8xfbEOO43O",
+  "name": "Warped Evolution",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "2+ Skill Ranks in Use Magic, Demon Clansmen Factor",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 20,
+   "kpCost": "8(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "20 TP · KP 8(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Warped Evolution",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "BgTfzQJZk8UjBhxT",
+  "name": "Weather Summoning",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Tier of Power 2+",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 10,
+   "kpCost": "5(bT)",
+   "maneuverType": "Out-of-Sequence",
+   "actionCost": "N/A",
+   "advancements": [
+    {
+     "name": "Magical Weather",
+     "tp": 5,
+     "prerequisite": "2+ Skill Ranks in Use Magic",
+     "owned": false
+    },
+    {
+     "name": "Lasting Weather",
+     "tp": 10,
+     "prerequisite": "2+ Skill Ranks in Survival",
+     "owned": false
+    },
+    {
+     "name": "Empowered Weather",
+     "tp": 10,
+     "prerequisite": "Tier of Power 3+",
+     "owned": false
+    },
+    {
+     "name": "Destructive Weather",
+     "tp": 10,
+     "prerequisite": "Tier of Power 4+",
+     "owned": false
+    }
+   ],
+   "restrictions": [
+    {
+     "name": "Specific Weather Summoning",
+     "tp": 2,
+     "applied": false
+    }
+   ],
+   "modifiers": [],
+   "summary": "10 TP · KP 5(bT) · Out-of-Sequence",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "Weather Summoning",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Magical Weather, Lasting Weather, Empowered Weather, Destructive Weather</li><li>Restrictions: Specific Weather Summoning</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "QpX2jiyBwnn1tqhA",
+  "name": "World Forging",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Magical Materialization",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 12,
+   "kpCost": "2(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Mass Construction",
+     "tp": 3,
+     "prerequisite": "Force or Magic Score 8+",
+     "owned": false
+    },
+    {
+     "name": "Advanced Construction",
+     "tp": 5,
+     "prerequisite": "4+ Skill Ranks in Use Magic",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "12 TP · KP 2(bT) · Standard",
+   "source": {
+    "slug": "unique-abilities",
+    "section": "World Forging",
+    "url": "https://dbu-rpg.com/unique-abilities/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Mass Construction, Advanced Construction</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "unique-abilities"
+   }
+  }
+ }
+]

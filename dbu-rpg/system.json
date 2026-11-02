@@ -1,0 +1,131 @@
+{
+  "id": "dbu-rpg",
+  "title": "Dragon Ball Universe RPG (DBU)",
+  "description": "Sistema para o Dragon Ball Universe RPG (dbu-rpg.com, regras 0.9.3): ficha automatizada, rolagens de Acerto, Desvio e Dano com Dados Extras de Tier of Power, críticos, falhas críticas, Ki Wager, Energy Charges, limiares de vida, condições, estados, transformações, Signature Techniques e checagem das regras da ficha. Projeto de fã, sem fins lucrativos.",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14.369"
+  },
+  "authors": [
+    {
+      "name": "Joao (com Claude)"
+    }
+  ],
+  "esmodules": [
+    "dbu.mjs"
+  ],
+  "styles": [
+    "styles/dbu.css"
+  ],
+  "languages": [
+    {
+      "lang": "pt-BR",
+      "name": "Português (Brasil)",
+      "path": "lang/pt-BR.json"
+    },
+    {
+      "lang": "en",
+      "name": "English (ficha em português)",
+      "path": "lang/en.json"
+    }
+  ],
+  "documentTypes": {
+    "Actor": {
+      "character": {
+        "htmlFields": ["details.biography", "details.notes", "zsoul.description"]
+      },
+      "npc": {
+        "htmlFields": ["details.biography", "details.notes", "zsoul.description"]
+      }
+    },
+    "Item": {
+      "race": { "htmlFields": ["description"] },
+      "racialTrait": { "htmlFields": ["description"] },
+      "talent": { "htmlFields": ["description"] },
+      "transformation": { "htmlFields": ["description"] },
+      "signature": { "htmlFields": ["description"] },
+      "uniqueAbility": { "htmlFields": ["description"] },
+      "maneuver": { "htmlFields": ["description"] },
+      "weapon": { "htmlFields": ["description"] },
+      "apparel": { "htmlFields": ["description"] },
+      "item": { "htmlFields": ["description"] }
+    }
+  },
+  "packs": [
+    {
+      "name": "races",
+      "label": "DBU — Raças",
+      "path": "packs/races",
+      "type": "Item",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "racial-traits",
+      "label": "DBU — Traços Raciais e Fatores",
+      "path": "packs/racial-traits",
+      "type": "Item",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "talents",
+      "label": "DBU — Talentos",
+      "path": "packs/talents",
+      "type": "Item",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "transformations",
+      "label": "DBU — Transformações",
+      "path": "packs/transformations",
+      "type": "Item",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "unique-abilities",
+      "label": "DBU — Unique Abilities",
+      "path": "packs/unique-abilities",
+      "type": "Item",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "maneuvers",
+      "label": "DBU — Manobras Especiais",
+      "path": "packs/maneuvers",
+      "type": "Item",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "equipment",
+      "label": "DBU — Equipamentos",
+      "path": "packs/equipment",
+      "type": "Item",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "guide",
+      "label": "DBU — Guia do Sistema",
+      "path": "packs/guide",
+      "type": "JournalEntry",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    }
+  ],
+  "packFolders": [
+    {
+      "name": "Dragon Ball Universe",
+      "sorting": "m",
+      "color": "#c2410c",
+      "packs": ["guide", "races", "racial-traits", "talents", "transformations", "unique-abilities", "maneuvers", "equipment"]
+    }
+  ],
+  "grid": {
+    "distance": 2,
+    "units": "m"
+  },
+  "primaryTokenAttribute": "life",
+  "secondaryTokenAttribute": "ki",
+  "socket": true,
+  "url": "https://dbu-rpg.com/",
+  "license": "LICENSE.txt",
+  "readme": "README.md"
+}

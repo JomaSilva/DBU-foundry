@@ -1,0 +1,108 @@
+<section class="tab {{tab.cssClass}}" data-tab="main" data-group="primary">
+  <div class="dbu-columns">
+    <div class="dbu-col">
+      <h3 class="dbu-section">{{localize "DBU.Attributes"}} <small>{{localize "DBU.ScoreLimit"}}: {{system.scoreLimit}}</small></h3>
+      <table class="dbu-table dbu-attributes">
+        <thead>
+          <tr>
+            <th>{{localize "DBU.Attribute"}}</th>
+            <th data-tooltip="{{localize 'DBU.RacialIncreaseTip'}}">{{localize "DBU.Racial"}}</th>
+            <th data-tooltip="{{localize 'DBU.PointsTip'}}">{{localize "DBU.Points"}}</th>
+            <th data-tooltip="{{localize 'DBU.OtherScoreTip'}}">{{localize "DBU.Other"}}</th>
+            <th>Score</th>
+            <th>Mod</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each attributes as |a|}}
+          <tr class="{{#if a.over}}dbu-error-row{{/if}}">
+            <td class="dbu-attr-name"><strong>{{a.abbr}}</strong> {{a.label}}</td>
+            <td class="center">{{a.racial}}</td>
+            <td><input type="number" name="system.attributes.{{a.key}}.points" value="{{a.points}}" min="0" data-dtype="Number"></td>
+            <td><input type="number" name="system.attributes.{{a.key}}.bonus" value="{{a.bonus}}" data-dtype="Number"></td>
+            <td class="center dbu-score {{#if a.over}}error{{/if}}" data-tooltip="Limit {{a.limit}}">{{a.score}}</td>
+            <td class="center dbu-mod {{#if a.modChanged}}changed{{/if}}" data-tooltip="{{a.modTip}}">
+              <a data-action="roll" data-type="clash" data-key="{{a.key}}">{{a.mod}}</a>
+            </td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+      <p class="dbu-hint">{{localize "DBU.AttrPointsLine" spent=progression.attributePointsSpent max=progression.attributePoints}}</p>
+
+      <h3 class="dbu-section">{{localize "DBU.Saves"}}</h3>
+      <div class="dbu-saves">
+        {{#each saves as |s|}}
+        <a class="dbu-save {{#if s.proficient}}proficient{{/if}}" data-action="roll" data-type="save" data-key="{{s.key}}" data-tooltip="{{s.tip}}<br>Crit {{s.crit}}+">
+          <span class="label">{{s.label}} <small>({{s.attr}})</small></span>
+          <span class="value">+{{s.value}}</span>
+          {{#if s.proficient}}<i class="fa-solid fa-star" data-tooltip="{{localize 'DBU.RacialSave'}}"></i>{{/if}}
+        </a>
+        {{/each}}
+      </div>
+    </div>
+
+    <div class="dbu-col">
+      <h3 class="dbu-section">{{localize "DBU.CombatRolls"}}</h3>
+      <div class="dbu-combat-rolls">
+        <a class="dbu-roll-btn strike" data-action="roll" data-type="strike" data-foundation="physical" data-tooltip="{{combatRolls.strike.tip}}">
+          <span class="name">{{localize "DBU.Roll.Strike"}}</span>
+          <span class="formula">1d10{{#if combatRolls.strike.dice}} + {{combatRolls.strike.dice}}{{/if}} {{combatRolls.strike.signed}}</span>
+          <span class="crit">Crit {{combatRolls.strike.crit}}+ · Botch ≤{{combatRolls.strike.botch}}</span>
+        </a>
+        <a class="dbu-roll-btn dodge" data-action="roll" data-type="dodge" data-tooltip="{{combatRolls.dodge.tip}}">
+          <span class="name">{{localize "DBU.Roll.Dodge"}}</span>
+          <span class="formula">1d10{{#if combatRolls.dodge.dice}} + {{combatRolls.dodge.dice}}{{/if}} {{combatRolls.dodge.signed}}</span>
+          <span class="crit">Crit {{combatRolls.dodge.crit}}+ · Botch ≤{{combatRolls.dodge.botch}}</span>
+        </a>
+        <a class="dbu-roll-btn wound" data-action="roll" data-type="wound" data-foundation="physical" data-tooltip="{{combatRolls.wound.physical.tip}}">
+          <span class="name">{{localize "DBU.Roll.Wound"}} ({{localize "DBU.Foundation.physical"}})</span>
+          <span class="formula">1d10{{#if combatRolls.wound.physical.dice}} + {{combatRolls.wound.physical.dice}}{{/if}} {{combatRolls.wound.physical.signed}}</span>
+        </a>
+        <a class="dbu-roll-btn wound" data-action="roll" data-type="wound" data-foundation="energy" data-tooltip="{{combatRolls.wound.energy.tip}}">
+          <span class="name">{{localize "DBU.Roll.Wound"}} ({{localize "DBU.Foundation.energy"}})</span>
+          <span class="formula">1d10{{#if combatRolls.wound.energy.dice}} + {{combatRolls.wound.energy.dice}}{{/if}} {{combatRolls.wound.energy.signed}}</span>
+        </a>
+        <a class="dbu-roll-btn wound" data-action="roll" data-type="wound" data-foundation="magic" data-tooltip="{{combatRolls.wound.magic.tip}}">
+          <span class="name">{{localize "DBU.Roll.Wound"}} ({{localize "DBU.Foundation.magic"}})</span>
+          <span class="formula">1d10{{#if combatRolls.wound.magic.dice}} + {{combatRolls.wound.magic.dice}}{{/if}} {{combatRolls.wound.magic.signed}}</span>
+        </a>
+      </div>
+      <div class="dbu-attack-row">
+        <select name="dbuProfile">{{selectOptions profileOptions valueAttr="value" labelAttr="label"}}</select>
+        <button type="button" data-action="attack"><i class="fa-solid fa-hand-fist"></i> {{localize "DBU.Attack.Basic"}}</button>
+      </div>
+
+      <h3 class="dbu-section">{{localize "DBU.Aptitudes"}}</h3>
+      <div class="dbu-aptitudes">
+        <div><span>Haste</span><strong>{{system.aptitudes.haste}}</strong></div>
+        <div><span>Awareness</span><strong>{{system.aptitudes.awareness}}</strong></div>
+        <div><span>Defense Value</span><strong>{{system.aptitudes.defenseValue}}</strong></div>
+        <div><span>Soak</span><strong>{{system.aptitudes.soak}}</strong></div>
+        <div data-tooltip="{{localize 'DBU.DRTip'}}"><span>{{localize "DBU.DR"}}</span><strong>{{system.aptitudes.dr}}</strong></div>
+        <div><span>Might</span><a data-action="roll" data-type="clash" data-key="might"><strong>{{system.aptitudes.might}}</strong></a></div>
+        <div><span>Surgency</span><strong>{{system.aptitudes.surgency}}</strong></div>
+        <div><a data-action="roll" data-type="initiative"><span>{{localize "DBU.Initiative"}}</span></a><strong>+{{system.aptitudes.initiative}}</strong></div>
+        <div><span>{{localize "DBU.SpeedNormal"}}</span><strong>{{system.aptitudes.speedNormal}} q</strong></div>
+        <div><span>{{localize "DBU.SpeedBoosted"}}</span><strong>{{system.aptitudes.speedBoosted}} q</strong></div>
+        <div><span>Super Stacks</span><strong>{{system.superStacks}}</strong></div>
+        <div><span>{{localize "DBU.Size.label"}}</span><strong>{{localize system.size.label}}</strong></div>
+      </div>
+
+      <h3 class="dbu-section">{{localize "DBU.Thresholds"}}</h3>
+      <div class="dbu-thresholds">
+        {{#each thresholds as |t|}}
+        <a class="dbu-threshold {{#if t.below}}below{{/if}} mark-{{t.mark}}" data-action="threshold" data-key="{{t.key}}"
+           data-tooltip="{{localize 'DBU.ThresholdTip'}}">
+          <span>{{t.label}}</span><small>≤ {{t.value}}</small>
+          <i class="fa-solid {{#if (eq t.mark 'pass')}}fa-circle-check{{else if (eq t.mark 'fail')}}fa-circle-xmark{{else}}fa-circle{{/if}}"></i>
+        </a>
+        {{/each}}
+        <a class="dbu-roll-small" data-action="roll" data-type="steadfast"><i class="fa-solid fa-dice-d10"></i> Steadfast</a>
+      </div>
+      {{#if system.health.combatPenalty}}
+      <p class="dbu-warn">{{localize "DBU.ThresholdPenaltyLine" combat=system.health.combatPenalty stress=system.health.stressPenalty}}</p>
+      {{/if}}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,1556 @@
+[
+ {
+  "_type": "Folder",
+  "_id": "RBZwN77bfYFmMktd",
+  "name": "Itens básicos",
+  "type": "Item",
+  "folder": null,
+  "sorting": "a",
+  "color": null,
+  "sort": 0,
+  "description": "",
+  "flags": {}
+ },
+ {
+  "_type": "Folder",
+  "_id": "nCqku6eLUcxVPDX0",
+  "name": "Acessórios",
+  "type": "Item",
+  "folder": null,
+  "sorting": "a",
+  "color": null,
+  "sort": 0,
+  "description": "",
+  "flags": {}
+ },
+ {
+  "_type": "Item",
+  "_id": "oGEZ4cDTNb7Noq09",
+  "name": "Animorphaline (Bad Batch)",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Master",
+   "details": "Medicine, Consumable",
+   "summary": "Craft DC Master · Medicine, Consumable",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Animorphaline (Bad Batch)",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "XbyNtfjhVXVwBKaV",
+  "name": "Animorphaline (Perfect)",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Grandmaster",
+   "details": "Medicine, Consumable",
+   "summary": "Craft DC Grandmaster · Medicine, Consumable",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Animorphaline (Perfect)",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "G0rxe9T2jJUSDokZ",
+  "name": "Bomb",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "Technology, Consumable, Device",
+   "summary": "Craft DC Qualified · Technology, Consumable, Device",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Bomb",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "2NBo96zaQaaE5YNB",
+  "name": "Caltrops",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "Consumable",
+   "summary": "Craft DC Qualified · Consumable",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Caltrops",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "qtSQjT4ZpDiW7Fox",
+  "name": "Capsule",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "Technology",
+   "summary": "Craft DC Qualified · Technology",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Capsule",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "wQ3c11vSbRJi1ZrV",
+  "name": "Communicator",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Apprentice",
+   "details": "Technology",
+   "summary": "Craft DC Apprentice · Technology",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Communicator",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "f6NmSsnFQ2QJGJAl",
+  "name": "Crystal Ball",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Expert",
+   "details": "N/A",
+   "summary": "Craft DC Expert · N/A",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Crystal Ball",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "JOwPI9hzTEDcceow",
+  "name": "Dragon Radar",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Master",
+   "details": "Technology",
+   "summary": "Craft DC Master · Technology",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Dragon Radar",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "iJM8FJHDiqREPYIi",
+  "name": "Flash Bang[Tech]",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "Technology, Consumable",
+   "summary": "Craft DC Qualified · Technology, Consumable",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Flash Bang[Tech]",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "n9BiGuqzoDtaWbmU",
+  "name": "Grenade",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "Technology, Consumable",
+   "summary": "Craft DC Qualified · Technology, Consumable",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Grenade",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "EIxxeIqwBtmCPTU6",
+  "name": "Key",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "N/A",
+   "summary": "Craft DC Qualified · N/A",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Key",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "enpTesPybGa1DaeA",
+  "name": "Longevity Supplement",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Expert",
+   "details": "Medicine, Consumable",
+   "summary": "Craft DC Expert · Medicine, Consumable",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Longevity Supplement",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "VXmbwfaCPVnCXEn1",
+  "name": "Medicine",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "Medicine, Consumable",
+   "summary": "Craft DC Qualified · Medicine, Consumable",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Medicine",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "7yt0wbL89ypJuFSE",
+  "name": "Net",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Expert",
+   "details": "N/A",
+   "summary": "Craft DC Expert · N/A",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Net",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "9ZLAYkLfe1utScgO",
+  "name": "Performance Enhancer",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Master",
+   "details": "Medicine, Consumable",
+   "summary": "Craft DC Master · Medicine, Consumable",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Performance Enhancer",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "DQlVeWVqeLAjxdRo",
+  "name": "Poison Vial",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Expert",
+   "details": "N/A",
+   "summary": "Craft DC Expert · N/A",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Poison Vial",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "lgJp2pIZNoHuspJc",
+  "name": "Remote Control",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Expert",
+   "details": "Technology",
+   "summary": "Craft DC Expert · Technology",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Remote Control",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "vpjvFxrx3Nhgkp9D",
+  "name": "Rice Cooker",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Apprentice",
+   "details": "Technology",
+   "summary": "Craft DC Apprentice · Technology",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Rice Cooker",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Lq32BorpFPWkjP0v",
+  "name": "Sake Bottle",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "Food",
+   "summary": "Craft DC Qualified · Food",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Sake Bottle",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Z3MTgO1bXhXxRoEu",
+  "name": "Scout Scope",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Apprentice",
+   "details": "Technology",
+   "summary": "Craft DC Apprentice · Technology",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Scout Scope",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "en6bNTbqWBxxRqI6",
+  "name": "Sealing Bottle",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Expert",
+   "details": "N/A",
+   "summary": "Craft DC Expert · N/A",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Sealing Bottle",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "a707BPA8XGmD9D0Y",
+  "name": "Sealing Talisman",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "N/A",
+   "summary": "Craft DC Qualified · N/A",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Sealing Talisman",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "l2dsCKqdwIF0roGz",
+  "name": "Smoke Bomb",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Apprentice",
+   "details": "Consumable",
+   "summary": "Craft DC Apprentice · Consumable",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Smoke Bomb",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "iBxaGc8x3DYiXoen",
+  "name": "Snack",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Apprentice",
+   "details": "Food, Consumable",
+   "summary": "Craft DC Apprentice · Food, Consumable",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Snack",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "12Znah42Zss3e4lj",
+  "name": "Taser",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "Technology, Device",
+   "summary": "Craft DC Qualified · Technology, Device",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Taser",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "mEroaX1Dftpau5ck",
+  "name": "Torch",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "basic",
+   "quantity": 1,
+   "craftDC": "Novice",
+   "details": "N/A",
+   "summary": "Craft DC Novice · N/A",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Torch",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "RBZwN77bfYFmMktd",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "viBHN4HmO9JXxRkE",
+  "name": "Armored Gloves",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Expert",
+   "details": "",
+   "summary": "Craft DC Expert",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Armored Gloves",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "45UNYkat6SIbbeaB",
+  "name": "Battle Jacket Belt [Tech]",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Master",
+   "details": "",
+   "summary": "Craft DC Master",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Battle Jacket Belt [Tech]",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "pWkA39k9wx7eQpf0",
+  "name": "Bunny Ears",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Apprentice",
+   "details": "",
+   "summary": "Craft DC Apprentice",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Bunny Ears",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "IzxS8GJsa5i3bN4t",
+  "name": "Champion Belt",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Master",
+   "details": "",
+   "summary": "Craft DC Master",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Champion Belt",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "2HVbKm1O4NQOTBTa",
+  "name": "Eyeglasses",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Apprentice",
+   "details": "",
+   "summary": "Craft DC Apprentice",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Eyeglasses",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "sxp0R0Zti3RDhXqg",
+  "name": "Eyepatch",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Apprentice",
+   "details": "",
+   "summary": "Craft DC Apprentice",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Eyepatch",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "d3Y2NhZjobhuI8T5",
+  "name": "Fashionable Accessories",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "",
+   "summary": "Craft DC Qualified",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Fashionable Accessories",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Ry4s7x9hkXd9yOgW",
+  "name": "Flowing Fashion",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Expert",
+   "details": "",
+   "summary": "Craft DC Expert",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Flowing Fashion",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "umxwl73hbPODnxtp",
+  "name": "Galactic Receiver [Tech]",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "",
+   "summary": "Craft DC Qualified",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Galactic Receiver [Tech]",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "D1YO79ad4BFaBsgD",
+  "name": "Helmet",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Expert",
+   "details": "",
+   "summary": "Craft DC Expert",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Helmet",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "6w0uVuvel3aQmdul",
+  "name": "Hologram Projector [Tech]",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Expert",
+   "details": "",
+   "summary": "Craft DC Expert",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Hologram Projector [Tech]",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "JiPSWtEIAHf4u3QE",
+  "name": "Jetpack [Tech]",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "",
+   "summary": "Craft DC Qualified",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Jetpack [Tech]",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "sjUhyJGtTNXiZBeQ",
+  "name": "Ki-Sealing Handcuff [Tech]",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Grandmaster",
+   "details": "",
+   "summary": "Craft DC Grandmaster",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Ki-Sealing Handcuff [Tech]",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "blYvLiTHXtKKNbXW",
+  "name": "Mask",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "",
+   "summary": "Craft DC Qualified",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Mask",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "LPZrm70i09mZiPBz",
+  "name": "Metamo-Ring [Tech]",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Grandmaster",
+   "details": "",
+   "summary": "Craft DC Grandmaster",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Metamo-Ring [Tech]",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "hglwgcmUrzLBbmCs",
+  "name": "Micro Band [Tech]",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Master",
+   "details": "",
+   "summary": "Craft DC Master",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Micro Band [Tech]",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "KSQdk8EDiIOrHjbn",
+  "name": "Sash",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "",
+   "summary": "Craft DC Qualified",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Sash",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "YMuMmI2cGbB6cf7k",
+  "name": "Scouter [Tech]",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Variable (Qualified ~ Grandmaster)",
+   "details": "",
+   "summary": "Craft DC Variable (Qualified ~ Grandmaster)",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Scouter [Tech]",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "I02h4hYRbOdH51ma",
+  "name": "Sheath/Holster",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "",
+   "summary": "Craft DC Qualified",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Sheath/Holster",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "f6pDT7ZPgxRh8jf6",
+  "name": "Shock Collar[Tech]",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Expert",
+   "details": "",
+   "summary": "Craft DC Expert",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Shock Collar[Tech]",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "uN5D5yZyZkVLYazm",
+  "name": "Space Helmet [Tech]",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Expert",
+   "details": "",
+   "summary": "Craft DC Expert",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Space Helmet [Tech]",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "GVqGrfgXtMNhAKjQ",
+  "name": "Sunglasses",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Apprentice",
+   "details": "",
+   "summary": "Craft DC Apprentice",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Sunglasses",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "NDBYKnoQNtncOYuu",
+  "name": "Suppression Crown [Tech]",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Master",
+   "details": "",
+   "summary": "Craft DC Master",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Suppression Crown [Tech]",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "1FIjfczl466GdNc2",
+  "name": "Transformation Device [Tech]",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Master",
+   "details": "",
+   "summary": "Craft DC Master",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Transformation Device [Tech]",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "kzxSahJ6TAmmOmC7",
+  "name": "Trucker Hat",
+  "type": "item",
+  "img": "icons/svg/item-bag.svg",
+  "system": {
+   "itemType": "accessory",
+   "quantity": 1,
+   "craftDC": "Qualified",
+   "details": "",
+   "summary": "Craft DC Qualified",
+   "source": {
+    "slug": "basic-items-accessories",
+    "section": "Trucker Hat",
+    "url": "https://dbu-rpg.com/basic-items-accessories/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/basic-items-accessories/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/basic-items-accessories</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "nCqku6eLUcxVPDX0",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "basic-items-accessories"
+   }
+  }
+ }
+]

@@ -1,0 +1,41 @@
+<section class="tab {{tab.cssClass}}" data-tab="bio" data-group="primary">
+  <div class="dbu-columns">
+    <div class="dbu-col">
+      <h3 class="dbu-section">Z-Soul</h3>
+      <label>{{localize "DBU.ZSoul.Alignment"}}
+        <select name="system.zsoul.alignment" data-dtype="Number">
+          {{selectOptions alignmentOptions selected=source.zsoul.alignment valueAttr="value" labelAttr="label"}}
+        </select>
+      </label>
+      <label>{{localize "DBU.ZSoul.Quote"}} <input type="text" name="system.zsoul.quote" value="{{source.zsoul.quote}}"></label>
+      <prose-mirror name="system.zsoul.description" value="{{source.zsoul.description}}" toggled data-document-u-u-i-d="{{actor.uuid}}">{{{enrichedZsoul}}}</prose-mirror>
+    </div>
+    <div class="dbu-col">
+      <h3 class="dbu-section">{{localize "DBU.Details"}}</h3>
+      <div class="dbu-details-grid">
+        <label>{{localize "DBU.Player"}} <input type="text" name="system.details.player" value="{{source.details.player}}"></label>
+        <label>{{localize "DBU.Concept"}} <input type="text" name="system.details.concept" value="{{source.details.concept}}"></label>
+        <label>{{localize "DBU.AgeLabel"}} <input type="text" name="system.details.age" value="{{source.details.age}}"></label>
+        <label>{{localize "DBU.Gender"}} <input type="text" name="system.details.gender" value="{{source.details.gender}}"></label>
+        <label>{{localize "DBU.Height"}} <input type="text" name="system.details.height" value="{{source.details.height}}"></label>
+        <label>{{localize "DBU.Weight"}} <input type="text" name="system.details.weight" value="{{source.details.weight}}"></label>
+        <label>{{localize "DBU.Hair"}} <input type="text" name="system.details.hair" value="{{source.details.hair}}"></label>
+        <label>{{localize "DBU.Eyes"}} <input type="text" name="system.details.eyes" value="{{source.details.eyes}}"></label>
+        <label>{{localize "DBU.Skin"}} <input type="text" name="system.details.skin" value="{{source.details.skin}}"></label>
+        {{#if isNPC}}
+        <label>{{localize "DBU.NpcType"}}
+          <select name="system.npcType">
+            <option value="adversary" {{#if (eq source.npcType "adversary")}}selected{{/if}}>Adversary</option>
+            <option value="minion" {{#if (eq source.npcType "minion")}}selected{{/if}}>Minion</option>
+            <option value="other" {{#if (eq source.npcType "other")}}selected{{/if}}>{{localize "DBU.Other"}}</option>
+          </select>
+        </label>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+  <h3 class="dbu-section">{{localize "DBU.Biography"}}</h3>
+  <prose-mirror name="system.details.biography" value="{{source.details.biography}}" toggled data-document-u-u-i-d="{{actor.uuid}}">{{{enrichedBio}}}</prose-mirror>
+  <h3 class="dbu-section">{{localize "DBU.Notes"}}</h3>
+  <prose-mirror name="system.details.notes" value="{{source.details.notes}}" toggled data-document-u-u-i-d="{{actor.uuid}}">{{{enrichedNotes}}}</prose-mirror>
+</section>

@@ -1,0 +1,34 @@
+<div class="dbu-prereq">
+  <h4>{{localize "DBU.Prereq.Checked"}}
+    <a data-action="addRow" data-path="system.prereq.scores" data-tooltip="{{localize 'DBU.Prereq.AddScore'}}"><i class="fa-solid fa-plus"></i> Score</a>
+    {{#if isType.talent}}<a data-action="addRow" data-path="system.prereq.skills" data-tooltip="{{localize 'DBU.Prereq.AddSkill'}}"><i class="fa-solid fa-plus"></i> {{localize "DBU.Skill.label"}}</a>{{/if}}
+  </h4>
+  <table class="dbu-table">
+    {{#each source.prereq.scores as |s i|}}
+    <tr>
+      <td>{{localize "DBU.Prereq.ScoreOf"}}</td>
+      <td><input type="text" name="system.prereq.scores.{{i}}.attrs" value="{{s.attrs}}" data-tooltip="{{localize 'DBU.Prereq.AttrsTip'}}"></td>
+      <td>≥ <input type="number" name="system.prereq.scores.{{i}}.min" value="{{s.min}}" min="0" data-dtype="Number"></td>
+      <td><a data-action="removeRow" data-path="system.prereq.scores" data-index="{{i}}"><i class="fa-solid fa-trash"></i></a></td>
+    </tr>
+    {{/each}}
+    {{#if isType.talent}}
+    {{#each source.prereq.skills as |s i|}}
+    <tr>
+      <td>{{localize "DBU.Skill.label"}}</td>
+      <td><input type="text" name="system.prereq.skills.{{i}}.key" value="{{s.key}}"></td>
+      <td>≥ <input type="number" name="system.prereq.skills.{{i}}.ranks" value="{{s.ranks}}" min="0" data-dtype="Number"> ranks</td>
+      <td><a data-action="removeRow" data-path="system.prereq.skills" data-index="{{i}}"><i class="fa-solid fa-trash"></i></a></td>
+    </tr>
+    {{/each}}
+    {{/if}}
+  </table>
+  {{#if isType.talent}}
+  <div class="dbu-form-grid">
+    <label>{{localize "DBU.Prereq.Talents"}} <input type="text" name="system.prereq.talents" value="{{source.prereq.talents}}" data-tooltip="{{localize 'DBU.Prereq.ListTip'}}"></label>
+    <label>{{localize "DBU.Prereq.AnyTalents"}} <input type="text" name="system.prereq.anyTalents" value="{{source.prereq.anyTalents}}"></label>
+    <label>ToP ≥ <input type="number" name="system.prereq.top" value="{{source.prereq.top}}" min="0" max="7" data-dtype="Number"></label>
+    <label>{{localize "DBU.RaceLabel"}} <input type="text" name="system.prereq.race" value="{{source.prereq.race}}"></label>
+  </div>
+  {{/if}}
+</div>

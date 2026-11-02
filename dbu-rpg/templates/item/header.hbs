@@ -1,0 +1,17 @@
+<header class="dbu-header item">
+  <img class="dbu-portrait small" src="{{item.img}}" data-edit="img" data-action="editImage" alt="">
+  <div class="dbu-header-main">
+    <input class="dbu-name" type="text" name="name" value="{{item.name}}" placeholder="{{localize 'Name'}}">
+    <div class="dbu-item-meta">
+      <span class="tag">{{typeLabel}}</span>
+      {{#if (and isType.signature system.computed)}}
+        <span class="tag {{#if system.computed.errors.length}}error{{else}}ok{{/if}}">{{system.computed.tp}} TP · {{sig.comp.kpUnits}}{{#if sig.comp.kpAdjust}}{{#if (gt sig.comp.kpAdjust 0)}}+{{/if}}{{sig.comp.kpAdjust}}{{/if}}(T) KP</span>
+      {{/if}}
+      {{#if source.source.slug}}
+        <a class="tag link" data-action="openSource"><i class="fa-solid fa-up-right-from-square"></i> dbu-rpg.com</a>
+      {{/if}}
+      {{#if item.actor}}<a class="tag link" data-action="use"><i class="fa-solid fa-play"></i> {{localize "DBU.Item.Use"}}</a>{{/if}}
+    </div>
+    <input class="dbu-summary" type="text" name="system.summary" value="{{source.summary}}" placeholder="{{localize 'DBU.Item.SummaryPlaceholder'}}">
+  </div>
+</header>

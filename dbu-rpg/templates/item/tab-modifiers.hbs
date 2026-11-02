@@ -1,0 +1,25 @@
+<section class="tab {{tab.cssClass}}" data-tab="modifiers" data-group="primary">
+  <p class="dbu-hint">{{localize "DBU.Mod.Hint"}}</p>
+  <table class="dbu-table dbu-modifiers">
+    <thead><tr><th></th><th>{{localize "DBU.Mod.Label"}}</th><th>{{localize "DBU.TargetLabel"}}</th><th>{{localize "DBU.Mod.Value"}}</th><th>{{localize "DBU.Mod.Condition"}}</th><th><a data-action="addRow" data-path="system.modifiers"><i class="fa-solid fa-plus"></i></a></th></tr></thead>
+    <tbody>
+      {{#each source.modifiers as |m i|}}
+      <tr>
+        <td><input type="checkbox" name="system.modifiers.{{i}}.active" {{checked m.active}}></td>
+        <td><input type="text" name="system.modifiers.{{i}}.label" value="{{m.label}}"></td>
+        <td><select name="system.modifiers.{{i}}.target">{{selectOptions @root.modifierTargets selected=m.target valueAttr="value" labelAttr="label"}}</select></td>
+        <td><input type="text" name="system.modifiers.{{i}}.value" value="{{m.value}}" placeholder="1(T)"></td>
+        <td><input type="text" name="system.modifiers.{{i}}.condition" value="{{m.condition}}" placeholder="@power >= 2"></td>
+        <td><a data-action="removeRow" data-path="system.modifiers" data-index="{{i}}"><i class="fa-solid fa-trash"></i></a></td>
+      </tr>
+      {{else}}
+      <tr><td colspan="6" class="dbu-empty">{{localize "DBU.Mod.None"}}</td></tr>
+      {{/each}}
+    </tbody>
+  </table>
+  {{> "systems/dbu-rpg/templates/parts/triggers.hbs" path="system.triggers" rows=source.triggers addAction="addRow" removeAction="removeRow"}}
+  <details class="dbu-help">
+    <summary>{{localize "DBU.Mod.HelpTitle"}}</summary>
+    <div>{{{localize "DBU.Mod.Help"}}}</div>
+  </details>
+</section>

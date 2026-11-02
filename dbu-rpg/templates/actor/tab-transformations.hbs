@@ -1,0 +1,59 @@
+<section class="tab {{tab.cssClass}}" data-tab="transformations" data-group="primary">
+  <div class="dbu-tp-line">
+    <span>{{localize "DBU.Trans.Stacking"}}</span>
+    <span>{{localize "DBU.Trans.Current" top=system.top.current stress=system.stress.bonus}}</span>
+    <a data-action="openCompendium" data-pack="transformations"><i class="fa-solid fa-book"></i> {{localize "DBU.OpenCompendium"}}</a>
+  </div>
+
+  {{#*inline "transList"}}
+  <h3 class="dbu-section">{{title}}
+    <a class="dbu-add" data-action="itemCreate" data-type="transformation" data-trans-type="{{type}}"><i class="fa-solid fa-plus"></i></a>
+  </h3>
+  <table class="dbu-table dbu-items dbu-trans">
+    <thead><tr><th></th><th>{{localize "DBU.Name"}}</th><th>ToP</th><th>Stress</th><th>{{localize "DBU.Trans.Bonuses"}}</th><th>{{localize "DBU.Trans.Aspects"}}</th><th></th></tr></thead>
+    <tbody>
+      {{#each list as |t|}}
+      <tr data-item-id="{{t.item.id}}" class="draggable {{#if t.s.active}}active{{/if}} {{#unless t.raceOk}}dbu-warn-row{{/unless}}">
+        <td><img src="{{t.item.img}}" alt="" width="28" height="28"></td>
+        <td>
+          <a data-action="itemEdit">{{t.item.name}}</a>
+          {{#if t.s.line}}<small>{{t.s.line}} {{#if t.s.stage}}S{{t.s.stage}}{{/if}}</small>{{/if}}
+          {{#if t.s.subtype}}<span class="tag">{{t.s.subtype}}</span>{{/if}}
+          {{#if (eq t.mastered "full")}}<span class="tag ok" data-tooltip="Fully Mastered">M</span>{{else if (eq t.mastered "partial")}}<span class="tag" data-tooltip="Mastery {{t.s.mastery}}/{{t.s.masteryNeeded}}">M{{t.s.mastery}}</span>{{/if}}
+          {{#unless t.raceOk}}<i class="fa-solid fa-triangle-exclamation warn" data-tooltip="{{localize 'DBU.Trans.RaceWarn'}}: {{t.s.race}}"></i>{{/unless}}
+        </td>
+        <td class="center {{#unless t.canEnter}}dbu-dim{{/unless}}">{{t.s.topReq}}+</td>
+        <td class="center">{{#if t.stress}}{{t.stress}}{{else}}—{{/if}}</td>
+        <td class="dbu-small">{{t.bonuses}}</td>
+        <td class="dbu-small">{{t.aspects}}</td>
+        <td class="dbu-controls">
+          {{#if (eq t.s.transType "awakening")}}
+            <a data-action="itemStack" data-field="system.stacks" data-delta="-1"><i class="fa-solid fa-minus"></i></a>
+            <span data-tooltip="Stacks">{{t.s.stacks}}/{{t.s.maxStacks}}</span>
+            <a data-action="itemStack" data-field="system.stacks" data-delta="1"><i class="fa-solid fa-plus"></i></a>
+          {{else}}
+            <a class="dbu-transform-btn {{#if t.s.active}}on{{/if}}" data-action="itemUse" data-tooltip="{{#if t.s.active}}{{localize 'DBU.Trans.Revert'}}{{else}}{{localize 'DBU.Trans.Transform'}}{{/if}}">
+              <i class="fa-solid {{#if t.s.active}}fa-power-off{{else}}fa-fire-flame-curved{{/if}}"></i></a>
+            {{#if t.s.graded}}
+            <a data-action="itemStack" data-field="system.grade" data-delta="-1"><i class="fa-solid fa-minus"></i></a>
+            <span data-tooltip="Grade">G{{t.s.grade}}</span>
+            <a data-action="itemStack" data-field="system.grade" data-delta="1"><i class="fa-solid fa-plus"></i></a>
+            {{/if}}
+            <a data-action="itemToggle" data-field="system.active" data-tooltip="{{localize 'DBU.Trans.ToggleNoTest'}}"><i class="fa-solid fa-toggle-{{#if t.s.active}}on{{else}}off{{/if}}"></i></a>
+          {{/if}}
+          <a data-action="itemChat"><i class="fa-solid fa-comment"></i></a>
+          <a data-action="itemDelete"><i class="fa-solid fa-trash"></i></a>
+        </td>
+      </tr>
+      {{else}}
+      <tr><td colspan="7" class="dbu-empty">—</td></tr>
+      {{/each}}
+    </tbody>
+  </table>
+  {{/inline}}
+
+  {{> transList title=(localize "DBU.TransType.form") type="form" list=forms}}
+  {{> transList title=(localize "DBU.TransType.enhancement") type="enhancement" list=enhancements}}
+  {{> transList title=(localize "DBU.TransType.awakening") type="awakening" list=awakenings}}
+  {{#if evolved.length}}{{> transList title=(localize "DBU.TransType.evolved") type="evolved" list=evolved}}{{/if}}
+</section>

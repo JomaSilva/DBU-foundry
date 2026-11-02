@@ -1,0 +1,95 @@
+<header class="dbu-header">
+  <img class="dbu-portrait" src="{{actor.img}}" data-edit="img" data-action="editImage" title="{{actor.name}}" alt="{{actor.name}}">
+  <div class="dbu-header-main">
+    <div class="dbu-name-row">
+      <input class="dbu-name" type="text" name="name" value="{{actor.name}}" placeholder="{{localize 'Name'}}">
+      {{#if system.validationCounts.error}}
+      <a class="dbu-badge error" data-action="gotoTab" data-tab="progression" data-tooltip="{{localize 'DBU.Val.ClickToSee'}}">
+        <i class="fa-solid fa-triangle-exclamation"></i> {{system.validationCounts.error}} {{localize "DBU.Val.Errors"}}
+      </a>
+      {{else if system.validationCounts.warning}}
+      <a class="dbu-badge warning" data-action="gotoTab" data-tab="progression">
+        <i class="fa-solid fa-circle-exclamation"></i> {{system.validationCounts.warning}} {{localize "DBU.Val.Warnings"}}
+      </a>
+      {{else if system.settings.validate}}
+      <span class="dbu-badge ok"><i class="fa-solid fa-check"></i> {{localize "DBU.Val.AllGood"}}</span>
+      {{/if}}
+    </div>
+    <div class="dbu-header-grid">
+      <label>{{localize "DBU.PL"}}
+        <input type="number" name="system.pl" value="{{source.pl}}" min="1" max="30" step="1" data-dtype="Number">
+      </label>
+      <div class="dbu-stat" data-tooltip="{{localize 'DBU.TopTip'}}">
+        <span class="label">ToP</span>
+        <span class="value">{{system.top.current}}{{#if (ne system.top.current system.top.base)}} <small>(base {{system.top.base}})</small>{{/if}}</span>
+      </div>
+      <div class="dbu-stat" data-tooltip="{{localize 'DBU.TopDiceTip'}}">
+        <span class="label">{{localize "DBU.ExtraDice"}}</span>
+        <span class="value">{{system.top.extraDiceLabel}}{{#if (gt system.top.instances 1)}} ×{{system.top.instances}}{{/if}}</span>
+      </div>
+      <div class="dbu-stat">
+        <span class="label">{{localize "DBU.CritDice"}}</span>
+        <span class="value">{{system.top.critDiceLabel}}</span>
+      </div>
+      <div class="dbu-stat">
+        <span class="label">{{localize "DBU.RaceLabel"}}</span>
+        <span class="value">{{#if race}}<a data-action="itemEdit" data-item-id="{{race.id}}">{{race.name}}</a>{{else}}<a data-action="openCompendium" data-pack="races">{{localize "DBU.Race.Choose"}}</a>{{/if}}</span>
+      </div>
+      <label>{{localize "DBU.Size.label"}}
+        <select name="system.details.size">
+          {{selectOptions sizeOptions selected=source.details.size valueAttr="value" labelAttr="label"}}
+        </select>
+      </label>
+      {{#if combatInfo}}
+      <div class="dbu-stat dbu-combat-stat {{#if combatInfo.isTurn}}my-turn{{/if}}" data-tooltip="{{localize 'DBU.Combat.SheetTip'}}">
+        <span class="label">{{localize "DBU.Combat.RoundShort"}}</span>
+        <span class="value">{{combatInfo.round}}{{#if combatInfo.isTurn}} · {{localize "DBU.Combat.YourTurn"}}{{else}} <small>({{combatInfo.current}})</small>{{/if}}</span>
+      </div>
+      <div class="dbu-stat">
+        <span class="label">{{localize "DBU.Actions"}}</span>
+        <span class="value">{{system.combat.actions}} + {{system.combat.counters}}C</span>
+      </div>
+      {{/if}}
+      <div class="dbu-stat" data-tooltip="Stress Bonus = PL + Determination">
+        <span class="label">Stress</span><span class="value">+{{system.stress.bonus}}</span>
+      </div>
+      <div class="dbu-stat">
+        <span class="label">Karma</span>
+        <span class="value dbu-pips">
+          <a data-action="pool" data-field="system.karma.value" data-delta="-1"><i class="fa-solid fa-minus"></i></a>
+          {{system.karma.value}}/4
+          <a data-action="pool" data-field="system.karma.value" data-delta="1"><i class="fa-solid fa-plus"></i></a>
+        </span>
+      </div>
+    </div>
+
+    <div class="dbu-bars">
+      <div class="dbu-bar life">
+        <div class="fill" style="width: {{lifePct}}%"></div>
+        <span class="bar-label"><i class="fa-solid fa-heart"></i> LP</span>
+        <a class="bar-btn" data-action="pool" data-pool="life" data-delta="-1"><i class="fa-solid fa-minus"></i></a>
+        <input type="number" name="system.life.value" value="{{source.life.value}}" data-dtype="Number">
+        <span class="bar-max">/ {{system.life.max}}</span>
+        <a class="bar-btn" data-action="pool" data-pool="life" data-delta="1"><i class="fa-solid fa-plus"></i></a>
+        <span class="bar-status {{system.health.current}}">{{healthLabel}}</span>
+      </div>
+      <div class="dbu-bar ki">
+        <div class="fill" style="width: {{kiPct}}%"></div>
+        <span class="bar-label"><i class="fa-solid fa-fire"></i> KP</span>
+        <a class="bar-btn" data-action="pool" data-pool="ki" data-delta="-1"><i class="fa-solid fa-minus"></i></a>
+        <input type="number" name="system.ki.value" value="{{source.ki.value}}" data-dtype="Number">
+        <span class="bar-max">/ {{system.ki.max}}</span>
+        <a class="bar-btn" data-action="pool" data-pool="ki" data-delta="1"><i class="fa-solid fa-plus"></i></a>
+        {{#if system.transformation.kiMultiplier}}<span class="bar-status mult" data-tooltip="Ki Multiplier">×2</span>{{/if}}
+      </div>
+      <div class="dbu-bar capacity">
+        <div class="fill" style="width: {{capPct}}%"></div>
+        <span class="bar-label"><i class="fa-solid fa-gauge-high"></i> {{localize "DBU.Capacity"}}</span>
+        <a class="bar-btn" data-action="pool" data-pool="capacity" data-delta="-1"><i class="fa-solid fa-minus"></i></a>
+        <input type="number" name="system.capacity.value" value="{{source.capacity.value}}" data-dtype="Number">
+        <span class="bar-max">/ {{system.capacity.max}}</span>
+        <a class="bar-btn" data-action="pool" data-pool="capacity" data-delta="1"><i class="fa-solid fa-plus"></i></a>
+      </div>
+    </div>
+  </div>
+</header>

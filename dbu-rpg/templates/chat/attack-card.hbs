@@ -1,0 +1,66 @@
+<div class="dbu-card dbu-attack">
+  <header class="dbu-card-header">
+    <div>
+      <h3>{{attack.name}}</h3>
+      <div class="dbu-card-sub">{{category}}{{#if attack.charges}} · {{attack.charges}} Energy Charge(s){{/if}}{{#if attack.wager}} · Wager {{attack.wager}}{{/if}} · {{attack.kp}} KP</div>
+    </div>
+  </header>
+  <div class="dbu-card-total {{#if attack.strike.crit}}crit{{/if}} {{#if attack.strike.botch}}botch{{/if}}">
+    <span class="label">{{localize "DBU.Roll.Strike"}}</span>
+    <span class="total">{{attack.strike.total}}</span>
+    {{#if attack.strike.crit}}<span class="flag crit">{{localize "DBU.Roll.Critical"}}</span>{{/if}}
+    {{#if attack.strike.botch}}<span class="flag botch">{{localize "DBU.Roll.Botch"}}</span>{{/if}}
+    {{#if attack.autoHit}}<span class="flag tn">{{localize "DBU.Attack.AutoHit"}}</span>{{/if}}
+  </div>
+  <details class="dbu-breakdown-wrap">
+    <summary>{{localize "DBU.Roll.Breakdown"}}</summary>
+    <ul class="dbu-breakdown">
+      <li><span>{{localize "DBU.Roll.Natural"}}</span><strong>{{attack.strikeView.natural}}{{#if (ne attack.strikeView.natural attack.strikeView.rawNatural)}} <small>({{attack.strikeView.rawNatural}})</small>{{/if}}</strong></li>
+      {{#each attack.strikeView.extra as |e|}}<li><span>{{e.label}} <small>{{e.formula}}</small></span><strong>+{{e.total}}</strong></li>{{/each}}
+      {{#each attack.strikeView.parts as |p|}}<li><span>{{p.label}}</span><strong>{{p.value}}</strong></li>{{/each}}
+      {{#if attack.strikeView.critTotal}}<li class="crit"><span>{{localize "DBU.Roll.CritDice"}}</span><strong>+{{attack.strikeView.critTotal}}</strong></li>{{/if}}
+    </ul>
+  </details>
+
+  {{#if attack.wound}}
+  <div class="dbu-card-total wound {{#if attack.wound.crit}}crit{{/if}}">
+    <span class="label">Wound</span><span class="total">{{attack.wound.total}}</span>
+    {{#if attack.wound.crit}}<span class="flag crit">{{localize "DBU.Roll.Critical"}}</span>{{/if}}
+  </div>
+  {{/if}}
+
+  {{#if hasTargets}}
+  <table class="dbu-targets">
+    {{#each attack.targets as |t i|}}
+    <tr class="result-{{t.result}}">
+      <td class="who">{{#if t.img}}<img src="{{t.img}}" alt="" width="24" height="24">{{/if}} {{t.name}}</td>
+      <td class="state">
+        {{#if (eq t.result "hit")}}<span class="hit">{{localize "DBU.Defense.Hit"}}</span>{{else if (eq t.result "miss")}}<span class="miss">{{localize "DBU.Defense.Miss"}}</span>{{else}}<span class="pending">{{localize "DBU.Defense.Pending"}}</span>{{/if}}
+        {{#if t.defense}}<small>{{t.defense.mode}}{{#if t.defense.total}} {{t.defense.total}}{{/if}}{{#if t.defense.cost}} ({{t.defense.cost}} KP){{/if}}</small>{{/if}}
+        {{#if (or (eq t.damage 0) t.damage)}}<strong class="dmg">−{{t.damage}} LP</strong>{{/if}}
+      </td>
+      <td class="actions">
+        {{#unless t.result}}
+        <button type="button" data-dbu-action="defense" data-mode="dodge" data-index="{{i}}" data-tooltip="{{localize 'DBU.Defense.Dodge'}}"><i class="fa-solid fa-person-running"></i></button>
+        <button type="button" data-dbu-action="defense" data-mode="parry" data-index="{{i}}" data-tooltip="Defend: Parry"><i class="fa-solid fa-hand"></i></button>
+        <button type="button" data-dbu-action="defense" data-mode="guard" data-index="{{i}}" data-tooltip="Defend: Guard"><i class="fa-solid fa-shield-halved"></i></button>
+        <button type="button" data-dbu-action="defense" data-mode="directHit" data-index="{{i}}" data-tooltip="Defend: Direct Hit"><i class="fa-solid fa-person-rays"></i></button>
+        <button type="button" data-dbu-action="defense" data-mode="crossCounter" data-index="{{i}}" data-tooltip="Defend: Cross Counter"><i class="fa-solid fa-arrows-left-right"></i></button>
+        <button type="button" data-dbu-action="defense" data-mode="none" data-index="{{i}}" data-tooltip="{{localize 'DBU.Defense.None'}}"><i class="fa-solid fa-xmark"></i></button>
+        {{/unless}}
+        {{#if @root.attack.wound}}{{#unless (eq t.result "miss")}}{{#unless (or (eq t.damage 0) t.damage)}}
+        <button type="button" class="dbu-dmg-btn" data-dbu-action="damage" data-index="{{i}}" data-tooltip="{{localize 'DBU.Damage.Apply'}}"><i class="fa-solid fa-heart-crack"></i> {{localize "DBU.Damage.Apply"}}</button>
+        {{/unless}}{{/unless}}{{/if}}
+      </td>
+    </tr>
+    {{/each}}
+  </table>
+  {{else}}
+  <p class="dbu-card-note">{{localize "DBU.Attack.NoTargetsCard"}}</p>
+  {{/if}}
+
+  <div class="dbu-card-buttons">
+    {{#unless attack.wound}}<button type="button" data-dbu-action="wound"><i class="fa-solid fa-burst"></i> {{localize "DBU.Wound.Roll"}}</button>{{/unless}}
+    <button type="button" data-dbu-action="retarget"><i class="fa-solid fa-crosshairs"></i> {{localize "DBU.Attack.Retarget"}}</button>
+  </div>
+</div>
