@@ -12,6 +12,12 @@ export function registerSocket() {
       const { onAllocateRequest } = await import("./combat/stacks.mjs");
       return onAllocateRequest(payload.data);
     }
+    // The attacker (or the GM) chooses the Injury a hit inflicts
+    if ( payload?.action === "injury" ) {
+      if ( payload.userId !== game.user.id ) return;
+      const { onInjuryRequest } = await import("./combat/injuries.mjs");
+      return onInjuryRequest(payload.data);
+    }
     if ( !game.user.isActiveGM ) return;
     try {
       await handle(payload);

@@ -2,7 +2,8 @@ import { DBU } from "../config.mjs";
 import { dbuRoll, postInfoCard } from "../dice/roller.mjs";
 import { categoryToDice } from "../rules/dice.mjs";
 import { emitGM, safeUpdate } from "../socket.mjs";
-import { limitedPower, rules } from "../optional-rules.mjs";
+import { INJURY_TYPES, limitedPower, rules } from "../optional-rules.mjs";
+import { injuryCheck, requestInjury } from "./injuries.mjs";
 
 const { DialogV2 } = foundry.applications.api;
 const FDE = () => foundry.applications.ux.FormDataExtended;
@@ -66,6 +67,8 @@ export async function openAttackDialog(actor, { signature = null, profile = null
       <label><input type="checkbox" name="spendAction" checked> ${L("DBU.Attack.SpendAction")}</label>
       <label><input type="checkbox" name="ignoreLimits"> ${L("DBU.Attack.IgnoreLimits")}</label>
     </div>
+    ${rules().injurySystem ? `<div class="form-group"><label>${L("DBU.Injury.Intended")}</label><select name="injuryType">
+      <option value="">—</option>${INJURY_TYPES.map(t => `<option value="${t}">${L(`DBU.Injury.${t}`)}</option>`).join("")}</select></div>` : ""}
     <p class="hint">${targets.length ? L("DBU.Attack.Targets", { names: targets.map(t => t.name).join(", ") }) : L("DBU.Attack.NoTargets")}</p>
   </div>`;
 
@@ -275,7 +278,8 @@ export async function executeAttack(actor, opts) {
     signatureId: signature?.id ?? null, profile: profileKey, foundation, weaponId: weapon?.id ?? null,
     kp, wager: wager + lifeWager, charges: totalCharges, chargeCategory, category, ballistic: !!ballistic,
     caliber: ballistic ? (weapon.system.caliber ?? 0) : 0,
-    calledShot: !!opts.calledShot, longRange: !!opts.longRange, oblivious: !!opts.oblivious,
+    calledShot: !!opts.calledShot, injuryType: opts.calledShot ? (opts.injuryType || "") : "",
+    longRange: !!opts.longRange, oblivious: !!opts.oblivious,
     woundBonus: Number(opts.woundBonus) || 0, ultimate: !!comp?.ultimate,
     sig: comp ? { woundT: comp.woundT, longShotT: comp.longShotT, lastLegs: comp.lastLegs, lowPowerCrush: comp.lowPowerCrush,
       armorPiercing: comp.armorPiercing, shatteringBlow: comp.shatteringBlow, penetration: comp.penetration,
@@ -607,7 +611,7 @@ export async function applyAttackDamage(message, index) {
   const attacker = await fromUuid(attack.attackerUuid);
   if ( !target ) return;
   const res = computeDamage(target, attack, attacker, t.defense);
-  await applyDamageToActor(target, res.damage, { attacker, attack, lines: res.lines });
+  await applyDamageToActor(target, res.damage, { attacker, attack, lines: res.lines, category: res.category });
   // Diminishing Defense when the target never rolled a defense
   if ( !t.dimApplied && !t.defense ) {
     const stacks = target.system.dimDefensePerAttack * ((attack.profile === "sweeping" && res.damage > 0) ? 2 : 1);
@@ -639,7 +643,7 @@ export async function storeDamageOnMessage(messageId, index, damage) {
 /**
  * Reduce Life Points (through the GM if needed) and grant Bonus Momentum to the attacker.
  */
-export async function applyDamageToActor(target, damage, { attacker = null, attack = null, lines = [], selfInflicted = false } = {}) {
+export async function applyDamageToActor(target, damage, { attacker = null, attack = null, lines = [], selfInflicted = false, category = null } = {}) {
   const tsys = target.system;
   const before = tsys.life.value;
   const after = before - damage;
@@ -651,22 +655,20 @@ export async function applyDamageToActor(target, damage, { attacker = null, atta
   const max = tsys.life.max;
   // Overkill Rules: more than 1/3 (rounded up) of the Maximum Life Points in one attack
   if ( R.overkill && attack && (damage > Math.ceil(max / 3)) ) notes.push(L("DBU.Damage.Overkill"));
-  // Injury System: Damage above 1/3 (Lethal: 1/4) of the Maximum Life Points while below Bruised
-  if ( R.injurySystem && attack && (damage > 0) ) {
-    const lethal = (attack.category ?? 1) >= 3;
-    const regen = target.items.some(i => /namekian biology|namekian cells|rubbery body|nanomachine repair|karyon core|regenerative anatomy/i.test(i.name));
-    let need = max / (lethal ? 4 : 3);
-    if ( regen ) need /= 2;
-    if ( (damage > need) && (value <= max / 2) ) {
-      const major = (value <= max / 10) || (value <= 0);
-      notes.push(L(major ? "DBU.Injury.CanMajor" : "DBU.Injury.CanMinor", { name: target.name }));
-    }
-  }
+  // Injury System: the attacker chooses the Injury (Threshold and Type) right away
+  const injury = (attack && !selfInflicted)
+    ? injuryCheck(target, { damage, lifeAfter: value, lifeMax: max, category: category ?? attack.category ?? 1, attack }) : null;
+  if ( injury?.noType ) notes.push(L("DBU.Injury.NoTypeDeclared"));
+  else if ( injury ) notes.push(L(injury.max === "major" ? "DBU.Injury.CanMajor" : "DBU.Injury.CanMinor", { name: target.name }));
   await postInfoCard({
     actor: target, title: L("DBU.Damage.Applied", { name: target.name, damage }),
     subtitle: attack?.name ?? "", lines: [...lines, L("DBU.Damage.LifeChange", { before, after: value }), ...notes],
     img: target.img
   });
+  if ( injury && !injury.noType ) {
+    requestInjury({ targetUuid: target.uuid, attackerUuid: attacker?.uuid ?? null, max: injury.max,
+      forcedType: injury.forcedType, attackName: attack?.name ?? "" });
+  }
 
   // Bonus Momentum: knocking an Opponent through a Health Threshold (once per Combat Round)
   if ( attacker && game.combat?.started && !selfInflicted ) {

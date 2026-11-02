@@ -443,7 +443,8 @@
       "ErrSuperReq": "{name}: requisito do Super Profile ({req}).",
       "WarnUnknown": "Opção desconhecida: {key}.",
       "WarnSuperProfile": "Super Profile desconhecido.",
-      "WarnSuperOnlyFinisher": "Super Profiles só entram em Dramatic Finishers (ou por efeitos)."
+      "WarnSuperOnlyFinisher": "Super Profiles só entram em Dramatic Finishers (ou por efeitos).",
+      "Examples": "Técnicas de exemplo (compêndio)"
     },
     "SuperProfileReq": {
       "allOut": "LP abaixo de Injured",
@@ -888,9 +889,57 @@
       "minor": "Minor",
       "major": "Major",
       "Ignored": "Ignorar (Karma)",
-      "Hint": "Reduz LP e KP máximos (1/10 Minor, 1/5 Major) e aplica as penalidades do tipo.",
-      "CanMinor": "Injury System: o ataque pode infligir um Ferimento Minor em {name}.",
-      "CanMajor": "Injury System: o ataque pode infligir um Ferimento Major em {name}."
+      "Hint": "Minor: −1/10 de LP e KP máximos; Major: −1/5. Uma Minor repetida no mesmo local vira Major.",
+      "CanMinor": "Injury System: dano suficiente para uma Injury Minor em {name} — o atacante escolhe.",
+      "CanMajor": "Injury System: dano suficiente para uma Injury Major em {name} — o atacante escolhe.",
+      "None": "Nenhuma",
+      "Threshold": "Grau",
+      "Type": "Local",
+      "Question": "{attack} deixou {name} em condição de sofrer uma Injury (até {max}). Escolha o grau e o local:",
+      "CalledShotType": "Called Shot: só pode ser o tipo declarado no ataque.",
+      "Title": "Injury — {name}",
+      "Inflict": "Infligir",
+      "Skip": "Não infligir",
+      "NoTail": "o alvo não parece ter cauda",
+      "Upgraded": "Já tinha uma Minor nesse local: virou Major.",
+      "PoolLoss": "LP e KP máximos −{n} enquanto durar.",
+      "RegenNote": "Regenerator: some no fim do encontro, e um Healing Surge pode encerrar uma.",
+      "Inflicted": "{name}: Injury {severity} ({type})",
+      "RegenTitle": "Regenerator",
+      "RegenSurge": "Regenerator: o Healing Surge pode encerrar uma Injury. Qual?",
+      "Remove": "Remover",
+      "Keep": "Manter",
+      "Removed": "{name}: Injury encerrada",
+      "RegenEncounter": "{name} (Regenerator): todas as Injuries terminaram com o encontro.",
+      "FootLegProne": "Pé/Perna (Major): falhou o Steadfast e caiu Prone.",
+      "Intended": "Injury pretendida (Called Shot)",
+      "NoTypeDeclared": "Injury System: Called Shot sem tipo de Injury declarado não inflige Injury.",
+      "Effect": {
+        "eyes": {
+          "minor": "Limited Sight, sem poder sair dele enquanto durar.",
+          "major": "No Sight, sem poder sair dele enquanto durar."
+        },
+        "ears": {
+          "minor": "−1(bT) no Impulsive Save, no Acerto e no Desvio.",
+          "major": "−2(bT) no Impulsive Save, no Acerto e no Desvio; Diminishing Defense como se tivesse 2 ToP base a mais."
+        },
+        "handArm": {
+          "minor": "1 arma a menos equipada; −1(bT) no Acerto e no Dano.",
+          "major": "1 arma a menos; −2(bT) no Acerto e no Dano; Diminishing Offense começa 1 ataque antes."
+        },
+        "footLeg": {
+          "minor": "−1(bT) no Acerto e no Desvio; Speed ×3/4.",
+          "major": "−2(bT) no Acerto e no Desvio; Speed pela metade; falhar um Steadfast derruba (Prone)."
+        },
+        "internal": {
+          "minor": "1 stack de Fatigued que não sai enquanto durar.",
+          "major": "1 stack de Fatigued e 4 stacks de DOT que não saem enquanto durar."
+        },
+        "tail": {
+          "minor": "Sem Tail Attack (quem não tinha acesso: −1(bT) nas Rolagens de Combate).",
+          "major": "Sem Tail Attack e −2 no Stress Bonus (quem não tinha acesso: −1(bT) nas Rolagens de Combate)."
+        }
+      }
     },
     "Stamina": {
       "Burst": "ignora o limiar de stamina até o fim do turno"

@@ -15,6 +15,7 @@ Sistema de fã (sem fins lucrativos) para o **Dragon Ball Universe RPG** de [dbu
 - **Gatilhos de turno/rodada**: efeitos *Start/End of Turn*, *Start of Combat Round* e *Start of Combat Encounter* de traços, talentos, transformações e Unique Abilities ligados ao combate — automáticos (LP/KP, stacks, pontos, Ações, Counter Actions, States e Conditions com duração), botão no chat (efeitos opcionais) ou lembrete no momento certo. Gatilhos personalizados na ficha.
 - **Condições e Estados** com efeitos numéricos e ícones no token.
 - **Stacks por rolagem** (Battle Born, Progress...): ao ganhar um stack, abre uma caixa na tela do jogador dono para escolher Acerto, Desvio ou Dano, respeitando os limites (e os efeitos que mudam o limite).
+- **Injury System**: dano grande abre a escolha de Injury (grau e local) para o atacante, com Called Shot, Regenerator e Minor repetida virando Major.
 - **Power** em caixas de seleção: Power Up 2×/rodada, cada stack expira sozinho no fim do seu próximo turno.
 - **Transformações**: bônus de atributo por tabela (T/bT/stacks), aspectos automáticos (Super Saiyan Form, Bulky, Armored, Enhanced Save, Perfect Ki Control, High Speed, Raging, Mindful, Draining, Straining...), Legend Realized.
 - **Signature Techniques**: construtor com todas as Vantagens/Desvantagens, custo de TP e KP calculados, requisitos checados.
@@ -25,7 +26,7 @@ Sistema de fã (sem fins lucrativos) para o **Dragon Ball Universe RPG** de [dbu
 ## Conteúdo
 
 Compêndios: Raças (28), Traços Raciais e Fatores (262), Talentos (268), Transformações (472), Unique Abilities (66),
-Manobras Especiais (67), Equipamentos (51) e o **Guia do Sistema** (como usar + resumo das regras e relações).
+Técnicas de Exemplo (41), Manobras Especiais (67), Equipamentos (51) e o **Guia do Sistema** (como usar + resumo das regras e relações).
 
 Os compêndios trazem os **dados mecânicos** (números, requisitos, aspectos, custos, modificadores e gatilhos) e o link de cada entrada.
 O texto completo das regras pertence à equipe do DBU: use o botão **Carregar texto oficial** na aba Descrição de qualquer item

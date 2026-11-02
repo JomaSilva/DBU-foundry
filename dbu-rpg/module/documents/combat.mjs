@@ -1,6 +1,7 @@
 import { DBU } from "../config.mjs";
 import { postInfoCard } from "../dice/roller.mjs";
 import { clearTimed, expireTimed, runTriggers } from "../combat/triggers.mjs";
+import { clearRegeneratorInjuries } from "../combat/injuries.mjs";
 
 const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
 
@@ -186,6 +187,7 @@ export async function onCombatDeleted(combat) {
     await clearTimed(actor);
     await actor.resetEncounter({ instantRecovery: true });
     lines.push(L("DBU.Combat.InstantRecovery", { name: actor.name }));
+    if ( await clearRegeneratorInjuries(actor) ) lines.push(L("DBU.Injury.RegenEncounter", { name: actor.name }));
   }
   if ( lines.length ) await postInfoCard({ title: L("DBU.Combat.End"), lines, img: "icons/svg/combat.svg" });
 }

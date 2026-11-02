@@ -681,7 +681,7 @@ Ativadas pelo GM em **Configurações › Regras Adicionais**. Relações princi
 | Ballistics | arma balística: Wound sem atributo, sem Wager/KP, Caliber e munição |
 | Fighting Styles | Stance States com efeitos automáticos; Stance Strain −1 Stress |
 | Gravity | GI do mundo − aclimatação (− metade do requisito de ToP da Form): −GI(bT) Speed e Combate, −GI Perícias e Stress; GI 2 sem Soar; GI 3+ Prone no fim do turno; GI 4+ perde 1/4 do LP ao cair |
-| Injury System | Minor/Major: −1/10 ou −1/5 de LP/KP máximos e penalidades por local; Internal Major mantém 4 stacks de DOT |
+| Injury System | dano > 1/3 do LP máximo (Lethal: 1/4; Regenerator: metade; Called Shot: dano +1/4 e tipo declarado) → Injury escolhida pelo atacante: Minor (alvo abaixo de Bruised) ou Major (abaixo de Critical/Derrotado); −1/10 ou −1/5 de LP/KP máximos e penalidades por local; Minor repetida no mesmo local vira Major; Pé/Perna Major: Steadfast falho → Prone; Regenerator: Healing Surge remove 1 e o fim do encontro remove todas |
 | Path to Godhood | após PL 30: God Levels → Stress Bonus, categoria dos Dados de ToP, Legend Perks |
 | Path to Power | PL1 em 5 Martial Levels: 40 LP/30 KP +5 por ML, Martial Dice d4→d10, limites próprios |
 | Gag Rules | Gag Maneuver (Clash Morale) com perda de LP |

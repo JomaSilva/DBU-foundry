@@ -129,6 +129,35 @@ Modo e Duração.
   renova a duração de um deles). Em combate, cada stack sai sozinho no fim do seu próximo turno, e a Max
   Capacity (+1/4 nos 2 primeiros stacks) acompanha.
 
+## Técnicas de exemplo
+
+- O compêndio **DBU — Técnicas de Exemplo** traz as 41 Signature Techniques da página de exemplos do site
+  (Kamehameha, Final Flash, Spirit Bomb...), organizadas em Super, Ultimate e Dramatic Finisher. Arraste para a
+  ficha ou use o ícone de livro ao lado de "Signature Techniques" na aba Técnicas.
+- Cada exemplo já vem com Fundação, Perfil, Vantagens e Desvantagens (com ranks e escolhas) no construtor, e a
+  ficha calcula TP e KP.
+- A página de exemplos foi escrita com uma versão anterior das regras: os custos listados lá aparecem na
+  descrição do item, mas a ficha recalcula pelas regras atuais. Perfis antigos (Sphere, Rapid Fire, Explosion,
+  Kiai, Spell, Basic, Blitzing) foram trocados pelo Perfil atual mais próximo, e opções que não existem mais ficaram
+  de fora. Tudo isso está anotado na aba Descrição de cada técnica. Requisitos que não batem com as regras atuais
+  aparecem como erro no construtor.
+
+## Injury System (ferimentos)
+
+Com a regra **Injury System** ligada em Regras Adicionais:
+
+- Quando um ataque aplica dano acima de **1/3 do LP máximo** do alvo (**1/4** se o dano for Lethal; metade disso
+  contra um **Regenerator**, como Namekian Biology ou Nanomachine Repair), o sistema checa o limiar de vida do alvo
+  depois do golpe: abaixo de Bruised permite **Minor**; abaixo de Critical, ou Derrotado, permite **Major**.
+- Abre uma caixa para o **atacante** escolher o grau (nenhuma, Minor ou até Major) e o local (Olhos, Ouvidos,
+  Mão/Braço, Pé/Perna, Interno, Cauda). A caixa aparece na tela do jogador dono do atacante ou, se ele não
+  estiver online, na do GM.
+- **Called Shot:** marque o tipo de Injury pretendido no diálogo de ataque. O dano conta +1/4 para a checagem e
+  só aquele tipo pode ser infligido; sem tipo declarado não há Injury.
+- A Injury entra na ficha do alvo: LP e KP máximos −1/10 (Minor) ou −1/5 (Major), mais as penalidades do local.
+  Uma Minor repetida no mesmo local vira Major. Com Pé/Perna Major, falhar um Steadfast derruba (Prone).
+- **Regenerator:** um Healing Surge pode encerrar uma Injury, e todas acabam no fim do encontro.
+
 ## Alertas e testes situacionais
 
 A faixa de alertas mostra o que precisa ser feito agora, com botões quando dá para resolver na

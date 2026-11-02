@@ -1168,12 +1168,144 @@ def build_items():
 
 
 # ---------------------------------------------------------------------------
+# Example Signature Techniques
+# ---------------------------------------------------------------------------
+SIG_OPTIONS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "dbu-rpg", "module", "data", "signature-options.mjs")
+SIG_LEVELS = {"super": "super", "ultimate": "ultimate", "limit break": "finisher", "dramatic finisher": "finisher"}
+# Profiles of the current rules, by normalised label
+SIG_PROFILES = {
+    "simple": "simple", "combination": "combination", "launching": "launching", "megaflare": "megaFlare", "blitz": "blitz",
+    "crushing": "crushing", "pinpoint": "pinpoint", "powered": "powered", "soaring": "soaring", "sweeping": "sweeping",
+    "beam": "beam", "blast": "blast", "clearing": "clearing", "concentrated": "concentrated", "cutting": "cutting", "wave": "wave",
+    "elementaldark": "elementalDark", "elementaldarkness": "elementalDark", "elementalearth": "elementalEarth",
+    "elementalfire": "elementalFire", "elementalice": "elementalIce", "elementallight": "elementalLight",
+    "elementallightning": "elementalLightning", "elementalmetal": "elementalMetal", "elementalplantlife": "elementalPlantlife",
+    "elementalpoison": "elementalPoison", "elementalwater": "elementalWater", "elementalwind": "elementalWind"
+}
+# Profiles the examples still use from an older version of the rules → closest current Profile
+SIG_OLD_PROFILES = {"blitzing": "blitz", "basic": "simple", "spell": "simple", "sphere": "clearing", "explosion": "clearing",
+                    "rapidfire": "combination", "kiai": "beam"}
+SIG_SUPER_PROFILES = {"allout": "allOut", "cataclysmicattack": "cataclysmic", "comboattack": "combo",
+                      "completeannihilation": "annihilation", "genki": "genki", "gigaflare": "gigaFlare", "karmic": "karmic",
+                      "superbeam": "superBeam", "supercombination": "superCombination", "superlaunch": "superLaunch",
+                      "weathermaximizer": "weatherMaximizer"}
+SIG_ALIASES = {"grapplingtechnique": "grappling"}
+
+
+def norm_key(s):
+    return re.sub(r"[^a-z0-9]", "", s.lower())
+
+
+def build_signatures():
+    src = open(SIG_OPTIONS_FILE, encoding="utf-8").read()
+    options = json.loads(src[src.index("{"):src.rindex("}") + 1])
+    by_name = {}
+    for o in options.values():
+        n = norm_key(o["name"])
+        by_name[n] = o
+        by_name[n.replace("restricted", "restriction")] = o
+    for alias, key in SIG_ALIASES.items():
+        target = next((o for o in options.values() if o["key"] == key), None)
+        if target:
+            by_name[alias] = target
+    lines = read("signature-examples")
+    text = "\n".join(lines)
+    folders = {}
+    for block in re.split(r"^## ", text, flags=re.M)[1:]:
+        head = clean(block.splitlines()[0])
+        m = re.match(r"(.+?) - (Super|Ultimate|Limit Break|Dramatic Finisher)(?: Signature)?$", head)
+        if not m:
+            continue
+        name, level = m.group(1).strip(), SIG_LEVELS[m.group(2).lower()]
+        fields = {}
+        for l in block.splitlines():
+            # "- **Foundation: **Energy" and "- **Foundation**: Energy" are both used
+            fm = re.match(r"^- \*\*(.+?)\*\*\s*:?\s*(.*)$", l.strip())
+            if fm:
+                fields[clean(fm.group(1)).rstrip(":. ").lower()] = clean(fm.group(2))
+        notes = []
+        # Foundation (Profile[, Super Profile])
+        fm = re.match(r"^(Physical|Energy|Magic)\s*\((.+)\)$", fields.get("foundation", ""))
+        if not fm:
+            continue
+        foundation = fm.group(1).lower()
+        parts = [p.strip() for p in fm.group(2).split(",")]
+        profile_raw = parts[0]
+        pk = norm_key(profile_raw)
+        profile = SIG_PROFILES.get(pk)
+        if not profile and pk in SIG_OLD_PROFILES:
+            profile = SIG_OLD_PROFILES[pk]
+            notes.append(f"Perfil “{profile_raw}” é de uma versão antiga das regras: ajustado para “{profile}” — revise na aba Detalhes.")
+        if not profile:
+            profile = "simple"
+            notes.append(f"Perfil “{profile_raw}” não existe nas regras atuais: ajustado para “simple” — revise.")
+        super_profile = ""
+        for extra in parts[1:]:
+            sp = SIG_SUPER_PROFILES.get(norm_key(extra))
+            if sp and not super_profile:
+                super_profile = sp
+            else:
+                notes.append(f"Super Profile “{extra}” não existe nas regras atuais (não aplicado).")
+
+        def option_list(raw, kind):
+            out = []
+            for part in re.split(r",\s*(?![^()]*\))", raw or ""):
+                part = part.strip().rstrip(".")
+                if not part or part.lower() in ("none", "n/a", "-"):
+                    continue
+                pm = re.match(r"^(.+?)\s*\(([^)]*)\)\s*$", part)
+                nm, arg = (pm.group(1).strip(), pm.group(2).strip()) if pm else (part, "")
+                opt = by_name.get(norm_key(nm))
+                if not opt and (kind == "advantage") and norm_key(nm) in SIG_SUPER_PROFILES:
+                    sp = SIG_SUPER_PROFILES[norm_key(nm)]
+                    if not super_profile_holder[0]:
+                        super_profile_holder[0] = sp
+                        notes.append(f"“{nm}” agora é um Super Profile: aplicado como Super Profile.")
+                    else:
+                        notes.append(f"“{nm}” agora é um Super Profile (a técnica já tem um; não aplicado).")
+                    continue
+                if not opt:
+                    notes.append(f"{'Vantagem' if kind == 'advantage' else 'Desvantagem'} “{part}” não existe nas regras atuais (não aplicada).")
+                    continue
+                rank, choice = 1, ""
+                am = re.match(r"^(\d+)\s*[,.]?\s*(.*)$", arg)
+                if am:
+                    rank = int(am.group(1))
+                    choice = am.group(2).strip()
+                elif arg:
+                    choice = arg
+                out.append({"key": opt["key"], "rank": rank, "choice": choice})
+            return out
+
+        super_profile_holder = [super_profile]
+        advantages = option_list(fields.get("advantages"), "advantage")
+        disadvantages = option_list(fields.get("disadvantages"), "disadvantage")
+        super_profile = super_profile_holder[0]
+        if super_profile and level != "finisher":
+            notes.append("Super Profile só vale em Dramatic Finisher: confira o nível da técnica.")
+        kp, tp = fields.get("ki point cost", ""), fields.get("technique point cost", "")
+        level_label = {"super": "Super", "ultimate": "Ultimate", "finisher": "Dramatic Finisher"}[level]
+        if level not in folders:
+            folders[level] = folder("signature-examples", level_label)
+        system = {
+            "level": level, "foundation": foundation, "profile": profile, "superProfile": super_profile, "multiProfile": "",
+            "advantages": advantages, "disadvantages": disadvantages, "free": False, "granted": False, "tpAdjust": 0,
+            "summary": f"{level_label} · {fm.group(1)} ({profile_raw}) · site: {kp} KP, {tp} TP"
+        }
+        structure = [f"Custo listado no site: {kp} KP · {tp} TP. A página de exemplos usa custos de uma versão anterior das "
+                     "regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais."] + notes
+        doc = add_item("signature-examples", name, "signature", system, "signature-examples", name, structure, folders[level])
+        doc["system"]["description"] = doc["system"]["description"].replace("Efeitos (estrutura):", "Notas da importação:")
+
+
+# ---------------------------------------------------------------------------
 build_races()
 build_talents()
 build_transformations()
 build_unique_abilities()
 build_maneuvers()
 build_items()
+build_signatures()
 
 os.makedirs(OUT, exist_ok=True)
 for pack, docs in PACKS.items():

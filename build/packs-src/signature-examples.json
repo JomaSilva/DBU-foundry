@@ -1,0 +1,2539 @@
+[
+ {
+  "_type": "Folder",
+  "_id": "IRj1Km97Qv3i1geU",
+  "name": "Super",
+  "type": "Item",
+  "folder": null,
+  "sorting": "a",
+  "color": null,
+  "sort": 0,
+  "description": "",
+  "flags": {}
+ },
+ {
+  "_type": "Item",
+  "_id": "7IPrhl62akLQa7up",
+  "name": "Acid Attack",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "energy",
+   "profile": "blast",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "sustained",
+     "rank": 4,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "inaccurate",
+     "rank": 2,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Energy (Blast) · site: 10(T) KP, 23 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Acid Attack",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 10(T) KP · 23 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "FYeSd6qxNf0ZKAha",
+  "name": "Big Bang Attack",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "energy",
+   "profile": "clearing",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "powerShot",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "twinLinked",
+     "rank": 1,
+     "choice": "Wound"
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "inefficiency",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "statDrain",
+     "rank": 1,
+     "choice": "Force"
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Energy (Sphere) · site: 9(T) KP, 16 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Big Bang Attack",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 9(T) KP · 16 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Perfil “Sphere” é de uma versão antiga das regras: ajustado para “clearing” — revise na aba Detalhes.</li><li>Vantagem “Big Bang (2)” não existe nas regras atuais (não aplicada).</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Folder",
+  "_id": "BcxaRME74i3eaQ6B",
+  "name": "Ultimate",
+  "type": "Item",
+  "folder": null,
+  "sorting": "a",
+  "color": null,
+  "sort": 0,
+  "description": "",
+  "flags": {}
+ },
+ {
+  "_type": "Item",
+  "_id": "Jp4UAOdFVJOo8FRA",
+  "name": "Blazing Magnetron",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "physical",
+   "profile": "powered",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "transformationBoost",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "accurate",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "powerShot",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "lastLegs",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "leadUp",
+     "rank": 1,
+     "choice": "Sweeping"
+    },
+    {
+     "key": "climaxAttack",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Physical (Powered) · site: 14(T) KP, 32 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Blazing Magnetron",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 14(T) KP · 32 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Z6Kpk8o4Sc8wXlpt",
+  "name": "Chain Destructo Disk Barrage",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "energy",
+   "profile": "combination",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "twinLinked",
+     "rank": 1,
+     "choice": "Strike"
+    },
+    {
+     "key": "alottaLottaAttacks",
+     "rank": 2,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "mandatoryCharge",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Energy (Rapid Fire) · site: 12(T) KP, 35 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Chain Destructo Disk Barrage",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 12(T) KP · 35 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Perfil “Rapid Fire” é de uma versão antiga das regras: ajustado para “combination” — revise na aba Detalhes.</li><li>Vantagem “Chain Attack(Cutting)” não existe nas regras atuais (não aplicada).</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "vagX6cgRoSp6YGTd",
+  "name": "Cross-Arm Dive",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "physical",
+   "profile": "simple",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "accurate",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "brutalBlitz",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "dropDown",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "allOrNothing",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Physical (Basic) · site: 7(T) KP, 18 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Cross-Arm Dive",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 7(T) KP · 18 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Perfil “Basic” é de uma versão antiga das regras: ajustado para “simple” — revise na aba Detalhes.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "2hwXkBLbx18fcR2h",
+  "name": "Darkness Judgement",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "magic",
+   "profile": "elementalDark",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "twinLinked",
+     "rank": 1,
+     "choice": "Wound"
+    },
+    {
+     "key": "accurate",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "splitting",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "powerShot",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "transformationBoost",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "restrictedTransformation",
+     "rank": 2,
+     "choice": "Dark King"
+    },
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "statDrain",
+     "rank": 2,
+     "choice": "Magic"
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Magic (Elemental: Darkness) · site: 16(T) KP, 48 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Darkness Judgement",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 16(T) KP · 48 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "mBPtS8wCAPmDWN5d",
+  "name": "Death Beam",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "energy",
+   "profile": "beam",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "penetration",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "efficiency",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "accurate",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "deadLink",
+     "rank": 1,
+     "choice": "Wound"
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Energy (Beam) · site: 12(T) KP, 31 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Death Beam",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 12(T) KP · 31 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "mWEP1DPnHfFSFMFQ",
+  "name": "Death Meteor",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "magic",
+   "profile": "elementalEarth",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "knockback",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "powerShot",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "superAdvantage",
+     "rank": 1,
+     "choice": "Power Shot"
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "deadLink",
+     "rank": 1,
+     "choice": "Strike"
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Magic (Elemental: Earth) · site: 11(T) KP, 31 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Death Meteor",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 11(T) KP · 31 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "No185dqAKHOVmDHB",
+  "name": "Destructo Disk",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "energy",
+   "profile": "cutting",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "twinLinked",
+     "rank": 1,
+     "choice": "Strike"
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "mandatoryCharge",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Energy (Cutting) · site: 8(T) KP, 10 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Destructo Disk",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 8(T) KP · 10 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "6EmXz8sSn4kyGYXA",
+  "name": "Dimension Ray",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "magic",
+   "profile": "elementalLight",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "transformationBoost",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "twinLinked",
+     "rank": 1,
+     "choice": "Wound"
+    },
+    {
+     "key": "terrainDestruction",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "allOrNothing",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Magic (Elemental: Light) · site: 13(T) KP, 36 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Dimension Ray",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 13(T) KP · 36 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Vantagem “Widespread Magic (Line)” não existe nas regras atuais (não aplicada).</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "GqYL5QeqlfoleOgZ",
+  "name": "Dragon Fist",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "physical",
+   "profile": "crushing",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "shatteringBlow",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "hitAndRun",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "chargingAssault",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "transformationBoost",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "climaxAttack",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "allOrNothing",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Physical (Crushing) · site: 15(T) KP, 44 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Dragon Fist",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 15(T) KP · 44 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "rqaSClMThUP3L2Dj",
+  "name": "Final Explosion",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "energy",
+   "profile": "clearing",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "finalChance",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "intenseBlast",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "powerShot",
+     "rank": 2,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "climaxAttack",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "mandatoryCharge",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "volatileExplosion",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "selfExplosion",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "allOrNothing",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Energy (Explosion) · site: 12(T) KP, 20 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Final Explosion",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 12(T) KP · 20 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Perfil “Explosion” é de uma versão antiga das regras: ajustado para “clearing” — revise na aba Detalhes.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "1pEz1JzF1syjQeQh",
+  "name": "Final Flash",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "energy",
+   "profile": "beam",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "terrainDestruction",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "powerShot",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "maximumCharge",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "allOrNothing",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "mandatoryCharge",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "inefficiency",
+     "rank": 2,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Energy (Beam) · site: 23(T) KP, 25 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Final Flash",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 23(T) KP · 25 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Vantagem “Broad Beam” não existe nas regras atuais (não aplicada).</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "OWoaU6NtMcqck7wg",
+  "name": "Final Shine Attack",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "energy",
+   "profile": "beam",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "powerShot",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "maximumCharge",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "transformationBoost",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "mandatoryCharge",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Energy (Beam) · site: 19(T) KP, 46 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Final Shine Attack",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 19(T) KP · 46 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "YtySc2nT7D5Y5ttG",
+  "name": "Flame Shower Breath",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "magic",
+   "profile": "elementalWind",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "terrainDestruction",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Magic (Elemental: Wind) · site: 8(T) KP, 17 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Flame Shower Breath",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 8(T) KP · 17 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Vantagem “Widespread Magic (Line)” não existe nas regras atuais (não aplicada).</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "uEBlCb6RGOyofmlp",
+  "name": "Gamma Burst Flash",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "energy",
+   "profile": "beam",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "terrainDestruction",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "maximumCharge",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "transformationBoost",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "powerShot",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "superAdvantage",
+     "rank": 1,
+     "choice": "Power Shot"
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "statDrain",
+     "rank": 3,
+     "choice": "Force"
+    },
+    {
+     "key": "exhaustive",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "climaxAttack",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "mandatoryCharge",
+     "rank": 2,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Energy (Beam) · site: 16(T) KP, 29 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Gamma Burst Flash",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 16(T) KP · 29 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Vantagem “Broad Beam” não existe nas regras atuais (não aplicada).</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "b1n2gWzxwrGFYVQV",
+  "name": "Gravity Finale",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "magic",
+   "profile": "megaFlare",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "transformationBoost",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "terrainDestruction",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "intenseBlast",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "mandatoryCharge",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "allOrNothing",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "restrictedTransformation",
+     "rank": 2,
+     "choice": "Godslayer"
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Magic (Mega Flare) · site: 18(T) KP, 38 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Gravity Finale",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 18(T) KP · 38 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Vantagem “Widespread Magic (Sphere)” não existe nas regras atuais (não aplicada).</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "3jb6xyIpagsn74yF",
+  "name": "Hellzone Grenade",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "energy",
+   "profile": "combination",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "alottaLottaAttacks",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "twinLinked",
+     "rank": 1,
+     "choice": "Strike"
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Energy (Rapid Fire) · site: 10(T) KP, 27 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Hellzone Grenade",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 10(T) KP · 27 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Perfil “Rapid Fire” é de uma versão antiga das regras: ajustado para “combination” — revise na aba Detalhes.</li><li>Desvantagem “Trick Technique” não existe nas regras atuais (não aplicada).</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "eldsZzpjURM9EfKL",
+  "name": "Hyper Tornado",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "physical",
+   "profile": "sweeping",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "knockback",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "mandatoryCharge",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Physical (Sweeping) · site: 6(T) KP, 10 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Hyper Tornado",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 6(T) KP · 10 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Ab0UnpY607vBQWkI",
+  "name": "Kamehameha",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "energy",
+   "profile": "beam",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "powerShot",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "accurate",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "mandatoryCharge",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "statDrain",
+     "rank": 1,
+     "choice": "Force"
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Energy (Beam) · site: 12(T) KP, 12 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Kamehameha",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 12(T) KP · 12 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "JQg7mHGD9vz2uVZX",
+  "name": "Lariat Express",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "physical",
+   "profile": "blitz",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "expressTicket",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "powerShot",
+     "rank": 2,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Physical (Blitzing) · site: 8(T) KP, 24 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Lariat Express",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 8(T) KP · 24 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Perfil “Blitzing” é de uma versão antiga das regras: ajustado para “blitz” — revise na aba Detalhes.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "bJ3X8DIdEj1TsXuI",
+  "name": "Lightning of Absolution",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "magic",
+   "profile": "elementalLightning",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "splitting",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "accurate",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "twinLinked",
+     "rank": 1,
+     "choice": "Wound"
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "restrictedTransformation",
+     "rank": 2,
+     "choice": "Divine Halo"
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Magic (Elemental: Lightning) · site: 13(T) KP, 24 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Lightning of Absolution",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 13(T) KP · 24 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "EUsl5cDuihLnts2i",
+  "name": "Mastered Kamehameha",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "energy",
+   "profile": "beam",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "powerShot",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "accurate",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "ascendedSignature",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "statDrain",
+     "rank": 1,
+     "choice": "Force"
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Energy (Beam) · site: 16(T) KP, 32 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Mastered Kamehameha",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 16(T) KP · 32 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "3MkEpdLbfKlOSBvj",
+  "name": "Mystic Flash",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "energy",
+   "profile": "blast",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "condition",
+     "rank": 1,
+     "choice": "Guard Down"
+    },
+    {
+     "key": "twinLinked",
+     "rank": 1,
+     "choice": "Wound"
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "allOrNothing",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "statDrain",
+     "rank": 2,
+     "choice": "Force"
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Energy (Blast) · site: 10(T) KP, 23 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Mystic Flash",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 10(T) KP · 23 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Folder",
+  "_id": "aT14GYFL3FIfwrum",
+  "name": "Dramatic Finisher",
+  "type": "Item",
+  "folder": null,
+  "sorting": "a",
+  "color": null,
+  "sort": 0,
+  "description": "",
+  "flags": {}
+ },
+ {
+  "_type": "Item",
+  "_id": "JlfHL8v0GwLrXWpX",
+  "name": "Neo Tri-Beam",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "finisher",
+   "foundation": "energy",
+   "profile": "beam",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "powerShot",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "accurate",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "preciseStrike",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "exhaustive",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "restrictedEnvironment",
+     "rank": 1,
+     "choice": "Sky"
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Dramatic Finisher · Energy (Kiai) · site: 10(T) KP, 23 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Neo Tri-Beam",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 10(T) KP · 23 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Perfil “Kiai” é de uma versão antiga das regras: ajustado para “beam” — revise na aba Detalhes.</li><li>Super Profile “Reckless Barrage” não existe nas regras atuais (não aplicado).</li><li>Vantagem “Big Bang (2)” não existe nas regras atuais (não aplicada).</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "aT14GYFL3FIfwrum",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "08JuZQjO5dBIpssz",
+  "name": "Neo Wolf Fang Fist",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "physical",
+   "profile": "combination",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "alottaLottaAttacks",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "knockback",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "pepperingBlows",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "exhaustive",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "statDrain",
+     "rank": 1,
+     "choice": "Force"
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Physical (Combination) · site: 15(T) KP, 22 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Neo Wolf Fang Fist",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 15(T) KP · 22 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "HAfZuV4tzVtVGIbV",
+  "name": "Remote Serious Bomb",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "magic",
+   "profile": "simple",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "delayed",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "powerShot",
+     "rank": 2,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "mandatoryCharge",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "shortDelay",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Magic (Spell) · site: 7(T) KP, 24 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Remote Serious Bomb",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 7(T) KP · 24 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Perfil “Spell” é de uma versão antiga das regras: ajustado para “simple” — revise na aba Detalhes.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Onc6xD5VKFIrhtj8",
+  "name": "Revenge Death Ball",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "finisher",
+   "foundation": "energy",
+   "profile": "clearing",
+   "superProfile": "genki",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "maximumCharge",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "intenseBlast",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "mandatoryCharge",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Dramatic Finisher · Energy (Sphere) · site: 15(T) KP, 33 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Revenge Death Ball",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 15(T) KP · 33 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Perfil “Sphere” é de uma versão antiga das regras: ajustado para “clearing” — revise na aba Detalhes.</li><li>Vantagem “Giant Sphere” não existe nas regras atuais (não aplicada).</li><li>Vantagem “Big Bang (2)” não existe nas regras atuais (não aplicada).</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "aT14GYFL3FIfwrum",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "2plQaKFaIJUL5lDf",
+  "name": "Rock, Paper, Scissors",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "physical",
+   "profile": "simple",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "condition",
+     "rank": 1,
+     "choice": "Guard Down"
+    },
+    {
+     "key": "knockback",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "deadLink",
+     "rank": 1,
+     "choice": "Wound"
+    },
+    {
+     "key": "lowPenetration",
+     "rank": 3,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Physical (Simple) · site: 4(T) KP, 13 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Rock, Paper, Scissors",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 4(T) KP · 13 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "MWyPTsa1N3jKNpcZ",
+  "name": "Saibaman Bomb",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "energy",
+   "profile": "clearing",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "finalChance",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "powerShot",
+     "rank": 3,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "grappling",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "allOrNothing",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "selfExplosion",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "volatileExplosion",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Energy (Explosion) · site: 10(T) KP, 12 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Saibaman Bomb",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 10(T) KP · 12 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Perfil “Explosion” é de uma versão antiga das regras: ajustado para “clearing” — revise na aba Detalhes.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "bLSQSxK2SFf8bYYB",
+  "name": "Special Beam Cannon",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "energy",
+   "profile": "beam",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "penetration",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "maximumCharge",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "mandatoryCharge",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Energy (Beam) · site: 14(T) KP, 18 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Special Beam Cannon",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 14(T) KP · 18 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Vantagem “Broad Beam” não existe nas regras atuais (não aplicada).</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "ci5nmx4wpPuICzHT",
+  "name": "Spirit Bomb",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "finisher",
+   "foundation": "energy",
+   "profile": "clearing",
+   "superProfile": "genki",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "powerShot",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "maximumCharge",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "superAdvantage",
+     "rank": 1,
+     "choice": "Power Shot"
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "inefficiency",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "climaxAttack",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "mandatoryCharge",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Dramatic Finisher · Energy (Sphere) · site: 15(T) KP, 19 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Spirit Bomb",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 15(T) KP · 19 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Perfil “Sphere” é de uma versão antiga das regras: ajustado para “clearing” — revise na aba Detalhes.</li><li>“Karmic” agora é um Super Profile (a técnica já tem um; não aplicado).</li><li>Desvantagem “Blind Karma” não existe nas regras atuais (não aplicada).</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "aT14GYFL3FIfwrum",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "B0jIt2cGfooyTy2K",
+  "name": "Stardust Breaker",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "energy",
+   "profile": "clearing",
+   "superProfile": "karmic",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "transformationBoost",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "delayed",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "mandatoryCharge",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Energy (Sphere) · site: 9(T) KP, 36 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Stardust Breaker",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 9(T) KP · 36 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Perfil “Sphere” é de uma versão antiga das regras: ajustado para “clearing” — revise na aba Detalhes.</li><li>“Karmic” agora é um Super Profile: aplicado como Super Profile.</li><li>Desvantagem “Blind Karma” não existe nas regras atuais (não aplicada).</li><li>Super Profile só vale em Dramatic Finisher: confira o nível da técnica.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "slUWW2xPM5cKKr2V",
+  "name": "Super Spirit Bomb",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "finisher",
+   "foundation": "energy",
+   "profile": "clearing",
+   "superProfile": "genki",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "powerShot",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "superAdvantage",
+     "rank": 1,
+     "choice": "Power Shot"
+    },
+    {
+     "key": "maximumCharge",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "mandatoryCharge",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "climaxAttack",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Dramatic Finisher · Energy (Sphere) · site: 16(T) KP, 40 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Super Spirit Bomb",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 16(T) KP · 40 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Perfil “Sphere” é de uma versão antiga das regras: ajustado para “clearing” — revise na aba Detalhes.</li><li>“Karmic” agora é um Super Profile (a técnica já tem um; não aplicado).</li><li>Vantagem “Big Bang (2)” não existe nas regras atuais (não aplicada).</li><li>Vantagem “Giant Sphere” não existe nas regras atuais (não aplicada).</li><li>Desvantagem “Blind Karma” não existe nas regras atuais (não aplicada).</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "aT14GYFL3FIfwrum",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "2nl1GJVexuKMYjWM",
+  "name": "Supernova",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "ultimate",
+   "foundation": "energy",
+   "profile": "clearing",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "maximumCharge",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "mandatoryCharge",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Ultimate · Energy (Sphere) · site: 7(T) KP, 27 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Supernova",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 7(T) KP · 27 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Perfil “Sphere” é de uma versão antiga das regras: ajustado para “clearing” — revise na aba Detalhes.</li><li>Vantagem “Big Bang (2)” não existe nas regras atuais (não aplicada).</li><li>Vantagem “Giant Sphere” não existe nas regras atuais (não aplicada).</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "BcxaRME74i3eaQ6B",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "2IWEsXrQQM5camZa",
+  "name": "Spirit Ball",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "energy",
+   "profile": "combination",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "homing",
+     "rank": 3,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "mandatoryCharge",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Energy (Rapid Fire) · site: 7(T) KP, 24 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Spirit Ball",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 7(T) KP · 24 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Perfil “Rapid Fire” é de uma versão antiga das regras: ajustado para “combination” — revise na aba Detalhes.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "3RFNkviFB3O3SWLU",
+  "name": "Thunder Flash Attack",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "magic",
+   "profile": "elementalFire",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "knockback",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "twinLinked",
+     "rank": 1,
+     "choice": "Strike"
+    },
+    {
+     "key": "efficiency",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "mandatoryCharge",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Magic (Elemental: Fire) · site: 14(T) KP, 30 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Thunder Flash Attack",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 14(T) KP · 30 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Vantagem “Widespread Magic (Line)” não existe nas regras atuais (não aplicada).</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "e1RDcFsNfxgDEj9m",
+  "name": "Tidal Wave",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "magic",
+   "profile": "elementalWater",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "knockback",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "twinLinked",
+     "rank": 1,
+     "choice": "Wound"
+    },
+    {
+     "key": "powerShot",
+     "rank": 2,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "inaccurate",
+     "rank": 2,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Magic (Elemental: Water) · site: 12(T) KP, 21 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Tidal Wave",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 12(T) KP · 21 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "j4tZSzXCgZEwVHNH",
+  "name": "Time Release",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "physical",
+   "profile": "soaring",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "accurate",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "efficiency",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "timeSkipped",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Physical (Soaring) · site: 8(T) KP, 21 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Time Release",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 8(T) KP · 21 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "oAyliKTScYSKZxz3",
+  "name": "Tri-Beam",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "energy",
+   "profile": "beam",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "powerShot",
+     "rank": 3,
+     "choice": ""
+    },
+    {
+     "key": "accurate",
+     "rank": 2,
+     "choice": ""
+    },
+    {
+     "key": "preciseStrike",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "backlash",
+     "rank": 5,
+     "choice": ""
+    },
+    {
+     "key": "restrictedEnvironment",
+     "rank": 1,
+     "choice": "Sky"
+    },
+    {
+     "key": "exhaustive",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "concentration",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Energy (Kiai) · site: 7(T) KP, 10 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Tri-Beam",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 7(T) KP · 10 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li><li>Perfil “Kiai” é de uma versão antiga das regras: ajustado para “beam” — revise na aba Detalhes.</li><li>Vantagem “Big Bang (2)” não existe nas regras atuais (não aplicada).</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "vOfkgb2yd6RfHlJ2",
+  "name": "Wolf Fang Fist",
+  "type": "signature",
+  "img": "icons/svg/explosion.svg",
+  "system": {
+   "level": "super",
+   "foundation": "physical",
+   "profile": "combination",
+   "superProfile": "",
+   "multiProfile": "",
+   "advantages": [
+    {
+     "key": "pepperingBlows",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "alottaLottaAttacks",
+     "rank": 1,
+     "choice": ""
+    },
+    {
+     "key": "knockback",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "disadvantages": [
+    {
+     "key": "exhaustive",
+     "rank": 1,
+     "choice": ""
+    }
+   ],
+   "free": false,
+   "granted": false,
+   "tpAdjust": 0,
+   "summary": "Super · Physical (Combination) · site: 8(T) KP, 19 TP",
+   "source": {
+    "slug": "signature-examples",
+    "section": "Wolf Fang Fist",
+    "url": "https://dbu-rpg.com/signature-examples/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/signature-examples/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/signature-examples</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Notas da importação:</strong></p><ul><li>Custo listado no site: 8(T) KP · 19 TP. A página de exemplos usa custos de uma versão anterior das regras: a ficha recalcula TP e KP pelas regras atuais e avisa se alguma opção não cumpre os requisitos atuais.</li></ul>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "IRj1Km97Qv3i1geU",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "signature-examples"
+   }
+  }
+ }
+]

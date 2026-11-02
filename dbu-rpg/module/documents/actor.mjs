@@ -3,6 +3,7 @@ import { dbuRoll, postInfoCard } from "../dice/roller.mjs";
 import { openAttackDialog, applyDamageToActor } from "../combat/attack.mjs";
 import { categoryToDice } from "../rules/dice.mjs";
 import { addTimedPower, dropTimedPower, inCombat, renewTimedPower } from "../combat/triggers.mjs";
+import { footLegProne, offerRegeneratorRemoval } from "../combat/injuries.mjs";
 
 const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
 const { DialogV2 } = foundry.applications.api;
@@ -133,6 +134,8 @@ export class DBUActor extends Actor {
     }
     await this.update(updates);
     if ( self && game.combat?.started ) await this.update({ "system.combat.reducedMomentum": true });
+    // Injury System, Foot/Leg Major Injury: failing a Steadfast Check knocks you Prone
+    if ( anyFail && !defeated && (await footLegProne(this)) ) lines.push(L("DBU.Injury.FootLegProne"));
 
     const transformed = this.system.transformation.active.length > 0;
     const buttons = [];
@@ -270,6 +273,7 @@ export class DBUActor extends Actor {
       const t = key.split(":")[1];
       const r = await this.rollSteadfast({ threshold: t });
       await this.update({ [`system.thresholds.${t}`]: r.success ? "pass" : "fail" });
+      if ( !r.success && (await footLegProne(this)) ) ui.notifications.info(`${this.name}: ${L("DBU.Injury.FootLegProne")}`);
       if ( !r.success && this.system.transformation.active.length ) await this.addPending("stressTest");
       return r;
     }
@@ -493,6 +497,8 @@ export class DBUActor extends Actor {
       const r = await new Roll(`${2 * sys.top.current}d10 + ${surgency}`).evaluate();
       await r.toMessage({ speaker: ChatMessage.getSpeaker({ actor: this }), flavor: `Healing Surge (Surgency ${surgency})` });
       await this.update({ "system.life.value": Math.min(sys.life.max, sys.life.value + r.total), "system.combat.surgeUsed": true });
+      // Injury System, Regenerator: a Healing Surge may end one Injury
+      await offerRegeneratorRemoval(this);
       return r;
     }
     const ki = Math.floor(sys.ki.max / 4) + surgency;
@@ -543,15 +549,17 @@ export class DBUActor extends Actor {
     const sys = this.system;
     let damage = wound;
     const lines = [];
+    const cat = Math.clamp(category + (sys.damageCategoryTaken ?? 0), 1, 3);
     if ( !raw ) {
-      const cat = Math.clamp(category + (sys.damageCategoryTaken ?? 0), 1, 3);
       const dr = ignoreDR ? 0 : sys.aptitudes.dr;
       const soak = ignoreSoak ? 0 : (cat === 1 ? sys.aptitudes.soak : (cat === 2 ? Math.floor(sys.aptitudes.soak / 2) : 0));
       damage = Math.max(0, wound - dr - soak);
       if ( damage > 0 ) damage += (sys.aptitudes.brokenOverflow ?? 0) + (sys.damageTaken ?? 0);
       lines.push(L("DBU.Damage.Breakdown", { wound, dr, soak, cat: L(DBU.damageCategories[cat]), damage }));
     }
-    return applyDamageToActor(this, damage, { lines });
+    // Damage typed in the calculator counts as a hit from an Attacking Maneuver (Injury System, Overkill)
+    const attack = { name: L("DBU.DamageCalc"), category: cat, calledShot: false, manual: true };
+    return applyDamageToActor(this, damage, { lines, attack, category: cat });
   }
 
   /** Gag Maneuver (Gag Rules): Clash (Morale); on a win the target loses 1/2 (Trick + Dirty Trick: 3/4) of the PE Modifier. */

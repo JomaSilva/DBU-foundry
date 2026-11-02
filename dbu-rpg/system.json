@@ -33,23 +33,71 @@
   "documentTypes": {
     "Actor": {
       "character": {
-        "htmlFields": ["details.biography", "details.notes", "zsoul.description"]
+        "htmlFields": [
+          "details.biography",
+          "details.notes",
+          "zsoul.description"
+        ]
       },
       "npc": {
-        "htmlFields": ["details.biography", "details.notes", "zsoul.description"]
+        "htmlFields": [
+          "details.biography",
+          "details.notes",
+          "zsoul.description"
+        ]
       }
     },
     "Item": {
-      "race": { "htmlFields": ["description"] },
-      "racialTrait": { "htmlFields": ["description"] },
-      "talent": { "htmlFields": ["description"] },
-      "transformation": { "htmlFields": ["description"] },
-      "signature": { "htmlFields": ["description"] },
-      "uniqueAbility": { "htmlFields": ["description"] },
-      "maneuver": { "htmlFields": ["description"] },
-      "weapon": { "htmlFields": ["description"] },
-      "apparel": { "htmlFields": ["description"] },
-      "item": { "htmlFields": ["description"] }
+      "race": {
+        "htmlFields": [
+          "description"
+        ]
+      },
+      "racialTrait": {
+        "htmlFields": [
+          "description"
+        ]
+      },
+      "talent": {
+        "htmlFields": [
+          "description"
+        ]
+      },
+      "transformation": {
+        "htmlFields": [
+          "description"
+        ]
+      },
+      "signature": {
+        "htmlFields": [
+          "description"
+        ]
+      },
+      "uniqueAbility": {
+        "htmlFields": [
+          "description"
+        ]
+      },
+      "maneuver": {
+        "htmlFields": [
+          "description"
+        ]
+      },
+      "weapon": {
+        "htmlFields": [
+          "description"
+        ]
+      },
+      "apparel": {
+        "htmlFields": [
+          "description"
+        ]
+      },
+      "item": {
+        "htmlFields": [
+          "description"
+        ]
+      }
     }
   },
   "packs": [
@@ -58,56 +106,90 @@
       "label": "DBU — Raças",
       "path": "packs/races",
       "type": "Item",
-      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
     },
     {
       "name": "racial-traits",
       "label": "DBU — Traços Raciais e Fatores",
       "path": "packs/racial-traits",
       "type": "Item",
-      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
     },
     {
       "name": "talents",
       "label": "DBU — Talentos",
       "path": "packs/talents",
       "type": "Item",
-      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
     },
     {
       "name": "transformations",
       "label": "DBU — Transformações",
       "path": "packs/transformations",
       "type": "Item",
-      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
     },
     {
       "name": "unique-abilities",
       "label": "DBU — Unique Abilities",
       "path": "packs/unique-abilities",
       "type": "Item",
-      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "signature-examples",
+      "label": "DBU — Técnicas de Exemplo",
+      "path": "packs/signature-examples",
+      "type": "Item",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
     },
     {
       "name": "maneuvers",
       "label": "DBU — Manobras Especiais",
       "path": "packs/maneuvers",
       "type": "Item",
-      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
     },
     {
       "name": "equipment",
       "label": "DBU — Equipamentos",
       "path": "packs/equipment",
       "type": "Item",
-      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
     },
     {
       "name": "guide",
       "label": "DBU — Guia do Sistema",
       "path": "packs/guide",
       "type": "JournalEntry",
-      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
     }
   ],
   "packFolders": [
@@ -115,7 +197,17 @@
       "name": "Dragon Ball Universe",
       "sorting": "m",
       "color": "#c2410c",
-      "packs": ["guide", "races", "racial-traits", "talents", "transformations", "unique-abilities", "maneuvers", "equipment"]
+      "packs": [
+        "guide",
+        "races",
+        "racial-traits",
+        "talents",
+        "transformations",
+        "unique-abilities",
+        "signature-examples",
+        "maneuvers",
+        "equipment"
+      ]
     }
   ],
   "grid": {
