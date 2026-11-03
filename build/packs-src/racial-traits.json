@@ -516,15 +516,24 @@
    "category": "body",
    "tier": "secondary",
    "active": true,
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "steadfast",
+     "value": "1",
+     "condition": "",
+     "label": "Surprising Resilience",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
-   "summary": "Arcosians · secondary · Body · 3 efeito(s), 0 automatizado(s)",
+   "summary": "Arcosians · secondary · Body · 3 efeito(s), 1 automatizado(s)",
    "source": {
     "slug": "arcosians",
     "section": "Surprising Resilience",
     "url": "https://dbu-rpg.com/arcosians/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/arcosians/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/arcosians</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Triggered/Threshold] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/arcosians/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/arcosians</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — manual</li><li>(3) [Triggered/Threshold] — manual</li></ul>"
   },
   "effects": [],
   "folder": "TZrvJm3aYP57WhcD",
@@ -666,14 +675,26 @@
    "tier": "secondary",
    "active": true,
    "modifiers": [],
-   "triggers": [],
-   "summary": "Bio Androids · secondary · Mind · 2 efeito(s), 0 automatizado(s)",
+   "triggers": [
+    {
+     "event": "startOfRound",
+     "effect": "resource",
+     "value": "1",
+     "resource": "Adaptation Points",
+     "condition": "",
+     "mode": "auto",
+     "duration": "none",
+     "label": "Combat Blueprint — opção: Pursuit of Perfection",
+     "active": false
+    }
+   ],
+   "summary": "Bio Androids · secondary · Mind · 2 efeito(s), 1 automatizado(s)",
    "source": {
     "slug": "bio-android",
     "section": "Combat Blueprint",
     "url": "https://dbu-rpg.com/bio-android/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/bio-android/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/bio-android</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [1/Round] — manual</li><li>(2) [Choice] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/bio-android/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/bio-android</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [1/Round] — manual</li><li>(2) [Choice] — auto</li></ul>"
   },
   "effects": [],
   "folder": "DxmsYizU8wAt24EI",
@@ -2072,11 +2093,11 @@
   "system": {
    "race": "Majins",
    "category": "body",
-   "tier": "primary",
+   "tier": "secondary",
    "active": true,
    "modifiers": [],
    "triggers": [],
-   "summary": "Majins · primary · Body · 3 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Body · 3 efeito(s), 0 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Bouncy Physique",
@@ -2102,11 +2123,11 @@
   "system": {
    "race": "Majins",
    "category": "body",
-   "tier": "primary",
+   "tier": "secondary",
    "active": true,
    "modifiers": [],
    "triggers": [],
-   "summary": "Majins · primary · Body · 2 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Body · 2 efeito(s), 0 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Burrowed Strike",
@@ -2132,11 +2153,11 @@
   "system": {
    "race": "Majins",
    "category": "body",
-   "tier": "primary",
+   "tier": "secondary",
    "active": true,
    "modifiers": [],
    "triggers": [],
-   "summary": "Majins · primary · Body · 1 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Body · 1 efeito(s), 0 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Dangerous Liquid",
@@ -2162,11 +2183,11 @@
   "system": {
    "race": "Majins",
    "category": "mind",
-   "tier": "primary",
+   "tier": "secondary",
    "active": true,
    "modifiers": [],
    "triggers": [],
-   "summary": "Majins · primary · Mind · 3 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Mind · 3 efeito(s), 0 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Disarming Demeanor",
@@ -2192,11 +2213,11 @@
   "system": {
    "race": "Majins",
    "category": "body",
-   "tier": "primary",
+   "tier": "secondary",
    "active": true,
    "modifiers": [],
    "triggers": [],
-   "summary": "Majins · primary · Body · 3 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Body · 3 efeito(s), 0 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Elastic Tentacle",
@@ -2222,11 +2243,11 @@
   "system": {
    "race": "Majins",
    "category": "body",
-   "tier": "primary",
+   "tier": "secondary",
    "active": true,
    "modifiers": [],
    "triggers": [],
-   "summary": "Majins · primary · Body · 2 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Body · 2 efeito(s), 0 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Magical Being",
@@ -2252,11 +2273,11 @@
   "system": {
    "race": "Majins",
    "category": "mind",
-   "tier": "primary",
+   "tier": "secondary",
    "active": true,
    "modifiers": [],
    "triggers": [],
-   "summary": "Majins · primary · Mind · 3 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Mind · 3 efeito(s), 0 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Majin Malice",
@@ -2282,11 +2303,11 @@
   "system": {
    "race": "Majins",
    "category": "body",
-   "tier": "primary",
+   "tier": "secondary",
    "active": true,
    "modifiers": [],
    "triggers": [],
-   "summary": "Majins · primary · Body · 3 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Body · 3 efeito(s), 0 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Majin Mass-Shift",
@@ -2312,11 +2333,11 @@
   "system": {
    "race": "Majins",
    "category": "mind",
-   "tier": "primary",
+   "tier": "secondary",
    "active": true,
    "modifiers": [],
    "triggers": [],
-   "summary": "Majins · primary · Mind · 2 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Mind · 2 efeito(s), 0 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Majin Mentality",
@@ -2342,11 +2363,11 @@
   "system": {
    "race": "Majins",
    "category": "mind",
-   "tier": "primary",
+   "tier": "secondary",
    "active": true,
    "modifiers": [],
    "triggers": [],
-   "summary": "Majins · primary · Mind · 4 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Mind · 4 efeito(s), 0 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Majin See, Majin Do",
@@ -2372,11 +2393,11 @@
   "system": {
    "race": "Majins",
    "category": "body",
-   "tier": "primary",
+   "tier": "secondary",
    "active": true,
    "modifiers": [],
    "triggers": [],
-   "summary": "Majins · primary · Body · 6 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Body · 6 efeito(s), 0 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Majin Style",
@@ -2402,11 +2423,11 @@
   "system": {
    "race": "Majins",
    "category": "body",
-   "tier": "primary",
+   "tier": "secondary",
    "active": true,
    "modifiers": [],
    "triggers": [],
-   "summary": "Majins · primary · Body · 3 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Body · 3 efeito(s), 0 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Quick Sleep",
@@ -2432,11 +2453,11 @@
   "system": {
    "race": "Majins",
    "category": "body",
-   "tier": "primary",
+   "tier": "secondary",
    "active": true,
    "modifiers": [],
    "triggers": [],
-   "summary": "Majins · primary · Body · 3 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Body · 3 efeito(s), 0 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Revenge Bomber",
@@ -2462,11 +2483,11 @@
   "system": {
    "race": "Majins",
    "category": "mind",
-   "tier": "primary",
+   "tier": "secondary",
    "active": true,
    "modifiers": [],
    "triggers": [],
-   "summary": "Majins · primary · Mind · 3 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Mind · 3 efeito(s), 0 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Snack Motivated",
@@ -2492,11 +2513,11 @@
   "system": {
    "race": "Majins",
    "category": "body",
-   "tier": "primary",
+   "tier": "secondary",
    "active": true,
    "modifiers": [],
    "triggers": [],
-   "summary": "Majins · primary · Body · 3 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Body · 3 efeito(s), 0 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Steaming Fury",
@@ -2522,11 +2543,11 @@
   "system": {
    "race": "Majins",
    "category": "mind",
-   "tier": "primary",
+   "tier": "secondary",
    "active": true,
    "modifiers": [],
    "triggers": [],
-   "summary": "Majins · primary · Mind · 2 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Mind · 2 efeito(s), 0 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Transfiguration Beam",
@@ -2566,7 +2587,16 @@
    "category": "body",
    "tier": "primary",
    "active": true,
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "steadfast",
+     "value": "1",
+     "condition": "",
+     "label": "Namekian Biology",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [
     {
      "event": "startOfRound",
@@ -2580,13 +2610,13 @@
      "active": true
     }
    ],
-   "summary": "Namekians · primary · Body · 6 efeito(s), 1 automatizado(s)",
+   "summary": "Namekians · primary · Body · 6 efeito(s), 2 automatizado(s)",
    "source": {
     "slug": "namekians",
     "section": "Namekian Biology",
     "url": "https://dbu-rpg.com/namekians/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/namekians/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/namekians</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [1/Round] — manual</li><li>(4) [Triggered] — manual</li><li>(5) [Triggered, 1/Round] — manual</li><li>(6) [Triggered/Start of Combat Round] — auto</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/namekians/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/namekians</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — auto</li><li>(3) [1/Round] — manual</li><li>(4) [Triggered] — manual</li><li>(5) [Triggered, 1/Round] — manual</li><li>(6) [Triggered/Start of Combat Round] — auto</li></ul>"
   },
   "effects": [],
   "folder": "a7ORGrTu467uw56g",
@@ -4613,15 +4643,24 @@
    "category": "body",
    "tier": "primary",
    "active": true,
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "steadfast",
+     "value": "1",
+     "condition": "",
+     "label": "Life Among the Dead",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
-   "summary": "Oni · primary · Body · 4 efeito(s), 0 automatizado(s)",
+   "summary": "Oni · primary · Body · 4 efeito(s), 1 automatizado(s)",
    "source": {
     "slug": "oni",
     "section": "Life Among the Dead",
     "url": "https://dbu-rpg.com/oni/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/oni/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/oni</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li><li>(4) [Triggered/Defeated] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/oni/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/oni</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — auto</li><li>(3) [Passive] — manual</li><li>(4) [Triggered/Defeated] — manual</li></ul>"
   },
   "effects": [],
   "folder": "VLbI2TwF3017Sczj",
@@ -7465,6 +7504,159 @@
   }
  },
  {
+  "_type": "Item",
+  "_id": "zCkNnLMwjtI3osKl",
+  "name": "Emperor",
+  "type": "racialTrait",
+  "img": "icons/svg/pawprint.svg",
+  "system": {
+   "race": "Arcosian",
+   "category": "body",
+   "tier": "factor",
+   "factor": "Mutation",
+   "replaces": "",
+   "maxFactor": 1,
+   "active": true,
+   "modifiers": [],
+   "triggers": [],
+   "summary": "Fator Mutation (Arcosian) · substitui um traço Secundário",
+   "source": {
+    "slug": "mutation",
+    "section": "Emperor",
+    "url": "https://dbu-rpg.com/mutation/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/mutation/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/mutation</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Triggered] — manual</li><li>(4) [Triggered, 1/Round] — manual</li><li>(5) [Triggered, 1/Encounter] — manual</li></ul>"
+  },
+  "effects": [],
+  "folder": "R00XG0lHnSsO3Gdi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "mutation"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "KLoDnoeN6LEsAEIS",
+  "name": "Tremendous Lord",
+  "type": "racialTrait",
+  "img": "icons/svg/pawprint.svg",
+  "system": {
+   "race": "Namekian",
+   "category": "body",
+   "tier": "factor",
+   "factor": "Mutation",
+   "replaces": "",
+   "maxFactor": 1,
+   "active": true,
+   "modifiers": [],
+   "triggers": [],
+   "summary": "Fator Mutation (Namekian) · substitui um traço Secundário",
+   "source": {
+    "slug": "mutation",
+    "section": "Tremendous Lord",
+    "url": "https://dbu-rpg.com/mutation/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/mutation/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/mutation</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Triggered, 1/Round] — manual</li><li>(4) [Triggered, 1/Encounter] — manual</li></ul>"
+  },
+  "effects": [],
+  "folder": "R00XG0lHnSsO3Gdi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "mutation"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "7oUaThREjhnK4wxI",
+  "name": "Legendary Saiyan",
+  "type": "racialTrait",
+  "img": "icons/svg/pawprint.svg",
+  "system": {
+   "race": "Saiyan",
+   "category": "body",
+   "tier": "factor",
+   "factor": "Mutation",
+   "replaces": "",
+   "maxFactor": 1,
+   "active": true,
+   "modifiers": [
+    {
+     "target": "battleBorn.cap.wound",
+     "value": "2",
+     "condition": "",
+     "label": "Legendary Saiyan",
+     "active": true,
+     "always": false
+    }
+   ],
+   "triggers": [],
+   "summary": "Fator Mutation (Saiyan) · substitui um traço Secundário",
+   "source": {
+    "slug": "mutation",
+    "section": "Legendary Saiyan",
+    "url": "https://dbu-rpg.com/mutation/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/mutation/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/mutation</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — auto</li><li>(3) [Passive] — manual</li><li>(4) [Triggered, 1/Round] — manual</li></ul>"
+  },
+  "effects": [],
+  "folder": "R00XG0lHnSsO3Gdi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "mutation"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "3TlfhHh6eVmt6FEg",
+  "name": "Golden Fruit",
+  "type": "racialTrait",
+  "img": "icons/svg/pawprint.svg",
+  "system": {
+   "race": "Shinjin",
+   "category": "body",
+   "tier": "factor",
+   "factor": "Mutation",
+   "replaces": "",
+   "maxFactor": 1,
+   "active": true,
+   "modifiers": [],
+   "triggers": [
+    {
+     "event": "startOfTurn",
+     "effect": "resource",
+     "value": "4(bT)",
+     "resource": "Divine Ki Points",
+     "condition": "",
+     "mode": "auto",
+     "duration": "none",
+     "label": "Golden Fruit",
+     "active": true
+    }
+   ],
+   "summary": "Fator Mutation (Shinjin) · substitui um traço Secundário",
+   "source": {
+    "slug": "mutation",
+    "section": "Golden Fruit",
+    "url": "https://dbu-rpg.com/mutation/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/mutation/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/mutation</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [1/Round] — manual</li><li>(2) [Triggered/Start of Turn] — auto</li><li>(3) [Triggered/Power, 1/Encounter] — manual</li></ul>"
+  },
+  "effects": [],
+  "folder": "R00XG0lHnSsO3Gdi",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "mutation"
+   }
+  }
+ },
+ {
   "_type": "Folder",
   "_id": "8akjD529O2eOOMcn",
   "name": "Fator: Reincarnated",
@@ -7535,7 +7727,16 @@
    "replaces": "",
    "maxFactor": 1,
    "active": true,
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "steadfast",
+     "value": "1",
+     "condition": "",
+     "label": "Undead Survival",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Fator Undead · substitui um traço Secundário · pré-req.: You are not Unnatural before applying the effects of the Undead Survival Factor.",
    "source": {
@@ -7543,7 +7744,7 @@
     "section": "Undead Survival",
     "url": "https://dbu-rpg.com/undead/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/undead/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/undead</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li><li>(4) [Triggered/Defeated] — manual</li><li>(5) [Automatic] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/undead/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/undead</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — auto</li><li>(3) [Passive] — manual</li><li>(4) [Triggered/Defeated] — manual</li><li>(5) [Automatic] — manual</li></ul>"
   },
   "effects": [],
   "folder": "7IOiBL9HuTiF6BnJ",
@@ -8568,14 +8769,26 @@
    "maxFactor": 3,
    "active": true,
    "modifiers": [],
-   "triggers": [],
+   "triggers": [
+    {
+     "event": "startOfTurn",
+     "effect": "resource",
+     "value": "1",
+     "resource": "Adaptation Points",
+     "condition": "",
+     "mode": "auto",
+     "duration": "none",
+     "label": "Arcosian Genes [Any – you decide] — opção: Pursuit of Perfection",
+     "active": false
+    }
+   ],
    "summary": "Fator Genetic Splicing · substitui um traço Secundário",
    "source": {
     "slug": "genetic-splicing",
     "section": "Arcosian Genes [Any – you decide]",
     "url": "https://dbu-rpg.com/genetic-splicing/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/genetic-splicing/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/genetic-splicing</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Passive, Ruling] — manual</li><li>(4) [Choice] — manual</li><li>(5) [Triggered, 1/Round] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/genetic-splicing/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/genetic-splicing</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Passive, Ruling] — manual</li><li>(4) [Choice] — auto</li><li>(5) [Triggered, 1/Round] — manual</li></ul>"
   },
   "effects": [],
   "folder": "J5nGq0M4x5rPPj2I",

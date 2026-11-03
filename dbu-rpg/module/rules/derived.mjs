@@ -6,6 +6,7 @@ import {
 import { roundDown } from "./formula.mjs";
 import { AWAKENING_POINTS, godHoned, gravityFor, limitedPower, martialDieCategory, rules } from "../optional-rules.mjs";
 import { allocTotal, resourceSlug, splitLimits } from "./resources.mjs";
+import { danceHalved } from "../fusion/fusion-rules.mjs";
 
 /** Base Tier of Power from Power Level: 1-4 → 1, 5-9 → 2 ... 30 → 7. */
 export function baseTopFromPL(pl) {
@@ -52,7 +53,9 @@ const parts = (buckets, ...keys) => keys.flatMap(k => buckets[k]?.parts ?? []);
  * Writes directly onto the TypeDataModel instance (system).
  */
 export function prepareActorData(sys, actor) {
-  const pl = Math.clamp(sys.pl ?? 1, 1, 30);
+  // A Fusion's Power Level may exceed 30 (Life/Ki Points and Capacity only; the base ToP stops at 7)
+  const fusion = (actor.type === "fusion") ? sys.fusion : null;
+  const pl = Math.clamp(sys.pl ?? 1, 1, fusion ? 60 : 30);
   const bT = baseTopFromPL(pl);
   const statuses = actor.statuses ?? new Set();
 
@@ -69,12 +72,17 @@ export function prepareActorData(sys, actor) {
   if ( unnatural ) { cond.suffocating = 0; cond.poisoned = 0; }
 
   /* ----- Race and raw scores ----- */
-  const race = actor.items.find(i => i.type === "race") ?? null;
+  const races = actor.items.filter(i => i.type === "race");
+  const race = races[0] ?? null;
   sys.race = race;
-  const racial = race?.system.increases ?? {};
+  // A Fusion has every Race of its Fused Characters
+  sys.races = races;
+  const racial = fusion ? {} : (race?.system.increases ?? {});
   const rawScores = {};
   for ( const a of DBU.ATTRIBUTES ) {
-    rawScores[a] = 1 + (racial[a] ?? 0) + (sys.attributes[a]?.points ?? 0) + (sys.attributes[a]?.bonus ?? 0);
+    // A Fusion's Attribute Scores are the highest of its Fused Characters
+    const base = fusion ? (fusion.scores?.[a] ?? 1) : 1 + (racial[a] ?? 0) + (sys.attributes[a]?.points ?? 0);
+    rawScores[a] = base + (sys.attributes[a]?.bonus ?? 0);
   }
 
   /* ----- Transformations ----- */
@@ -90,11 +98,13 @@ export function prepareActorData(sys, actor) {
     active, forms: activeForms, enhancements: activeEnh, kiMultiplier,
     transformed: active.some(t => t.system.stage !== 0 || t.system.transType !== "form"),
     highestTopReq: active.reduce((m, t) => Math.max(m, t.system.topReq), 0),
-    newLevel: active.some(t => t.system.newLevel)
+    // Awakenings count too: once gained, the character is always "in" them
+    newLevel: transformations.some(t => t.system.newLevel && t.system.isActive)
   };
 
   /* ----- Preliminary pools for threshold maths ----- */
-  const rlmBase = race?.system.rlm ?? 0;
+  // A Fusion uses the highest Racial Life Modifier among its Races
+  const rlmBase = races.length ? Math.max(...races.map(r => r.system.rlm ?? 0)) : 0;
   // Path to Power: PL1 split into Martial Levels (40 LP / 30 KP + 5 per Martial Level)
   const ml = (R.pathToPower && (opt.martialLevel > 0)) ? (pl > 1 ? 5 : opt.martialLevel) : 0;
   const lifeStart = ml ? 40 + (5 * (ml - 1)) : 60;
@@ -127,6 +137,7 @@ export function prepareActorData(sys, actor) {
     states: { ...sys.states }, cond, res: resources,
     transformed: sys.transformation.transformed ? 1 : 0,
     inForm: activeForms.length ? 1 : 0, inEnhancement: activeEnh.length ? 1 : 0,
+    enhancementCount: active.filter(t => t.system.transType === "enhancement").length,
     life: sys.life.value, ki: sys.ki.value, capacity: sys.capacity.value,
     alignment: sys.zsoul.alignment, kiLow: 0
   };
@@ -147,8 +158,18 @@ export function prepareActorData(sys, actor) {
   sys.top.kp = Math.min(topCurrent, bT); // Breakthrough: temporary ToP increases do not raise Ki Point Costs
   data.T = topCurrent;
 
-  const fatigued = Math.min(2, Math.max(cond.fatigued, sum(buckets, "fatiguedMin")));
+  const fatiguedMin = Math.min(2, sum(buckets, "fatiguedMin"));
+  const fatigued = Math.max(cond.fatigued, fatiguedMin);
   cond.fatigued = fatigued;
+  // What keeps a Condition on besides the sheet (an Internal Injury, a token status icon): shown on the sheet
+  sys.conditionMins = { fatigued: fatiguedMin };
+  sys.conditionHolds = {};
+  if ( fatiguedMin > 0 ) sys.conditionHolds.fatigued = parts(buckets, "fatiguedMin").map(p => p.label);
+  for ( const key of Object.keys(DBU.conditions) ) {
+    if ( statuses.has(key) && !((sys.conditions?.[key] ?? 0) > 0) ) {
+      (sys.conditionHolds[key] ??= []).push(game.i18n.localize("DBU.Condition.HeldByIcon"));
+    }
+  }
   const kiBase = Math.floor((kiStart + (12 * (pl - 1))) * injuryMult) + sum(buckets, "ki.max");
   const kiMax = Math.floor(kiBase * (kiMultiplier ? 2 : 1) * (buckets["ki.mult"]?.total ?? 1));
   data.kiMaxBase = Math.floor(kiBase * (buckets["ki.mult"]?.total ?? 1));
@@ -176,10 +197,17 @@ export function prepareActorData(sys, actor) {
     A.limit = limit;
     data.scores[a] = A.score;
   }
+  // A Plump Fusion halves its Agility Modifier; a Frail one its Agility, Force, Tenacity and Magic Modifiers
+  const halved = fusion ? danceHalved(fusion.dance) : [];
   for ( const a of DBU.ATTRIBUTES ) {
     const A = sys.attributes[a];
     A.mod = Math.max(0, A.score + sum(buckets, `mod.${a}`));
     A.modParts = parts(buckets, `mod.${a}`);
+    if ( halved.includes(a) ) {
+      const lost = A.mod - Math.floor(A.mod / 2);
+      A.mod -= lost;
+      A.modParts.push({ label: game.i18n.localize(`DBU.Fusion.Dance.${fusion.dance}Short`), value: -lost });
+    }
     data[a] = A.mod;
   }
 
@@ -193,7 +221,8 @@ export function prepareActorData(sys, actor) {
     greaterDice: flag("greaterDice"), ignoreThresholds: flag("ignoreThresholds"), autoHit: flag("autoHit"),
     noWeaponPenalty: flag("noWeaponPenalty"), perfectKiControl: flag("perfectKiControl"),
     straining: flag("straining"), exhausting: flag("exhausting"), autoPassBruised: flag("autoPassBruised"),
-    energyWithoutFO: flag("energyWithoutFO"), magicWithoutMA: flag("magicWithoutMA")
+    energyWithoutFO: flag("energyWithoutFO"), magicWithoutMA: flag("magicWithoutMA"),
+    noApparelPenalty: flag("noApparelPenalty"), autoStress: flag("autoStress")
   };
   const T = topCurrent;
   const attr = a => sys.attributes[a].mod;
@@ -239,7 +268,7 @@ export function prepareActorData(sys, actor) {
   /* Apparel */
   const apparel = actor.items.filter(i => (i.type === "apparel") && i.system.isActive);
   const penaltyPieces = apparel.filter(i => (i.system.category !== "standard") && !i.system.integrated && !i.system.natural);
-  const apparelPenalty = Math.max(0, apparel.length - 1) > 0
+  const apparelPenalty = (Math.max(0, apparel.length - 1) > 0) && !sys.flags.noApparelPenalty
     ? Math.max(0, Math.min(penaltyPieces.length, apparel.length - 1)) * Math.ceil(bT / 2) : 0;
   const apparelBonus = i => (DBU.craftsmanship[i.system.craftsmanship]?.apparelBonus ?? 1) * bT;
   const weights = apparel.filter(i => i.system.category === "weights").reduce((t, i) => t + apparelBonus(i), 0);
@@ -301,15 +330,18 @@ export function prepareActorData(sys, actor) {
 
   /* Stress Bonus and Steadfast */
   const determination = score("pe") >= 8 ? 2 : (score("pe") >= 4 ? 1 : 0);
+  // A Fusion's Power Level above 30 only counts for ToP, Life/Ki Points, Capacity and Legend Realized
+  const stressPL = fusion ? Math.min(pl, 30) : pl;
   sys.stress = {
     determination,
-    bonus: pl + determination - sys.health.stressPenalty + sum(buckets, "stress") + (sys.combat.stressBonus ?? 0)
+    bonus: stressPL + determination - sys.health.stressPenalty + sum(buckets, "stress") + (sys.combat.stressBonus ?? 0)
       + (sys.transformation.newLevel ? bT : 0),
     steadfast: sum(buckets, "steadfast")
   };
 
   /* Saving Throws */
-  const raceSaves = new Set(race?.system.saves ?? []);
+  // A Fusion gains the Racial Saving Throw Bonus of all of its Races
+  const raceSaves = new Set(races.flatMap(r => r.system.saves ?? []));
   sys.saves = {};
   for ( const [key, def] of Object.entries(DBU.saves) ) {
     const proficient = raceSaves.has(key) || ((buckets[`saveProf.${key}`]?.total ?? 0) > 0);
@@ -510,7 +542,9 @@ export function prepareActorData(sys, actor) {
   const talentAdditions = perks.talent + (conv.talent ?? 0) + honed.talent;
   const skillImprovements = perks.skill + (conv.skill ?? 0);
   const tpPerSI = 15 + (gifted * 3) + sum(buckets, "tp.perSI");
-  const tpTotal = (skillImprovements * tpPerSI) + pl1Bonus.tp + (sys.tp.bonus ?? 0) + sum(buckets, "tp");
+  // A Fusion only has the Technique Points of Character Combination (its copied techniques are already paid for)
+  const tpTotal = fusion ? ((fusion.tp ?? 0) + (sys.tp.bonus ?? 0))
+    : (skillImprovements * tpPerSI) + pl1Bonus.tp + (sys.tp.bonus ?? 0) + sum(buckets, "tp");
   const profileBuyoutCost = R.profileBuyout ? 2 * (opt.boughtProfiles?.length ?? 0) : 0;
   sys.progression = {
     perks, perksAvailable: Math.max(0, perks.perk), perksUsed: (conv.attribute ?? 0) + (conv.talent ?? 0) + (conv.skill ?? 0),
@@ -519,7 +553,7 @@ export function prepareActorData(sys, actor) {
     talentAdditions, skillImprovements,
     skillRanksFromSI: (skillImprovements * 4) + pl1Bonus.ranks + (2 * honed.technique),
     skillRanksSpent: Object.values(sys.skills).reduce((t, s) => t + (s.ranks ?? 0), 0),
-    racialRanks: race?.system.skillRanks ?? 0,
+    racialRanks: fusion ? 0 : (race?.system.skillRanks ?? 0),
     racialRanksSpent: Object.values(sys.skills).reduce((t, s) => t + (s.racial ?? 0), 0),
     tpPerSI, tpTotal, profileBuyoutCost, freeSignatureAllowed: pl1Bonus.freeSignature,
     martialLevel: ml, ng,

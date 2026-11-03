@@ -4,18 +4,32 @@
  */
 const API = "https://public-api.wordpress.com/wp/v2/sites/dbu-rpg.com/pages";
 
-export async function fetchOfficialText(slug, section = "") {
-  let html;
-  try {
-    const res = await fetch(`${API}?slug=${encodeURIComponent(slug)}&_fields=content,link,title`);
-    if ( !res.ok ) return null;
-    const data = await res.json();
-    html = data?.[0]?.content?.rendered;
-    if ( !html ) return null;
-  } catch(err) {
-    console.error("DBU | fetchOfficialText", err);
-    return null;
+/** Pages already downloaded in this session (many entries share one page, e.g. every Talent). */
+const pages = new Map();
+
+function getPage(slug) {
+  if ( !pages.has(slug) ) {
+    pages.set(slug, (async () => {
+      try {
+        const res = await fetch(`${API}?slug=${encodeURIComponent(slug)}&_fields=content,link,title`);
+        if ( !res.ok ) return null;
+        const data = await res.json();
+        return data?.[0]?.content?.rendered ?? null;
+      } catch(err) {
+        console.error("DBU | fetchOfficialText", err);
+        return null;
+      }
+    })());
   }
+  return pages.get(slug).then(html => {
+    if ( !html ) pages.delete(slug); // try again next time
+    return html;
+  });
+}
+
+export async function fetchOfficialText(slug, section = "") {
+  const html = await getPage(slug);
+  if ( !html ) return null;
   const doc = new DOMParser().parseFromString(`<div id="root">${html}</div>`, "text/html");
   const root = doc.getElementById("root");
   root.querySelectorAll("script, style, iframe, form, button").forEach(e => e.remove());
@@ -25,16 +39,61 @@ export async function fetchOfficialText(slug, section = "") {
     const name = normalize(section);
     const start = blocks.findIndex(b => startsWithEntry(b, name));
     if ( start >= 0 ) {
-      out = [blocks[start]];
+      const first = blocks[start];
+      // A section that is a heading of its own (a Transformation Stage) keeps its traits and Mastery Traits:
+      // it runs until the next heading of the same or a higher level. An entry ("**Name**: ...") ends at the next one.
+      const level = (headingLevel(first) && normalize(first.textContent).startsWith(name)) ? headingLevel(first) : 0;
+      out = [first];
       for ( let i = start + 1; i < blocks.length; i++ ) {
         const b = blocks[i];
-        if ( isHeading(b) || isEntryStart(b) ) break;
+        if ( level ) {
+          const l = headingLevel(b);
+          if ( l && (l <= level) ) break;
+        }
+        else if ( isHeading(b) || isEntryStart(b) ) break;
         out.push(b);
       }
     }
   }
   const link = `<p><a href="https://dbu-rpg.com/${slug}/" target="_blank" rel="noopener">dbu-rpg.com/${slug}</a></p>`;
   return out.map(b => b.outerHTML).join("\n") + link;
+}
+
+/** The official text of an item, or null (no source, offline...). */
+export function officialTextOf(item) {
+  const src = item.system?.source;
+  if ( !src?.slug ) return Promise.resolve(null);
+  return fetchOfficialText(src.slug, src.section || item.name);
+}
+
+/** The compendium entries only carry a link and the list of automated effects until the official text is loaded. */
+export function isStubDescription(html) {
+  return !html || html.includes("Texto completo da regra");
+}
+
+/** The official text with the compendium's list of automated effects kept underneath. */
+export function withOfficialText(stub, official) {
+  const keep = String(stub ?? "")
+    .replace(/<p><a [^>]*>[^<]*<\/a><\/p>/, "")
+    .replace(/<p><em>Texto completo da regra[\s\S]*?<\/em><\/p>/, "")
+    .trim();
+  return keep ? `${official}<hr>${keep}` : official;
+}
+
+let queue = Promise.resolve();
+
+/**
+ * Items added to the world or to a sheet without the official text get it on their own
+ * (one download at a time; compendium entries are only shown, never written).
+ */
+export function autoOfficialText(item) {
+  if ( item.pack || !isStubDescription(item.system?.description) || !item.system?.source?.slug || !item.isOwner ) return;
+  if ( !game.settings.get("dbu-rpg", "autoOfficialText") ) return;
+  queue = queue.then(async () => {
+    const html = await officialTextOf(item);
+    const current = item.system.description;
+    if ( html && isStubDescription(current) ) await item.update({ "system.description": withOfficialText(current, html) });
+  }).catch(err => console.error("DBU | autoOfficialText", err));
 }
 
 function flattenBlocks(root) {
@@ -50,18 +109,23 @@ function flattenBlocks(root) {
   return blocks;
 }
 
-const normalize = s => String(s).toLowerCase().replace(/[’']/g, "'").replace(/\s+/g, " ").trim();
-const isHeading = b => /^h[1-4]$/i.test(b.tagName);
+const normalize = s => String(s).toLowerCase().replace(/[’']/g, "'").replace(/[“”]/g, '"').replace(/\s+/g, " ").trim();
+const isHeading = b => /^h[1-6]$/i.test(b.tagName);
+const headingLevel = b => Number(/^h([1-6])$/i.exec(b.tagName)?.[1] ?? 0);
 
 function firstStrong(b) {
   const s = b.querySelector("strong, b");
   return s ? normalize(s.textContent) : "";
 }
 
+/**
+ * Does this block start the entry? Also matches an entry glued to a section title in the same block
+ * ("Primary Racial Traits" + "Born for Battle (Body): ...").
+ */
 function startsWithEntry(b, name) {
   const text = normalize(b.textContent);
-  const strong = firstStrong(b);
-  return (strong.startsWith(name) || text.startsWith(name)) && (isHeading(b) || strong.length > 0);
+  const strongs = Array.from(b.querySelectorAll("strong, b")).map(s => normalize(s.textContent));
+  return (text.startsWith(name) && (isHeading(b) || strongs.length > 0)) || strongs.some(s => s.startsWith(name));
 }
 
 /** A block that starts a new "**Name**:" entry or a new heading. */

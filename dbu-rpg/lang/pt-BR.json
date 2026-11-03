@@ -2,7 +2,8 @@
   "TYPES": {
     "Actor": {
       "character": "Personagem",
-      "npc": "NPC"
+      "npc": "NPC",
+      "fusion": "Fusão"
     },
     "Item": {
       "race": "Raça",
@@ -21,7 +22,8 @@
     "Welcome": "Sistema DBU carregado. Configure as Regras Adicionais em Configurações › Configurar Sistema › Regras Adicionais. Use os compêndios DBU para raças, talentos, transformações e Unique Abilities.",
     "Sheet": {
       "Actor": "Ficha DBU",
-      "Item": "Item DBU"
+      "Item": "Item DBU",
+      "Fusion": "Ficha de Fusão DBU"
     },
     "Tab": {
       "main": "Principal",
@@ -33,7 +35,8 @@
       "gear": "Itens",
       "progression": "Progressão",
       "optional": "Opcionais",
-      "bio": "Biografia"
+      "bio": "Biografia",
+      "fusion": "Fusão"
     },
     "ItemTab": {
       "details": "Detalhes",
@@ -183,7 +186,10 @@
       "staggered": "Atordoado (Staggered)",
       "stressExhaustion": "Stress Exhaustion",
       "suffocating": "Sufocando (Suffocating)",
-      "transfigured": "Transfigurado (Transfigured)"
+      "transfigured": "Transfigurado (Transfigured)",
+      "HeldByIcon": "ícone de condição no token",
+      "Held": "{name} continua ativo por causa de: {by}.",
+      "HeldTip": "Mantido por: {by}. Ferimentos ficam na aba Opcionais (Injury System): marque \"ignorado\" ou remova o ferimento."
     },
     "ConditionHint": {
       "blinded": "Efeitos do nível de luz Blinding.",
@@ -411,7 +417,22 @@
       "Rampaging": "Rampaging: Compelled contra o oponente mais próximo.",
       "Bursting": "Bursting: a camada superior de vestuário é destruída.",
       "Maneuver": "Transformation Maneuver",
-      "GradeStress": "Stress por Grade (ex.: 13,18 ou +2,+5)"
+      "GradeStress": "Stress por Grade (ex.: 13,18 ou +2,+5)",
+      "NewLevelForm": "New Level of Power! Primeira vez nesta Form: sucesso automático no Stress Test, +1 ToP, +1(bT) Stress Bonus e Legend Realized dobrado até o fim do encontro.",
+      "NewLevelEnhancement": "New Level of Power! Primeira vez nesta Enhancement: sucesso automático no Stress Test, +1 ToP e +1(bT) Stress Bonus até o fim do encontro; pode usar o Burst Limit de novo.",
+      "NewLevelAwakening": "New Level of Power! Awakening ganho em combate: recupera metade do LP e do KP; +1 ToP e +1(bT) Stress Bonus até o fim do encontro.",
+      "NewLevelStress": "Sucesso automático: New Level of Power em {name}.",
+      "NewLevelPending": "New Level of Power pendente (primeira vez em combate)",
+      "NewLevelPendingTip": "Marcado: na próxima vez que o personagem entrar nesta transformação participando de um combate, ganha o New Level of Power. Toda Form ou Enhancement nova na ficha já vem marcada; desmarque nas que ele já tinha usado antes.",
+      "NewLevelPendingTag": "New Level of Power pendente: vale na próxima entrada em combate. Clique para cancelar.",
+      "NewLevelActiveTip": "New Level of Power ativo até o fim deste encontro (+1 ToP, +1(bT) Stress Bonus, Stress Tests automáticos). Clique para cancelar.",
+      "NewLevelCancel": "Cancelar o New Level of Power de {name}?",
+      "LegendSameType": "Sem Legend Realized: já veio de {name} (mesmo tipo de Form e mesmo requisito de ToP) neste encontro.",
+      "EverEntered": "Já usada antes (sem New Level of Power)",
+      "EverEnteredTip": "Marcado sozinho na primeira vez que o personagem entra nesta transformação. Desmarcado, a próxima entrada em combate dá New Level of Power.",
+      "NewLevelWaiting": "New Level of Power pendente: ele vale quando o personagem entrar nesta transformação participando de um combate (no Combat Tracker).",
+      "GradeAspects": "Grade {n}: ganha {list}.",
+      "Rampaging2": "Rampaging (LV2): Compelled contra o personagem mais próximo, aliado ou oponente."
     },
     "Sig": {
       "Level": {
@@ -624,7 +645,9 @@
       "FetchFailed": "Não foi possível carregar o texto do site.",
       "NoSource": "Este item não tem página de origem.",
       "DeleteTitle": "Excluir item",
-      "DeleteText": "Excluir {name}?"
+      "DeleteText": "Excluir {name}?",
+      "Loading": "Carregando o texto oficial de dbu-rpg.com…",
+      "PreviewNote": "Texto oficial carregado de dbu-rpg.com (só para leitura; ele é salvo quando o item vai para uma ficha)."
     },
     "Mod": {
       "Label": "Origem",
@@ -722,7 +745,9 @@
       "bbCapDodge": "Limite de Battle Born no Desvio",
       "bbCapWound": "Limite de Battle Born no Dano",
       "flagBbWoundUnlimited": "Battle Born ilimitado no Dano",
-      "flagBbForceWound": "Battle Born novo vai para o Dano"
+      "flagBbForceWound": "Battle Born novo vai para o Dano",
+      "flagNoApparelPenalty": "Ignora penalidades de vestuário",
+      "flagAutoStress": "Sucesso automático em Stress Tests"
     },
     "Combat": {
       "Round": "Rodada {n}",
@@ -998,6 +1023,14 @@
       "ForcePT": {
         "Name": "Ficha sempre em português",
         "Hint": "Usa o português na ficha mesmo com o Foundry em inglês."
+      },
+      "Auras": {
+        "Name": "Auras de transformação nos tokens",
+        "Hint": "Mostra o contorno, os raios e as nebulosas das transformações ativas em volta dos tokens. Desligue se pesar no seu computador."
+      },
+      "AutoText": {
+        "Name": "Carregar o texto oficial automaticamente",
+        "Hint": "Abrir um item do compêndio mostra o texto de dbu-rpg.com, e um item arrastado para uma ficha já vem com ele salvo. Precisa de internet."
       }
     },
     "ZSoul": {
@@ -1135,7 +1168,10 @@
       "DimDefense": "Diminishing Defense: −{n} no Desvio até o início da próxima rodada.",
       "Dismiss": "Dispensar (decisão do ARC)",
       "Allocate": "{name}: {n} stack(s) esperando você escolher a Rolagem de Combate (Acerto, Desvio ou Dano).",
-      "AllocateButton": "Distribuir"
+      "AllocateButton": "Distribuir",
+      "Choice": "{name}: escolha pendente em {traits}.",
+      "ChoiceButton": "Escolher",
+      "Rampaging2": "Rampaging (LV2): Compelled contra o personagem mais próximo (aliado ou oponente) no início de cada turno (1 Karma ignora até o próximo turno)."
     },
     "Trigger": {
       "Title": "Gatilhos de turno/rodada",
@@ -1212,6 +1248,235 @@
       "Placed": "{name} aplicado em {roll} ({n} stack(s) nessa rolagem).",
       "Manual": "ficha",
       "NewName": "Novo recurso"
+    },
+    "Aura": {
+      "Title": "Aura no token",
+      "StyleLabel": "Aparência",
+      "Color": "Cor",
+      "Color2": "Cor 2 (raios / nebulosa)",
+      "Auto": "Automática ({preset})",
+      "NoPreset": "nenhuma para este nome",
+      "HintPreset": "enquanto ativa: {preset}. Escolha outra aparência ou cores para trocar.",
+      "HintChoose": "escolha a aparência que o token mostra enquanto esta transformação está ativa.",
+      "Style": {
+        "none": "Nenhuma",
+        "glow": "Contorno brilhante",
+        "lightning": "Contorno com raios",
+        "nebula": "Nebulosa"
+      },
+      "Preset": {
+        "ssj": "contorno dourado",
+        "ssj2": "contorno dourado com raios",
+        "ssj3": "contorno dourado com muitos raios",
+        "god": "contorno vermelho",
+        "blue": "contorno azul",
+        "rose": "contorno rosa",
+        "ui": "nebulosa prateada",
+        "ue": "nebulosa roxa"
+      }
+    },
+    "Choice": {
+      "Title": "{name} — escolha obrigatória",
+      "Pick1": "{trait} ({name}): escolha 1 opção. A escolha é permanente e vale para todos os estágios que têm este traço.",
+      "PickN": "{trait} ({name}): escolha {n} opções. A escolha é permanente e vale para todos os estágios que têm este traço.",
+      "Foundation": "Fundação da opção",
+      "HintRequired": "Você só entra na transformação depois de escolher.",
+      "Hint": "Você pode escolher agora ou depois (o alerta da ficha lembra).",
+      "Confirm": "Confirmar",
+      "Later": "Depois",
+      "WrongCount": "Escolha exatamente {n} opção(ões).",
+      "SeeText": "efeito descrito no texto oficial (aba Descrição)",
+      "Chosen": "{name}: escolha feita",
+      "Required": "{name}: escolha as opções obrigatórias para entrar na transformação.",
+      "PendingTip": "Escolha obrigatória pendente: será pedida na primeira vez que transformar.",
+      "Section": "Escolhas (Option)",
+      "NotChosen": "ainda não escolhido — será pedido na primeira transformação",
+      "Open": "Escolher ou trocar",
+      "Cond": {
+        "power": "com {n}+ stacks de Power",
+        "battleBorn": "com {n}+ Battle Born no {roll}",
+        "below1": "abaixo de Bruised",
+        "below2": "abaixo de Injured",
+        "below3": "abaixo de Critical"
+      },
+      "ChosenFoundation": "da Fundação escolhida"
+    },
+    "Mastery": {
+      "Tip": "Maestria {n}/{max}: + e − mudam o nível; ao dominar, as Mastery Traits entram sozinhas",
+      "Level": "Maestria {n}",
+      "Loses": "Perde: {list}",
+      "Gains": "Ganha: {list}",
+      "Reduced": "{n} nível(is) de {aspect}",
+      "AutoOn": "{n} efeito(s) automatizado(s) ligado(s).",
+      "AutoOff": "{n} efeito(s) automatizado(s) desligado(s).",
+      "Full": "Transformação totalmente dominada.",
+      "Manual": "Efeitos narrativos (acesso a Evolved Stages, gatilhos especiais) estão no texto oficial da transformação.",
+      "TitleUp": "{name}: Maestria {n}/{max}",
+      "TitleDown": "{name}: Maestria reduzida para {n}/{max}",
+      "Section": "Maestria",
+      "SectionHint": "o que cada nível de maestria muda nos Aspects (aplicado sozinho)",
+      "Regains": "Volta a ter: {list}",
+      "Drops": "Deixa de ter: {list}",
+      "Max": "máx. {n}"
+    },
+    "Boss": {
+      "Label": "Boss (vilão)",
+      "Tip": "Vilão chefe: pode entrar em Forms e Enhancements acima do próprio Tier of Power (ex.: Freeza na forma final no ToP 2)."
+    },
+    "Fusion": {
+      "ErrFew": "{method} precisa de pelo menos {n} personagens.",
+      "ErrMany": "{method} aceita no máximo {n} personagens.",
+      "ErrFusionLimit": "{name} já é uma fusão: uma fusão não pode fazer parte de outra.",
+      "ErrMissing": "Personagem da fusão não encontrado ({uuid}).",
+      "NotSynced": "A fusão ainda não foi montada: clique em Sincronizar.",
+      "ErrTraits": "A fusão tem {n} traços raciais; o máximo é {max}.",
+      "ErrPrimaries": "A fusão precisa de 2 a 4 traços raciais primários (tem {n}).",
+      "ErrModifiers": "Fusion Modifiers demais: {n} (máximo {max}).",
+      "SyncActive": "A fusão está em jogo: desfaça a fusão para sincronizar.",
+      "NeedTwo": "Escolha os personagens da fusão primeiro.",
+      "Synced": "{name}: fusão sincronizada com os personagens.",
+      "Dance": {
+        "plump": "Fusão Plump: a dança falhou para um dos dois. Fica no estado normal, sem Fusion Modifiers, sem transformações, Signature Techniques ou Unique Abilities, e com o Modificador de Agilidade pela metade.",
+        "frail": "Fusão Frail: a dança falhou para um dos dois. Fica no estado normal, sem Fusion Modifiers, sem transformações, Signature Techniques ou Unique Abilities, e com os Modificadores de AG, FO, TE e MA pela metade.",
+        "success": "Dança perfeita: fusão completa.",
+        "plumpShort": "Fusão Plump (½)",
+        "frailShort": "Fusão Frail (½)",
+        "Pass": "{name}: Performance {total} contra {tn}, acertou a dança.",
+        "Fail": "{name}: Performance {total} contra {tn}, errou a dança.",
+        "D4": "Fusion Dance: um dos dois errou, 1d4 (1 = Frail, 2~4 = Plump)",
+        "Nothing": "Os dois erraram: nada acontece.",
+        "Title": "Metamoran Fusion Dance"
+      },
+      "DanceOpt": {
+        "success": "Sucesso (fusão completa)",
+        "plump": "Plump (um errou, 2~4 no 1d4)",
+        "frail": "Frail (um errou, 1 no 1d4)"
+      },
+      "MetamoranClothing": "Combat Clothing de grau High (Durable, Free Flowing, Stretching): +Apparel Bonus no Acerto e no Wound.",
+      "Tech": {
+        "NeedTwo": "A Fused Technique precisa de Signature Techniques de dois personagens diferentes.",
+        "SuperOfBase": "Super Profile \"Super\" do perfil da técnica base",
+        "Hint": "Escolha uma técnica de cada personagem. A base perde as Desvantagens, recebe as Vantagens da outra, ganha o Super Profile e custa 4(T) KP a menos. Ela é uma Ultimate e não gasta TP.",
+        "Base": "Técnica base",
+        "Other": "Outra técnica (do outro personagem)",
+        "Super": "Super Profile",
+        "Name": "Nome (vazio: as duas juntas)",
+        "Title": "Criar Fused Technique",
+        "Remake": "Refazer Fused Technique",
+        "Create": "Criar",
+        "Different": "As duas técnicas precisam ser de personagens diferentes.",
+        "Created": "Fused Technique criada: {name}."
+      },
+      "AlreadyFused": "{name} já está fundido.",
+      "Cooldown": "{name} acabou de sair de uma fusão e só pode se fundir de novo na rodada {round}.",
+      "Fused": "{names} se fundiram: {name} ({method}).",
+      "RoundsLeft": "Rodadas restantes da fusão: {n}",
+      "AllInjured": "Todos estavam abaixo do limiar Injured: a fusão começa com {lp} LP.",
+      "MethodKarma": "+{n} Karma do método (perdidos se não forem usados até a defusão).",
+      "MethodActions": "+{n} Ações ao fundir.",
+      "Title": "Fusão: {name}",
+      "Defusion": "Defusão",
+      "Defused": {
+        "time": "O tempo acabou: {name} se separa em {names}.",
+        "forced": "Defusão forçada: {name} se separa em {names}.",
+        "voluntary": "{name} se separa em {names}.",
+        "free": "{name} se separa em {names} (defusão livre)."
+      },
+      "DefusePenalties": "Eles rolam Iniciativa de novo, pulam o turno nesta rodada, ficam em Stress Exhaustion por 2 rodadas e não podem se fundir por 5 rodadas.",
+      "FreeDefusion": "Defusão livre: sem Stress Exhaustion e sem perder o turno.",
+      "DefusedTitle": "Defusão: {name}",
+      "SkipTurn": "{name} acabou de sair da fusão e pula o turno nesta rodada.",
+      "TopCut": "Primeira transformação de requisito ToP 4+ ({name}): −{n} rodadas de fusão (restam {left}).",
+      "AutoStress": "Sucesso automático no Stress Test ({name}): Maximum Metamorese.",
+      "PotaraSave": "O Stress Test falhou. Usar o Divine Fusion Method (1/encontro) e transformar a falha em sucesso?",
+      "PotaraSaved": "Divine Fusion Method: a falha no Stress Test virou sucesso.",
+      "StatusActive": "Fundidos",
+      "StatusIdle": "Separados",
+      "Defuse": "Desfazer fusão",
+      "FreeDefuse": "Defusão livre",
+      "FreeDefuseTip": "Fusões duradouras podem se separar no início da rodada sem Stress Exhaustion nem perder o turno.",
+      "Sync": "Sincronizar",
+      "Fuse": "Fundir",
+      "FuseTip": "Troca os tokens dos personagens pelo da fusão na cena e no combate.",
+      "AutoSync": "Sincronizar sozinha",
+      "AutoSyncTip": "Quando um dos personagens muda (atributos, perícias, itens), a fusão é montada de novo. Nunca enquanto a fusão está em jogo.",
+      "Components": "Personagens fundidos",
+      "Remove": "Tirar da fusão",
+      "DropHere": "Arraste a ficha de um personagem para cá",
+      "Choose": "Escolher personagem…",
+      "Add": "Adicionar",
+      "Method": "Método de fusão",
+      "MethodInfo": "{type} · {rounds} rodadas · {n} personagens · obtido por: {obtain}",
+      "DanceResult": "Resultado da dança",
+      "DanceRoll": "Fazer a dança",
+      "DanceRollTip": "Os dois rolam Performance contra Master (Grandmaster com tamanhos diferentes) e o resultado é aplicado.",
+      "SizeUp": "Bio-Fusion: aumentar o tamanho base",
+      "Forgo": "Merged Tuffle: abrir mão do vestuário (+2(bT) nas Rolagens de Combate e na Redução de Dano)",
+      "Result": "Resultado da combinação",
+      "TP": "{n} TP para novas técnicas",
+      "FusionCol": "Fusão",
+      "Size": "Tamanho",
+      "Alignment": "Alinhamento",
+      "FusedTechniqueToggle": "Criar Fused Technique (sem ela: +5(bT) TP)",
+      "FusedTechniqueTip": "Fusões ganham uma Ultimate feita de duas técnicas dos personagens. Quem não quiser ganha 5(bT) TP a mais.",
+      "Modifiers": "Fusion Modifiers",
+      "NoModifiers": "Fusões Plump e Frail não têm Fusion Modifiers.",
+      "PrereqOk": "requisito ok",
+      "PrereqNo": "sem requisito",
+      "ModInactive": "não vale (requisito ou limite)",
+      "BalancedPick": "Atributos que recebem o bônus (2; clique em outro para trocar):",
+      "Traits": "Traços raciais",
+      "Primaries": "primários: {n} (2~4)",
+      "Awakenings": "Awakenings (limite da fusão)",
+      "PLText": "PL mais alto {pl} + {bonus} (1(bT) da fusão)",
+      "PLMinion": "PL mais alto {pl}: com um Minion não há aumento",
+      "PLFar": "PL mais alto {pl}: os PLs passam de 5 de diferença, sem aumento",
+      "Type": {
+        "temporary": "Temporária",
+        "lasting": "Duradoura"
+      },
+      "Tier": {
+        "primary": "primário",
+        "secondary": "secundário",
+        "subrace": "sub-raça",
+        "factor": "fator"
+      },
+      "MethodSummary": {
+        "metamorese": "Metamoran Style: veste a Metamoran Clothing (+Apparel Bonus no Acerto e no Wound), +2 no Stress Bonus e +2 Karma ao fundir (perdidos se não forem usados até a defusão). 1/encontro: uma Manobra de 1 Ação fora de sequência. Numa Transformação de requisito ToP 4+, a roupa pode ganhar Divine Apparel.",
+        "potara": "Divine Fusion Method: vestuário combinado (uma peça por camada, junte as qualidades à mão), ignora penalidades de vestuário, +2(bT) no Wound e na Redução de Dano no estado God Ki, +2 LP máximos por PL. 1/encontro: um Stress Test falho vira sucesso; 1/encontro: Transformation Maneuver fora de sequência.",
+        "maxi": "Maximum Metamorese: +2 Ações ao fundir, pode entrar na Ultra Fusion fora de sequência, Metamoran Clothing com Divine Apparel, sucesso automático em todos os Stress Tests.",
+        "merge": "Bio-Fusion: pode aumentar o tamanho base 1 categoria acima do maior (2 com 3+ personagens); acima de Large conta como Large para o Defense Value e para o Punching Up. Pode se separar de graça no início da rodada.",
+        "ex": "Fusion of Fusion Methods: vestuário combinado, ignora penalidades de vestuário, +1 no Stress Bonus. Pode se separar de graça no início da rodada.",
+        "parasitic": "Merged Tuffle: pode abrir mão do vestuário para ganhar +2(bT) nas Rolagens de Combate e na Redução de Dano. 1/rodada: Healing Surge como Manobra de 1 Ação. Pode se separar de graça no início da rodada."
+      },
+      "ModSummary": {
+        "balanced": "+2(bT) no Modificador de 2 Atributos equilibrados; recupera 3(bT) KP no início do turno.",
+        "dominant": "Dobra os TP da combinação; −2(T) KP nos ataques e nas Unique Abilities.",
+        "enhanced": "+1(T) nas Rolagens de Combate numa Enhancement não Transcended; +2(T) no Wound com 2+ Enhancements juntas; 1/turno pode entrar numa Enhancement fora de sequência até o fim do turno.",
+        "fusedTransformation": "As Forms em comum ganham +1(T) (Alternate) ou +2(T) (Legendary) em AG/FO/TE/MA, liberam os estágios seguintes da linha que o ToP base permite e ignoram a penalidade de limiar no Stress Bonus.",
+        "powerOfFriendship": "+1 ToP; a fusão é a própria Partner.",
+        "sharedHeritage": "Dobra o Racial Life Modifier; +1(T) em AG/FO/TE/MA; +2(T) no Wound da Fused Technique por personagem.",
+        "synergistic": "+1(T) em AG/FO/TE/MA; +3 PL para a fusão.",
+        "mightiest": "+1 ToP; a fusão é a própria Rival (+1(T) no Wound e +1(T) no Soak)."
+      },
+      "ModReq": {
+        "balanced": "Requisito: 2+ Atributos com Score igual ou com 1 de diferença entre os personagens.",
+        "dominant": "Requisito: só 1 personagem não-Minion, ou 1 com PL maior que todos.",
+        "enhanced": "Requisito: nenhum dos personagens tem Forms.",
+        "fusedTransformation": "Requisito: todos têm a mesma Form.",
+        "powerOfFriendship": "Requisito: 2 personagens, um Partner do outro (Synchronized Combatants).",
+        "sharedHeritage": "Requisito: todos da mesma raça e menos de 7 traços raciais.",
+        "synergistic": "Requisito: 2+1(bT) talentos iguais.",
+        "mightiest": "Requisito: 2 personagens, um Rival do outro (Chosen Rival)."
+      },
+      "AlignmentTip": "Escolha o alinhamento na aba Biografia (Z-Soul). Ele fica entre o menor e o maior dos personagens; fora dessa faixa, a sincronização ajusta sozinha.",
+      "BalancedFar": "Não pode: diferença maior que 1 entre os personagens",
+      "CustomName": "Bônus personalizados dos personagens",
+      "CustomSummary": "Modificadores e gatilhos personalizados de {names} (aba Progressão), cada um uma vez."
+    },
+    "Grade": {
+      "Section": "Aspectos por Grade",
+      "SectionHint": "o que cada Grade aplica, junto com os dos Grades abaixo (aplicado sozinho)"
     }
   }
 }

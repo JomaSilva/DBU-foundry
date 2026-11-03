@@ -9698,7 +9698,16 @@
     "skills": [],
     "race": ""
    },
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "steadfast",
+     "value": "1",
+     "condition": "",
+     "label": "Diehard",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Threshold · N/A",
    "source": {
@@ -9706,7 +9715,7 @@
     "section": "Diehard",
     "url": "https://dbu-rpg.com/talents/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — auto</li></ul>"
   },
   "effects": [],
   "folder": "1fZudjrK5oN5NLit",

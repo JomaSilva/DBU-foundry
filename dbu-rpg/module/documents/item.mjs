@@ -70,6 +70,11 @@ export class DBUItem extends Item {
   async use() {
     const actor = this.actor;
     if ( !actor ) return this.toChat();
+    // A Plump or Frail Fusion cannot use Signature Techniques, Unique Abilities or the Transformation Maneuver
+    const dance = (actor.type === "fusion") ? actor.system.fusion.dance : "success";
+    if ( (dance !== "success") && ["signature", "uniqueAbility", "transformation"].includes(this.type) ) {
+      return ui.notifications.warn(game.i18n.localize(`DBU.Fusion.Dance.${dance}`));
+    }
     switch ( this.type ) {
       case "signature": return actor.attack({ signature: this });
       case "transformation":

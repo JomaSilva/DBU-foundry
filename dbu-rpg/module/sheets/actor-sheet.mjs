@@ -11,6 +11,14 @@ const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
 const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
 
+/** Tooltip of the Mastery control: the Mastery Traits and what each level changes. */
+function masteryTooltip(s) {
+  const traits = (s.traits ?? []).filter(t => /\[mastery trait\]/.test(t)).map(t => t.replace(/\s*\[mastery trait\]/, ""));
+  const lines = [L("DBU.Mastery.Tip", { n: s.mastery, max: s.masteryNeeded })];
+  if ( traits.length ) lines.push(traits.join(" · "));
+  return lines.join(" — ");
+}
+
 export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   static DEFAULT_OPTIONS = {
@@ -28,6 +36,7 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       itemChat: DBUActorSheet.#onItemChat,
       itemToggle: DBUActorSheet.#onItemToggle,
       itemStack: DBUActorSheet.#onItemStack,
+      itemMastery: DBUActorSheet.#onItemMastery,
       condition: DBUActorSheet.#onCondition,
       state: DBUActorSheet.#onState,
       pool: DBUActorSheet.#onPool,
@@ -51,9 +60,20 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       removeTrigger: DBUActorSheet.#onRemoveTrigger,
       powerBox: DBUActorSheet.#onPowerBox,
       resourceStack: DBUActorSheet.#onResourceStack,
-      allocate: DBUActorSheet.#onAllocate
+      allocate: DBUActorSheet.#onAllocate,
+      newLevel: DBUActorSheet.#onNewLevel
     }
   };
+
+  /** Click on the New Level of Power tag: cancel it (a mistaken one, or a pending first time that will not happen). */
+  static async #onNewLevel(event, target) {
+    const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);
+    if ( !item ) return;
+    const ok = await foundry.applications.api.DialogV2.confirm({
+      window: { title: item.name }, content: `<p>${L("DBU.Trans.NewLevelCancel", { name: item.name })}</p>`, rejectClose: false
+    });
+    if ( ok ) await item.update({ "system.newLevel": false, "system.newLevelPending": false });
+  }
 
   static PARTS = {
     header: { template: "systems/dbu-rpg/templates/actor/header.hbs" },
@@ -139,6 +159,7 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     const conditions = Object.entries(DBU.conditions).map(([key, def]) => ({
       key, label: L(`DBU.Condition.${key}`), hint: L(`DBU.ConditionHint.${key}`), img: def.img, max: def.max,
       value: sys.effectiveConditions[key], active: sys.effectiveConditions[key] > 0,
+      held: (sys.conditionHolds?.[key] ?? []).join(", "),
       pips: def.max > 1 ? Array.from({ length: def.max }, (_, i) => ({ n: i + 1, on: i < sys.effectiveConditions[key] })) : null
     }));
     const states = Object.entries(DBU.states).map(([key, def]) => ({
@@ -161,12 +182,15 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         .map(a => `${DBU.attributeAbbr[a]} ${s.bonuses[a]}`).join(", ");
       return {
         item: i, s, bonuses,
-        aspects: s.aspects.map(a => a.name || DBU.aspects[a.key]?.label || a.key).join(", "),
+        aspects: s.aspects.map(a => a.name || `${DBU.aspects[a.key]?.label ?? a.key}${a.level ? ` (LV${a.level})` : ""}`).join(", "),
         stress: s.transType === "awakening" ? null : actor.stressRequirement(i),
-        canEnter: (s.transType !== "awakening") && (sys.top.current >= (s.topReq - (s.prelude ? 1 : 0))),
-        raceOk: raceMatches(s.race, race),
+        canEnter: (s.transType !== "awakening") && (actor.isBoss || (sys.top.current >= (s.topReq - (s.prelude ? 1 : 0)))),
+        raceOk: raceMatches(s.race, sys.races?.length ? sys.races : race),
         typeLabel: L(DBU.transformationTypes[s.transType] ?? s.transType),
-        mastered: s.mastery >= s.masteryNeeded ? "full" : (s.mastery > 0 ? "partial" : "none")
+        mastered: s.mastery >= s.masteryNeeded ? "full" : (s.mastery > 0 ? "partial" : "none"),
+        canMaster: (s.transType !== "awakening") && !s.baseAspects?.some(a => a.key === "peaked"),
+        masteryTip: masteryTooltip(s),
+        pending: s.pendingChoices?.length ?? 0
       };
     });
     const groupTrans = type => transformations.filter(t => t.s.transType === type);
@@ -365,7 +389,18 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     if ( !item ) return;
     const field = target.dataset.field;
     const value = !foundry.utils.getProperty(item, field);
-    // Turning a Transformation on through the toggle skips the Stress Test (GM convenience) — warn about stacking
+    // Turning a Transformation on through the toggle skips the Stress Test (GM convenience), not its choices
+    if ( value && (field === "system.active") && item.system.pendingChoices?.length ) {
+      const { chooseTransformationOptions } = await import("../combat/choices.mjs");
+      if ( !(await chooseTransformationOptions(this.actor, item, { required: true })) ) {
+        return ui.notifications.warn(L("DBU.Choice.Required", { name: item.name }));
+      }
+    }
+    if ( value && (field === "system.active") && (item.system.transType !== "awakening") ) {
+      await this.actor._newLevelOfPower(item);
+      if ( item.system.newLevelPending ) ui.notifications.info(L("DBU.Trans.NewLevelWaiting"));
+      return item.update({ [field]: value, "system.everEntered": true });
+    }
     await item.update({ [field]: value });
   }
 
@@ -378,10 +413,25 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     await item.update({ [field]: Math.max(0, cur + delta) });
   }
 
+  /** Mastery level of a Transformation (0 … needed); reaching a level applies its Mastery Traits. */
+  static async #onItemMastery(event, target) {
+    const item = DBUActorSheet.#item.call(this, target);
+    if ( !item ) return;
+    const s = item.system;
+    const next = Math.clamp((s.mastery ?? 0) + (Number(target.dataset.delta) || 0), 0, s.masteryNeeded);
+    if ( next === s.mastery ) return;
+    const { announceMastery } = await import("../combat/mastery.mjs");
+    const before = s.mastery ?? 0;
+    await item.update({ "system.mastery": next });
+    return announceMastery(this.actor, item, before, next);
+  }
+
   static async #onCondition(event, target) {
     const key = target.dataset.key;
     const def = DBU.conditions[key];
-    const current = this.actor.system.conditions[key] ?? 0;
+    const sys = this.actor.system;
+    // Start from what the sheet shows (a status icon or an Internal Injury may hold more than the stored stacks)
+    const current = sys.effectiveConditions?.[key] ?? sys.conditions[key] ?? 0;
     let next;
     if ( target.dataset.n ) {
       const n = Number(target.dataset.n);
@@ -389,6 +439,10 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     }
     else next = current > 0 ? 0 : 1;
     if ( event.button === 2 ) next = 0;
+    const min = sys.conditionMins?.[key] ?? 0;
+    if ( next < min ) {
+      ui.notifications.warn(L("DBU.Condition.Held", { name: L(`DBU.Condition.${key}`), by: (sys.conditionHolds?.[key] ?? []).join(", ") }));
+    }
     return this.actor.setCondition(key, Math.clamp(next, 0, def.max));
   }
 
@@ -413,7 +467,8 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     if ( pool && this.actor.system[pool]?.max !== undefined && (pool !== "life") ) value = Math.clamp(value, 0, this.actor.system[pool].max);
     if ( pool === "life" ) value = Math.min(value, this.actor.system.life.max);
     if ( field === "system.combat.power" ) value = Math.clamp(value, 0, 2);
-    if ( field === "system.karma.value" ) value = Math.clamp(value, 0, 4);
+    // A Fusion holds the Karma Points of all of its Fused Characters
+    if ( field === "system.karma.value" ) value = Math.clamp(value, 0, this.actor.type === "fusion" ? 99 : 4);
     return this.actor.update({ [path]: Math.max(pool === "life" ? -9999 : 0, value) });
   }
 

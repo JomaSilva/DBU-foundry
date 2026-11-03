@@ -177,15 +177,26 @@ export function inCombat(actor) {
   return !!game.combat?.started && game.combat.combatants.some(c => c.actor?.uuid === actor.uuid);
 }
 
-async function addTimed(actor, { kind, key, prev, level, duration, event, label }) {
+async function addTimed(actor, { kind, key, prev, level, duration, event, label, rounds = 0 }) {
   const list = foundry.utils.deepClone(actor.getFlag("dbu-rpg", "timed") ?? []);
   const existing = list.find(e => (e.kind === kind) && (e.key === key));
   // "Until the end of your next turn" started during your own turn skips the end of the current turn
   const ownTurn = event ? (event === "startOfTurn") : isActorsTurn(actor);
-  const skip = ((duration === "endOfNextTurn") && ownTurn) ? 1 : 0;
+  let skip = ((duration === "endOfNextTurn") && ownTurn) ? 1 : 0;
+  // "For N Combat Rounds": the current round counts as the first one
+  if ( (duration === "endOfRound") && (rounds > 1) ) skip = rounds - 1;
   if ( existing ) Object.assign(existing, { level, duration, skip, label });
   else list.push({ kind, key, prev, level, duration, skip, label });
   await actor.setFlag("dbu-rpg", "timed", list);
+}
+
+/**
+ * A Combat Condition that lasts for a while (Stress Exhaustion: until the end of your next turn).
+ * Outside of combat nothing ends it automatically.
+ */
+export async function addTimedCondition(actor, key, prev = 0, level = 1, duration = "endOfNextTurn", label = "", { rounds = 0 } = {}) {
+  if ( !inCombat(actor) ) return;
+  await addTimed(actor, { kind: "condition", key, prev, level, duration, event: "", label, rounds });
 }
 
 /** Power Up: each stack of Power lasts until the end of your next turn. */

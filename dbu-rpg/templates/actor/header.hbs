@@ -57,7 +57,7 @@
         <span class="label">Karma</span>
         <span class="value dbu-pips">
           <a data-action="pool" data-field="system.karma.value" data-delta="-1"><i class="fa-solid fa-minus"></i></a>
-          {{system.karma.value}}/4
+          {{system.karma.value}}{{#unless (eq actor.type "fusion")}}/4{{/unless}}
           <a data-action="pool" data-field="system.karma.value" data-delta="1"><i class="fa-solid fa-plus"></i></a>
         </span>
       </div>

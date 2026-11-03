@@ -291,7 +291,8 @@ export function computeSignature(sig, actor = null) {
   // Super Profile
   const sp = DBU.superProfiles[sig.superProfile];
   if ( sig.superProfile && !sp ) warnings.push(L("DBU.Sig.WarnSuperProfile"));
-  if ( sp && (sig.level !== "finisher") ) warnings.push(L("DBU.Sig.WarnSuperOnlyFinisher"));
+  // A Fusion's Fused Technique is an Ultimate with a Super Profile
+  if ( sp && (sig.level !== "finisher") && !sig.fused ) warnings.push(L("DBU.Sig.WarnSuperOnlyFinisher"));
   if ( sp ) {
     const spReq = {
       cataclysmic: () => !!aoe, combo: () => !aoe, gigaFlare: () => profileKey === "megaFlare",
@@ -322,7 +323,8 @@ export function computeSignature(sig, actor = null) {
   kpUnits = Math.max(baseKp, kpUnits);
   const kpAdjust = (rank("inefficiency") * 4) - (rank("efficiency") * 4)
     - (profileKey === "blitz" ? (profile.sigKpReduction ?? 0) : 0)
-    - ((has("backFlip") && has("chargingAssault")) ? 1 : 0);
+    - ((has("backFlip") && has("chargingAssault")) ? 1 : 0)
+    - (sig.fused ? 4 : 0);
   const kpMinUnits = baseKp / 2;
 
   // Combat roll adjustments (multiples of T unless noted)
@@ -330,7 +332,7 @@ export function computeSignature(sig, actor = null) {
   const dbl = key => (superAdv && superAdv.toLowerCase().replace(/\s/g, "") === key.toLowerCase()) ? 2 : 1;
   const strikeT = (rank("accurate") * dbl("accurate")) - rank("inaccurate");
   const woundT = (2 * Math.min(rank("powerShot"), 3) * dbl("powerShot")) + (2 * Math.max(0, rank("powerShot") - 3))
-    - rank("lowPenetration");
+    - rank("lowPenetration") + (sig.fusedWoundT ?? 0);
   const longShotT = rank("longShot") * dbl("longShot");
   const chargeCategory = 1 + (has("maximumCharge") ? 1 : 0) + (sp?.chargeCategory ?? 0);
   const maxCharges = (profile?.maxCharges ?? 7) + (ultimate ? 1 : 0);

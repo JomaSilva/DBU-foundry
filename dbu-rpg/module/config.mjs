@@ -433,7 +433,8 @@ DBU.modifierTargets = {
   "speed.mult": "DBU.Target.speedMult", "favoredElement": "DBU.Target.favoredElement",
   "battleBorn.cap.strike": "DBU.Target.bbCapStrike", "battleBorn.cap.dodge": "DBU.Target.bbCapDodge",
   "battleBorn.cap.wound": "DBU.Target.bbCapWound", "flag.bbWoundUnlimited": "DBU.Target.flagBbWoundUnlimited",
-  "flag.bbForceWound": "DBU.Target.flagBbForceWound"
+  "flag.bbForceWound": "DBU.Target.flagBbForceWound",
+  "flag.noApparelPenalty": "DBU.Target.flagNoApparelPenalty", "flag.autoStress": "DBU.Target.flagAutoStress"
 };
 
 /**

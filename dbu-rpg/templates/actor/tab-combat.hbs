@@ -63,6 +63,7 @@
         {{#each conditions as |c|}}
         <div class="dbu-condition {{#if c.active}}active{{/if}}" data-tooltip="{{c.hint}}">
           <a data-action="condition" data-key="{{c.key}}"><img src="{{c.img}}" alt=""> {{c.label}}</a>
+          {{#if c.held}}<i class="fa-solid fa-lock dbu-cond-held" data-tooltip="{{localize 'DBU.Condition.HeldTip' by=c.held}}"></i>{{/if}}
           {{#if c.pips}}<span class="pips">{{#each c.pips as |p|}}<a class="pip {{#if p.on}}on{{/if}}" data-action="condition" data-key="{{c.key}}" data-n="{{p.n}}"></a>{{/each}}</span>{{/if}}
         </div>
         {{/each}}

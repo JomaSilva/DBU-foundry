@@ -289,6 +289,10 @@ label.wide input { width: 100%; }
 .dbu-source-row { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 8px; flex-wrap: wrap; }
 .dbu-source-row label { display: flex; flex-direction: column; font-size: 0.8em; font-weight: 600; }
 .dbu.sheet prose-mirror { min-height: 260px; background: var(--dbu-panel); border-radius: 6px; }
+/* The description fills its tab (long official texts, such as a whole Transformation Stage with its traits) */
+.dbu.sheet.item .tab[data-tab="description"].active { display: flex; flex-direction: column; }
+.dbu.sheet.item .tab[data-tab="description"] prose-mirror { flex: 1 1 auto; }
+.dbu.sheet.item .tab[data-tab="description"] prose-mirror .editor-content { height: 100%; }
 .dbu-list { margin: 2px 0 6px 18px; font-size: 0.88em; }
 .dbu-details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
 .dbu-details-grid label { display: flex; flex-direction: column; font-size: 0.82em; font-weight: 600; }
@@ -372,3 +376,51 @@ label.wide input { width: 100%; }
 .dbu-targets td { border: none; }
 .dbu-targets td.who { flex: 1 1 auto; }
 .dbu-targets td.actions { flex: 1 1 100%; }
+
+/* ----- Mastery control and Option choices ----- */
+.dbu-mastery { display: inline-flex; align-items: center; gap: 3px; margin-right: 4px; }
+.dbu-mastery .dbu-mastery-badge { padding: 1px 6px; border-radius: 10px; border: 1px solid var(--dbu-border, #8884); font-size: 0.85em; white-space: nowrap; }
+.dbu-mastery.full .dbu-mastery-badge { background: var(--dbu-orange); color: #fff; border-color: var(--dbu-orange); }
+.dbu-choice .dbu-choice-option { display: flex; gap: 8px; align-items: flex-start; padding: 6px 4px; border-bottom: 1px solid var(--dbu-border, #8883); cursor: pointer; }
+.dbu-choice .dbu-choice-option span { display: flex; flex-direction: column; gap: 2px; }
+.dbu-choice .dbu-choice-option small { opacity: 0.8; }
+.dbu-list li.ok { color: var(--dbu-green, #2e9d4f); }
+
+/* ----- Fusion sheet ----- */
+.dbu-fusion-status { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px; margin-bottom: 8px;
+  border: 1px solid var(--dbu-line); border-radius: 8px; background: var(--dbu-panel); }
+.dbu-fusion-status.active { border-color: var(--dbu-orange); background: var(--dbu-orange-soft); }
+.dbu-fusion-status button { flex: 0 0 auto; width: auto; }
+.dbu-fusion-badge { font-weight: 800; color: var(--dbu-orange); }
+.dbu-fusion-badge.off { color: var(--dbu-muted); }
+.dbu-fusion-rounds { font-weight: 700; }
+.dbu-fusion-problem { color: var(--dbu-red); margin: 4px 0; }
+.dbu-fusion-comps { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.dbu-fusion-comp { display: flex; align-items: center; gap: 8px; padding: 6px; border: 1px solid var(--dbu-line); border-radius: 8px;
+  background: var(--dbu-panel); position: relative; }
+.dbu-fusion-comp img { border: none; border-radius: 6px; object-fit: cover; }
+.dbu-fusion-comp.empty { justify-content: center; min-height: 60px; border-style: dashed; color: var(--dbu-muted); }
+.dbu-fusion-comp-info { display: flex; flex-direction: column; min-width: 0; }
+.dbu-fusion-comp-info small { color: var(--dbu-muted); }
+.dbu-fusion-remove { position: absolute; top: 4px; right: 6px; color: var(--dbu-muted); }
+.dbu-fusion-add, .dbu-fusion-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 0; }
+.dbu-fusion-add select { flex: 1 1 240px; }
+.dbu-fusion-add button, .dbu-fusion-row button { flex: 0 0 auto; width: auto; }
+.dbu-fusion-row label { display: flex; align-items: center; gap: 6px; }
+.dbu-fusion-big { font-size: 1.25em; font-weight: 800; color: var(--dbu-orange); }
+.dbu-fusion-scores td, .dbu-fusion-scores th { text-align: center; }
+.dbu-fusion-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.dbu-fusion-list li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; padding: 4px 6px; border-bottom: 1px solid var(--dbu-line); }
+.dbu-fusion-list li small { flex-basis: 100%; color: var(--dbu-muted); }
+.dbu-fusion-list.compact { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.dbu-fusion-list.compact li small { flex-basis: auto; }
+.dbu-fusion-tech label { display: flex; flex-direction: column; gap: 2px; margin: 6px 0; }
+.dbu-nlop { cursor: pointer; }
+.dbu-nlop.on { background: var(--dbu-orange); color: #fff; }
+.dbu-official-preview { padding: 6px 10px; border: 1px solid var(--dbu-line); border-radius: 8px; background: var(--dbu-panel); }
+.dbu-fusion-balanced { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; }
+.dbu-fusion-attr { display: inline-block; min-width: 34px; text-align: center; padding: 1px 8px; border: 1px solid var(--dbu-line);
+  border-radius: 999px; font-weight: 800; cursor: pointer; }
+.dbu-fusion-attr.on { background: var(--dbu-orange); border-color: var(--dbu-orange); color: #fff; }
+.dbu-fusion-attr.off { opacity: 0.35; cursor: not-allowed; }
+.dbu-cond-held { margin-left: 4px; color: var(--dbu-orange); font-size: 0.85em; }

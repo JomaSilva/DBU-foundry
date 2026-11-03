@@ -4,6 +4,7 @@ import { prepareActorData } from "../rules/derived.mjs";
 import { validateActor } from "../rules/validation.mjs";
 import { computeAlerts } from "../rules/alerts.mjs";
 import { AGE_CATEGORIES, INJURY_TYPES, STANCES } from "../optional-rules.mjs";
+import { FUSION_METHODS } from "../fusion/fusion-rules.mjs";
 
 const { ArrayField, BooleanField, HTMLField, SchemaField, StringField } = foundry.data.fields;
 
@@ -172,10 +173,58 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
 
 /* -------------------------------------------- */
 
+/**
+ * A Fusion (dbu-rpg.com/fusion): built from its Fused Characters by the synchronization (module/fusion/fusion.mjs).
+ * Its Power Level may exceed 30 (only for Life/Ki Points and Capacity; the base ToP stops at 7).
+ */
+export class FusionData extends CharacterData {
+  static defineSchema() {
+    const schema = super.defineSchema();
+    schema.pl = intField(1, { min: 1, max: 60 });
+    schema.karma = new SchemaField({ value: intField(0, { min: 0 }) });
+    const score = () => intField(1, { min: 1 });
+    schema.fusion = new SchemaField({
+      method: new StringField({ initial: "metamorese", choices: Object.keys(FUSION_METHODS) }),
+      components: new ArrayField(new StringField()),
+      dance: new StringField({ initial: "success", choices: ["success", "plump", "frail"] }),
+      modifiers: new ArrayField(new StringField()),
+      balanced: new ArrayField(new StringField()),
+      fusedTechnique: new BooleanField({ initial: true }),
+      forgoApparel: new BooleanField({ initial: false }),
+      sizeUp: new BooleanField({ initial: false }),
+      size: new StringField({ blank: true, initial: "" }),
+      autoSync: new BooleanField({ initial: true }),
+      // Kept between synchronizations (Repeating Fusions)
+      picked: new BooleanField({ initial: false }),
+      traits: new ArrayField(new StringField()),
+      awakenings: new ArrayField(new StringField()),
+      fusedForms: new ArrayField(new StringField()),
+      scores: new SchemaField({ ag: score(), fo: score(), te: score(), sc: score(), in: score(), ma: score(), pe: score() }),
+      tp: intField(0, { min: 0 }),
+      syncedAt: intField(0, { min: 0 }),
+      // In play
+      active: new BooleanField({ initial: false }),
+      roundsLeft: intField(0, { min: 0 }),
+      topReduced: new BooleanField({ initial: false }),
+      karmaStart: intField(0, { min: 0 }),
+      stressSaveUsed: new BooleanField({ initial: false })
+    });
+    return schema;
+  }
+
+  /** @override A Fusion may hold the Karma Points of all of its Fused Characters (more than 4). */
+  static migrateData(source) {
+    return foundry.abstract.TypeDataModel.migrateData.call(this, source);
+  }
+}
+
+/* -------------------------------------------- */
+
 export class NpcData extends CharacterData {
   static defineSchema() {
     const schema = super.defineSchema();
-    schema.npcType = new StringField({ initial: "adversary", choices: ["adversary", "minion", "other"] });
+    // Boss: a villain who may enter Forms above its Tier of Power (Final Form Frieza, Perfect Cell...)
+    schema.npcType = new StringField({ initial: "adversary", choices: ["adversary", "boss", "minion", "other"] });
     schema.settings = new SchemaField({
       validate: new BooleanField({ initial: false }),
       creation: new BooleanField({ initial: false })

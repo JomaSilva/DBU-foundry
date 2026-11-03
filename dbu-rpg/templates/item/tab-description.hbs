@@ -4,5 +4,11 @@
     <label>{{localize "DBU.Item.SourceSection"}} <input type="text" name="system.source.section" value="{{source.source.section}}" placeholder="{{item.name}}"></label>
     <button type="button" data-action="fetchText" data-tooltip="{{localize 'DBU.Item.FetchTip'}}"><i class="fa-solid fa-cloud-arrow-down"></i> {{localize "DBU.Item.Fetch"}}</button>
   </div>
+  {{#if officialLoading}}<p class="dbu-hint"><i class="fa-solid fa-spinner fa-spin"></i> {{localize "DBU.Item.Loading"}}</p>{{/if}}
+  {{#if officialPreview}}
+  <p class="dbu-hint"><i class="fa-solid fa-cloud"></i> {{localize "DBU.Item.PreviewNote"}}</p>
+  <div class="dbu-official-preview">{{{enrichedDescription}}}</div>
+  {{else}}
   <prose-mirror name="system.description" value="{{source.description}}" toggled data-document-u-u-i-d="{{item.uuid}}">{{{enrichedDescription}}}</prose-mirror>
+  {{/if}}
 </section>

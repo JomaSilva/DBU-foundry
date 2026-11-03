@@ -1,5 +1,6 @@
 import { baseItemSchema, intField, usesField } from "./fields.mjs";
 import { computeSignature } from "../rules/signature.mjs";
+import { currentAspects } from "../rules/aspects.mjs";
 
 const { ArrayField, BooleanField, NumberField, SchemaField, StringField } = foundry.data.fields;
 
@@ -49,7 +50,8 @@ export class RacialTraitData extends BaseItemData {
       ...super.defineSchema(),
       race: new StringField({ blank: true, initial: "" }),
       category: new StringField({ initial: "body", choices: ["body", "mind"] }),
-      tier: new StringField({ initial: "primary", choices: ["primary", "secondary", "subrace", "factor", "benefit", "drawback", "role"] }),
+      // "fusion": Method Traits and Fusion Modifiers generated for a Fusion
+      tier: new StringField({ initial: "primary", choices: ["primary", "secondary", "subrace", "factor", "benefit", "drawback", "role", "fusion"] }),
       factor: new StringField({ blank: true, initial: "" }),
       replaces: new StringField({ blank: true, initial: "" }),
       maxFactor: intField(1, { min: 0 }),
@@ -132,12 +134,53 @@ export class TransformationData extends BaseItemData {
       viaManeuver: new BooleanField({ initial: true }),
       legendRealized: new BooleanField({ initial: false }),
       newLevel: new BooleanField({ initial: false }),
+      // The character has been in this Transformation before
+      everEntered: new BooleanField({ initial: false }),
+      // New Level of Power when it is next entered in a Combat Encounter: the character gains access to it during the
+      // encounter (set when it is added mid-combat) or the ARC marks a first time planned for the next fight
+      newLevelPending: new BooleanField({ initial: false }),
       temporary: new BooleanField({ initial: false }),
       homebrew: new BooleanField({ initial: false }),
       // Optional Rules
       ignoreLimit: new BooleanField({ initial: false }),
       greaterEnhancement: new BooleanField({ initial: false }),
-      scalingEarned: intField(0, { min: 0, max: 4 })
+      scalingEarned: intField(0, { min: 0, max: 4 }),
+      // Mastery Traits that change Aspects ("loses the Draining Aspect"), applied from that Mastery level on.
+      // add: gains the Aspect at that level; raise / reduce: gains / loses that many levels
+      masteryAspects: new ArrayField(new SchemaField({
+        mastery: intField(1, { min: 1 }),
+        op: new StringField({ initial: "remove", choices: ["remove", "add", "reduce", "raise"] }),
+        key: new StringField({ blank: true, initial: "" }),
+        level: intField(0, { min: 0 }),
+        // Only that part of an Aspect with several ("loses the Innate State (Feral) Aspect")
+        param: new StringField({ blank: true, initial: "" }),
+        // "M levels": as many levels as Masteries, up to max (0 = no limit): "M levels of the Scaling Aspect (max. 2)"
+        perMastery: new BooleanField({ initial: false }),
+        max: intField(0, { min: 0 })
+      })),
+      // Aspects a Grade applies (Grades table), also in the Grades above it: Wrathful's 2nd → Armored, Bulky, Growth (LV1)
+      gradeAspects: new ArrayField(new SchemaField({
+        grade: intField(2, { min: 1 }),
+        key: new StringField({ blank: true, initial: "" }),
+        level: intField(0, { min: 0 }),
+        param: new StringField({ blank: true, initial: "" })
+      })),
+      // Option effects chosen once ("Upon gaining access to this Transformation, select one of the following")
+      choices: new ArrayField(new SchemaField({
+        id: new StringField({ blank: true, initial: "" }),
+        trait: new StringField({ blank: true, initial: "" }),
+        options: new ArrayField(new StringField()),
+        pick: intField(1, { min: 1 }),
+        selected: new ArrayField(new StringField()),
+        detail: new StringField({ blank: true, initial: "" }),
+        subs: new ArrayField(new StringField())
+      })),
+      // Aura drawn around the token while the Transformation is active ("auto": by name, e.g. Super Saiyan → gold)
+      aura: new SchemaField({
+        style: new StringField({ initial: "auto", choices: ["auto", "none", "glow", "lightning", "nebula"] }),
+        color: new StringField({ blank: true, initial: "" }),
+        color2: new StringField({ blank: true, initial: "" })
+      })
     };
   }
 
@@ -148,8 +191,20 @@ export class TransformationData extends BaseItemData {
 
   /** Number of Masteries needed to be Fully Mastered (Difficult aspect adds levels). */
   get masteryNeeded() {
-    const difficult = this.aspects.find(a => a.key === "difficult");
+    const difficult = (this.baseAspects ?? this.aspects).find(a => a.key === "difficult");
     return 1 + (difficult?.level ?? 0);
+  }
+
+  /** Choices that still have to be made. */
+  get pendingChoices() {
+    return (this.choices ?? []).filter(c => (c.selected?.length ?? 0) < c.pick);
+  }
+
+  /** The Grade (its Aspects and "(LVG)" levels) and the Mastery Traits reached change the Aspects. */
+  prepareDerivedData() {
+    super.prepareDerivedData?.();
+    this.baseAspects = this.aspects;
+    this.aspects = currentAspects(this);
   }
 
   get isMastered() {
@@ -191,7 +246,10 @@ export class SignatureData extends BaseItemData {
       free: new BooleanField({ initial: false }),
       granted: new BooleanField({ initial: false }),
       tpAdjust: intField(0),
-      usedThisEncounter: new BooleanField({ initial: false })
+      usedThisEncounter: new BooleanField({ initial: false }),
+      // Fused Technique of a Fusion: an Ultimate with a Super Profile that costs 4(T) Ki Points less
+      fused: new BooleanField({ initial: false }),
+      fusedWoundT: intField(0, { min: 0 })
     };
   }
 

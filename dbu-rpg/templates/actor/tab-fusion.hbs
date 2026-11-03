@@ -1,0 +1,131 @@
+<section class="tab {{tab.cssClass}}" data-tab="fusion" data-group="primary">
+  {{#with fusion as |F|}}
+  <div class="dbu-fusion-status {{#if F.play.active}}active{{/if}}">
+    {{#if F.play.active}}
+      <span class="dbu-fusion-badge"><i class="fa-solid fa-yin-yang"></i> {{localize "DBU.Fusion.StatusActive"}}</span>
+      {{#if F.play.temporary}}<span class="dbu-fusion-rounds">{{localize "DBU.Fusion.RoundsLeft" n=F.play.roundsLeft}}</span>{{/if}}
+      <button type="button" data-action="fusionDefuse"><i class="fa-solid fa-people-arrows"></i> {{localize "DBU.Fusion.Defuse"}}</button>
+      {{#if F.play.lasting}}<button type="button" data-action="fusionFree" data-tooltip="{{localize 'DBU.Fusion.FreeDefuseTip'}}"><i class="fa-solid fa-feather"></i> {{localize "DBU.Fusion.FreeDefuse"}}</button>{{/if}}
+    {{else}}
+      <span class="dbu-fusion-badge off"><i class="fa-solid fa-yin-yang"></i> {{localize "DBU.Fusion.StatusIdle"}}</span>
+      <button type="button" data-action="fusionSync"><i class="fa-solid fa-rotate"></i> {{localize "DBU.Fusion.Sync"}}</button>
+      <button type="button" data-action="fusionFuse" {{#unless F.ok}}disabled{{/unless}} data-tooltip="{{localize 'DBU.Fusion.FuseTip'}}"><i class="fa-solid fa-yin-yang"></i> {{localize "DBU.Fusion.Fuse"}}</button>
+      <label class="check" data-tooltip="{{localize 'DBU.Fusion.AutoSyncTip'}}"><input type="checkbox" name="system.fusion.autoSync" {{checked F.fs.autoSync}}> {{localize "DBU.Fusion.AutoSync"}}</label>
+    {{/if}}
+  </div>
+  {{#each F.problems as |p|}}<p class="dbu-fusion-problem"><i class="fa-solid fa-circle-xmark"></i> {{p}}</p>{{/each}}
+  {{#unless F.synced}}{{#if F.comps.length}}<p class="dbu-hint">{{localize "DBU.Fusion.NotSynced"}}</p>{{/if}}{{/unless}}
+
+  <h3 class="dbu-section">{{localize "DBU.Fusion.Components"}}</h3>
+  <div class="dbu-fusion-comps">
+    {{#each F.comps as |c|}}
+    <div class="dbu-fusion-comp">
+      <img src="{{c.img}}" alt="" width="48" height="48">
+      <div class="dbu-fusion-comp-info">
+        <a data-action="fusionOpen" data-uuid="{{c.uuid}}"><strong>{{c.name}}</strong></a>
+        <small>PL {{c.pl}} · ToP {{c.top}} · {{c.race}}</small>
+        <small>LP {{c.lp}} · KP {{c.kp}}</small>
+      </div>
+      {{#unless F.play.active}}<a class="dbu-fusion-remove" data-action="fusionRemove" data-uuid="{{c.uuid}}" data-tooltip="{{localize 'DBU.Fusion.Remove'}}"><i class="fa-solid fa-xmark"></i></a>{{/unless}}
+    </div>
+    {{/each}}
+    {{#each F.slots}}<div class="dbu-fusion-comp empty"><i class="fa-solid fa-user-plus"></i> {{localize "DBU.Fusion.DropHere"}}</div>{{/each}}
+  </div>
+  {{#if F.canAdd}}
+  <div class="dbu-fusion-add">
+    <select name="dbuFusionAdd"><option value="">{{localize "DBU.Fusion.Choose"}}</option>{{selectOptions F.actorOptions}}</select>
+    <button type="button" data-action="fusionAdd"><i class="fa-solid fa-plus"></i> {{localize "DBU.Fusion.Add"}}</button>
+  </div>
+  {{/if}}
+
+  <h3 class="dbu-section">{{localize "DBU.Fusion.Method"}}</h3>
+  <div class="dbu-fusion-row">
+    <label>{{localize "DBU.Fusion.Method"}}
+      <select name="system.fusion.method" {{#if F.play.active}}disabled{{/if}}>{{selectOptions F.methodOptions selected=F.fs.method}}</select>
+    </label>
+    {{#if F.method.dance}}
+    <label>{{localize "DBU.Fusion.DanceResult"}}
+      <select name="system.fusion.dance" {{#if F.play.active}}disabled{{/if}}>{{selectOptions F.danceOptions selected=F.fs.dance}}</select>
+    </label>
+    <button type="button" data-action="fusionDance" {{#if F.play.active}}disabled{{/if}} data-tooltip="{{localize 'DBU.Fusion.DanceRollTip'}}"><i class="fa-solid fa-music"></i> {{localize "DBU.Fusion.DanceRoll"}}</button>
+    {{/if}}
+  </div>
+  <p class="dbu-hint"><strong>{{F.method.trait}}</strong> — {{F.method.info}}</p>
+  <p class="dbu-hint">{{F.method.summary}}</p>
+  {{#if F.method.sizeUp}}<label class="check"><input type="checkbox" name="system.fusion.sizeUp" {{checked F.fs.sizeUp}}> {{localize "DBU.Fusion.SizeUp"}}</label>{{/if}}
+  {{#if F.method.forgo}}<label class="check"><input type="checkbox" name="system.fusion.forgoApparel" {{checked F.fs.forgoApparel}}> {{localize "DBU.Fusion.Forgo"}}</label>{{/if}}
+
+  {{#if F.comps.length}}
+  <h3 class="dbu-section">{{localize "DBU.Fusion.Result"}}</h3>
+  <div class="dbu-fusion-row">
+    <span class="dbu-fusion-big">PL {{F.result.pl}}</span><small>{{F.result.plText}}</small>
+    <span class="dbu-fusion-big">ToP {{F.result.bT}}</span>
+    <span>{{localize "DBU.Fusion.TP" n=F.result.tp}}</span>
+    <span>Karma {{F.result.karma}}</span>
+  </div>
+  <table class="dbu-table dbu-fusion-scores">
+    <thead><tr><th></th>{{#each F.comps as |c|}}<th>{{c.name}}</th>{{/each}}<th>{{localize "DBU.Fusion.FusionCol"}}</th></tr></thead>
+    <tbody>
+      {{#each F.result.rows as |r|}}
+      <tr><td><strong>{{r.label}}</strong></td>{{#each r.values as |v|}}<td class="center">{{v}}</td>{{/each}}<td class="center"><strong>{{r.value}}</strong></td></tr>
+      {{/each}}
+    </tbody>
+  </table>
+  <div class="dbu-fusion-row">
+    <label>{{localize "DBU.Fusion.Size"}} <select name="system.fusion.size" {{#if F.play.active}}disabled{{/if}}>{{selectOptions F.sizeOptions selected=F.sizeValue}}</select></label>
+    <span data-tooltip="{{localize 'DBU.Fusion.AlignmentTip'}}">{{localize "DBU.Fusion.Alignment"}}: <strong>{{F.alignmentLabel}}</strong> <small>({{F.alignmentRange}})</small></span>
+  </div>
+  <div class="dbu-fusion-row">
+    <label class="check" data-tooltip="{{localize 'DBU.Fusion.FusedTechniqueTip'}}"><input type="checkbox" name="system.fusion.fusedTechnique" {{checked F.fs.fusedTechnique}}> {{localize "DBU.Fusion.FusedTechniqueToggle"}}</label>
+    {{#if F.fs.fusedTechnique}}
+    <button type="button" data-action="fusionTechnique"><i class="fa-solid fa-burst"></i> {{#if F.fusedTech}}{{localize "DBU.Fusion.Tech.Remake"}}{{else}}{{localize "DBU.Fusion.Tech.Title"}}{{/if}}</button>
+    {{#if F.fusedTech}}<span class="tag">{{F.fusedTech.name}}</span>{{/if}}
+    {{/if}}
+  </div>
+
+  <h3 class="dbu-section">{{localize "DBU.Fusion.Modifiers"}} <small>{{F.modCount}}/{{F.modLimit}}</small></h3>
+  {{#unless F.modLimit}}<p class="dbu-hint">{{localize "DBU.Fusion.NoModifiers"}}</p>{{/unless}}
+  <ul class="dbu-fusion-list">
+    {{#each F.modifiers as |m|}}
+    <li class="{{#unless m.prereq}}dbu-dim{{/unless}}">
+      <a data-action="fusionPick" data-list="modifiers" data-key="{{m.key}}"><i class="fa-regular {{#if m.on}}fa-square-check{{else}}fa-square{{/if}}"></i> <strong>{{m.label}}</strong></a>
+      {{#if m.prereq}}<span class="tag ok">{{localize "DBU.Fusion.PrereqOk"}}</span>{{else}}<span class="tag">{{localize "DBU.Fusion.PrereqNo"}}</span>{{/if}}
+      {{#if m.on}}{{#unless m.active}}<span class="tag warn">{{localize "DBU.Fusion.ModInactive"}}</span>{{/unless}}{{/if}}
+      <small>{{m.req}}</small>
+      <small>{{m.hint}}</small>
+      {{#if m.on}}{{#if (eq m.key "balanced")}}
+      <div class="dbu-fusion-balanced">
+        <span>{{localize "DBU.Fusion.BalancedPick"}}</span>
+        {{#each F.balanced.options as |o|}}
+        {{#if o.eligible}}
+        <a class="dbu-fusion-attr {{#if o.on}}on{{/if}}" data-action="fusionPick" data-list="balanced" data-key="{{o.key}}" data-tooltip="{{o.tip}}">{{o.label}}</a>
+        {{else}}
+        <span class="dbu-fusion-attr off" data-tooltip="{{localize 'DBU.Fusion.BalancedFar'}} — {{o.tip}}">{{o.label}}</span>
+        {{/if}}
+        {{/each}}
+      </div>
+      {{/if}}{{/if}}
+    </li>
+    {{/each}}
+  </ul>
+
+  <h3 class="dbu-section">{{localize "DBU.Fusion.Traits"}} <small>{{F.traitCount}}/{{F.traitMax}} · {{localize "DBU.Fusion.Primaries" n=F.primaryCount}}</small></h3>
+  <ul class="dbu-fusion-list compact">
+    {{#each F.traits as |t|}}
+    <li><a data-action="fusionPick" data-list="traits" data-key="{{t.key}}"><i class="fa-regular {{#if t.on}}fa-square-check{{else}}fa-square{{/if}}"></i> {{t.name}}</a>
+      <span class="tag">{{t.tier}}</span> <small>{{t.from}}</small></li>
+    {{/each}}
+  </ul>
+
+  {{#if F.awakenings.length}}
+  <h3 class="dbu-section">{{localize "DBU.Fusion.Awakenings"}} <small>Lesser {{F.awak.lesser}}/{{F.awak.maxLesser}} · Greater {{F.awak.greater}}/{{F.awak.maxGreater}}</small></h3>
+  <ul class="dbu-fusion-list compact">
+    {{#each F.awakenings as |a|}}
+    <li><a data-action="fusionPick" data-list="awakenings" data-key="{{a.key}}"><i class="fa-regular {{#if a.on}}fa-square-check{{else}}fa-square{{/if}}"></i> {{a.name}}</a>
+      <span class="tag">{{a.kind}}</span> <small>{{a.from}}</small></li>
+    {{/each}}
+  </ul>
+  {{/if}}
+  {{/if}}
+  {{/with}}
+</section>

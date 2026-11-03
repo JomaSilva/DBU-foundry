@@ -35,6 +35,11 @@ Atualiza os compêndios quando sair uma versão nova das regras em dbu-rpg.com.
    node build\build-packs.mjs
    ```
 
-   O compêndio "Guia do Sistema" é gerado de `docs/COMO-USAR.md` e `docs/REGRAS.md`.
+   O compêndio "Guia do Sistema" é gerado de `docs/COMO-USAR.md` e `docs/REGRAS.md`. Se algum compêndio estiver
+   aberto no Foundry, o script para antes de apagar qualquer coisa. Ao abrir o mundo, o GM atualiza sozinho, nas
+   transformações que já estão nas fichas, o que a maestria e os Grades fazem nos Aspects.
 
 `build/tools/lang_add.py <pasta lang> <arquivo.json>` mescla chaves novas (com pontos) no `pt-BR.json` e espelha no `en.json`.
+
+`build/tools/simular-luta.js` roda lutas automáticas entre dois atores (Macro de Script ou console do GM),
+usado nas lutas de `docs/LUTAS-TESTE.md`. Só num mundo de teste: ele apaga os combates e os tokens da cena ativa.

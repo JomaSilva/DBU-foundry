@@ -26,6 +26,7 @@
         <label>{{localize "DBU.NpcType"}}
           <select name="system.npcType">
             <option value="adversary" {{#if (eq source.npcType "adversary")}}selected{{/if}}>Adversary</option>
+            <option value="boss" {{#if (eq source.npcType "boss")}}selected{{/if}} data-tooltip="{{localize 'DBU.Boss.Tip'}}">{{localize "DBU.Boss.Label"}}</option>
             <option value="minion" {{#if (eq source.npcType "minion")}}selected{{/if}}>Minion</option>
             <option value="other" {{#if (eq source.npcType "other")}}selected{{/if}}>{{localize "DBU.Other"}}</option>
           </select>

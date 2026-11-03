@@ -2,6 +2,7 @@ import { DBU } from "../config.mjs";
 import { postInfoCard } from "../dice/roller.mjs";
 import { clearTimed, expireTimed, runTriggers } from "../combat/triggers.mjs";
 import { clearRegeneratorInjuries } from "../combat/injuries.mjs";
+import { fusionSkipTurn, fusionStartRound } from "../fusion/fusion.mjs";
 
 const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
 
@@ -39,7 +40,9 @@ export class DBUCombat extends Combat {
       // Power Advantage: base ToP higher than every Opponent's base ToP → +1 Action
       const opponents = parts.filter(o => (o !== p) && (o.disposition !== 0) && (o.disposition !== p.disposition)
         && (p.disposition !== 0));
-      const advantage = opponents.length && opponents.every(o => (o.actor.system.top?.base ?? 1) < sys.top.base);
+      // New Level of Power: the base Tier of Power counts as 1 higher for Power Advantage
+      const paBase = a => (a.system.top?.base ?? 1) + (a.system.transformation?.newLevel ? 1 : 0);
+      const advantage = opponents.length && opponents.every(o => paBase(o.actor) < paBase(p.actor));
       let actions = sys.actionsPerRound + (advantage ? 1 : 0) - (sys.combat.reducedMomentum ? 1 : 0);
       actions = Math.max(0, actions);
       const roundKi = sys.roundKi ?? 0;
@@ -61,6 +64,8 @@ export class DBUCombat extends Combat {
     lines.unshift(L("DBU.Combat.RoundReset"));
     await postInfoCard({ title: L("DBU.Combat.Round", { n: context.round }), lines, img: "icons/svg/combat.svg",
       whisper: game.users.filter(u => u.isGM).map(u => u.id) });
+    // Fusions: Round Limiter and their rolled Initiative after the first turn
+    await fusionStartRound(this);
     // Start of Combat Round triggers (Namekian regeneration, Infinite Energy, Battle Born on even rounds...)
     for ( const p of parts ) await runTriggers(p.actor, "startOfRound", { round: context.round });
   }
@@ -81,6 +86,8 @@ export class DBUCombat extends Combat {
     if ( !this.automation ) return;
     const actor = combatant.actor;
     if ( !actor?.system?.top ) return;
+    // A Fused Character that just split off skips its turn this Combat Round
+    if ( await fusionSkipTurn(this, combatant) ) return;
     // Timed States/Conditions "until the start of your next turn" end before anything else happens
     await expireTimed(actor, "startOfTurn");
     const sys = actor.system;
@@ -170,6 +177,11 @@ export async function onCombatStart(combat) {
   for ( const c of combat.combatants ) {
     if ( !c.actor || done.has(c.actor.uuid) ) continue;
     done.add(c.actor.uuid);
+    // A New Level of Power only lasts for the encounter it happened in (one gained before "Begin Combat" stays)
+    const stale = c.actor.items.filter(i => (i.type === "transformation") && i.system.newLevel
+      && (i.flags?.["dbu-rpg"]?.newLevelCombat !== combat.id))
+      .map(i => ({ _id: i.id, "system.newLevel": false }));
+    if ( stale.length ) await c.actor.updateEmbeddedDocuments("Item", stale);
     await runTriggers(c.actor, "startOfEncounter", { round: 0 });
   }
 }

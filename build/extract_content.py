@@ -110,6 +110,9 @@ def condition_prefix(text):
     m = re.match(r"^While you (?:are|have) (?:in )?(?:a Form and/or Enhancement|in a Transformation|transformed|a Form or Enhancement|an active Transformation), (.*)$", t, re.I)
     if m:
         return ("@transformed", None, m.group(1))
+    m = re.match(r"^While you (?:have|possess) (\d+)\+ stacks? of Battle Born applied to your (Strike|Dodge|Wound) Rolls?, (.*)$", t, re.I)
+    if m:
+        return (f"@res.battleborn_{m.group(2).lower()} >= {m.group(1)}", None, m.group(3))
     m = re.match(r"^For each Health Threshold you are below, (.*)$", t, re.I)
     if m:
         return ("", "@below", m.group(1))
@@ -188,7 +191,7 @@ def compile_passive_one(text, label):
             mods.append({"target": tgt, "value": expr, "condition": cond, "label": label, "active": True, "always": False})
         return True
 
-    m = re.match(rf"^(Increase|Reduce) (?:all of )?your (.+?) by {VALUE_RE}(?: and {VALUE_RE})?(?: respectively)?$", rest, re.I)
+    m = re.match(rf"^(Increase|Reduce) (?:all of )?(?:the Dice Score of )?your (.+?) by {VALUE_RE}(?: and {VALUE_RE})?(?: respectively)?$", rest, re.I)
     if m:
         phrase = m.group(2).lower().replace("the dice score of your ", "").strip()
         phrase = re.sub(r"^your ", "", phrase)
@@ -216,6 +219,10 @@ def compile_passive_one(text, label):
     m = re.match(r"^Gain (\d|a) Super Stacks?$", rest, re.I)
     if m:
         emit(["superStacks"], ["1" if m.group(1).lower() == "a" else m.group(1)], 1)
+        return mods
+    if re.match(r"^Treat the Superior State as the Raging State for the effects of the Raging Aspect$", rest, re.I):
+        mods.append({"target": "wound", "value": "2(T)", "condition": " && ".join(c for c in [cond, "@states.superior >= 1 && @states.raging == 0"] if c),
+                     "label": label, "active": True, "always": False})
         return mods
     # Battle Born limits per Combat Roll
     m = re.match(r"^Increase (?:the|your) maximum number of Battle Born stacks (?:you may apply to|for) (?:each of |each )?(?:your )?(.+?) by (\d+)$", rest, re.I)
@@ -509,7 +516,12 @@ def parse_effects(lines, start):
 # Option effects whose wording is too free-form for the compiler
 OPTION_OVERRIDES = {
     "Tailed": [{"target": "stress", "value": "(@bT>=5?2:1)", "condition": ""}],
+    # "{foundation}" is replaced by the Foundation the player picks with this option
+    "Super Specialist": [{"target": "strike.{foundation}", "value": "1(T)", "condition": "@res.battleborn_strike >= 1"},
+                         {"target": "wound.{foundation}", "value": "2(T)", "condition": "@res.battleborn_wound >= 1"}],
 }
+# Options that ask for something more when chosen
+OPTION_SUBS = {"Super Specialist": "foundation"}
 OPTION_RE = re.compile(r"- ([^\[:]+?)\s*(?:\[([^\]]+)\])?:\s*(.*?)(?=\s+- [A-Z][^:]{1,60}:|$)")
 
 
@@ -541,7 +553,8 @@ def compile_effects(effects, label, extra_cond=""):
         auto_trigs = compile_trigger(kw, e["text"], label)
         if re.search(r"If you would gain a stack of Battle Born, you must apply it to your Wound Rolls", clean(e["text"]), re.I):
             auto_mods.append({"target": "flag.bbForceWound", "value": "1", "condition": "", "label": label, "active": True, "always": False})
-        if re.search(r"Option", kw):
+        # Option bullets, and Choice bullets that depend on another trait's option (both compiled switched off)
+        if re.search(r"Option|Choice", kw):
             om, ot = compile_options(e["text"], label)
             auto_mods += om
             auto_trigs += ot
@@ -664,6 +677,12 @@ def race_traits(slug, race_name, fold):
     i = 0
     while i < len(lines):
         line = lines[i].strip()
+        # A section title on its own line ("# **Secondary Racial Traits**", Majins) changes the tier of what follows
+        lone = re.match(r"^#+ \*\*(Primary|Secondary) Racial Traits\*\*\s*$", line)
+        if lone:
+            tier = lone.group(1).lower()
+            i += 1
+            continue
         m = SECTION_RE.match(line)
         name = cat = None
         if m:
@@ -710,17 +729,23 @@ def factor_pages(parent_fold):
         prereq = re.search(r"Prerequisite\(s\): \*\*(.+)", text)
         fold = folder("racial-traits", f"Fator: {r['title']}", None)
         for i, line in enumerate(lines):
-            m = re.match(r"^#+ \*\*Factor Traits?(.+?) \((Body|Mind)\)(?: \[([^\]]+)\])?\*\*:", line.strip()) \
-                or (re.match(r"^\*\*([^*]+?) \((Body|Mind)\)(?: \[([^\]]+)\])?\*\*:", line.strip()) if i > 5 else None)
-            if not m:
-                continue
-            name = m.group(1).strip()
+            # "Factor Trait<Name> (Body)", and race-specific ones such as "Arcosian Factor TraitEmperor (Body)"
+            m = re.match(r"^#+ \*\*(?:([A-Z][\w-]+) )?Factor Traits?(.+?) \((Body|Mind)\)(?: \[([^\]]+)\])?\*\*:", line.strip())
+            if m:
+                race_only, name, cat, replaces = m.groups()
+            else:
+                m = re.match(r"^\*\*([^*]+?) \((Body|Mind)\)(?: \[([^\]]+)\])?\*\*:", line.strip()) if i > 5 else None
+                if not m:
+                    continue
+                race_only = None
+                name, cat, replaces = m.groups()
+            name = name.strip()
             effects, _ = parse_effects(lines, i + 1)
             mods, trigs, structure = compile_effects(effects, name)
-            system = {"race": clean(req.group(1)) if req else "", "category": m.group(2).lower(), "tier": "factor",
-                      "factor": r["title"], "replaces": m.group(3) or "", "maxFactor": int(maxf.group(1)) if maxf else 1,
+            system = {"race": race_only or (clean(req.group(1)) if req else ""), "category": cat.lower(), "tier": "factor",
+                      "factor": r["title"], "replaces": replaces or "", "maxFactor": int(maxf.group(1)) if maxf else 1,
                       "active": True, "modifiers": mods, "triggers": trigs,
-                      "summary": f"Fator {r['title']} · substitui {m.group(3) or 'um traço Secundário'}"
+                      "summary": f"Fator {r['title']}{' (' + race_only + ')' if race_only else ''} · substitui {replaces or 'um traço Secundário'}"
                                  + (f" · pré-req.: {clean(prereq.group(1))}" if prereq and 'N/A' not in prereq.group(1) else "")}
             add_item("racial-traits", name, "racialTrait", system, r["slug"], name, structure, fold, key=f"{r['slug']}:{name}")
 
@@ -907,11 +932,142 @@ GRADED = {
     "Evil Aura": {"bonuses": {"fo": "(@G>=2?3:1)(T)", "ma": "(@G>=2?3:1)(T)"}, "gradeStress": "13,18", "maxGrade": 2},
     "Lightspeed Mode": {"bonuses": {"ag": "(@G>=4?6:(@G>=3?4:(@G>=2?3:1)))(T)"}, "gradeStress": "6,10,14,22", "maxGrade": 4},
     "Powerhouse": {"bonuses": {"fo": "@G(T)"}, "maxGrade": 3, "mods": [("superStacks", "@G", "Powerhouse Grade")]},
-    "Mighty Namekian": {"bonuses": {"fo": "@G(T)"}, "maxGrade": 3, "mods": [("superStacks", "@G", "Powerhouse Grade")]},
+    # Variant (Powerhouse): its Grades table (Muscular Proportions) has no copy on the Mighty Namekian page
+    "Mighty Namekian": {"bonuses": {"fo": "@G(T)"}, "maxGrade": 3, "mods": [("superStacks", "@G", "Powerhouse Grade")],
+                        "gradeAspects": [{"grade": 2, "key": "growth", "level": 1, "param": ""},
+                                         {"grade": 3, "key": "armored", "level": 0, "param": ""}]},
     "Ascended Super Saiyan": {"maxGrade": 2, "mods": [("superStacks", "(@G>=2?3:1)", "Ascended Super Saiyan Grade")]},
     "Wrathful": {"bonuses": {a: "(@G>=2?3:2)(T)" for a in ("ag", "fo", "te")}, "gradeStress": "14,18", "maxGrade": 2},
     "Beyond Divine Saiyan": {"gradeStress": "+2,+5,+8", "maxGrade": 3},
 }
+
+
+def aspect_part(name):
+    """'the Innate State (Feral) Aspect' → ('innateState', 0, 'Feral'); 'Natural (LV1)' → ('natural', 1, '')."""
+    n = re.sub(r"^(?:both |the )+", "", clean(name).strip(), flags=re.I)
+    n = re.sub(r"\s*aspects?$", "", n, flags=re.I).strip()
+    m = re.match(r"^(.+?)\s*\((.+)\)$", n)
+    base, inner = (m.group(1).strip(), m.group(2).strip()) if m else (n, "")
+    lv = re.match(r"^LV\s*(\d+)$", inner, re.I)
+    return ASPECT_KEYS.get(base.lower(), ""), (int(lv.group(1)) if lv else 0), ("" if lv else inner)
+
+
+LEVELS_RE = re.compile(r"^(?:an?\s+additional\s+)?(?P<q>\d+|M|an?)(?:\s*\(max\.?\s*(?P<mx>\d+)\))?\s+(?:additional\s+)?"
+                       r"levels?\s+of\s+(?P<rest>.+)$", re.I)
+
+
+def level_amount(q):
+    """'M' (one level per Mastery), 'a'/'an' (1) or a number."""
+    return "M" if q.upper() == "M" else (1 if q.lower() in ("a", "an") else int(q))
+
+
+def level_part(part):
+    """'M (max. 2) levels of the Scaling Aspect' → ('M', 2, 'the Scaling Aspect'); 'an additional level of X' → (1, 0, 'X')."""
+    m = LEVELS_RE.match(part.strip())
+    if not m:
+        return None
+    rest, mx = m.group("rest"), m.group("mx")
+    cap = re.search(r"\s*\(max\.?\s*(\d+)\)", rest)
+    if cap:
+        mx = mx or cap.group(1)
+        rest = (rest[:cap.start()] + rest[cap.end():]).strip()
+    return level_amount(m.group("q")), int(mx) if mx else 0, rest
+
+
+def aspect_change(level, op, key, amount=0, param="", mx=0):
+    per = amount == "M"
+    return {"mastery": level, "op": op, "key": key, "level": 0 if per else int(amount), "param": param,
+            "perMastery": per, "max": mx}
+
+
+def mastery_aspect_changes(text, level):
+    """Aspect changes of a Mastery Trait's Permanent effects:
+    'X loses both the Draining and Power High Aspects and gains the Natural (LV1) Aspect';
+    'gains M levels of the Scaling Aspect (max. 2)' (M = number of Masteries) and 'loses 1 level of the Draining Aspect';
+    'gains the Perfect Ki Control Aspect and loses the Draining Aspect' (either order, also ', but gains');
+    'loses the Innate State (Feral) Aspect' takes only that State away;
+    'Reduce the Rampaging Aspect for this Transformation by 1 level'; 'Increase the level of the Natural Aspect for X by 1';
+    'the Limited Aspect gains M Levels, and the Draining Aspect loses M levels'.
+    (Monster Form's 'Your level for the Rampaging Aspect is set to 2' stays manual: the same Mastery Trait ignores the
+    effects of that Aspect.)"""
+    out = []
+    for sentence in sentences(text):
+        s = sentence.rstrip(".")
+        red = re.search(r"\b[Rr]educe (?:the level of )?(?:the )?(.+?) Aspect(?: (?:for|of) this Transformation)? by (\d+) [Ll]evels?\b", s)
+        inc = re.search(r"\b[Ii]ncrease the level of (?:the )?(.+?) Aspect(?: for .+?)? by (\d+)\b", s)
+        if red or inc:
+            m = red or inc
+            key = aspect_part(m.group(1))[0]
+            if key:
+                out.append(aspect_change(level, "reduce" if red else "raise", key, int(m.group(2))))
+            continue
+        subject = list(re.finditer(r"\bthe ([A-Z][\w ]+?) Aspect (gains|loses) (M|\d+|an?) [Ll]evels?\b", s))
+        if subject:
+            for m in subject:
+                key = aspect_part(m.group(1))[0]
+                if key:
+                    out.append(aspect_change(level, "raise" if m.group(2) == "gains" else "reduce", key, level_amount(m.group(3))))
+            continue
+        for verb, body in re.findall(r"\b(loses|gains)\s+(.+?)(?=,?\s+(?:and|but)\s+(?:loses|gains)\b|,\s*(?:loses|gains)\b|$)", s):
+            amount = None
+            for part in re.split(r",\s*(?:and\s+|but\s+)?|\s+and\s+", body):
+                part = part.strip()
+                if not part:
+                    continue
+                lv = level_part(part)
+                if lv:
+                    amount, part = lv[:2], lv[2]
+                # 'M levels of the Natural and Scaling Aspects': a bare name keeps the amount before it
+                elif re.match(r"^(?:the|an?|both)\b", part, re.I):
+                    amount = None
+                key, lvl, param = aspect_part(part)
+                if not key:
+                    continue
+                if amount:
+                    out.append(aspect_change(level, "raise" if verb == "gains" else "reduce", key, amount[0], mx=amount[1]))
+                elif verb == "loses":
+                    out.append(aspect_change(level, "remove", key, param=param))
+                else:
+                    out.append(aspect_change(level, "add", key, lvl, param=param))
+    return out
+
+
+def grade_aspects(seg):
+    """Aspects column of the Grades table: [{'grade': 2, 'key': 'armored', 'level': 0, 'param': ''}, ...]."""
+    out = []
+    for k, line in enumerate(seg):
+        head = [c.strip().lower() for c in line.strip().strip("|").split("|")]
+        if not (line.strip().startswith("| Grade") and "aspects" in head):
+            continue
+        col = head.index("aspects")
+        for row in seg[k + 1:]:
+            if not row.strip().startswith("|"):
+                break
+            cells = [c.strip() for c in row.strip().strip("|").split("|")]
+            g = re.match(r"\d+", cells[0]) if cells else None
+            if not g or col >= len(cells):
+                continue
+            for a in parse_aspects(cells[col]):
+                if a["key"]:
+                    out.append({"grade": int(g.group(0)), "key": a["key"], "level": a["level"], "param": a["param"]})
+        break
+    return out
+
+
+def effect_choices(effects, trait):
+    """Option / Multi-Option effects a character must choose (once, permanently)."""
+    out = []
+    for e in effects:
+        kw = e["keywords"]
+        if not re.search(r"\b(Multi-Option|Option)\b", kw):
+            continue
+        names = [m.group(1).strip() for m in OPTION_RE.finditer(clean(e["text"]))]
+        if len(names) < 2:
+            continue
+        pick = re.search(r"Multi-Option/(\d+)", kw)
+        out.append({"id": f"{trait}#{e['n']}", "trait": trait, "options": names, "pick": int(pick.group(1)) if pick else 1,
+                    "selected": [], "detail": "", "subs": [n for n in names if n in OPTION_SUBS]})
+    return out
 
 
 # "Transformation Type: **Form" and "**Transformation Type:** Form" are both used on the site
@@ -941,7 +1097,7 @@ def build_transformations():
         cur["end"] = len(lines)
         blocks.append(cur)
         blocks = [b for b in blocks if any(TT_RE.search(l) for l in lines[b["start"]:b["end"]])]
-        prev_traits = []  # (trait mods, trig) inherited by higher stages
+        prev_traits = []  # (trait mods, trigs, choices) inherited by higher stages
         prev_race = ""
         for b in blocks:
             seg = lines[b["start"]:b["end"]]
@@ -968,6 +1124,8 @@ def build_transformations():
             graded = any(a["key"] == "graded" for a in aspects)
             # Traits
             traits, own_mods, own_trigs, structure = [], [], [], []
+            own_choices, mastery_aspects = [], []
+            in_mastery = False
             i = bonus_start + 2 if bonus_start else 0
             while i < len(seg):
                 line = seg[i].strip()
@@ -990,11 +1148,24 @@ def build_transformations():
                     continue
                 req = re.search(r"\((\d)\)\s*$", name)
                 cond = ""
-                if "mastery" in kind or kind == "trait" and req and trans_type != "awakening":
-                    if "mastery" in kind:
-                        cond = f"@M >= {req.group(1) if req else 1}"
+                # A Mastery Trait heading starts the mastery section; the next "Name (2)" traits need more masteries
+                if "mastery" in kind:
+                    in_mastery = True
+                elif kind != "trait" or not req:
+                    in_mastery = False
+                mastery_level = 0
+                if trans_type != "awakening" and ("mastery" in kind or (in_mastery and req)):
+                    mastery_level = int(req.group(1)) if req else 1
+                    cond = f"@M >= {mastery_level}"
+                    if "mastery" not in kind:
+                        kind = "mastery trait"
                 if trans_type == "awakening" and req:
                     cond = f"@Z >= {req.group(1)}"
+                if mastery_level:
+                    for e in effects:
+                        if "Permanent" in e["keywords"]:
+                            mastery_aspects += mastery_aspect_changes(e["text"], mastery_level)
+                own_choices += effect_choices(effects, name)
                 mods, trigs, st = compile_effects(effects, name, cond)
                 if "legendary" in kind:
                     for mm in mods:
@@ -1006,6 +1177,7 @@ def build_transformations():
                 i = j
             inherited_mods = [m for t in prev_traits for m in t[0]]
             inherited_trigs = [t2 for t in prev_traits for t2 in t[1]]
+            inherited_choices = [c for t in prev_traits for c in t[2]]
             system = {
                 "transType": trans_type, "subtype": subtype, "origin": fields.get("awakening origin", "").lower(),
                 "race": race, "prerequisites": fields.get("prerequisite(s)", ""), "line": fields.get("transformation line", ""),
@@ -1016,6 +1188,8 @@ def build_transformations():
                 "aspects": aspects, "traits": traits, "graded": graded, "grade": 1,
                 "stacks": 1, "maxStacks": int(max_stacks.group(1)) if max_stacks else 1,
                 "modifiers": inherited_mods + own_mods, "triggers": inherited_trigs + own_trigs,
+                "choices": [dict(c) for c in inherited_choices] + own_choices, "masteryAspects": mastery_aspects,
+                "gradeAspects": grade_aspects(seg),
                 "homebrew": False,
                 "summary": " · ".join(x for x in [
                     f"{trans_type.capitalize()} {subtype}".strip(), f"ToP {int(top.group(1)) if top else 1}+",
@@ -1028,12 +1202,15 @@ def build_transformations():
                 system["gradeStress"] = ov.get("gradeStress", "")
                 system["maxGrade"] = ov.get("maxGrade", 0)
                 system["graded"] = True
+                if ov.get("gradeAspects"):
+                    system["gradeAspects"] = ov["gradeAspects"]
                 for tgt, val, lab in ov.get("mods", []):
                     system["modifiers"].append({"target": tgt, "value": val, "condition": "", "label": lab, "active": True, "always": False})
                     STATS["modifiers"] += 1
                 system["summary"] = system["summary"].replace(" · bônus por Grade (ver tabela)", " · bônus por Grade automatizados")
             if trans_type in ("form", "evolved"):
-                prev_traits.append(([m for m in own_mods if "@M" not in m["condition"]], [t for t in own_trigs if "@M" not in t["condition"]]))
+                prev_traits.append(([m for m in own_mods if "@M" not in m["condition"]], [t for t in own_trigs if "@M" not in t["condition"]],
+                                    own_choices))
             group = {"awakening": f"Awakenings ({subtype or '—'})", "enhancement": f"Enhancements ({subtype or '—'})",
                      "form": f"Forms ({subtype or '—'})", "evolved": "Evolved Stages"}[trans_type]
             fold = folder("transformations", group.title() if False else group)

@@ -132,6 +132,8 @@ export async function executeAttack(actor, opts) {
   }
   if ( sys.effectiveConditions.transfigured && (foundation !== "physical" || sig) ) problems.push(L("DBU.Attack.ErrTransfigured"));
   if ( sys.effectiveConditions.pinned ) problems.push(L("DBU.Attack.ErrPinned"));
+  // A Plump or Frail Fusion cannot use Signature Techniques
+  if ( sig && (actor.type === "fusion") && (sys.fusion.dance !== "success") ) problems.push(L(`DBU.Fusion.Dance.${sys.fusion.dance}`));
 
   /* ----- Ki Point Cost ----- */
   let units = sig ? (comp.kpUnits + comp.kpAdjust) : prof.kp;

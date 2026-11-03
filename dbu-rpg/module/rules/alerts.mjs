@@ -51,6 +51,13 @@ export function computeAlerts(sys, actor) {
   if ( cond.staggered ) add("info", "staggered", L("DBU.Alert.Staggered"));
   if ( cond.blinded ) add("info", "blinded", L("DBU.Alert.Blinded"));
 
+  /* ----- Choices still to make: Awakenings (always on) and Transformations switched on without choosing ----- */
+  for ( const t of actor.items ) {
+    if ( (t.type !== "transformation") || !t.system.pendingChoices?.length || !t.system.isActive ) continue;
+    add("urgent", `choice:${t.id}`, L("DBU.Alert.Choice", { name: t.name, traits: t.system.pendingChoices.map(c => c.trait).join(", ") }),
+      `choice:${t.id}`, L("DBU.Alert.ChoiceButton"), "fa-solid fa-list-check");
+  }
+
   /* ----- Stacks waiting for a Combat Roll (Battle Born, Progress...) ----- */
   for ( const r of sys.resources ?? [] ) {
     if ( r.split && (r.unassigned > 0) ) {
@@ -64,7 +71,9 @@ export function computeAlerts(sys, actor) {
   if ( (sys.combat.power ?? 0) > 0 ) add("info", "power", L("DBU.Alert.Power", { n: sys.combat.power }));
   if ( (sys.combat.dot ?? 0) > 0 || (sys.dotMin ?? 0) > 0 ) add("warning", "dot", L("DBU.Alert.Dot", { n: Math.max(sys.combat.dot, sys.dotMin ?? 0) * sys.top.base }));
   if ( sys.costs.draining > 0 ) add("warning", "draining", L("DBU.Alert.Draining", { n: 3 * Math.max(1, sys.transformation.highestTopReq) * sys.costs.draining }));
-  if ( sys.transformation.active.some(t => t.system.aspects.some(a => a.key === "rampaging")) ) add("warning", "rampaging", L("DBU.Alert.Rampaging"));
+  const rampaging = Math.max(0, ...sys.transformation.active.flatMap(t => t.system.aspects.filter(a => a.key === "rampaging")
+    .map(a => Math.max(1, a.level || 0))));
+  if ( rampaging ) add("warning", "rampaging", L(rampaging >= 2 ? "DBU.Alert.Rampaging2" : "DBU.Alert.Rampaging"));
   if ( sys.transformation.active.some(t => t.system.aspects.some(a => a.key === "limited")) ) add("info", "limited", L("DBU.Alert.Limited"));
   if ( sys.health.combatPenalty ) add("info", "thresholdPenalty", L("DBU.ThresholdPenaltyLine", { combat: sys.health.combatPenalty, stress: sys.health.stressPenalty }));
   if ( (sys.combat.holdingBack ?? 0) >= sys.top.base ) add("info", "holdingBack", L("DBU.Alert.HoldingBackMax"));

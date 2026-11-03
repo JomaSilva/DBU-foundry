@@ -16,8 +16,11 @@ Sistema de fã (sem fins lucrativos) para o **Dragon Ball Universe RPG** de [dbu
 - **Condições e Estados** com efeitos numéricos e ícones no token.
 - **Stacks por rolagem** (Battle Born, Progress...): ao ganhar um stack, abre uma caixa na tela do jogador dono para escolher Acerto, Desvio ou Dano, respeitando os limites (e os efeitos que mudam o limite).
 - **Injury System**: dano grande abre a escolha de Injury (grau e local) para o atacante, com Called Shot, Regenerator e Minor repetida virando Major.
+- **Maestria e escolhas**: botão de maestria na aba Transformações aplica as Mastery Traits (Aspects removidos/adicionados e bônus); efeitos *Option* (ex.: S-Cells) são escolhidos obrigatoriamente na primeira transformação e valem para os estágios seguintes.
+- **Auras nos tokens**: transformações ativas desenham contorno, raios ou nebulosa em volta do token (SSJ dourado, SSJ2/3 com raios azuis, God vermelho, Blue azul, Rosé rosa, Ultra Instinct e Ultra Ego em nebulosa); as outras formas usam a aparência escolhida na ficha.
 - **Power** em caixas de seleção: Power Up 2×/rodada, cada stack expira sozinho no fim do seu próximo turno.
-- **Transformações**: bônus de atributo por tabela (T/bT/stacks), aspectos automáticos (Super Saiyan Form, Bulky, Armored, Enhanced Save, Perfect Ki Control, High Speed, Raging, Mindful, Draining, Straining...), Legend Realized.
+- **Transformações**: bônus de atributo por tabela (T/bT/stacks), aspectos automáticos (Super Saiyan Form, Bulky, Armored, Enhanced Save, Perfect Ki Control, High Speed, Raging, Mindful, Draining, Straining...), Legend Realized (sem repetir com Form do mesmo tipo e requisito) e **New Level of Power** quando o personagem ganha acesso à transformação no meio de um combate, ou quando ela está marcada como pendente (+1 ToP, Power Advantage, Stress Tests automáticos, Legend Realized dobrado; Awakening recupera metade de LP e KP). NPCs do tipo **Chefe** podem usar formas acima do próprio ToP.
+- **Fusão**: Ator do tipo Fusão que monta a fusão a partir das fichas dos personagens (PL, atributos, perícias, raças, traços, talentos, transformações, técnicas, equipamento), com os seis métodos, os Fusion Modifiers, a Fused Technique, a dança (Plump/Frail) e, em jogo, os tokens se encontrando (a fusão aparece onde eles se juntam e eles se separam ao desfazer), os jogadores donos da fusão só enquanto ela dura, Round Limiter, defusão forçada e as penalidades da defusão.
 - **Signature Techniques**: construtor com todas as Vantagens/Desvantagens, custo de TP e KP calculados, requisitos checados.
 - **Checagem de regras**: pontos de atributo, perks, ranks, talentos (categorias e pré-requisitos), TP, limites de Signature, Ultimates, transformações empilhadas, limites de Awakening, vestuário, armas e mais.
 - **Alertas**: testes situacionais pendentes (Stress Test após Steadfast falhado transformado, Steadfast, Ki 0, Prone, Pinned...).
@@ -28,7 +31,7 @@ Sistema de fã (sem fins lucrativos) para o **Dragon Ball Universe RPG** de [dbu
 Compêndios: Raças (28), Traços Raciais e Fatores (262), Talentos (268), Transformações (472), Unique Abilities (66),
 Técnicas de Exemplo (41), Manobras Especiais (67), Equipamentos (51) e o **Guia do Sistema** (como usar + resumo das regras e relações).
 
-Os compêndios trazem os **dados mecânicos** (números, requisitos, aspectos, custos, modificadores e gatilhos) e o link de cada entrada.
+Os compêndios trazem os **dados mecânicos** (números, requisitos, aspectos, custos, modificadores e gatilhos) e o link de cada entrada. O texto oficial vem de dbu-rpg.com na hora: abrir um item do compêndio mostra o texto, e um item arrastado para uma ficha já vem com ele salvo.
 O texto completo das regras pertence à equipe do DBU: use o botão **Carregar texto oficial** na aba Descrição de qualquer item
 para baixar o texto direto do site para o seu mundo.
 

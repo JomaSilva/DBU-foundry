@@ -49,6 +49,15 @@ async function handle({ action, uuid, data, options }) {
       await storeDamageOnMessage(data.messageId, data.targetIndex, data.damage);
       break;
     }
+    // A player fuses or defuses: the GM moves the tokens and the combatants
+    case "fusion": {
+      const fusion = await fromUuid(data.uuid);
+      if ( fusion?.type !== "fusion" ) break;
+      const F = await import("./fusion/fusion.mjs");
+      if ( data.op === "fuse" ) await F.fuse(fusion);
+      else if ( data.op === "defuse" ) await F.defuse(fusion, { reason: data.reason });
+      break;
+    }
     default: break;
   }
 }

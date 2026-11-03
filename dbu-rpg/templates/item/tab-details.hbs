@@ -138,12 +138,47 @@
     <label class="check"><input type="checkbox" name="system.transcended" {{checked source.transcended}}> Transcended</label>
     <label class="check"><input type="checkbox" name="system.prelude" {{checked source.prelude}}> Prelude</label>
     <label class="check"><input type="checkbox" name="system.newLevel" {{checked source.newLevel}}> New Level of Power</label>
+    <label class="check" data-tooltip="{{localize 'DBU.Trans.NewLevelPendingTip'}}"><input type="checkbox" name="system.newLevelPending" {{checked source.newLevelPending}}> {{localize "DBU.Trans.NewLevelPending"}}</label>
     <label class="check"><input type="checkbox" name="system.viaManeuver" {{checked source.viaManeuver}}> {{localize "DBU.Trans.ViaManeuver"}}</label>
     <label class="check"><input type="checkbox" name="system.ignoreBulky" {{checked source.ignoreBulky}}> {{localize "DBU.Trans.IgnoreBulky"}}</label>
     {{/if}}
     <label>{{localize "DBU.Trans.Initial"}} <input type="text" name="system.initialEnhancement" value="{{source.initialEnhancement}}"></label>
   </div>
   <label class="wide">{{localize "DBU.PrereqLabel"}} <input type="text" name="system.prerequisites" value="{{source.prerequisites}}"></label>
+
+  <h4>{{localize "DBU.Aura.Title"}} <small>{{auraHint}}</small></h4>
+  <div class="dbu-form-grid dbu-aura-fields">
+    <label>{{localize "DBU.Aura.StyleLabel"}} <select name="system.aura.style">{{selectOptions auraOptions selected=source.aura.style valueAttr="value" labelAttr="label"}}</select></label>
+    <label>{{localize "DBU.Aura.Color"}} <color-picker name="system.aura.color" value="{{source.aura.color}}"></color-picker></label>
+    <label>{{localize "DBU.Aura.Color2"}} <color-picker name="system.aura.color2" value="{{source.aura.color2}}"></color-picker></label>
+  </div>
+
+  {{#if choiceRows.length}}
+  <h4>{{localize "DBU.Choice.Section"}}
+    {{#if canChoose}}<a data-action="chooseOptions" data-tooltip="{{localize 'DBU.Choice.Open'}}"><i class="fa-solid fa-list-check"></i></a>{{/if}}
+  </h4>
+  <ul class="dbu-list">
+    {{#each choiceRows as |c|}}
+    <li><strong>{{c.trait}}</strong>: {{#if c.text}}{{c.text}}{{else}}<em class="dbu-warn">{{localize "DBU.Choice.NotChosen"}}</em>{{/if}}</li>
+    {{/each}}
+  </ul>
+  {{/if}}
+  {{#if masteryRows.length}}
+  <h4>{{localize "DBU.Mastery.Section"}} <small>{{localize "DBU.Mastery.SectionHint"}}</small></h4>
+  <ul class="dbu-list">
+    {{#each masteryRows as |m|}}
+    <li class="{{#if m.reached}}ok{{/if}}">{{localize "DBU.Mastery.Level" n=m.level}}: {{m.text}}{{#if m.reached}} ✓{{/if}}</li>
+    {{/each}}
+  </ul>
+  {{/if}}
+  {{#if gradeRows.length}}
+  <h4>{{localize "DBU.Grade.Section"}} <small>{{localize "DBU.Grade.SectionHint"}}</small></h4>
+  <ul class="dbu-list">
+    {{#each gradeRows as |g|}}
+    <li class="{{#if g.reached}}ok{{/if}}">Grade {{g.grade}}: {{g.text}}{{#if g.reached}} ✓{{/if}}</li>
+    {{/each}}
+  </ul>
+  {{/if}}
 
   <h4>{{localize "DBU.Trans.Bonuses"}} <small>{{localize "DBU.Trans.BonusHint"}}</small></h4>
   <div class="dbu-attr-inputs">

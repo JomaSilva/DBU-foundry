@@ -493,7 +493,9 @@ Insight — conferido na planilha, ver seção 5.1.)
 - **Transformações empilhadas:** requisito = maior requisito + 1/2 dos requisitos das demais.
 - **Falhou o Stress Test:** Stress Exhaustion até o fim do próximo turno (não entra).
 - **Saída forçada:** Derrota; Ki = 0 (sai + Stress Exhaustion); Revert.
-- **Grades** (Graded): "G" = grade atual; muda de grade com Transformation Maneuver.
+- **Grades** (Graded): "G" = grade atual; muda de grade com Transformation Maneuver. Cada Grade aplica os
+  Aspects da sua linha da tabela de Grades, incluindo os dos Grades abaixo (Powerhouse diz isso; Wrathful só
+  tem 2 Grades). Um Aspect com nível "LVG" tem tantos níveis quanto o Grade atual.
 - **Stages** (Forms): "S" = estágio; estágios herdam traços dos anteriores; precisa ter os
   anteriores. Stage 0 = Null Stage (conta como estado normal, sem Ki Multiplier).
 - **Step-by-Step:** de uma Form para outra de maior requisito de ToP: −1 no requisito (−2 se mesma
@@ -518,7 +520,11 @@ Insight — conferido na planilha, ver seção 5.1.)
 | 7 | 7 | 4 |
 
 - **Full Awakening Maneuver** [1/Enc]: ativa o Grand Awakening; recupera 1/4 (arred. p/ cima) de LP/KP.
-- **Mastery:** Mastery Trait; Difficult [LV] exige masterizar várias vezes ("M").
+- **Mastery:** Mastery Trait; Difficult [LV] exige masterizar várias vezes ("M"). Os efeitos Permanent
+  da Mastery Trait mudam os Aspects: "perde o Innate State (Feral)" tira só esse estado (o Wrathful continua no
+  Raging); "reduz o Rampaging em 1 nível" vale depois do nível dado pelo Grade. "M levels" = um nível por maestria
+  (M = número de maestrias), até o "(max. N)" quando houver; "gains N level(s)" soma aos níveis que o Aspect já tem,
+  enquanto "gains the X (LVN) Aspect" deixa o Aspect com pelo menos N níveis.
 
 ### 12.1 Aspectos com efeito numérico automatizável
 | Aspecto | Efeito |
@@ -731,3 +737,72 @@ Os efeitos de traços, talentos, transformações e Unique Abilities com palavra
 momentos: os numéricos (recuperar LP/KP, ganhar stacks/pontos/ações, entrar em State ou sofrer
 Condition por um tempo) são aplicados sozinhos; os que dependem de escolha geram botão ou
 lembrete.
+
+## 23. Fusão (Fusion)
+
+Resumo das páginas *Fusion* e *Fusion Methods & Modifiers*. Na ficha, isso fica no Ator do tipo Fusão.
+
+**Character Combination** (o (bT) da criação é o do personagem de maior PL):
+1. Z-Soul e Alinhamento entre o menor e o maior dos personagens; a fusão usa o Karma de todos.
+2. Todas as raças; usa o maior Racial Life Modifier e os Saving Throws raciais de todas.
+3. Até 7 traços raciais: 2 a 4 primários; o resto secundários ou de sub-raça.
+4. Atributos: o maior Score de cada um.
+5. Tamanho base entre o menor e o maior.
+6. Todos os talentos, transformações (com maestrias), Signature Techniques e Unique Abilities.
+   Awakenings dentro do limite próprio da fusão.
+7. Perícias: o maior número de ranks de cada uma.
+8. PL da fusão: o maior + 1(bT), se todos estão a até 5 PL do maior e não há Minion. Pode passar de
+   30, mas o ToP base para em 7. Esse PL vale para ToP, LP, KP, Capacidade e Legend Realized.
+9. Fused Technique, mais 10(bT) TP (ou 15(bT) sem a Fused Technique).
+10. Todo o equipamento.
+11. Fusion Modifiers e o Method Trait.
+
+**Limite de Awakenings da fusão** (Lesser / Greater por ToP base): 1: 3/1 · 2: 4/2 · 3: 5/3 · 4: 6/3 ·
+5: 7/4 · 6: 8/5 · 7: 10/6. Uma fusão não pode fazer parte de outra.
+
+**Fused Technique:** duas técnicas de personagens diferentes. A base perde as Desvantagens, recebe as
+Vantagens da outra, ganha Complete Annihilation, um Super Profile "Super" do perfil da base ou
+Multi-Profile, e −4(T) KP. É uma Ultimate.
+
+**Repeating Fusions:** a mesma fusão pelo mesmo método reaproveita a ficha. Atributos, itens,
+perícias, PL e equipamento são refeitos; dá para trocar 1 Fusion Modifier.
+
+**Em combate:**
+- A fusão rola Iniciativa, mas joga logo depois de formada. É um personagem novo: LP e KP cheios, ou 1
+  acima do limiar Bruised se todos estavam abaixo de Injured.
+- Ao se separar, os personagens rolam Iniciativa de novo, entram ao lado, pulam o turno na rodada,
+  ficam em Stress Exhaustion por 2 rodadas e não se fundem por 5 rodadas.
+- **Defusão forçada:** falhar o Steadfast de Injured ou Critical, ou ser Derrotada.
+
+**Métodos:**
+
+| Método | Tipo | Rodadas | Personagens | Method Trait (resumo) |
+|---|---|---|---|---|
+| Metamorese | Temporária | 10 | 2 | Metamoran Clothing, +2 Stress Bonus, +2 Karma, 1 Manobra fora de sequência |
+| Potara | Temporária | 20 | 2 | vestuário combinado sem penalidade, +2(bT) Wound/RD em God Ki, +2 LP/PL, 1 Stress Test salvo |
+| Maxi | Temporária | 1 | 5 | +2 Ações, Ultra Fusion, Stress Tests automáticos |
+| Merge | Duradoura | — | 2~4 | tamanho base +1 (+2 com 3+) |
+| EX | Duradoura | — | 2 | vestuário combinado sem penalidade, +1 Stress Bonus |
+| Parasitic | Duradoura | — | 2 | sem vestuário: +2(bT) Rolagens/RD; Healing Surge 1/rodada |
+
+- **Round Limiter:** nas Temporárias, a primeira Transformação de requisito ToP 4+ corta metade do
+  requisito (para cima) das rodadas restantes.
+- **Defusão livre:** Duradouras se separam no início da rodada sem penalidades.
+- **Metamoran Fusion Dance:** Performance contra Master (+1 categoria com tamanhos diferentes). Os
+  dois acertam: Metamorese. Um erra: 1d4 (1 Frail, 2~4 Plump). Os dois erram: nada acontece.
+  - Plump: Modificador de AG pela metade.
+  - Frail: AG, FO, TE e MA pela metade.
+  - Os dois ficam sem Fusion Modifiers, transformações, técnicas e Unique Abilities.
+
+**Fusion Modifiers** (2 nas Temporárias, 1 nas Duradouras):
+
+| Modifier | Requisito | Efeito |
+|---|---|---|
+| Balanced Fusion | 2+ atributos com Score igual ou a 1 de diferença | +2(bT) no Mod de 2 deles; +3(bT) KP no início do turno |
+| Dominant Personality | 1 não-Minion, ou 1 com PL maior que todos | TP ×2; −2(T) KP em ataques e UAs |
+| Enhanced Fusion | ninguém tem Forms | +1(T) Rolagens em Enhancement; +2(T) Wound com 2+ |
+| Fused Transformation | todos têm a mesma Form | +1(T)/+2(T) AG/FO/TE/MA nela; estágios seguintes; sem penalidade de limiar no Stress |
+| Power of Friendship | Partners (Synchronized Combatants) | +1 ToP |
+| Shared Heritage | mesma raça e menos de 7 traços | RLM ×2; +1(T) AG/FO/TE/MA; +2(T) Wound da Fused Technique por personagem |
+| Synergistic Fusion | 2+1(bT) talentos iguais | +1(T) AG/FO/TE/MA; +3 PL |
+| The Mightiest Fusion | Rivals (Chosen Rival) | +1 ToP; é a própria Rival |

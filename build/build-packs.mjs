@@ -38,6 +38,23 @@ function fid(key) {
   return out;
 }
 
+/** Foundry keeps the packs of a running world locked: stop before deleting anything if one is in use. */
+async function assertUnlocked() {
+  if ( !fs.existsSync(OUT) ) return;
+  for ( const name of fs.readdirSync(OUT) ) {
+    const dir = path.join(OUT, name);
+    if ( !fs.existsSync(path.join(dir, "CURRENT")) ) continue;
+    const db = new ClassicLevel(dir, { keyEncoding: "utf8", valueEncoding: "json" });
+    try {
+      await db.open();
+    } catch(err) {
+      console.error(`Pack "${name}" is in use (close Foundry first); nothing was changed. ${err.cause?.message ?? err.message}`);
+      process.exit(1);
+    }
+    await db.close();
+  }
+}
+
 async function writePack(name, entries) {
   const dir = path.join(OUT, name);
   fs.rmSync(dir, { recursive: true, force: true });
@@ -212,6 +229,7 @@ async function buildGuide() {
 
 /* -------------------------------------------- */
 
+await assertUnlocked();
 for ( const pack of SYSTEM.packs ) {
   if ( pack.type === "Item" ) await buildItemPack(pack.name);
 }

@@ -1,5 +1,6 @@
 import { DBU } from "../config.mjs";
 import { limitedPower, rules } from "../optional-rules.mjs";
+import { FUSION_AWAKENING_LIMITS, FUSION_METHODS, FUSION_TRAIT_LIMITS } from "../fusion/fusion-rules.mjs";
 
 /**
  * Rule checks for a DBU character sheet. Returns a list of problems:
@@ -20,16 +21,20 @@ export function validateActor(sys, actor) {
   const byType = type => items.filter(i => i.type === type);
   const attrName = a => game.i18n.localize(DBU.attributes[a]);
 
+  // A Fusion is not made through Character Creation: it follows the Character Combination rules instead
+  const isFusion = actor.type === "fusion";
+  if ( isFusion ) validateFusion(sys, actor, add);
+
   /* ----- Race ----- */
   const races = byType("race");
   if ( !races.length ) add("warning", "race", "DBU.Val.NoRace");
-  if ( races.length > 1 ) add("error", "race", "DBU.Val.MultipleRaces");
+  if ( (races.length > 1) && !isFusion ) add("error", "race", "DBU.Val.MultipleRaces");
   const race = races[0];
-  if ( race ) validateRaceIncreases(race, add);
+  if ( race && !isFusion ) validateRaceIncreases(race, add);
 
   /* ----- Size ----- */
   const allowedSizes = race?.system.sizes?.length ? race.system.sizes : DBU.CREATION_SIZES;
-  if ( !allowedSizes.includes(sys.details.size) ) {
+  if ( !allowedSizes.includes(sys.details.size) && !isFusion ) {
     add("warning", "race", "DBU.Val.CreationSize", { size: game.i18n.localize(DBU.sizes[sys.details.size]?.label ?? "") });
   }
   // Age and Size: children cannot be larger than Small, adolescents than Medium
@@ -42,7 +47,8 @@ export function validateActor(sys, actor) {
   }
 
   /* ----- Perks ----- */
-  if ( prog.perksUsed > prog.perksAvailable ) {
+  if ( isFusion ) { /* no Character Creation budgets */ }
+  else if ( prog.perksUsed > prog.perksAvailable ) {
     add("error", "progression", "DBU.Val.PerksOver", { used: prog.perksUsed, max: prog.perksAvailable });
   }
   else if ( prog.perksUsed < prog.perksAvailable ) {
@@ -50,7 +56,8 @@ export function validateActor(sys, actor) {
   }
 
   /* ----- Attributes ----- */
-  if ( prog.attributePointsSpent > prog.attributePoints ) {
+  if ( isFusion ) { /* Attribute Scores come from the Fused Characters */ }
+  else if ( prog.attributePointsSpent > prog.attributePoints ) {
     add("error", "attributes", "DBU.Val.AttrPointsOver", { spent: prog.attributePointsSpent, max: prog.attributePoints });
   }
   else if ( prog.attributePointsSpent < prog.attributePoints ) {
@@ -65,17 +72,20 @@ export function validateActor(sys, actor) {
   const cap = sys.skillRankCap;
   for ( const [key, S] of Object.entries(sys.skills) ) {
     if ( S.totalRanks > cap ) add("error", "skills", "DBU.Val.SkillCap", { skill: S.label, ranks: S.totalRanks, cap, top: bT });
-    if ( (S.ranks ?? 0) > (prog.skillImprovements + 2) ) {
+    if ( !isFusion && ((S.ranks ?? 0) > (prog.skillImprovements + 2)) ) {
       add("error", "skills", "DBU.Val.SkillSIRepeat", { skill: S.label, n: prog.skillImprovements });
     }
   }
-  if ( prog.racialRanksSpent > prog.racialRanks ) {
+  // A Fusion's Skill Ranks are the highest of its Fused Characters
+  if ( isFusion ) { /* no Skill Improvement budget */ }
+  else if ( prog.racialRanksSpent > prog.racialRanks ) {
     add("error", "skills", "DBU.Val.RacialRanksOver", { spent: prog.racialRanksSpent, max: prog.racialRanks });
   }
   else if ( race && (prog.racialRanksSpent < prog.racialRanks) ) {
     add("info", "skills", "DBU.Val.RacialRanksLeft", { n: prog.racialRanks - prog.racialRanksSpent });
   }
-  if ( prog.skillRanksSpent > prog.skillRanksFromSI ) {
+  if ( isFusion ) { /* idem */ }
+  else if ( prog.skillRanksSpent > prog.skillRanksFromSI ) {
     add("error", "skills", "DBU.Val.SkillRanksOver", { spent: prog.skillRanksSpent, max: prog.skillRanksFromSI });
   }
   else if ( prog.skillRanksSpent < prog.skillRanksFromSI ) {
@@ -84,8 +94,10 @@ export function validateActor(sys, actor) {
 
   /* ----- Talents ----- */
   const talents = byType("talent");
-  const paidTalents = talents.filter(t => !t.system.granted);
-  if ( paidTalents.length > prog.talentAdditions ) {
+  // A Fusion has every Talent of its Fused Characters
+  const paidTalents = isFusion ? [] : talents.filter(t => !t.system.granted);
+  if ( isFusion ) { /* no Talent Additions */ }
+  else if ( paidTalents.length > prog.talentAdditions ) {
     add("error", "talents", "DBU.Val.TalentsOver", { n: paidTalents.length, max: prog.talentAdditions });
   }
   else if ( paidTalents.length < prog.talentAdditions ) {
@@ -147,7 +159,8 @@ export function validateActor(sys, actor) {
   duplicates(signatures).forEach(name => add("warning", "signatures", "DBU.Val.Duplicate", { name }));
 
   for ( const u of uas ) {
-    tpSpent += u.system.tpSpent;
+    // Unique Abilities a Fusion got from its Fused Characters are already paid for
+    if ( !(isFusion && u.flags?.["dbu-rpg"]?.fusion?.from) ) tpSpent += u.system.tpSpent;
     for ( const problem of checkPrerequisites(u, sys, actor) ) add("error", "abilities", "DBU.Val.Prereq", { name: u.name, problem });
     const restr = u.system.restrictions.filter(r => r.applied).reduce((t, r) => t + r.tp, 0);
     if ( !u.system.granted && ((u.system.tpCost - restr) < Math.ceil(u.system.tpCost / 2)) ) {
@@ -169,11 +182,13 @@ export function validateActor(sys, actor) {
   if ( activeEnh.length > 1 ) add("error", "transformations", "DBU.Val.TwoEnhancements", { names: activeEnh.map(t => t.name).join(", ") });
   for ( const t of trans ) {
     const s = t.system;
-    if ( raceName && !raceMatches(s.race, race) ) add("warning", "transformations", "DBU.Val.TransRace", { name: t.name, race: s.race });
-    if ( (s.transType !== "awakening") && s.active && (s.topReq > sys.top.current) && !s.prelude ) {
+    if ( raceName && !raceMatches(s.race, sys.races?.length ? sys.races : race) ) {
+      add("warning", "transformations", "DBU.Val.TransRace", { name: t.name, race: s.race });
+    }
+    if ( (s.transType !== "awakening") && s.active && (s.topReq > sys.top.current) && !s.prelude && !actor.isBoss ) {
       add("error", "transformations", "DBU.Val.TransTop", { name: t.name, req: s.topReq, top: sys.top.current });
     }
-    if ( s.prelude && s.active && ((s.topReq - 1) > sys.top.current) ) {
+    if ( s.prelude && s.active && ((s.topReq - 1) > sys.top.current) && !actor.isBoss ) {
       add("error", "transformations", "DBU.Val.TransTop", { name: t.name, req: s.topReq - 1, top: sys.top.current });
     }
     if ( (s.transType === "awakening") && (s.stacks > s.maxStacks) ) {
@@ -193,7 +208,9 @@ export function validateActor(sys, actor) {
   }
   const awak = trans.filter(t => (t.system.transType === "awakening") && !t.system.temporary
     && !(R.limitBreaking && t.system.ignoreLimit));
-  const limits = DBU.AWAKENING_LIMITS[bT] ?? DBU.AWAKENING_LIMITS[7];
+  // A Fusion has its own Awakening Limit
+  const limitTable = isFusion ? FUSION_AWAKENING_LIMITS : DBU.AWAKENING_LIMITS;
+  const limits = limitTable[bT] ?? limitTable[7];
   const lesser = awak.filter(t => t.system.subtype === "lesser").length;
   const greater = awak.filter(t => t.system.subtype === "greater").length;
   const superA = awak.filter(t => t.system.subtype === "super").length;
@@ -270,7 +287,8 @@ export function validateActor(sys, actor) {
   if ( sys.life.value > sys.life.max ) add("warning", "status", "DBU.Val.LifeOver", { v: sys.life.value, max: sys.life.max });
   if ( sys.ki.value > sys.ki.max ) add("warning", "status", "DBU.Val.KiOver", { v: sys.ki.value, max: sys.ki.max });
   if ( sys.capacity.value > sys.capacity.max ) add("warning", "status", "DBU.Val.CapacityOver", { v: sys.capacity.value, max: sys.capacity.max });
-  if ( sys.karma.value > 4 ) add("error", "status", "DBU.Val.Karma");
+  // A Fusion may use the Karma Points of all of its Fused Characters
+  if ( (sys.karma.value > 4) && !isFusion ) add("error", "status", "DBU.Val.Karma");
   if ( (sys.combat.power ?? 0) > 2 ) add("warning", "combat", "DBU.Val.Power");
   for ( const r of sys.resources ?? [] ) {
     if ( !r.split ) continue;
@@ -304,14 +322,48 @@ function duplicates(items) {
     && (items.findIndex(o => o.name.trim().toLowerCase() === i.name.trim().toLowerCase()) === idx)).map(i => i.name);
 }
 
-/** Does a Racial Requirement text ("Saiyan", "Any", "Earthling, Saiyan") include this race? */
+/**
+ * Character Combination checks of a Fusion (dbu-rpg.com/fusion): Fused Characters, Racial Traits,
+ * Fusion Modifiers. Reads only the Fusion's own data (the Fused Characters may not be prepared yet).
+ */
+function validateFusion(sys, actor, add) {
+  const fs = sys.fusion;
+  const method = FUSION_METHODS[fs.method];
+  const comps = fs.components ?? [];
+  if ( comps.length < (method?.min ?? 2) ) add("warning", "fusion", "DBU.Fusion.ErrFew", { n: method?.min ?? 2, method: method?.label ?? "" });
+  if ( comps.length > (method?.max ?? 2) ) add("error", "fusion", "DBU.Fusion.ErrMany", { n: method?.max ?? 2, method: method?.label ?? "" });
+  // While the world loads, the Fused Characters may not exist yet
+  for ( const uuid of (game.ready ? comps : []) ) {
+    const c = fromUuidSync(uuid);
+    if ( !c ) add("error", "fusion", "DBU.Fusion.ErrMissing", { uuid });
+    else if ( c.type === "fusion" ) add("error", "fusion", "DBU.Fusion.ErrFusionLimit", { name: c.name });
+  }
+  if ( !fs.syncedAt && comps.length ) add("warning", "fusion", "DBU.Fusion.NotSynced");
+  // At most 7 Racial Traits: 2~4 Primary, the rest Secondary or Subrace (Method Traits and Modifiers do not count)
+  const traits = actor.items.filter(i => (i.type === "racialTrait") && ["primary", "secondary", "subrace", "factor"].includes(i.system.tier));
+  const primaries = traits.filter(t => t.system.tier === "primary").length;
+  if ( traits.length > FUSION_TRAIT_LIMITS.total ) add("error", "fusion", "DBU.Fusion.ErrTraits", { n: traits.length, max: FUSION_TRAIT_LIMITS.total });
+  if ( traits.length && ((primaries < FUSION_TRAIT_LIMITS.primaryMin) || (primaries > FUSION_TRAIT_LIMITS.primaryMax)) ) {
+    add("error", "fusion", "DBU.Fusion.ErrPrimaries", { n: primaries });
+  }
+  // Fusion Modifiers: 2 for a Temporary Fusion, 1 for a Lasting one, none for a Plump or Frail one
+  const mods = actor.items.filter(i => String(i.flags?.["dbu-rpg"]?.fusion?.generated ?? "").startsWith("modifier:")).length;
+  const limit = (fs.dance !== "success") ? 0 : (method?.type === "temporary" ? 2 : 1);
+  if ( mods > limit ) add("error", "fusion", "DBU.Fusion.ErrModifiers", { n: mods, max: limit });
+}
+
+/** Does a Racial Requirement text ("Saiyan", "Any", "Earthling, Saiyan") include this race (or one of these races)? */
 export function raceMatches(requirement, race) {
   const req = String(requirement ?? "").trim().toLowerCase();
   if ( !req || ["any", "n/a", "same as the 1st stage of this transformation line"].includes(req) ) return true;
   if ( req.startsWith("same as") || req.startsWith("any ") ) return true;
+  // A Fusion has several Races: any of them will do
+  if ( Array.isArray(race) ) return !race.length || race.some(r => raceMatches(requirement, r));
   if ( !race ) return true;
-  const name = race.name.toLowerCase().replace(/s$/, "");
-  const parts = req.split(/,|\bor\b|\/|\band\b/).map(p => p.trim().replace(/s$/, "")).filter(Boolean);
+  // "Bio-Android" and "Bio Androids", "Neo-Tuffle" and "Neo-Tuffles" are the same race
+  const simplify = s => s.toLowerCase().replace(/[-\s]+/g, " ").trim().replace(/s$/, "");
+  const name = simplify(race.name);
+  const parts = req.split(/,|\bor\b|\/|\band\b/).map(p => simplify(p)).filter(Boolean);
   return parts.some(p => name.includes(p) || p.includes(name));
 }
 
@@ -352,7 +404,9 @@ export function checkPrerequisites(item, sys, actor) {
     const sk = sys.skills[s.key];
     if ( sk && (sk.totalRanks < s.ranks) ) problems.push(game.i18n.format("DBU.Val.ReqSkill", { skill: sk.label, ranks: s.ranks }));
   }
-  if ( p.race && sys.race && !raceMatches(p.race, sys.race) ) problems.push(game.i18n.format("DBU.Val.ReqRace", { race: p.race }));
+  if ( p.race && sys.race && !raceMatches(p.race, sys.races?.length ? sys.races : sys.race) ) {
+    problems.push(game.i18n.format("DBU.Val.ReqRace", { race: p.race }));
+  }
   return problems;
 }
 

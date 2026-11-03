@@ -18,6 +18,8 @@ Flow of Combat | startOfTurn | Triggered/Start of Turn | If you have taken no Da
 Masters of Movement | startOfTurn | Triggered/Start of Turn | Select a Square within the Battlefield
 Caste Combat | startOfTurn | Triggered/Start of Turn | Regain Ki Points equal to your Insect Shell's Apparel Bonus if you have at least 1 adjacent Ally
 Monstrous Vitality | startOfEncounter | Triggered/Start of Combat Encounter | Use a Healing Surge as an Out-of-Sequence Maneuver
+Afterlife Officials — opção: Employed for Strength | startOfTurn | Triggered/Start of Turn | Make a Might Clash against all Opponents within your Area of Rule
+Afterlife Officials — opção: Employed for Speed | startOfTurn | Triggered/Start of Turn | You may move to any unoccupied Square within your Area of Rule
 Purpose — opção: Aid Robot | startOfTurn | Triggered/Start of Turn | All Allies within a Large Sphere AoE (centered on you) regain 2(bT) Life and Ki Points
 Seedling Biology | startOfTurn | Triggered/Start of Turn | Regain Life Points equal to x(bT)
 Savagery | startOfRound | Triggered/Start of Combat Round | Make a Basic Attack Maneuver against the closest Opponent as an Out-of-Sequence Maneuver
@@ -41,6 +43,9 @@ Heran Genes [Any – you decide] | startOfTurn | Triggered/Start of Turn | Lose 
 Shadow Dragon Genes [Morale] | startOfTurn | Triggered/Start of Turn | You may reduce your Life Points by up to 8(bT) to regain an equal amount of Ki Points
 Three-Eyes | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you are below the Injured Health Threshold, you may reduce your Life Points to 1 below the Critical Health Threshold (ignoring Reduced Momentum)
 Greedy Rabbit | startOfTurn | Triggered/Start of Turn | Regain 2(bT) Ki Points for every Integrated Majin-Dama you possess (max. 10(bT))
+Warrior of Two Worlds — opção: Inherited Creativity | startOfTurn | Triggered/Start of Turn, 1/Encounter | Create a Signature Technique with a TP Cost up to your maximum TP Cost for your base Tier of Power, you have access to that Signature Technique for the remainde
+Warrior of Two Worlds — opção: Inherited Freedom | startOfTurn | Triggered/Start of Turn | You may spend 1 Counter Action to use a Standard Maneuver with an Action Cost of 1 Action as an Out-of-Sequence Maneuver
+Warrior of Two Worlds — opção: Inherited Resolve | startOfTurn | Triggered/Start of Turn | Regain x(bT) Life and Ki Points, where x is equal to twice the number of Health Thresholds you are below
 Adapted Saibaman | startOfTurn | Triggered/Start of Turn | Regain Ki Points equal to x(bT)
 Masterful Strike | startOfTurn | Triggered/Start of Turn, 1/Encounter | Until the end of your turn, ignore all penalties to your Strike Rolls
 Buddy System | startOfEncounter | Triggered/Start of Combat Encounter | You may spend 1 Karma Point to gain a Buddy of your choice (you cannot choose a Special Buddy)
@@ -75,6 +80,7 @@ Honed Monster | startOfTurn | Triggered/Start of Turn | If you are in Monster Fo
 Rampaging Hunger | startOfTurn | Automatic/Start of Turn | Make an Urgent Clash (Morale) against yourself (roll 2 times and compare the results)
 All-Out Power | startOfTurn | Automatic/Start of Turn | If you lose 2+ stacks of Focused Power through this effect, you may use the Power Up Maneuver as an Out-of-Sequence Maneuver
 Special Analysis | startOfTurn | Triggered/Start of Turn, 1/Encounter | All Opponents stop being Analyzed, and you regain Ki Points equal to double your Scholarship Modifier
+Enhanced Class — opção: Elite | startOfRound | Triggered/Start of Combat Round | While your Ki Points exceed 1/2 of your Maximum Ki Points, regain 2(bT) Ki Points
 Celestial Perfection | startOfTurn | Triggered/Start of Turn | You may spend 1 Counter Action to enter the God Ki Special State until the start of your next turn
 In the Realm of Angels | startOfTurn | Triggered/Start of Turn | You may spend 3(bT) Divine Ki Points to remove a Combat Condition you are suffering from (except Pinned, Suffocating, Transfigured, or Poisoned)
 Spirit of Battle | startOfTurn | Triggered/Start of Turn | Use the Power Up Maneuver as an Out-of-Sequence Maneuver
@@ -239,6 +245,7 @@ Hazardous Aura | startOfTurn | Triggered/Transform, Triggered/Start of Turn | Un
 Power of Life Itself | startOfTurn | Triggered/Start of Turn | Regain Life and Ki Points equal to your Life Power
 Perfect Clone | startOfRound | Triggered/Start of Combat Round | You can change the Magnitude of your Field of Aggression to any Magnitude between Standard and Destructive until the end of the Combat Round
 Beautiful Reflection | startOfRound | Triggered/Start of Combat Round | If your Beloved Reflection is on a Square that does not possess the Glass Environmental Quality, apply the Glass Environmental Quality to all Squares within a M
+Super Class — opção: Elite | startOfTurn | Triggered/Start of Turn, 1/Encounter | Use a Ki Surge as an Out-of-Sequence Maneuver
 Fiendish Evolution (2) | startOfTurn | Triggered/Start of Turn, 1/Encounter | Ignore the 3rd effect of Demonic Pressure
 Powerful Evolution (1) | startOfTurn | Triggered/Start of Turn, M/Encounter | Apply the effects of Legend Realized if you do not have access to the Emperor Mutation Trait
 Armed Form | startOfTurn | Triggered/Start of Turn | Select a Weapon you possess and a qualifying Weapon Quality for that Weapon (except a Special Weapon Quality) with 1 Quality Slot

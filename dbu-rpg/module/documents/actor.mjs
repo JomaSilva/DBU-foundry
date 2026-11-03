@@ -2,13 +2,18 @@ import { DBU } from "../config.mjs";
 import { dbuRoll, postInfoCard } from "../dice/roller.mjs";
 import { openAttackDialog, applyDamageToActor } from "../combat/attack.mjs";
 import { categoryToDice } from "../rules/dice.mjs";
-import { addTimedPower, dropTimedPower, inCombat, renewTimedPower } from "../combat/triggers.mjs";
+import { addTimedCondition, addTimedPower, dropTimedPower, inCombat, renewTimedPower } from "../combat/triggers.mjs";
 import { footLegProne, offerRegeneratorRemoval } from "../combat/injuries.mjs";
 
 const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
 const { DialogV2 } = foundry.applications.api;
 
 export class DBUActor extends Actor {
+
+  /** Boss villains may enter Transformations whose Tier of Power Requirement is above their own. */
+  get isBoss() {
+    return (this.type === "npc") && (this.system.npcType === "boss");
+  }
 
   /** @override */
   getRollData() {
@@ -19,8 +24,10 @@ export class DBUActor extends Actor {
   async _preCreate(data, options, user) {
     if ( (await super._preCreate(data, options, user)) === false ) return false;
     const updates = {};
-    if ( !data.prototypeToken?.actorLink && (this.type === "character") ) updates["prototypeToken.actorLink"] = true;
-    if ( this.type === "character" ) updates["prototypeToken.disposition"] = CONST.TOKEN_DISPOSITIONS.FRIENDLY;
+    // Characters and Fusions are always linked: a Fusion's Round Limiter lives on the actor
+    const linked = ["character", "fusion"].includes(this.type);
+    if ( !data.prototypeToken?.actorLink && linked ) updates["prototypeToken.actorLink"] = true;
+    if ( linked ) updates["prototypeToken.disposition"] = CONST.TOKEN_DISPOSITIONS.FRIENDLY;
     updates["prototypeToken.bar1"] = { attribute: "life" };
     updates["prototypeToken.bar2"] = { attribute: "ki" };
     // A new character starts with full Life Points, Ki Points and Capacity
@@ -48,7 +55,8 @@ export class DBUActor extends Actor {
         if ( v < 0 ) foundry.utils.setProperty(changed, path, 0);
       }
     }
-    if ( foundry.utils.hasProperty(changed, "system.karma.value") ) {
+    // A Fusion may use the Karma Points of all of its Fused Characters
+    if ( foundry.utils.hasProperty(changed, "system.karma.value") && (this.type !== "fusion") ) {
       const v = foundry.utils.getProperty(changed, "system.karma.value");
       if ( v > 4 ) {
         foundry.utils.setProperty(changed, "system.karma.value", 4);
@@ -148,6 +156,14 @@ export class DBUActor extends Actor {
     if ( lines.length || buttons.length ) {
       await postInfoCard({ actor: this, title: L("DBU.Threshold.Title", { name: this.name }), lines, buttons });
     }
+    // Forceful Defusion: a Fusion that fails the Steadfast Check of the Injured or Critical Threshold, or is Defeated
+    const forced = (this.type === "fusion") && this.system.fusion.active
+      && (defeated || ["injured", "critical"].some(k => updates[`system.thresholds.${k}`] === "fail"));
+    if ( forced ) {
+      const { defuse } = await import("../fusion/fusion.mjs");
+      await defuse(this, { reason: "forced" });
+      return;
+    }
     if ( defeated ) await this._onDefeated();
   }
 
@@ -239,14 +255,41 @@ export class DBUActor extends Actor {
   async rollStressTest(transformation = null, { grade } = {}) {
     const sys = this.system;
     const req = this.stressRequirement(transformation, { grade });
+    // New Level of Power: automatic success at any Stress Test for that Transformation, unless used in conjunction
+    const alone = sys.transformation.active;
+    // Maxi Fusion (Maximum Metamorese): automatic success on every Stress Test
+    const automatic = (!transformation && (alone.length === 1) && alone[0].system.newLevel) || sys.flags.autoStress;
+    if ( automatic ) {
+      if ( !transformation ) await this.removePending("stressTest");
+      const name = transformation?.name ?? alone[0]?.name ?? "";
+      await postInfoCard({ actor: this, title: L("DBU.Roll.Stress"), subtitle: name, img: (transformation ?? alone[0])?.img,
+        lines: [L(sys.flags.autoStress ? "DBU.Fusion.AutoStress" : "DBU.Trans.NewLevelStress", { name })] });
+      return { success: true, requirement: req, automatic: true };
+    }
+    const parts = [{ label: "+1", value: 1 }, { label: "Stress Bonus", value: sys.stress.bonus }];
+    // Fused Transformation: no Health Threshold penalty to the Stress Bonus for a Fused Form
+    const fusedForms = (this.type === "fusion") ? (sys.fusion.fusedForms ?? []) : [];
+    const tested = transformation ? [transformation] : alone;
+    if ( fusedForms.length && tested.length && tested.every(t => fusedForms.includes(t.name)) && sys.health.stressPenalty ) {
+      parts.push({ label: "Fused Transformation", value: sys.health.stressPenalty });
+    }
     const r = await dbuRoll({
       actor: this, kind: "stress", title: L("DBU.Roll.Stress"),
       subtitle: transformation ? transformation.name : sys.transformation.active.map(t => t.name).join(" + "),
-      noCrit: true, noBotch: true,
-      parts: [{ label: "+1", value: 1 }, { label: "Stress Bonus", value: sys.stress.bonus }],
-      target: req
+      noCrit: true, noBotch: true, parts, target: req
     });
-    const success = r.total >= req;
+    let success = r.total >= req;
+    // Potara Fusion (Divine Fusion Method, 1/Encounter): a failed Stress Test may count as a success
+    if ( !success && (this.type === "fusion") && sys.fusion.active && (sys.fusion.method === "potara") && !sys.fusion.stressSaveUsed ) {
+      const use = await DialogV2.confirm({
+        window: { title: "Divine Fusion Method" }, content: `<p>${L("DBU.Fusion.PotaraSave")}</p>`, rejectClose: false
+      });
+      if ( use ) {
+        success = true;
+        await this.update({ "system.fusion.stressSaveUsed": true });
+        await postInfoCard({ actor: this, title: "Divine Fusion Method", lines: [L("DBU.Fusion.PotaraSaved")], img: this.img });
+      }
+    }
     if ( !transformation ) await this.removePending("stressTest");
     if ( !success ) await this.applyStressExhaustion();
     return { ...r, success, requirement: req };
@@ -282,6 +325,11 @@ export class DBUActor extends Actor {
       return this.toggleStatusEffect("prone", { active: false }).catch(() => null);
     }
     if ( key === "mightClash" ) return this.rollClash("might");
+    if ( key.startsWith("choice:") ) {
+      const item = this.items.get(key.slice(7));
+      const { chooseTransformationOptions } = await import("../combat/choices.mjs");
+      return item ? chooseTransformationOptions(this, item, { required: false }) : null;
+    }
     if ( key.startsWith("allocate:") ) {
       const { openAllocationDialog } = await import("../combat/stacks.mjs");
       return openAllocationDialog(this, key.slice(9));
@@ -335,6 +383,7 @@ export class DBUActor extends Actor {
 
   async applyStressExhaustion() {
     const sys = this.system;
+    const prev = sys._source.conditions.stressExhaustion ?? 0;
     const updates = { "system.conditions.stressExhaustion": 1 };
     if ( sys.transformation.kiMultiplier ) updates["system.ki.value"] = Math.floor(sys.ki.value / 2);
     await this.update(updates);
@@ -342,6 +391,8 @@ export class DBUActor extends Actor {
       .map(t => ({ _id: t.id, "system.active": false }));
     if ( leave.length ) await this.updateEmbeddedDocuments("Item", leave);
     await this.toggleStatusEffect("stressExhaustion", { active: true }).catch(() => null);
+    // Stress Exhaustion lasts until the end of your next turn
+    await addTimedCondition(this, "stressExhaustion", prev, 1, "endOfNextTurn", "Stress Exhaustion");
   }
 
   /* -------------------------------------------- */
@@ -357,18 +408,32 @@ export class DBUActor extends Actor {
     if ( sys.effectiveConditions.stressExhaustion && !ts.aspects.some(a => a.key === "natural") ) problems.push(L("DBU.Trans.ErrExhausted"));
     if ( sys.ki.value <= 0 ) problems.push(L("DBU.Trans.ErrNoKi"));
     const topReq = ts.topReq - (ts.prelude ? 1 : 0);
-    if ( sys.top.current < topReq ) problems.push(L("DBU.Val.TransTop", { name: item.name, req: topReq, top: sys.top.current }));
+    if ( (sys.top.current < topReq) && !this.isBoss ) problems.push(L("DBU.Val.TransTop", { name: item.name, req: topReq, top: sys.top.current }));
     const { raceMatches } = await import("../rules/validation.mjs");
-    if ( sys.race && !raceMatches(ts.race, sys.race) ) problems.push(L("DBU.Val.TransRace", { name: item.name, race: ts.race }));
+    if ( sys.race && !raceMatches(ts.race, sys.races?.length ? sys.races : sys.race) ) problems.push(L("DBU.Val.TransRace", { name: item.name, race: ts.race }));
+    // A Plump or Frail Fusion stays in its Normal State
+    if ( (this.type === "fusion") && (sys.fusion.dance !== "success") ) problems.push(L(`DBU.Fusion.Dance.${sys.fusion.dance}`));
     if ( problems.length ) {
       ui.notifications.error(problems.join(" "));
       return null;
     }
+    // First time in this Transformation: its Option effects (e.g. S-Cells) must be chosen before entering it
+    if ( ts.pendingChoices?.length ) {
+      const { chooseTransformationOptions } = await import("../combat/choices.mjs");
+      if ( !(await chooseTransformationOptions(this, item, { required: true })) ) {
+        ui.notifications.warn(L("DBU.Choice.Required", { name: item.name }));
+        return null;
+      }
+    }
     const natural = ts.aspects.some(a => a.key === "natural") && !sys.transformation.active.length;
-    const newLevel = ts.newLevel;
+    // New Level of Power: the first time ever this character enters this Transformation during a Combat Encounter
+    const firstEver = await this._newLevelOfPower(item);
+    const newLevel = item.system.newLevel;
+    // Its automatic success does not cover a Stress Test for Transformations used in conjunction
+    const staying = sys.transformation.active.filter(t => (t.id !== item.id) && (ts.countsAsForm ? !t.system.countsAsForm : t.system.countsAsForm));
     let success = true;
     let roll = null;
-    if ( !natural && !newLevel ) {
+    if ( !natural && !(newLevel && !staying.length) ) {
       roll = await this.rollStressTest(item, { grade });
       success = roll.success;
     }
@@ -382,14 +447,21 @@ export class DBUActor extends Actor {
       if ( !ts.countsAsForm && !t.system.countsAsForm ) leave.push(t);
     }
     const updates = leave.map(t => ({ _id: t.id, "system.active": false }));
-    updates.push({ _id: item.id, "system.active": true, "system.viaManeuver": true, ...(grade ? { "system.grade": grade } : {}) });
+    updates.push({ _id: item.id, "system.active": true, "system.viaManeuver": true, "system.everEntered": true, ...(grade ? { "system.grade": grade } : {}) });
     await this.updateEmbeddedDocuments("Item", updates);
 
     // Legend Realized: first time per Combat Encounter in each Form
     const lines = [L("DBU.Trans.Entered", { name: item.name })];
+    if ( firstEver ) lines.push(L(ts.transType === "form" ? "DBU.Trans.NewLevelForm" : "DBU.Trans.NewLevelEnhancement"));
+    // Still pending: it only happens in a Combat Encounter
+    else if ( item.system.newLevelPending ) lines.push(L("DBU.Trans.NewLevelWaiting"));
     if ( (ts.transType === "form") && (ts.stage !== 0) && game.combat?.started ) {
       const used = new Set(sys.combat.legendRealized ?? []);
-      if ( !used.has(item.id) ) {
+      // Not again from a Form of the same Form Type and Tier of Power Requirement as one used this encounter
+      const twin = Array.from(used).map(id => this.items.get(id)).find(t => t && (t.id !== item.id)
+        && (t.system.subtype === ts.subtype) && (t.system.topReq === ts.topReq));
+      if ( twin ) lines.push(L("DBU.Trans.LegendSameType", { name: twin.name }));
+      if ( !used.has(item.id) && !twin ) {
         const T = this.system.top.current;
         const r = await new Roll(`${2 * T}d10 + ${this.system.pl}`).evaluate();
         let amount = r.total * (newLevel ? 2 : 1);
@@ -404,10 +476,55 @@ export class DBUActor extends Actor {
       }
     }
     if ( ts.transType === "enhancement" ) lines.push(L("DBU.Trans.BurstLimit"));
-    if ( ts.aspects.some(a => a.key === "rampaging") ) lines.push(L("DBU.Trans.Rampaging"));
+    // Round Limiter of a Temporary Fusion: the first Transformation with a ToP Requirement of 4+ shortens it
+    if ( this.type === "fusion" ) {
+      const { fusionTransformed } = await import("../fusion/fusion.mjs");
+      const cut = await fusionTransformed(this, item);
+      if ( cut ) lines.push(cut);
+    }
+    // Aspects of the Grade entered (and of the Grades below it)
+    if ( ts.graded ) {
+      const { aspectLabel } = await import("../rules/aspects.mjs");
+      const fromGrade = (ts.gradeAspects ?? []).filter(g => g.key && (g.grade <= ts.grade)).map(g => aspectLabel(g));
+      if ( fromGrade.length ) lines.push(L("DBU.Trans.GradeAspects", { n: ts.grade, list: fromGrade.join(", ") }));
+    }
+    const rampaging = ts.aspects.find(a => a.key === "rampaging");
+    if ( rampaging ) lines.push(L(rampaging.level >= 2 ? "DBU.Trans.Rampaging2" : "DBU.Trans.Rampaging"));
     if ( ts.aspects.some(a => a.key === "bursting") ) lines.push(L("DBU.Trans.Bursting"));
     await postInfoCard({ actor: this, title: item.name, subtitle: L("DBU.Trans.Maneuver"), lines, img: item.img });
     return roll ?? { success: true };
+  }
+
+  /**
+   * New Level of Power: the first time ever a character gains access to a Transformation during a Combat Encounter.
+   * While in it until the end of the encounter: +1 ToP, +1(bT) Stress Bonus, +1 base ToP for Power Advantage
+   * (data preparation). Awakening: regain 1/2 of the Life and Ki Points. Only one at a time.
+   * A Form or Enhancement only gets it when marked as pending (added mid-combat, or by the ARC for a planned first time);
+   * an Awakening gets it when it is gained during the encounter (force).
+   * @returns {Promise<boolean>} true when it triggered now
+   */
+  async _newLevelOfPower(item, { force = false } = {}) {
+    const ts = item.system;
+    // In the Combat Encounter, also right before it starts (transforming before "Begin Combat")
+    const combat = game.combat;
+    const inEncounter = !!combat && combat.combatants.some(c => c.actor?.uuid === this.uuid);
+    if ( !inEncounter || ts.newLevel || ts.temporary ) return false;
+    if ( !ts.newLevelPending && !(force && !ts.everEntered) ) return false;
+    const others = this.items.filter(i => (i.type === "transformation") && (i.id !== item.id) && i.system.newLevel)
+      .map(i => ({ _id: i.id, "system.newLevel": false }));
+    await this.updateEmbeddedDocuments("Item", [...others, {
+      _id: item.id, "system.newLevel": true, "system.newLevelPending": false, "system.everEntered": true,
+      "flags.dbu-rpg.newLevelCombat": combat.id
+    }]);
+    if ( ts.transType === "awakening" ) {
+      const sys = this.system;
+      await this.update({
+        "system.life.value": Math.min(sys.life.max, sys.life.value + Math.floor(sys.life.max / 2)),
+        "system.ki.value": Math.min(sys.ki.max, sys.ki.value + Math.floor(sys.ki.max / 2))
+      });
+      await postInfoCard({ actor: this, title: item.name, img: item.img, lines: [L("DBU.Trans.NewLevelAwakening")] });
+    }
+    return true;
   }
 
   async revert(item = null) {
@@ -418,7 +535,11 @@ export class DBUActor extends Actor {
     await this.updateEmbeddedDocuments("Item", updates);
     const exhausting = list.some(t => t.system.aspects.some(a => a.key === "exhausting"));
     if ( exhausting ) {
+      const prevSE = this.system._source.conditions.stressExhaustion ?? 0;
+      const prevIm = this.system._source.conditions.impediment ?? 0;
       await this.update({ "system.conditions.stressExhaustion": 1, "system.conditions.impediment": 1 });
+      await addTimedCondition(this, "stressExhaustion", prevSE, 1, "endOfNextTurn", "Exhausting");
+      await addTimedCondition(this, "impediment", prevIm, 1, "endOfNextTurn", "Exhausting");
     }
     // Clamp pools to the new maximums (Ki Multiplier ends)
     const upd = {};
@@ -640,6 +761,7 @@ export class DBUActor extends Actor {
       updates["system.ki.value"] = Math.min(sys.ki.max, sys.ki.value + Math.floor(sys.ki.max / 10));
     }
     updates["system.resources"] = (sys.resources ?? []).map(r => ({ ...r, value: 0 }));
+    if ( this.type === "fusion" ) updates["system.fusion.stressSaveUsed"] = false;
     await this.update(updates);
     const itemUpdates = [];
     for ( const i of this.items ) {

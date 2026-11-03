@@ -19,7 +19,9 @@
           <a data-action="itemEdit">{{t.item.name}}</a>
           {{#if t.s.line}}<small>{{t.s.line}} {{#if t.s.stage}}S{{t.s.stage}}{{/if}}</small>{{/if}}
           {{#if t.s.subtype}}<span class="tag">{{t.s.subtype}}</span>{{/if}}
-          {{#if (eq t.mastered "full")}}<span class="tag ok" data-tooltip="Fully Mastered">M</span>{{else if (eq t.mastered "partial")}}<span class="tag" data-tooltip="Mastery {{t.s.mastery}}/{{t.s.masteryNeeded}}">M{{t.s.mastery}}</span>{{/if}}
+          {{#if t.pending}}<span class="tag warn" data-tooltip="{{localize 'DBU.Choice.PendingTip'}}"><i class="fa-solid fa-list-check"></i> {{t.pending}}</span>{{/if}}
+          {{#if t.s.newLevel}}<a class="tag dbu-nlop on" data-action="newLevel" data-tooltip="{{localize 'DBU.Trans.NewLevelActiveTip'}}"><i class="fa-solid fa-bolt"></i> NLoP</a>
+          {{else if t.s.newLevelPending}}<a class="tag dbu-nlop" data-action="newLevel" data-tooltip="{{localize 'DBU.Trans.NewLevelPendingTag'}}"><i class="fa-regular fa-hourglass"></i> NLoP</a>{{/if}}
           {{#unless t.raceOk}}<i class="fa-solid fa-triangle-exclamation warn" data-tooltip="{{localize 'DBU.Trans.RaceWarn'}}: {{t.s.race}}"></i>{{/unless}}
         </td>
         <td class="center {{#unless t.canEnter}}dbu-dim{{/unless}}">{{t.s.topReq}}+</td>
@@ -34,6 +36,13 @@
           {{else}}
             <a class="dbu-transform-btn {{#if t.s.active}}on{{/if}}" data-action="itemUse" data-tooltip="{{#if t.s.active}}{{localize 'DBU.Trans.Revert'}}{{else}}{{localize 'DBU.Trans.Transform'}}{{/if}}">
               <i class="fa-solid {{#if t.s.active}}fa-power-off{{else}}fa-fire-flame-curved{{/if}}"></i></a>
+            {{#if t.canMaster}}
+            <span class="dbu-mastery {{#if (eq t.mastered "full")}}full{{/if}}" data-tooltip="{{t.masteryTip}}">
+              <a data-action="itemMastery" data-delta="-1"><i class="fa-solid fa-minus"></i></a>
+              <a data-action="itemMastery" data-delta="1" class="dbu-mastery-badge"><i class="fa-solid fa-graduation-cap"></i> {{t.s.mastery}}/{{t.s.masteryNeeded}}</a>
+              <a data-action="itemMastery" data-delta="1"><i class="fa-solid fa-plus"></i></a>
+            </span>
+            {{/if}}
             {{#if t.s.graded}}
             <a data-action="itemStack" data-field="system.grade" data-delta="-1"><i class="fa-solid fa-minus"></i></a>
             <span data-tooltip="Grade">G{{t.s.grade}}</span>

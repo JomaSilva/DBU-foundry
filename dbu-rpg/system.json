@@ -45,6 +45,13 @@
           "details.notes",
           "zsoul.description"
         ]
+      },
+      "fusion": {
+        "htmlFields": [
+          "details.biography",
+          "details.notes",
+          "zsoul.description"
+        ]
       }
     },
     "Item": {
