@@ -8,12 +8,21 @@ const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
 /** Gather the active turn/round triggers of an actor for one event. */
 export function collectTriggers(actor, event) {
   const list = [];
+  // A Trait possessed at all times (Legendary) runs once, even outside its Transformation or carried by two of them
+  const possessed = new Set();
   for ( const item of actor.items ) {
     const s = item.system;
-    if ( !s?.triggers?.length || !(s.isActive ?? true) ) continue;
-    const ctx = (item.type === "transformation") ? { G: s.grade, S: s.stage, Z: s.stacks, M: s.mastery } : {};
+    if ( !s?.triggers?.length ) continue;
+    const active = s.isActive ?? true;
+    const ctx = (item.type === "transformation") ? s.formulaContext : {};
     for ( const t of s.triggers ) {
-      if ( t.active && (t.event === event) ) list.push({ ...t, source: item.name, ctx });
+      if ( !t.active || (t.event !== event) || !(active || t.always) ) continue;
+      if ( t.always ) {
+        const key = [t.label, t.event, t.effect, t.value, t.condition].join("|");
+        if ( possessed.has(key) ) continue;
+        possessed.add(key);
+      }
+      list.push({ ...t, source: item.name, ctx });
     }
   }
   for ( const t of actor.system.customTriggers ?? [] ) {
@@ -177,6 +186,11 @@ export function inCombat(actor) {
   return !!game.combat?.started && game.combat.combatants.some(c => c.actor?.uuid === actor.uuid);
 }
 
+/** The started Combat Encounter the actor takes part in (not only the one the tracker shows), or null. */
+export function encounterOf(actor) {
+  return game.combats?.find(c => c.started && c.combatants.some(cb => cb.actor?.uuid === actor?.uuid)) ?? null;
+}
+
 async function addTimed(actor, { kind, key, prev, level, duration, event, label, rounds = 0 }) {
   const list = foundry.utils.deepClone(actor.getFlag("dbu-rpg", "timed") ?? []);
   const existing = list.find(e => (e.kind === kind) && (e.key === key));
@@ -197,6 +211,25 @@ async function addTimed(actor, { kind, key, prev, level, duration, event, label,
 export async function addTimedCondition(actor, key, prev = 0, level = 1, duration = "endOfNextTurn", label = "", { rounds = 0 } = {}) {
   if ( !inCombat(actor) ) return;
   await addTimed(actor, { kind: "condition", key, prev, level, duration, event: "", label, rounds });
+}
+
+/**
+ * A modifier that lasts a few Combat Rounds (Stretch: +1(T) Combat Rolls for the first 3): it goes into the sheet's
+ * custom modifiers under its label and is taken out when it ends.
+ */
+export async function addTimedModifier(actor, modifier, { rounds = 1 } = {}) {
+  const list = foundry.utils.deepClone(actor.system._source.customModifiers ?? []).filter(m => m.label !== modifier.label);
+  list.push(modifier);
+  await actor.update({ "system.customModifiers": list });
+  await addTimed(actor, { kind: "modifier", key: modifier.label, prev: 0, level: 0, duration: "endOfRound", event: "",
+    label: modifier.label, rounds });
+}
+
+async function removeTimedModifier(actor, label) {
+  const list = actor.system._source.customModifiers ?? [];
+  if ( !list.some(m => m.label === label) ) return false;
+  await actor.update({ "system.customModifiers": list.filter(m => m.label !== label) });
+  return true;
 }
 
 /** Power Up: each stack of Power lasts until the end of your next turn. */
@@ -260,6 +293,10 @@ export async function expireTimed(actor, event) {
     if ( EXPIRES_AT[entry.duration] !== event ) { keep.push(entry); continue; }
     if ( entry.skip > 0 ) { entry.skip -= 1; keep.push(entry); continue; }
     if ( entry.kind === "power" ) { powerLost += entry.count ?? 1; continue; }
+    if ( entry.kind === "modifier" ) {
+      if ( await removeTimedModifier(actor, entry.key) ) lines.push(L("DBU.Trigger.ExpiredModifier", { label: entry.label }));
+      continue;
+    }
     if ( await revert(actor, entry) ) lines.push(L("DBU.Trigger.Expired", { label: entry.label || "", what: statusLabel(entry.kind, entry.key) }));
   }
   await actor.setFlag("dbu-rpg", "timed", keep);
@@ -280,6 +317,9 @@ export async function expireTimed(actor, event) {
 export async function clearTimed(actor) {
   const list = actor?.getFlag("dbu-rpg", "timed") ?? [];
   if ( !list.length ) return;
-  for ( const entry of list ) if ( entry.kind !== "power" ) await revert(actor, entry);
+  for ( const entry of list ) {
+    if ( entry.kind === "modifier" ) await removeTimedModifier(actor, entry.key);
+    else if ( entry.kind !== "power" ) await revert(actor, entry);
+  }
   await actor.unsetFlag("dbu-rpg", "timed");
 }

@@ -277,6 +277,7 @@ Completion of Ultra Instinct | startOfTurn | Automatic/Start of Turn | If you ar
 Completion of Ultra Instinct | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you have 6 stacks of Instinct, trigger the Burst Limit of Autonomous Ultra Instinct (even if you have triggered a Burst Limit previously this Combat Encounte
 Frontline Fighter | startOfTurn | Triggered/Start of Turn | If this effect triggers before any other Character has taken a turn this Combat Round, increase your Strike and Wound Rolls by 1(T) and 2(T) respectively until 
 Frontline Fighter | startOfEncounter | Triggered/Start of Combat Encounter | If you trigger the second effect of Jump Start, it does not count for its [1/Encounter] Keyword
+Spited Divinity | startOfTurn | Triggered/Start of Turn, 1/Encounter | Target an Opponent
 Additional Vocation | startOfTurn | Triggered/Start of Turn | Select and gain access to one of your Extra Vocations
 Master of Magic | startOfTurn | Triggered/Start of Turn, 1/Encounter | Use a Ki Surge
 Reactionary Warrior | startOfTurn | Triggered/Start of Turn | If you only possess 1 Action, you may spend that Action to use a Surge of your choice as an Out-of-Sequence Maneuver

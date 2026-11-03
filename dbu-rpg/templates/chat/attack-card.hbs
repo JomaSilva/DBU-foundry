@@ -2,7 +2,7 @@
   <header class="dbu-card-header">
     <div>
       <h3>{{attack.name}}</h3>
-      <div class="dbu-card-sub">{{category}}{{#if attack.charges}} · {{attack.charges}} Energy Charge(s){{/if}}{{#if attack.wager}} · Wager {{attack.wager}}{{/if}} · {{attack.kp}} KP</div>
+      <div class="dbu-card-sub">{{category}}{{#if attack.charges}} · {{attack.charges}} Energy Charge(s){{/if}}{{#if attack.wager}} · Wager {{attack.wager}}{{#if attack.dkp.wager}} DKP{{/if}}{{/if}} · {{attack.kp}} {{#if attack.dkp.cost}}DKP{{else}}KP{{/if}}</div>
     </div>
   </header>
   <div class="dbu-card-total {{#if attack.strike.crit}}crit{{/if}} {{#if attack.strike.botch}}botch{{/if}}">
@@ -36,7 +36,7 @@
       <td class="who">{{#if t.img}}<img src="{{t.img}}" alt="" width="24" height="24">{{/if}} {{t.name}}</td>
       <td class="state">
         {{#if (eq t.result "hit")}}<span class="hit">{{localize "DBU.Defense.Hit"}}</span>{{else if (eq t.result "miss")}}<span class="miss">{{localize "DBU.Defense.Miss"}}</span>{{else}}<span class="pending">{{localize "DBU.Defense.Pending"}}</span>{{/if}}
-        {{#if t.defense}}<small>{{t.defense.mode}}{{#if t.defense.total}} {{t.defense.total}}{{/if}}{{#if t.defense.cost}} ({{t.defense.cost}} KP){{/if}}</small>{{/if}}
+        {{#if t.defense}}<small>{{t.defense.mode}}{{#if t.defense.total}} {{t.defense.total}}{{/if}}{{#if t.defense.cost}} ({{t.defense.cost}} {{#if t.defense.dkp}}DKP{{else}}KP{{/if}}){{/if}}</small>{{/if}}
         {{#if (or (eq t.damage 0) t.damage)}}<strong class="dmg">−{{t.damage}} LP</strong>{{/if}}
       </td>
       <td class="actions">
@@ -46,6 +46,7 @@
         <button type="button" data-dbu-action="defense" data-mode="guard" data-index="{{i}}" data-tooltip="Defend: Guard"><i class="fa-solid fa-shield-halved"></i></button>
         <button type="button" data-dbu-action="defense" data-mode="directHit" data-index="{{i}}" data-tooltip="Defend: Direct Hit"><i class="fa-solid fa-person-rays"></i></button>
         <button type="button" data-dbu-action="defense" data-mode="crossCounter" data-index="{{i}}" data-tooltip="Defend: Cross Counter"><i class="fa-solid fa-arrows-left-right"></i></button>
+        <button type="button" class="dbu-divine" data-dbu-action="defense" data-mode="divineFlex" data-index="{{i}}" data-tooltip="{{localize 'DBU.God.FlexTip'}}"><i class="fa-solid fa-sun"></i></button>
         <button type="button" data-dbu-action="defense" data-mode="none" data-index="{{i}}" data-tooltip="{{localize 'DBU.Defense.None'}}"><i class="fa-solid fa-xmark"></i></button>
         {{/unless}}
         {{#if @root.attack.wound}}{{#unless (eq t.result "miss")}}{{#unless (or (eq t.damage 0) t.damage)}}

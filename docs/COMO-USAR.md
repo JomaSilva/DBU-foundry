@@ -32,6 +32,18 @@ de internet):
 
 - **Cabeçalho:** nome, PL, ToP (atual/base), LP, KP e Capacidade com barras, Karma, rodada do
   combate e "SEU TURNO" quando é a vez do personagem.
+- **Poder de Luta** (logo abaixo das barras de LP e KP): o número que um scouter leria. Não é regra do DBU, é uma
+  leitura da ficha calibrada no anime:
+  `0,78 × 1,75^(PL−1) × 1,4^(ToP atual−1) × (FO + (AG + TE)/4)³ × KP restante`.
+  - Conta os **Modificadores** atuais: a transformação sobe o número (o SSJ1 multiplica por ~3 e o Blue por ~50 no
+    Goku de PL 25). Insight, Magic, Scholarship e Personality não entram.
+  - **KP restante** = KP atual ÷ KP máximo natural (sem Ki Multiplier nem multiplicador de forma). Gastando KP o
+    número cai (no mínimo 10%); numa forma com o KP acima do natural, ele sobe.
+  - O **Holding Back** baixa o ToP atual e, com ele, o número.
+  - Com fichas típicas: PL 1 (FO 6, AG 4, TE 4) ≈ 400; PL 4 (FO 9, AG 7, TE 7) ≈ 8.100; PL 5 (FO 9, AG 6, TE 6) ≈
+    17.700; PL 10 (FO 10, AG 8, TE 4) ≈ 517.000.
+  - O mestre pode trocar a fórmula em **Configurações › Configurar Sistema › Fórmula do Poder de Luta** (a dica lista
+    as variáveis; em branco volta ao padrão). O tooltip do número mostra a conta.
 - **Alertas:** faixa logo abaixo do cabeçalho com testes obrigatórios e lembretes (ver "Alertas").
 - **Principal:** atributos (Score, bônus racial, Modificador), aptidões (Initiative, Haste,
   Awareness, Defense Value, Soak, DR, Speed, Might, Surgency), Testes de Resistência e condições.
@@ -40,12 +52,40 @@ de internet):
   Internal do Injury System, que segura 1 stack de Fatigued, ou um ícone de condição no token. O
   tooltip diz o que é. Para tirar, ignore ou remova o ferimento na aba Opcionais.
 - **Perícias:** ranks, bônus raciais e de talentos, limites de ranks por PL e orçamento.
-- **Combate:** Acerto (Strike), Desvio (Dodge), Dano (Wound), dados de ToP, Greater Dice, crítico e
-  botch, contadores do combate (Ações, Counter Actions, Power, Super Stacks, Energy Charges,
-  Diminishing Defense, Holding Back, DOT), manobras rápidas (Power Up, Energy Charge, Surge,
-  Combat Recovery) e o botão **Atacar**.
+- **Combate:** no alto, os **Traços em uso** (ver "Transformações"). Depois, Acerto (Strike), Desvio (Dodge),
+  Dano (Wound), dados de ToP, Greater Dice, crítico e botch, contadores do combate (Ações, Counter Actions,
+  Power, Super Stacks, Energy Charges, Diminishing Defense, Holding Back, DOT), manobras rápidas (Power Up,
+  Energy Charge, Surge, Combat Recovery) e o botão **Atacar**.
 - **Técnicas:** Signature Techniques (com construtor de Vantagens/Desvantagens que calcula TP e
   KP), Unique Abilities e Manobras Especiais.
+- **Aventura:** os **Adventuring Maneuvers** que o personagem tem, e só eles:
+  - **Universais** (todos): Take a Breather e Rest.
+  - **Das perícias** com 2+ ranks: Stretch (Acrobatics), Pickpocket (Thievery), Obscure (Stealth), Create e Full
+    Repair (Craft; Tune Up com Craft Vehicles), Recall e Research (Knowledge), Care e Create (Medicine), Gauge
+    (Clairvoyance), Tame (Creature Handling), Power Regulation (Concealment), Profiling (Intuition), Scavenge
+    (Survival), Scam e Fraud (Bluff), Cook e Create (Cooking), Frighten (Intimidation), Befriend, Mingle e Recruit
+    (Persuasion).
+  - **De itens, habilidades e traços**: Scan (Scouter equipado ou Scout Scope), Item Search (Dragon Radar), Rice
+    Cooker, Teleport (Instant Transmission), Instant Understanding (Mind Reading), Long Distance Portal (Portal
+    Creation), Foresight (Precognition), Magical Sight (Second Sight), Morph (Shapeshift), Destroy (Hakai), Star
+    Consume, Replicate Self e Robot Factory (Big Gete Star Integration), Recruit (Awakening Commander, na metade do
+    tempo), Create (Magical Materialization, com Use Magic) e a remoção de absorvido do Roomy Biology.
+  - **Usar** só funciona **fora de combate**: com o personagem num combate começado, os botões ficam travados e a
+    aba avisa. Cada uso conta no **Session Limit**; o botão **Nova sessão de aventura** zera os usos do personagem
+    (o mestre tem **Nova sessão para todos**). Clique no nome para o texto oficial no chat.
+  - O que o botão faz:
+    - **Rest, Take a Breather e Care** recuperam LP/KP. Care escolhe o alvo e pode contar como Rest para ele.
+    - **Research, Scavenge, Fraud, Create e Cook** rolam a perícia contra a dificuldade escolhida.
+    - **Pickpocket, Obscure, Gauge, Profiling, Frighten e Befriend** rolam o Clash contra o alvo, que usa a melhor
+      das perícias dele; empate fica com o alvo.
+      - O Pickpocket aplica −3 a cada nova tentativa no mesmo alvo.
+      - Gauge, Profiling, Frighten e Befriend valem uma vez por alvo na sessão.
+      - Vencendo o Gauge, o PL e o Alignment do alvo chegam só para quem usou (e o mestre).
+      - O Profiling rola às cegas e só o mestre vê o resultado.
+    - **Power Regulation** ajusta o Holding Back.
+    - **Stretch** fica pendente e, se um combate começar em até 1 hora do tempo do mundo, dá +1(T) nas Combat Rolls
+      até o fim da 3ª rodada.
+    - Os outros mostram o efeito no chat para aplicar à mão.
 - **Transformações:** Forms, Enhancements e Awakenings. Botão de transformar (rola o Stress Test
   com todas as regras de empilhamento), Grade (G), Stage (S), stacks (Z) e Mastery (M).
 - **Raça e Talentos:** raça, traços raciais, fatores e talentos com checagem de pré-requisitos.
@@ -123,11 +163,89 @@ de internet):
     Full Power Super Saiyan, por exemplo, na 1ª maestria fica com Draining (LV1) e Scaling (LV1); na 2ª perde o
     Draining e fica com Scaling (LV2). Já "ganha 1 nível" soma aos níveis que o Aspect já tem: o Scaling (LV1)
     do Perfected Super Saiyan vai para LV2.
+- **Stages e variantes** (herança de traços, já embutida no compêndio):
+  - Cada Stage tem os traços automatizados de todos os Stages de baixo da mesma linha, mesmo quando estão em outra
+    página. O Super Saiyan 2 e o 3 têm o S-Cells do 1, e o Rosé tem o que vem do SSG.
+  - A Mastery Trait de um Stage de baixo só vale no de cima quando ele também estiver dominado.
+  - Uma variante (Aspect Variant) herda tudo da transformação listada, menos os traços que ela substitui (o nome
+    entre parênteses, como "Mixed S-Cells (S-Cells)" no Bio Super Saiyan). O Rosé, variante do Blue, recebe a escolha do
+    Blue Saiyan.
+  - Legendary Traits valem o tempo todo, mesmo fora da forma, e contam uma vez só.
+  - A aba Detalhes da transformação lista os **traços herdados** e de onde vem cada um.
+  - Os bônus de atributo (AMB) não somam entre Stages: cada Stage usa a própria tabela.
+- **Metamorphosis:** o Suppression of Power da Full Suppression ignora o requisito de ToP para entrar e
+  permanecer, e todos os Stages herdam esse traço. Um Arcosian entra em qualquer Stage que tenha, sem checar o ToP
+  (o Stress Test continua). O site não tem mais uma regra de acesso antecipado enfraquecido; a que existe para
+  qualquer forma é o Aspect **Prelude** (−1 no requisito de ToP e −3 no Stress, com −1(T) nos bônus e sem o último
+  traço).
+- **Traços em uso (aba Combate):** um quadro por transformação ativa, com os traços dela, os herdados (com "de
+  Super Saiyan 1" embaixo), a opção escolhida (S-Cells: Super Surger) e as Mastery Traits já alcançadas. Ao
+  reverter, o quadro some. Seguem os **Legendary Traits** (sempre, mesmo fora da forma), os traços raciais ativos e
+  os talentos.
+  - Passe o mouse num traço para ver os efeitos dele e quais são automáticos; clique para mandar o texto oficial
+    do traço ao chat (vem do site, ou do texto já carregado na ficha).
+  - Em cima de cada quadro ficam o Grade, a maestria e os Aspects que valem agora.
+- **Burst Limit:** ao entrar numa Enhancement pela Transformation Maneuver (ou mudar o Grade dela), o cartão do
+  chat traz o botão **Burst Limit: nome**; no quadro da Enhancement há o botão **Ativar**. O sistema conta 1 por
+  encontro (qualquer Enhancement) e libera de novo com o New Level of Power nela. Numa Enhancement Transcended, o
+  Burst Recovery devolve 1/2 do KP máximo. Fora desse momento, ele pergunta antes de ativar. O efeito de cada
+  Burst Limit aparece no cartão com o texto oficial e é aplicado à mão.
+- **Transcendent Trait:** nas Enhancements com o Aspect Transcendent, o + da maestria vai uma vez além de
+  Fully Mastered (aparece como "1/1+"). Com essa maestria extra, o Transcendent Trait vale enquanto ela estiver
+  Transcended (marque Transcended nos Detalhes); os efeitos [Permanent] dele valem sempre.
+- **Grand Awakening:** o traço Grand Awakening de um Super Awakening fica desligado até o botão **Full Awakening**
+  do quadro do Awakening (1 por encontro, 1 ação). O sistema mostra o Grand Trigger, pergunta se ele foi cumprido,
+  liga o traço até o fim do encontro e devolve 1/4 de LP e KP (arredondado para cima).
+- **Imagem do token por forma:** na aba Transformações, o ícone 🖼 de cada Form ou Enhancement escolhe a imagem do
+  token nela (também em Detalhes › Imagem do token). Ao entrar na forma, os tokens do personagem trocam para essa
+  imagem; ao sair, voltam à imagem de sempre. Uma Form vale mais que uma Enhancement quando as duas têm imagem.
+  Quem não tem permissão de navegar nos arquivos cola o caminho ou a URL da imagem. Se alguém trocar a imagem do
+  token à mão no meio da forma, ela fica.
+- **Fichas antigas:** quando uma correção do compêndio muda os traços das transformações (como a herança acima), o
+  GM recebe no chat o cartão **Atualizar as transformações das fichas**, com a lista do que muda. Ficam como estão
+  as escolhas feitas, a maestria, o Grade, o estado e os modificadores adicionados à mão. **Agora não** esconde o
+  cartão até a próxima mudança do compêndio.
 - **Escolhas obrigatórias:** traços com efeito *Option* (ex.: **S-Cells** do Super Saiyan 1: Super Surger, Super
   Speed, Super Sturdy ou Super Specialist) pedem a escolha na primeira vez que o personagem entra na transformação
   (pelo botão de transformar ou pelo interruptor): sem escolher, ele não entra. A escolha vale para todos os
   estágios que herdam o traço (SSJ2, SSJ3...) e liga só os efeitos da opção escolhida. Awakenings pedem a escolha
   assim que entram na ficha. A ficha da transformação mostra o que foi escolhido e permite trocar.
+
+## Divine Ki Points (God Ki)
+
+Quem tem uma transformação com o Aspect **God Ki** (Super Saiyan God, Blue, Rosé, Autonomous Ultra Instinct,
+Power of Destruction, Dark King...) ganha a barra **DKP** no topo da ficha, entre o KP e a Capacity.
+
+- **Tamanho:** metade do KP máximo, sem contar o Ki Multiplier. A barra enche sozinha no início de cada combate,
+  e também quando o acesso chega no meio do combate.
+- **Quando usar:** só no estado God Ki, ou seja, numa forma com God Ki ou com o estado God Ki marcado na aba
+  Combate (Divine Candidate). Fora dele a barra fica apagada e os pontos ficam guardados.
+- **Pagando com DKP:**
+  - **Ataque:** no diálogo há **Pagar o custo em DKP** e **Ki Wager em DKP**. São dois pagamentos separados, cada
+    um de um pool só, e o DKP gasta metade da Capacity.
+  - **Guard e Energy Charge:** seguem o botão **KP/DKP** da barra, que escolhe o pool padrão no estado God Ki.
+- **Draining:** no estado God Ki, também tira em DKP metade do KP perdido.
+- **No Energy:** uma forma com God Ki cai quando os **DKP** zeram, e não os KP. Se houver uma transformação sem
+  God Ki junto (Kaioken, por exemplo), o KP em 0 continua derrubando tudo.
+- **Empower:** botão na aba Combate. Marque o aliado (target), escolha as Ações e a quantidade. Com os dois em God
+  Ki, dá para mandar DKP. Não gasta Capacity.
+
+**God Maneuvers** (compêndio Manobras › God Maneuvers): arraste as que o personagem ganhou por traço para a aba
+Técnicas (Manobras especiais) e use pelo botão ☀. Elas exigem o estado God Ki, descontam o DKP (com metade da
+Capacity), as Ações ou Counter Actions, e controlam o limite 1/Round e 1/Encounter.
+
+| God Maneuver | O que o sistema faz |
+|---|---|
+| Divine Attack | Abre o ataque com o custo do Profile pago em DKP e +1 Damage Category |
+| God Strike | Escolhe o Profile uma vez; o ataque custa 1/4 do KP do Profile, em DKP |
+| Divine Breathing | Rola 5d10(bT) + Surgency e cura |
+| Divine Flame | +2 Power (até o fim do próximo turno) e devolve em KP o DKP gasto |
+| Divine Counter | Gasta a Counter Action e abre o Basic Attack fora de sequência |
+| Divine Flex | Botão ☀ na sua linha do cartão de ataque: −1 Damage Category e o Soak do Direct Hit |
+| Holy Transformation | Entra numa forma com God Ki sem Stress Test (por exemplo, do SSG para o Blue) |
+| Divine Pulse | 1 ou 2 Ações: Stress Bonus −1 por Ação e +1(T) em FO e MA por Ação até sair da forma |
+| Divine Movement, Divine Roar, God Bind | Descontam o DKP e mostram o efeito para o mestre resolver |
+| God Finisher | Lembrete: use a Signature dele com "Pagar o custo em DKP" |
 
 ## Fusão
 

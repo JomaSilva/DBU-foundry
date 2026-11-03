@@ -118,6 +118,16 @@ export class TransformationData extends BaseItemData {
         param: new StringField({ blank: true, initial: "" })
       })),
       traits: new ArrayField(new StringField()),
+      // Traits gained from the lower Stages of its Line or from its listed Transformation (Variant), less the replaced ones
+      inherited: new ArrayField(new SchemaField({
+        trait: new StringField({ blank: true, initial: "" }),
+        from: new StringField({ blank: true, initial: "" }),
+        slug: new StringField({ blank: true, initial: "" })
+      })),
+      // Token image while in this Transformation (empty: the token keeps its own)
+      tokenImg: new StringField({ blank: true, initial: "" }),
+      // Grand Awakening of a Super Awakening, activated by the Full Awakening Maneuver until the end of the encounter
+      grandAwakening: new BooleanField({ initial: false }),
       stacks: intField(1, { min: 0 }),
       maxStacks: intField(1, { min: 1 }),
       grade: intField(1, { min: 0 }),
@@ -130,6 +140,9 @@ export class TransformationData extends BaseItemData {
       transcended: new BooleanField({ initial: false }),
       prelude: new BooleanField({ initial: false }),
       ignoreBulky: new BooleanField({ initial: false }),
+      // Its Tier of Power Requirement is ignored for entering and remaining in it (Metamorphosis: Suppression of Power,
+      // which the higher Stages inherit)
+      ignoreTop: new BooleanField({ initial: false }),
       /** Entered through the Transformation Maneuver (Forms only get the Ki Multiplier this way). */
       viaManeuver: new BooleanField({ initial: true }),
       legendRealized: new BooleanField({ initial: false }),
@@ -193,6 +206,25 @@ export class TransformationData extends BaseItemData {
   get masteryNeeded() {
     const difficult = (this.baseAspects ?? this.aspects).find(a => a.key === "difficult");
     return 1 + (difficult?.level ?? 0);
+  }
+
+  /** Every Trait name it has, its own and the inherited ones ("Name [kind]"). */
+  get allTraits() {
+    return [...(this.traits ?? []), ...(this.inherited ?? []).map(t => t.trait)];
+  }
+
+  /** A Transcendent Trait needs one more Mastery once Fully Mastered. */
+  get masteryMax() {
+    return this.masteryNeeded + (this.allTraits.some(t => /\[transcendent trait\]/.test(t)) ? 1 : 0);
+  }
+
+  /** Formula variables of its Traits: Grade, Stage, Stacks (Z), Mastery, Masteries beyond Fully Mastered (MX),
+   * Transcended (TR) and Grand Awakening active (GA). */
+  get formulaContext() {
+    return {
+      G: this.grade, S: this.stage, Z: this.stacks, M: this.mastery, MX: Math.max(0, this.mastery - this.masteryNeeded),
+      TR: this.transcended ? 1 : 0, GA: this.grandAwakening ? 1 : 0
+    };
   }
 
   /** Choices that still have to be made. */
@@ -312,6 +344,9 @@ export class ManeuverData extends BaseItemData {
       maneuverType: new StringField({ blank: true, initial: "Standard" }),
       actionCost: new StringField({ blank: true, initial: "1" }),
       kpCost: new StringField({ blank: true, initial: "" }),
+      // God Maneuvers (God Ki) are paid with Divine Ki Points
+      dkpCost: new StringField({ blank: true, initial: "" }),
+      god: new BooleanField({ initial: false }),
       frequency: new StringField({ blank: true, initial: "" }),
       requirement: new StringField({ blank: true, initial: "" }),
       minions: new StringField({ blank: true, initial: "" })

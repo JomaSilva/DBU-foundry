@@ -3,6 +3,7 @@ import { postInfoCard } from "../dice/roller.mjs";
 import { clearTimed, expireTimed, runTriggers } from "../combat/triggers.mjs";
 import { clearRegeneratorInjuries } from "../combat/injuries.mjs";
 import { fusionSkipTurn, fusionStartRound } from "../fusion/fusion.mjs";
+import { fillDkp, noEnergy } from "../combat/divine.mjs";
 
 const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
 
@@ -90,8 +91,10 @@ export class DBUCombat extends Combat {
     if ( await fusionSkipTurn(this, combatant) ) return;
     // Timed States/Conditions "until the start of your next turn" end before anything else happens
     await expireTimed(actor, "startOfTurn");
-    const sys = actor.system;
     const lines = [];
+    // Divine Ki Points come full when the access to them comes during the Combat Encounter
+    if ( await fillDkp(actor, this) ) lines.push(L("DBU.Dkp.Filled", { n: actor.system.dkp.max }));
+    const sys = actor.system;
     const updates = {};
     let life = sys.life.value;
     let ki = sys.ki.value;
@@ -108,14 +111,21 @@ export class DBUCombat extends Combat {
       const cost = 3 * T * sys.costs.draining;
       ki -= cost;
       lines.push(L("DBU.Turn.Draining", { cost }));
+      // In the God Ki State it also takes Divine Ki Points: 1/2 of the Ki Points lost
+      const divine = sys.dkp?.usable ? Math.floor(cost / 2) : 0;
+      if ( divine > 0 ) {
+        updates["system.dkp.value"] = Math.max(0, sys.dkp.value - divine);
+        lines.push(L("DBU.Turn.DrainingDkp", { n: divine }));
+      }
     }
     if ( life !== sys.life.value ) updates["system.life.value"] = (sys._effectiveStates?.undying > 0) ? life : Math.max(0, life);
     if ( ki !== sys.ki.value ) updates["system.ki.value"] = Math.max(0, ki);
     if ( Object.keys(updates).length ) await actor.update(updates, { dbuSelfInflicted: true });
-    // No Energy: Ki at 0 ends every Form/Enhancement with Stress Exhaustion
-    if ( (actor.system.ki.value <= 0) && actor.system.transformation.active.length ) {
+    // No Energy: Ki at 0 ends every Form/Enhancement with Stress Exhaustion (Divine Ki at 0, for God Ki ones)
+    const empty = noEnergy(actor.system);
+    if ( empty ) {
       await actor.applyStressExhaustion();
-      lines.push(L("DBU.Turn.NoEnergy"));
+      lines.push(L(empty === "dkp" ? "DBU.Turn.NoEnergyDkp" : "DBU.Turn.NoEnergy"));
     }
     const buttons = [];
     if ( sys.flags.straining && sys.transformation.active.length ) {
@@ -181,7 +191,22 @@ export async function onCombatStart(combat) {
     const stale = c.actor.items.filter(i => (i.type === "transformation") && i.system.newLevel
       && (i.flags?.["dbu-rpg"]?.newLevelCombat !== combat.id))
       .map(i => ({ _id: i.id, "system.newLevel": false }));
+    // So does a Grand Awakening, and the Burst Limit used (both may happen right before "Begin Combat")
+    for ( const i of c.actor.items ) {
+      if ( (i.type === "transformation") && i.system.grandAwakening && (i.flags?.["dbu-rpg"]?.grandCombat !== combat.id) ) {
+        stale.push({ _id: i.id, "system.grandAwakening": false });
+      }
+    }
     if ( stale.length ) await c.actor.updateEmbeddedDocuments("Item", stale);
+    if ( c.actor.system.combat?.burstUsed && (c.actor.flags?.["dbu-rpg"]?.burstCombat !== combat.id) ) {
+      await c.actor.update({ "system.combat.burstUsed": false });
+    }
+    // Divine Ki Points: every Combat Encounter starts with the maximum
+    await fillDkp(c.actor, combat);
+    // Stretch (Adventuring Maneuver) done within the hour: +1(T) Combat Rolls for the first 3 Combat Rounds
+    const { applyStretch } = await import("../adventure.mjs");
+    const stretched = await applyStretch(c.actor);
+    if ( stretched ) await postInfoCard({ actor: c.actor, title: "Stretch", lines: [stretched] });
     await runTriggers(c.actor, "startOfEncounter", { round: 0 });
   }
 }

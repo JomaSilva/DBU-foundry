@@ -2087,5 +2087,413 @@
     "slug": "actions-maneuvers"
    }
   }
+ },
+ {
+  "_type": "Folder",
+  "_id": "QGg2sZB9I8g3cDor",
+  "name": "God Maneuvers",
+  "type": "Item",
+  "folder": null,
+  "sorting": "a",
+  "color": null,
+  "sort": 0,
+  "description": "",
+  "flags": {}
+ },
+ {
+  "_type": "Item",
+  "_id": "FJFpOxrgIsNwxls2",
+  "name": "Divine Attack",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "",
+   "dkpCost": "Variable",
+   "god": true,
+   "frequency": "1/Round",
+   "requirement": "God Ki",
+   "summary": "God Maneuver · Standard · 1 Action · DKP Variable",
+   "source": {
+    "slug": "god-ki",
+    "section": "Divine Attack",
+    "url": "https://dbu-rpg.com/god-ki/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/god-ki/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/god-ki</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "QGg2sZB9I8g3cDor",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "god-ki"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "oYLVIkiuSijltQfJ",
+  "name": "Divine Breathing",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Instant",
+   "actionCost": "N/A",
+   "kpCost": "",
+   "dkpCost": "5(bT)",
+   "god": true,
+   "frequency": "1/Encounter",
+   "requirement": "God Ki",
+   "summary": "God Maneuver · Instant · N/A · DKP 5(bT)",
+   "source": {
+    "slug": "god-ki",
+    "section": "Divine Breathing",
+    "url": "https://dbu-rpg.com/god-ki/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/god-ki/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/god-ki</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "QGg2sZB9I8g3cDor",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "god-ki"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "PqqWSduhvRTXqaSj",
+  "name": "Divine Counter",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter Action",
+   "kpCost": "",
+   "dkpCost": "2(T)",
+   "god": true,
+   "frequency": "1/Round",
+   "requirement": "God Ki",
+   "summary": "God Maneuver · Counter · 1 Counter Action · DKP 2(T)",
+   "source": {
+    "slug": "god-ki",
+    "section": "Divine Counter",
+    "url": "https://dbu-rpg.com/god-ki/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/god-ki/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/god-ki</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "QGg2sZB9I8g3cDor",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "god-ki"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "hWNpwMS7V2GF234Q",
+  "name": "Divine Flame",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "",
+   "dkpCost": "2(bT)",
+   "god": true,
+   "frequency": "1/Round",
+   "requirement": "God Ki",
+   "summary": "God Maneuver · Standard · 1 Action · DKP 2(bT)",
+   "source": {
+    "slug": "god-ki",
+    "section": "Divine Flame",
+    "url": "https://dbu-rpg.com/god-ki/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/god-ki/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/god-ki</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "QGg2sZB9I8g3cDor",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "god-ki"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "R8GYSz6NDwJHbig8",
+  "name": "Divine Flex",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter Action",
+   "kpCost": "",
+   "dkpCost": "2(bT)",
+   "god": true,
+   "frequency": "1/Round",
+   "requirement": "God Ki",
+   "summary": "God Maneuver · Counter · 1 Counter Action · DKP 2(bT)",
+   "source": {
+    "slug": "god-ki",
+    "section": "Divine Flex",
+    "url": "https://dbu-rpg.com/god-ki/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/god-ki/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/god-ki</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "QGg2sZB9I8g3cDor",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "god-ki"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "RVugiKBNdutajswV",
+  "name": "Divine Movement",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Instant",
+   "actionCost": "N/A",
+   "kpCost": "",
+   "dkpCost": "4(bT)",
+   "god": true,
+   "frequency": "1/Round, 3/Encounter",
+   "requirement": "God Ki",
+   "summary": "God Maneuver · Instant · N/A · DKP 4(bT)",
+   "source": {
+    "slug": "god-ki",
+    "section": "Divine Movement",
+    "url": "https://dbu-rpg.com/god-ki/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/god-ki/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/god-ki</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "QGg2sZB9I8g3cDor",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "god-ki"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "02JxI9QQkYt6rKtc",
+  "name": "Divine Pulse",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "Variable (1~2 Actions)",
+   "kpCost": "",
+   "dkpCost": "1(bT) for each Action Spent",
+   "god": true,
+   "frequency": "1/Round",
+   "requirement": "God Ki",
+   "summary": "God Maneuver · Standard · Variable (1~2 Actions) · DKP 1(bT) for each Action Spent",
+   "source": {
+    "slug": "god-ki",
+    "section": "Divine Pulse",
+    "url": "https://dbu-rpg.com/god-ki/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/god-ki/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/god-ki</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "QGg2sZB9I8g3cDor",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "god-ki"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "eaMcj3uR0EmwsHdD",
+  "name": "Divine Roar",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "2 Actions",
+   "kpCost": "",
+   "dkpCost": "4(bT)",
+   "god": true,
+   "frequency": "1/Encounter",
+   "requirement": "God Ki",
+   "summary": "God Maneuver · Standard · 2 Actions · DKP 4(bT)",
+   "source": {
+    "slug": "god-ki",
+    "section": "Divine Roar",
+    "url": "https://dbu-rpg.com/god-ki/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/god-ki/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/god-ki</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "QGg2sZB9I8g3cDor",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "god-ki"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Pc0gzLoicJeOWtoe",
+  "name": "God Bind",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "",
+   "dkpCost": "4(T)",
+   "god": true,
+   "frequency": "1/Encounter",
+   "requirement": "God Ki",
+   "summary": "God Maneuver · Standard · 1 Action · DKP 4(T)",
+   "source": {
+    "slug": "god-ki",
+    "section": "God Bind",
+    "url": "https://dbu-rpg.com/god-ki/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/god-ki/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/god-ki</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "QGg2sZB9I8g3cDor",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "god-ki"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "X7BcwTi37hnbEYcG",
+  "name": "God Strike",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "",
+   "dkpCost": "Varies",
+   "god": true,
+   "frequency": "1/Round",
+   "requirement": "God Ki",
+   "summary": "God Maneuver · Standard · 1 Action · DKP Varies",
+   "source": {
+    "slug": "god-ki",
+    "section": "God Strike",
+    "url": "https://dbu-rpg.com/god-ki/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/god-ki/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/god-ki</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "QGg2sZB9I8g3cDor",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "god-ki"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "dckVk3a5IDgUnpms",
+  "name": "God Finisher",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "",
+   "dkpCost": "Varies",
+   "god": true,
+   "frequency": "1/Encounter",
+   "requirement": "God Ki",
+   "summary": "God Maneuver · Standard · 1 Action · DKP Varies",
+   "source": {
+    "slug": "god-ki",
+    "section": "God Finisher",
+    "url": "https://dbu-rpg.com/god-ki/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/god-ki/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/god-ki</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "QGg2sZB9I8g3cDor",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "god-ki"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "dQgisT9Znvfqc22y",
+  "name": "Holy Transformation",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "",
+   "dkpCost": "2(T)",
+   "god": true,
+   "frequency": "1/Encounter",
+   "requirement": "God Ki",
+   "summary": "God Maneuver · Standard · 1 Action · DKP 2(T)",
+   "source": {
+    "slug": "god-ki",
+    "section": "Holy Transformation",
+    "url": "https://dbu-rpg.com/god-ki/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/god-ki/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/god-ki</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "QGg2sZB9I8g3cDor",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "god-ki"
+   }
+  }
  }
 ]

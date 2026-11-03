@@ -34,6 +34,17 @@ export function collectModifiers(actor, system) {
     if ( !mod?.target || (mod.active === false) ) return;
     list.push({ target: mod.target, value: mod.value ?? "", condition: mod.condition ?? "", label, ctx, itemId });
   };
+  // A Trait possessed at all times (a Legendary Trait, S-Cells...) counts once, even when several Transformations carry
+  // it (a lower Stage and the higher one that inherits it, a Variant and its listed Transformation)
+  const possessed = new Set();
+  const pushItemModifier = (m, label, ctx, itemId) => {
+    if ( m.always && (m.active !== false) ) {
+      const key = [m.label, m.target, m.value, m.condition].join("|");
+      if ( possessed.has(key) ) return;
+      possessed.add(key);
+    }
+    push(m, label, ctx, itemId);
+  };
 
   const aspects = new Map();
   const highSpeed = [];
@@ -43,15 +54,20 @@ export function collectModifiers(actor, system) {
     if ( !(s.isActive ?? true) ) {
       // Permanent/Legendary Traits of a Transformation apply even outside of it
       if ( item.type === "transformation" ) {
-        const ctxI = { G: s.grade, S: s.stage, Z: s.stacks, M: s.mastery };
-        for ( const m of s.modifiers ?? [] ) if ( m.always ) push(m, item.name, ctxI, item.id);
+        const ctxI = s.formulaContext;
+        for ( const m of s.modifiers ?? [] ) if ( m.always ) pushItemModifier(m, item.name, ctxI, item.id);
       }
       continue;
     }
     const ctx = {};
     if ( item.type === "transformation" ) {
-      Object.assign(ctx, { G: s.grade, S: s.stage, Z: s.stacks, M: s.mastery });
+      Object.assign(ctx, s.formulaContext);
       pushTransformationBonuses(item, system, push, ctx);
+      // Divine Pulse: +1(T) Attribute Modifier Bonus (FO/MA) per Action spent on it, until leaving this Transformation
+      const pulse = item.flags?.["dbu-rpg"]?.divinePulse ?? 0;
+      if ( pulse > 0 ) {
+        for ( const attr of ["fo", "ma"] ) push({ target: `mod.${attr}`, value: `${pulse}(T)` }, `${item.name} (Divine Pulse)`, ctx, item.id);
+      }
       for ( const a of s.aspects ) {
         if ( !a.key ) continue;
         const def = DBU.aspects[a.key] ?? {};
@@ -63,7 +79,7 @@ export function collectModifiers(actor, system) {
         if ( a.key === "highSpeed" ) highSpeed.push({ item, ctx });
       }
     }
-    for ( const m of s.modifiers ?? [] ) push(m, item.name, ctx, item.id);
+    for ( const m of s.modifiers ?? [] ) pushItemModifier(m, item.name, ctx, item.id);
     if ( (item.type === "transformation") && rule("greaterEnhancement") && s.greaterEnhancement && s.transcended ) {
       push({ target: "surgency", value: "1(T)" }, `${item.name} (Dedicated Power)`, ctx, item.id);
       push({ target: "capacity.mult", value: "1.25" }, `${item.name} (Dedicated Power)`, ctx, item.id);

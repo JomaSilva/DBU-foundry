@@ -30,33 +30,79 @@ function getPage(slug) {
 export async function fetchOfficialText(slug, section = "") {
   const html = await getPage(slug);
   if ( !html ) return null;
+  const blocks = pageBlocks(html);
+  const out = (section && sectionBlocks(blocks, section)) || blocks;
+  const link = `<p><a href="https://dbu-rpg.com/${slug}/" target="_blank" rel="noopener">dbu-rpg.com/${slug}</a></p>`;
+  return out.map(b => b.outerHTML).join("\n") + link;
+}
+
+/** The top-level blocks of a page's HTML. */
+function pageBlocks(html) {
   const doc = new DOMParser().parseFromString(`<div id="root">${html}</div>`, "text/html");
   const root = doc.getElementById("root");
   root.querySelectorAll("script, style, iframe, form, button").forEach(e => e.remove());
-  const blocks = flattenBlocks(root);
-  let out = blocks;
-  if ( section ) {
-    const name = normalize(section);
-    const start = blocks.findIndex(b => startsWithEntry(b, name));
-    if ( start >= 0 ) {
-      const first = blocks[start];
-      // A section that is a heading of its own (a Transformation Stage) keeps its traits and Mastery Traits:
-      // it runs until the next heading of the same or a higher level. An entry ("**Name**: ...") ends at the next one.
-      const level = (headingLevel(first) && normalize(first.textContent).startsWith(name)) ? headingLevel(first) : 0;
-      out = [first];
-      for ( let i = start + 1; i < blocks.length; i++ ) {
-        const b = blocks[i];
-        if ( level ) {
-          const l = headingLevel(b);
-          if ( l && (l <= level) ) break;
-        }
-        else if ( isHeading(b) || isEntryStart(b) ) break;
-        out.push(b);
-      }
+  return flattenBlocks(root);
+}
+
+/** The blocks of one entry or section of a page, or null when it is not there. */
+function sectionBlocks(blocks, section) {
+  const name = normalize(section);
+  const start = blocks.findIndex(b => startsWithEntry(b, name));
+  if ( start < 0 ) return null;
+  const first = blocks[start];
+  // A section that is a heading of its own (a Transformation Stage) keeps its traits and Mastery Traits:
+  // it runs until the next heading of the same or a higher level. An entry ("**Name**: ...") ends at the next one.
+  const level = (headingLevel(first) && normalize(first.textContent).startsWith(name)) ? headingLevel(first) : 0;
+  const out = [first];
+  for ( let i = start + 1; i < blocks.length; i++ ) {
+    const b = blocks[i];
+    if ( level ) {
+      const l = headingLevel(b);
+      if ( l && (l <= level) ) break;
     }
+    else if ( isHeading(b) || isEntryStart(b) ) break;
+    out.push(b);
   }
-  const link = `<p><a href="https://dbu-rpg.com/${slug}/" target="_blank" rel="noopener">dbu-rpg.com/${slug}</a></p>`;
-  return out.map(b => b.outerHTML).join("\n") + link;
+  return out;
+}
+
+/** "Burst LimitScarlet Multiplier: ..." — a Transformation Trait's heading starts with its kind. */
+const KIND_PREFIX = /^(?:mastery traits?|mastery|burst limit|legendary trait|grand awakening|transcendent trait)\s*/;
+
+/** The blocks of one Transformation Trait (its heading or "**Name**:" entry and its effects), or null. */
+function traitBlocks(blocks, trait) {
+  const name = normalize(trait);
+  const lead = b => normalize(b.textContent).replace(KIND_PREFIX, "");
+  const start = blocks.findIndex(b => (isHeading(b) || b.querySelector("strong, b")) && lead(b).startsWith(name)
+    && /^\s*(?::|$)/.test(lead(b).slice(name.length)));
+  if ( start < 0 ) return null;
+  const out = [blocks[start]];
+  for ( let i = start + 1; i < blocks.length; i++ ) {
+    const b = blocks[i];
+    if ( isHeading(b) || isEntryStart(b) ) break;
+    out.push(b);
+  }
+  return out;
+}
+
+/**
+ * The official text of one Transformation Trait: from an item's own loaded text when it has it, else from its page
+ * (within the Transformation's section first: a Trait name may come back in another Stage of the same page).
+ * @param {{name: string, slug?: string, section?: string, html?: string}} trait
+ * @returns {Promise<string|null>}
+ */
+export async function officialTraitText({ name, slug = "", section = "", html = "" }) {
+  const find = source => {
+    const all = pageBlocks(source);
+    const part = section ? sectionBlocks(all, section) : null;
+    return (part && traitBlocks(part, name)) || traitBlocks(all, name);
+  };
+  let out = (html && !isStubDescription(html)) ? find(html) : null;
+  if ( !out && slug ) {
+    const page = await getPage(slug);
+    if ( page ) out = find(page);
+  }
+  return out ? out.map(b => b.outerHTML).join("\n") : null;
 }
 
 /** The official text of an item, or null (no source, offline...). */

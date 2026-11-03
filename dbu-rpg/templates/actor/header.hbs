@@ -82,6 +82,21 @@
         <a class="bar-btn" data-action="pool" data-pool="ki" data-delta="1"><i class="fa-solid fa-plus"></i></a>
         {{#if system.transformation.kiMultiplier}}<span class="bar-status mult" data-tooltip="Ki Multiplier">×2</span>{{/if}}
       </div>
+      <div class="dbu-battle-power" data-tooltip="{{bpTip}}">
+        <span class="bp-label"><i class="fa-solid fa-glasses"></i> {{localize "DBU.BP.Label"}}</span>
+        <span class="bp-value">{{bpText}}</span>
+      </div>
+      {{#if system.dkp.access}}
+      <div class="dbu-bar dkp {{#unless system.dkp.usable}}off{{/unless}}" data-tooltip="{{dkpTip}}">
+        <div class="fill" style="width: {{dkpPct}}%"></div>
+        <span class="bar-label"><i class="fa-solid fa-sun"></i> DKP</span>
+        <a class="bar-btn" data-action="pool" data-pool="dkp" data-delta="-1"><i class="fa-solid fa-minus"></i></a>
+        <input type="number" name="system.dkp.value" value="{{source.dkp.value}}" data-dtype="Number">
+        <span class="bar-max">/ {{system.dkp.max}}</span>
+        <a class="bar-btn" data-action="pool" data-pool="dkp" data-delta="1"><i class="fa-solid fa-plus"></i></a>
+        <a class="bar-status dkp-pay {{#if source.dkp.prefer}}on{{/if}}" data-action="dkpPrefer" data-tooltip="{{localize 'DBU.Dkp.PreferTip'}}">{{#if source.dkp.prefer}}DKP{{else}}KP{{/if}}</a>
+      </div>
+      {{/if}}
       <div class="dbu-bar capacity">
         <div class="fill" style="width: {{capPct}}%"></div>
         <span class="bar-label"><i class="fa-solid fa-gauge-high"></i> {{localize "DBU.Capacity"}}</span>

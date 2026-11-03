@@ -17,12 +17,14 @@ import { DBUItemSheet } from "./module/sheets/item-sheet.mjs";
 import { onRenderChatMessage } from "./module/chat.mjs";
 import { registerSocket } from "./module/socket.mjs";
 import { refreshAllAuras, registerTokenAuras } from "./module/canvas/token-auras.mjs";
+import { registerTokenForms } from "./module/canvas/token-forms.mjs";
 import { SIGNATURE_SUMMARIES } from "./module/rules/signature.mjs";
 import { OPTIONAL_RULES, OptionalRulesConfig } from "./module/optional-rules.mjs";
 import * as formula from "./module/rules/formula.mjs";
 import { openAttackDialog } from "./module/combat/attack.mjs";
 import { inCombat } from "./module/combat/triggers.mjs";
 import { autoOfficialText } from "./module/rules/official-text.mjs";
+import { DEFAULT_BATTLE_POWER_FORMULA } from "./module/rules/battle-power.mjs";
 
 const TEMPLATES = [
   "systems/dbu-rpg/templates/parts/triggers.hbs",
@@ -30,7 +32,8 @@ const TEMPLATES = [
   "systems/dbu-rpg/templates/item/parts/qualities.hbs",
   "systems/dbu-rpg/templates/chat/roll-card.hbs",
   "systems/dbu-rpg/templates/chat/info-card.hbs",
-  "systems/dbu-rpg/templates/chat/attack-card.hbs"
+  "systems/dbu-rpg/templates/chat/attack-card.hbs",
+  "systems/dbu-rpg/templates/actor/parts/active-traits.hbs"
 ];
 
 Hooks.once("init", () => {
@@ -56,9 +59,9 @@ Hooks.once("init", () => {
     apparel: ApparelData, item: GearItemData
   };
   CONFIG.Actor.trackableAttributes = {
-    character: { bar: ["life", "ki", "capacity"], value: ["karma.value"] },
-    npc: { bar: ["life", "ki", "capacity"], value: ["karma.value"] },
-    fusion: { bar: ["life", "ki", "capacity"], value: ["karma.value", "fusion.roundsLeft"] }
+    character: { bar: ["life", "ki", "capacity", "dkp"], value: ["karma.value"] },
+    npc: { bar: ["life", "ki", "capacity", "dkp"], value: ["karma.value"] },
+    fusion: { bar: ["life", "ki", "capacity", "dkp"], value: ["karma.value", "fusion.roundsLeft"] }
   };
 
   // Initiative: 1d10 + 1/2 Agility Score; ties broken by Agility Score (decimals)
@@ -88,17 +91,20 @@ Hooks.once("init", () => {
   registerSettings();
   registerHelpers();
   registerTokenAuras();
+  registerTokenForms();
   foundry.applications.handlebars.loadTemplates(TEMPLATES);
 });
 
 /**
- * What each Mastery level and each Grade does to the Aspects is set only by the compendium (no sheet edits it): when a
- * rules fix changes it there, the Transformations already on the sheets follow.
+ * What each Mastery level and each Grade does to the Aspects, an ignored Tier of Power Requirement and the Traits
+ * inherited from lower Stages are set only by the compendium (no sheet edits them): when a rules fix changes them there,
+ * the Transformations already on the sheets follow.
  */
 async function refreshTransformationData() {
   const pack = game.packs.get("dbu-rpg.transformations");
   if ( !pack ) return;
-  const index = await pack.getIndex({ fields: ["system.masteryAspects", "system.gradeAspects", "flags.dbu-rpg.slug"] });
+  const index = await pack.getIndex({ fields: ["system.masteryAspects", "system.gradeAspects", "system.ignoreTop", "system.inherited",
+    "flags.dbu-rpg.slug"] });
   const byId = new Map(index.map(e => [e._id, e]));
   const bySlug = new Map(index.map(e => [`${e.flags?.["dbu-rpg"]?.slug}:${e.name}`, e]));
   const prefix = `Compendium.${pack.collection}.`;
@@ -110,10 +116,14 @@ async function refreshTransformationData() {
     const entry = (source.startsWith(prefix) ? byId.get(source.split(".").pop()) : null)
       ?? bySlug.get(`${i.flags?.["dbu-rpg"]?.slug}:${i.name}`);
     if ( !entry ) return [];
-    const { masteryAspects = [], gradeAspects = [] } = entry.system ?? {};
+    const { masteryAspects = [], gradeAspects = [], ignoreTop = false, inherited = [] } = entry.system ?? {};
     const s = i.system._source;
-    if ( same(s.masteryAspects, masteryAspects) && same(s.gradeAspects, gradeAspects) ) return [];
-    return [{ _id: i.id, "system.masteryAspects": masteryAspects, "system.gradeAspects": gradeAspects }];
+    const sameInherited = JSON.stringify((s.inherited ?? []).map(t => [t.trait, t.from, t.slug]))
+      === JSON.stringify(inherited.map(t => [t.trait, t.from, t.slug]));
+    if ( same(s.masteryAspects, masteryAspects) && same(s.gradeAspects, gradeAspects) && (!!s.ignoreTop === !!ignoreTop)
+      && sameInherited ) return [];
+    return [{ _id: i.id, "system.masteryAspects": masteryAspects, "system.gradeAspects": gradeAspects, "system.ignoreTop": !!ignoreTop,
+      "system.inherited": inherited }];
   });
   for ( const actor of game.actors ) {
     const updates = updatesOf(actor.items);
@@ -137,7 +147,12 @@ Hooks.once("ready", async () => {
     }
     await game.settings.set("dbu-rpg", "nlopPendingMigrated", true);
   }
-  if ( game.user.isActiveGM ) await refreshTransformationData().catch(err => console.error("DBU | Transformation data refresh", err));
+  if ( game.user.isActiveGM ) {
+    await refreshTransformationData().catch(err => console.error("DBU | Transformation data refresh", err));
+    // The compendium's Traits changed (a Stage's or a Variant's inheritance...): offer to update the sheets
+    const { offerTransformationUpdate } = await import("./module/compendium-update.mjs");
+    await offerTransformationUpdate().catch(err => console.error("DBU | Transformation update offer", err));
+  }
   if ( game.user.isGM && !game.settings.get("dbu-rpg", "welcomeShown") ) {
     game.settings.set("dbu-rpg", "welcomeShown", true);
     ChatMessage.create({
@@ -180,6 +195,13 @@ Hooks.on("updateItem", (item, changes, options, userId) => {
   if ( (userId !== game.user.id) || (item.type !== "transformation") || (item.system.transType !== "awakening") ) return;
   const stacks = foundry.utils.getProperty(changes, "system.stacks");
   if ( (stacks > 0) && (options.dbuOldStacks === 0) && (item.parent instanceof Actor) ) item.parent._newLevelOfPower?.(item, { force: true });
+});
+// Divine Pulse lasts until the character leaves that Transformation
+Hooks.on("updateItem", (item, changes, options, userId) => {
+  if ( (userId !== game.user.id) || (item.type !== "transformation") ) return;
+  if ( (foundry.utils.getProperty(changes, "system.active") === false) && item.getFlag("dbu-rpg", "divinePulse") ) {
+    item.unsetFlag("dbu-rpg", "divinePulse");
+  }
 });
 // Awakenings are always on: their Option effects are chosen as soon as the character gains them
 Hooks.on("createItem", async (item, options, userId) => {
@@ -254,6 +276,12 @@ function registerSettings() {
       for ( const app of foundry.applications.instances.values() ) if ( app.rendered ) app.render();
     }
   });
+  // Battle Power (scouter reading) shown under the Life and Ki bars: the GM may tune its formula
+  S("battlePowerFormula", {
+    name: "DBU.BP.Setting", hint: "DBU.BP.SettingHint", scope: "world", config: true, type: String,
+    default: DEFAULT_BATTLE_POWER_FORMULA,
+    onChange: () => game.actors.forEach(a => { a.reset(); a.sheet?.rendered && a.sheet.render(); })
+  });
   S("gravityIntensity", {
     scope: "world", config: false, type: Number, default: 0,
     onChange: () => game.actors.forEach(a => { a.reset(); a.sheet?.rendered && a.sheet.render(); })
@@ -289,6 +317,8 @@ function registerSettings() {
   });
   S("welcomeShown", { scope: "world", config: false, type: Boolean, default: false });
   S("nlopPendingMigrated", { scope: "world", config: false, type: Boolean, default: false });
+  // The compendium build whose sheet update the GM declined ("Agora não")
+  S("transformationUpdateSkipped", { scope: "world", config: false, type: Number, default: 0 });
 }
 
 function registerHelpers() {

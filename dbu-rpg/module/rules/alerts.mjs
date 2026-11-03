@@ -26,7 +26,15 @@ export function computeAlerts(sys, actor) {
         `steadfast:${k}`, L("DBU.Roll.Steadfast"), "fa-solid fa-dice-d10");
     }
   }
-  if ( transformed && (sys.ki.value <= 0) ) add("urgent", "noKi", L("DBU.Alert.NoKi"), "noKi", L("DBU.Alert.ApplyNoKi"), "fa-solid fa-power-off");
+  // No Energy: Ki Points at 0 (Divine Ki Points at 0 for Transformations with the God Ki Aspect)
+  const godKi = t => t.system.aspects.some(a => a.key === "godKi");
+  const activeT = sys.transformation.active;
+  if ( activeT.some(t => !godKi(t)) && (sys.ki.value <= 0) ) {
+    add("urgent", "noKi", L("DBU.Alert.NoKi"), "noKi", L("DBU.Alert.ApplyNoKi"), "fa-solid fa-power-off");
+  }
+  else if ( activeT.some(godKi) && ((sys.dkp?.value ?? 0) <= 0) ) {
+    add("urgent", "noKi", L("DBU.Alert.NoDkp"), "noKi", L("DBU.Alert.ApplyNoKi"), "fa-solid fa-power-off");
+  }
   if ( transformed && sys.flags.straining && inCombat ) add("warning", "straining", L("DBU.Alert.Straining"), "stressTest", L("DBU.Roll.Stress"), "fa-solid fa-bolt");
   if ( transformed && (sys.health.failed > 0) && !pending.has("stressTest") && sys.thresholds.critical === "fail" ) {
     add("info", "stressInfo", L("DBU.Alert.StressInfo"));

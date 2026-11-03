@@ -1,0 +1,35 @@
+<h3 class="dbu-section">{{localize "DBU.Traits.InUse"}} <small>{{localize "DBU.Traits.InUseHint"}}</small></h3>
+<div class="dbu-active-traits">
+  {{#each traitGroups as |g|}}
+  <div class="dbu-trait-group {{#if g.chips}}chips{{/if}}" {{#if g.itemId}}data-item-id="{{g.itemId}}"{{/if}}>
+    <header>
+      {{#if g.img}}<img src="{{g.img}}" alt="" width="24" height="24">{{else}}<i class="{{g.icon}}"></i>{{/if}}
+      <div>
+        <strong>{{g.title}}</strong>
+        {{#if g.subtitle}}<small>{{g.subtitle}}</small>{{/if}}
+      </div>
+      {{#if g.fullAwakening}}<button type="button" data-action="fullAwakening" data-tooltip="{{localize 'DBU.Grand.ButtonTip' name=g.grand}}"><i class="fa-solid fa-sun"></i> Full Awakening</button>{{/if}}
+    </header>
+    {{#if g.aspects}}<div class="dbu-trait-aspects" data-tooltip="{{localize 'DBU.Trans.Aspects'}}">{{g.aspects}}</div>{{/if}}
+    <ul>
+      {{#each g.traits as |t|}}
+      <li class="dbu-trait kind-{{t.css}}" data-item-id="{{t.itemId}}">
+        <a data-action="traitInfo" data-trait="{{t.name}}" data-tooltip="{{t.tip}}">{{t.name}}</a>
+        {{#if t.kindLabel}}{{#unless g.chips}}<span class="tag">{{t.kindLabel}}</span>{{/unless}}{{/if}}
+        {{#if t.choice}}<span class="dbu-trait-choice">{{t.choice}}</span>{{/if}}
+        {{#if t.uses}}<span class="tag" data-tooltip="{{localize 'DBU.Traits.Uses'}}">{{t.uses}}</span>{{/if}}
+        {{#if t.from}}<small class="dbu-trait-from">{{localize "DBU.Traits.From" name=t.from}}</small>{{/if}}
+        {{#if t.burst}}
+          {{#if t.burst.used}}<span class="tag dim" data-tooltip="{{localize 'DBU.Burst.UsedTip'}}">{{localize "DBU.Used"}}</span>
+          {{else}}<button type="button" data-action="burstLimit" data-trait="{{t.name}}" data-tooltip="{{localize 'DBU.Burst.ButtonTip'}}"><i class="fa-solid fa-explosion"></i> {{localize "DBU.Burst.Trigger"}}</button>{{/if}}
+        {{/if}}
+      </li>
+      {{else}}
+      <li class="dbu-empty">{{localize "DBU.Traits.None"}}</li>
+      {{/each}}
+    </ul>
+  </div>
+  {{else}}
+  <p class="dbu-empty">{{localize "DBU.Traits.Nothing"}}</p>
+  {{/each}}
+</div>

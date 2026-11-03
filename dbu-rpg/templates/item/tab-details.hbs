@@ -108,6 +108,8 @@
     <label>{{localize "DBU.UA.Maneuver"}} <input type="text" name="system.maneuverType" value="{{source.maneuverType}}"></label>
     <label>{{localize "DBU.UA.ActionCost"}} <input type="text" name="system.actionCost" value="{{source.actionCost}}"></label>
     <label>KP <input type="text" name="system.kpCost" value="{{source.kpCost}}"></label>
+    <label class="check" data-tooltip="{{localize 'DBU.God.ManeuverTip'}}"><input type="checkbox" name="system.god" {{checked source.god}}> God Maneuver</label>
+    {{#if source.god}}<label>DKP <input type="text" name="system.dkpCost" value="{{source.dkpCost}}" placeholder="2(bT)"></label>{{/if}}
     <label>{{localize "DBU.Frequency"}} <input type="text" name="system.frequency" value="{{source.frequency}}" placeholder="1/Round"></label>
     <label>{{localize "DBU.Requirement"}} <input type="text" name="system.requirement" value="{{source.requirement}}"></label>
     <label>Minions <input type="text" name="system.minions" value="{{source.minions}}"></label>
@@ -145,6 +147,13 @@
     <label>{{localize "DBU.Trans.Initial"}} <input type="text" name="system.initialEnhancement" value="{{source.initialEnhancement}}"></label>
   </div>
   <label class="wide">{{localize "DBU.PrereqLabel"}} <input type="text" name="system.prerequisites" value="{{source.prerequisites}}"></label>
+
+  {{#unless (eq source.transType "awakening")}}
+  <h4>{{localize "DBU.TokenImg.Section"}} <small>{{localize "DBU.TokenImg.Hint"}}</small></h4>
+  <div class="dbu-form-grid">
+    <label class="wide">{{localize "DBU.TokenImg.Label"}} <file-picker name="system.tokenImg" type="imagevideo" value="{{source.tokenImg}}"></file-picker></label>
+  </div>
+  {{/unless}}
 
   <h4>{{localize "DBU.Aura.Title"}} <small>{{auraHint}}</small></h4>
   <div class="dbu-form-grid dbu-aura-fields">
@@ -203,6 +212,10 @@
   {{#if source.traits.length}}
   <h4>{{localize "DBU.Trans.Traits"}}</h4>
   <ul class="dbu-list">{{#each source.traits as |t|}}<li>{{t}}</li>{{/each}}</ul>
+  {{/if}}
+  {{#if source.inherited.length}}
+  <h4>{{localize "DBU.Traits.Inherited"}} <small>{{localize "DBU.Traits.InheritedHint"}}</small></h4>
+  <ul class="dbu-list">{{#each source.inherited as |t|}}<li>{{t.trait}} <small>({{localize "DBU.Traits.From" name=t.from}})</small></li>{{/each}}</ul>
   {{/if}}
 {{/if}}
 

@@ -6,7 +6,7 @@ import { computeAlerts } from "../rules/alerts.mjs";
 import { AGE_CATEGORIES, INJURY_TYPES, STANCES } from "../optional-rules.mjs";
 import { FUSION_METHODS } from "../fusion/fusion-rules.mjs";
 
-const { ArrayField, BooleanField, HTMLField, SchemaField, StringField } = foundry.data.fields;
+const { ArrayField, BooleanField, HTMLField, NumberField, SchemaField, StringField } = foundry.data.fields;
 
 export class CharacterData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
@@ -58,7 +58,23 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
       life: new SchemaField({ value: intField(62) }),
       ki: new SchemaField({ value: intField(50) }),
       capacity: new SchemaField({ value: intField(20) }),
+      // Divine Ki Points (God Ki): the maximum is derived; combat = the Combat Encounter they were filled for;
+      // prefer = pay Ki Point costs with them while in the God Ki State
+      dkp: new SchemaField({
+        value: intField(0, { min: 0 }),
+        combat: new StringField({ blank: true, initial: "" }),
+        prefer: new BooleanField({ initial: false })
+      }),
       karma: new SchemaField({ value: intField(2, { min: 0 }) }),
+      // Adventuring Maneuvers: uses this Adventuring Session (per maneuver, and per target for those that count it)
+      // and the world time a Stretch was done (it helps if a Combat Encounter starts within the hour)
+      adventure: new SchemaField({
+        uses: new ArrayField(new SchemaField({
+          key: new StringField({ blank: true, initial: "" }),
+          n: intField(0, { min: 0 })
+        })),
+        stretchAt: new NumberField({ nullable: true, initial: null })
+      }),
       tp: new SchemaField({
         bonus: intField(0),
         spentOther: intField(0)
@@ -90,6 +106,8 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
         willToSurviveUsed: new BooleanField({ initial: false }),
         ultimatesUsed: intField(0, { min: 0 }),
         absoluteAttacks: intField(0, { min: 0 }),
+        // A Burst Limit was triggered this Combat Encounter (1/Encounter)
+        burstUsed: new BooleanField({ initial: false }),
         legendRealized: new ArrayField(new StringField())
       }),
       resources: new ArrayField(new SchemaField({

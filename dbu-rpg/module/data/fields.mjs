@@ -29,7 +29,9 @@ export function triggersField() {
     mode: new StringField({ initial: "auto", choices: ["auto", "ask", "remind"] }),
     duration: new StringField({ initial: "none", choices: ["none", "endOfTurn", "startOfNextTurn", "endOfNextTurn", "endOfRound", "encounter"] }),
     label: new StringField({ required: true, blank: true, initial: "" }),
-    active: new BooleanField({ initial: true })
+    active: new BooleanField({ initial: true }),
+    /** Runs even while the Transformation is not active (a Legendary Trait is possessed at all times). */
+    always: new BooleanField({ initial: false })
   }));
 }
 

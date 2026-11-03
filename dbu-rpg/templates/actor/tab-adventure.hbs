@@ -1,0 +1,30 @@
+<section class="tab {{tab.cssClass}}" data-tab="adventure" data-group="primary">
+  <div class="dbu-tp-line">
+    <span>{{localize "DBU.Adv.Hint"}}</span>
+    <a data-action="advNewSession" data-tooltip="{{localize 'DBU.Adv.NewSessionTip'}}"><i class="fa-solid fa-rotate"></i> {{localize "DBU.Adv.NewSession"}}</a>
+    {{#if isGM}}<a data-action="advNewSessionAll"><i class="fa-solid fa-users"></i> {{localize "DBU.Adv.NewSessionAll"}}</a>{{/if}}
+  </div>
+  {{#if advInCombat}}<p class="dbu-adv-combat"><i class="fa-solid fa-ban"></i> {{localize "DBU.Adv.InCombatBanner"}}</p>{{/if}}
+  {{#if advStretch}}<p class="dbu-hint"><i class="fa-solid fa-person-running"></i> {{localize "DBU.Adv.StretchPending"}}</p>{{/if}}
+
+  {{#each advGroups as |g|}}
+  <h3 class="dbu-section">{{g.title}}</h3>
+  <table class="dbu-table dbu-items dbu-adv">
+    <thead><tr><th>{{localize "DBU.Name"}}</th><th>{{localize "DBU.Adv.Via"}}</th><th>{{localize "DBU.Adv.TimeCol"}}</th><th>{{localize "DBU.Adv.LimitCol"}}</th><th>{{localize "DBU.Adv.EffectCol"}}</th><th></th></tr></thead>
+    <tbody>
+      {{#each g.rows as |r|}}
+      <tr class="{{#if r.spent}}dbu-dim{{/if}}">
+        <td><a data-action="advInfo" data-key="{{r.key}}" data-tooltip="{{localize 'DBU.Traits.ClickTip'}}"><strong>{{r.name}}</strong></a></td>
+        <td class="dbu-small">{{r.via}}</td>
+        <td class="center dbu-small">{{r.time}}</td>
+        <td class="center" data-tooltip="{{localize 'DBU.Adv.LimitTip'}}">{{r.uses}}</td>
+        <td class="dbu-small">{{r.effect}}</td>
+        <td class="dbu-controls"><button type="button" data-action="advUse" data-key="{{r.key}}" {{#if (or @root.advInCombat r.spent)}}disabled{{/if}}><i class="fa-solid fa-play"></i> {{localize "DBU.Adv.Use"}}</button></td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="dbu-empty">{{localize "DBU.Adv.None"}}</p>
+  {{/each}}
+</section>

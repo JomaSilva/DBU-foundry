@@ -185,10 +185,11 @@ export function validateActor(sys, actor) {
     if ( raceName && !raceMatches(s.race, sys.races?.length ? sys.races : race) ) {
       add("warning", "transformations", "DBU.Val.TransRace", { name: t.name, race: s.race });
     }
-    if ( (s.transType !== "awakening") && s.active && (s.topReq > sys.top.current) && !s.prelude && !actor.isBoss ) {
+    // A Transformation whose Tier of Power Requirement is ignored (Metamorphosis) has none to check
+    if ( (s.transType !== "awakening") && s.active && (s.topReq > sys.top.current) && !s.prelude && !actor.isBoss && !s.ignoreTop ) {
       add("error", "transformations", "DBU.Val.TransTop", { name: t.name, req: s.topReq, top: sys.top.current });
     }
-    if ( s.prelude && s.active && ((s.topReq - 1) > sys.top.current) && !actor.isBoss ) {
+    if ( s.prelude && s.active && ((s.topReq - 1) > sys.top.current) && !actor.isBoss && !s.ignoreTop ) {
       add("error", "transformations", "DBU.Val.TransTop", { name: t.name, req: s.topReq - 1, top: sys.top.current });
     }
     if ( (s.transType === "awakening") && (s.stacks > s.maxStacks) ) {

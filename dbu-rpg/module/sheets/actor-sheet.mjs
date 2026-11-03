@@ -3,9 +3,14 @@ import { categoryLabel } from "../rules/dice.mjs";
 import { checkPrerequisites, raceMatches } from "../rules/validation.mjs";
 import { AGE_CATEGORIES, INJURY_TYPES, OPTIONAL_RULES, OptionalRulesConfig, STANCES, rules } from "../optional-rules.mjs";
 import { triggerOptions } from "./item-sheet.mjs";
-import { powerTimers } from "../combat/triggers.mjs";
+import { encounterOf, powerTimers } from "../combat/triggers.mjs";
 import { changeStacks, openAllocationDialog } from "../combat/stacks.mjs";
 import { newResource } from "../rules/resources.mjs";
+import { activeTraits, traitStructure } from "../rules/traits.mjs";
+import { aspectLabel } from "../rules/aspects.mjs";
+import { traitKindLabel } from "../combat/trait-actions.mjs";
+import { availableAdventuringManeuvers, sessionUses } from "../rules/adventuring.mjs";
+import { DEFAULT_BATTLE_POWER_FORMULA } from "../rules/battle-power.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -13,10 +18,115 @@ const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
 
 /** Tooltip of the Mastery control: the Mastery Traits and what each level changes. */
 function masteryTooltip(s) {
-  const traits = (s.traits ?? []).filter(t => /\[mastery trait\]/.test(t)).map(t => t.replace(/\s*\[mastery trait\]/, ""));
+  const traits = (s.allTraits ?? s.traits ?? []).filter(t => /\[mastery trait\]/.test(t)).map(t => t.replace(/\s*\[mastery trait\]/, ""));
   const lines = [L("DBU.Mastery.Tip", { n: s.mastery, max: s.masteryNeeded })];
   if ( traits.length ) lines.push(traits.join(" · "));
+  if ( s.masteryMax > s.masteryNeeded ) lines.push(L("DBU.Mastery.TranscendentTip"));
   return lines.join(" — ");
+}
+
+const KIND_CSS = { "mastery trait": "mastery", "burst limit": "burst", "legendary trait": "legendary",
+  "transcendent trait": "transcendent", "grand awakening": "grand" };
+
+/**
+ * The Traits in use, for the Combat tab: one card per active Transformation (its Traits, the inherited ones and the
+ * Mastery Traits reached), then the Legendary Traits (possessed at all times), the active Racial Traits and the Talents.
+ */
+function traitGroups(actor, items) {
+  const sys = actor.system;
+  const now = activeTraits(items, { burstUsed: !!sys.combat?.burstUsed && !!encounterOf(actor) });
+  const trans = new Map(items.filter(i => i.type === "transformation").map(i => [i.name, i]));
+  const row = t => {
+    // The effects list of an inherited Trait is in its Transformation's description, when the sheet has it
+    const info = t.info || (t.from ? traitStructure(trans.get(t.from)?.system.description)[t.name] : "") || "";
+    const tip = [traitKindLabel(t.kind), t.from ? L("DBU.Traits.From", { name: t.from }) : "", ...(info ? info.split("; ") : []),
+      `<em>${L("DBU.Traits.ClickTip")}</em>`];
+    return { ...t, css: KIND_CSS[t.kind] ?? "trait", kindLabel: traitKindLabel(t.kind), tip: tip.filter(Boolean).join("<br>") };
+  };
+  const groups = now.transformations.map(g => {
+    const s = g.item.system;
+    const type = { form: "Form", enhancement: "Enhancement", awakening: "Awakening", evolved: "Evolved Stage" }[s.transType] ?? s.transType;
+    const sub = [s.subtype ? `${type} ${s.subtype.capitalize()}` : type];
+    if ( s.line && s.stage ) sub.push(`${s.line} S${s.stage}`);
+    if ( s.graded ) sub.push(`Grade ${s.grade}`);
+    if ( s.transType === "awakening" ) sub.push(`${s.stacks}/${s.maxStacks} Stacks`);
+    else if ( s.mastery ) sub.push(`Mastery ${Math.min(s.mastery, s.masteryNeeded)}/${s.masteryNeeded}${s.mastery > s.masteryNeeded ? "+" : ""}`);
+    if ( s.transcended ) sub.push("Transcended");
+    if ( s.newLevel ) sub.push("New Level of Power");
+    if ( s.grandAwakening ) sub.push("Grand Awakening");
+    return {
+      itemId: g.item.id, img: g.item.img, title: g.item.name, subtitle: sub.join(" · "),
+      aspects: s.aspects.filter(a => a.key).map(a => aspectLabel(a)).join(", "),
+      fullAwakening: g.fullAwakening, grand: g.grand, traits: g.traits.map(row)
+    };
+  });
+  if ( now.legendary.length ) {
+    groups.push({ icon: "fa-solid fa-crown", title: L("DBU.Traits.Legendary"), subtitle: L("DBU.Traits.LegendaryHint"),
+      traits: now.legendary.map(t => ({ ...row(t), from: t.from || t.source, kindLabel: "" })) });
+  }
+  const uses = u => (u?.max ? `${u.value ?? 0}/${u.max}${u.per ? ` ${L(`DBU.Per.${u.per}`)}` : ""}` : "");
+  const plain = (i, kindLabel) => ({ name: i.name, itemId: i.id, css: i.type, kindLabel, uses: uses(i.system.uses),
+    tip: [kindLabel, i.system.summary, `<em>${L("DBU.Traits.ClickTip")}</em>`].filter(Boolean).join("<br>") });
+  if ( now.racial.length ) {
+    groups.push({ icon: "fa-solid fa-dna", title: L("DBU.RacialTraits"), chips: true,
+      traits: now.racial.map(i => plain(i, L(`DBU.TraitTier.${i.system.tier}`))) });
+  }
+  if ( now.talents.length ) {
+    groups.push({ icon: "fa-solid fa-star", title: L("DBU.Talents"), chips: true,
+      traits: now.talents.map(i => plain(i, i.system.category)) });
+  }
+  return groups;
+}
+
+/**
+ * The Adventuring Maneuvers the character has (Adventure tab), grouped: Universal, from Skills with 2+ Skill Ranks,
+ * and from items, Unique Abilities, Awakenings and Talents. Only the ones the character qualifies for are listed.
+ */
+/** Battle Power line of the header: the number, and how it was reached in the tooltip. */
+function battlePowerInfo(sys) {
+  const bp = sys.battlePower ?? { value: 0, data: {} };
+  const d = bp.data ?? {};
+  const lang = game.i18n.lang;
+  const nf = new Intl.NumberFormat(lang);
+  const formula = game.settings.get("dbu-rpg", "battlePowerFormula");
+  const custom = formula && (formula !== DEFAULT_BATTLE_POWER_FORMULA);
+  const w = (d.fo ?? 0) + (((d.ag ?? 0) + (d.te ?? 0)) / 4);
+  const lines = [
+    `<strong>${L("DBU.BP.Label")}: ${nf.format(bp.value)}</strong> (${new Intl.NumberFormat(lang, { notation: "compact" }).format(bp.value)})`,
+    custom ? L("DBU.BP.Custom", { formula: foundry.utils.escapeHTML(formula) }) : L("DBU.BP.Formula"),
+    L("DBU.BP.Values", { pl: d.PL, t: d.T, fo: d.fo, ag: d.ag, te: d.te, w: new Intl.NumberFormat(lang, { maximumFractionDigits: 2 }).format(w) }),
+    L("DBU.BP.Ki", { ki: d.ki, natural: d.kiNatural, pct: Math.round((d.kiRatio ?? 0) * 100) })
+  ];
+  return { bpText: nf.format(bp.value), bpTip: lines.join("<br>") };
+}
+
+function adventuringGroups(actor) {
+  const sys = actor.system;
+  const uses = sys._source.adventure?.uses ?? [];
+  const groups = { universal: [], skill: [], item: [] };
+  for ( const e of availableAdventuringManeuvers(actor) ) {
+    const def = e.def;
+    const used = sessionUses(uses, def.key);
+    const finite = Number.isFinite(def.limit);
+    const via = e.via.map(v => {
+      if ( v === "universal" ) return L("DBU.Adv.Universal");
+      if ( v.startsWith("skill:") ) {
+        const k = v.slice(6);
+        return `${L(DBU.skills[k]?.label ?? k)} ${sys.skills[k]?.totalRanks ?? 0}`;
+      }
+      return v.slice(5);
+    });
+    const group = def.universal ? "universal" : (e.via.some(v => v.startsWith("skill:")) ? "skill" : "item");
+    groups[group].push({
+      key: def.key, name: def.name, time: e.time ?? "—", via: via.join(", "), effect: L(`DBU.Adv.Effect.${def.key}`),
+      uses: (def.limit === null) ? String(used) : `${used}/${finite ? def.limit : "∞"}`, spent: finite && (used >= def.limit)
+    });
+  }
+  return [
+    { title: L("DBU.Adv.GroupUniversal"), rows: groups.universal },
+    { title: L("DBU.Adv.GroupSkill"), rows: groups.skill },
+    { title: L("DBU.Adv.GroupItem"), rows: groups.item }
+  ].filter(g => g.rows.length);
 }
 
 export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
@@ -61,7 +171,32 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       powerBox: DBUActorSheet.#onPowerBox,
       resourceStack: DBUActorSheet.#onResourceStack,
       allocate: DBUActorSheet.#onAllocate,
-      newLevel: DBUActorSheet.#onNewLevel
+      newLevel: DBUActorSheet.#onNewLevel,
+      traitInfo: DBUActorSheet.#onTraitInfo,
+      burstLimit: DBUActorSheet.#onBurstLimit,
+      fullAwakening: DBUActorSheet.#onFullAwakening,
+      tokenImg: DBUActorSheet.#onTokenImg,
+      advUse: async function(event, target) {
+        const { useAdventuringManeuver } = await import("../adventure.mjs");
+        return useAdventuringManeuver(this.actor, target.dataset.key);
+      },
+      advInfo: async function(event, target) {
+        const { postAdventuringText } = await import("../adventure.mjs");
+        return postAdventuringText(this.actor, target.dataset.key);
+      },
+      advNewSession: async function() {
+        const { newAdventuringSession } = await import("../adventure.mjs");
+        return newAdventuringSession([this.actor]);
+      },
+      advNewSessionAll: async function() {
+        const ok = await foundry.applications.api.DialogV2.confirm({ window: { title: L("DBU.Adv.NewSessionAll") },
+          content: `<p>${L("DBU.Adv.NewSessionAllText")}</p>`, rejectClose: false });
+        if ( !ok ) return null;
+        const { newAdventuringSession } = await import("../adventure.mjs");
+        return newAdventuringSession(game.actors.filter(a => ["character", "npc", "fusion"].includes(a.type)));
+      },
+      // Which pool pays the Ki Point costs in the God Ki State (attacks, Guard, Energy Charge)
+      dkpPrefer: function() { return this.actor.update({ "system.dkp.prefer": !this.actor.system.dkp.prefer }); }
     }
   };
 
@@ -75,6 +210,50 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     if ( ok ) await item.update({ "system.newLevel": false, "system.newLevelPending": false });
   }
 
+  /** A Trait of the Combat tab to chat (a Transformation Trait with its official text). */
+  static async #onTraitInfo(event, target) {
+    const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);
+    if ( !item ) return null;
+    if ( item.type !== "transformation" ) return item.toChat();
+    const { postTraitCard } = await import("../combat/trait-actions.mjs");
+    return postTraitCard(this.actor, item, target.dataset.trait);
+  }
+
+  static async #onBurstLimit(event, target) {
+    const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);
+    if ( !item ) return null;
+    const { triggerBurstLimit } = await import("../combat/trait-actions.mjs");
+    return triggerBurstLimit(this.actor, item, target.dataset.trait);
+  }
+
+  static async #onFullAwakening(event, target) {
+    const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);
+    if ( !item ) return null;
+    const { fullAwakening } = await import("../combat/trait-actions.mjs");
+    return fullAwakening(this.actor, item);
+  }
+
+  /** Token image of a Transformation: the file browser, or the path / URL typed in (players may not browse files). */
+  static async #onTokenImg(event, target) {
+    const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);
+    if ( !item ) return null;
+    if ( target.dataset.clear ) return item.update({ "system.tokenImg": "" });
+    // Start from the token's usual image (the prototype shows the current Form's while transformed)
+    const current = item.system.tokenImg || this.actor.getFlag("dbu-rpg", "formImg")?.base || this.actor.prototypeToken?.texture?.src || "";
+    if ( game.user.can("FILES_BROWSE") ) {
+      const FP = foundry.applications.apps.FilePicker.implementation;
+      return new FP({ type: "imagevideo", current, callback: path => item.update({ "system.tokenImg": path }) }).browse();
+    }
+    const path = await foundry.applications.api.DialogV2.prompt({
+      window: { title: L("DBU.TokenImg.Title", { name: item.name }) },
+      content: `<p>${L("DBU.TokenImg.NoBrowse")}</p><input type="text" name="path" value="${foundry.utils.escapeHTML(item.system.tokenImg)}" placeholder="tokens/goku-ssj.webp">`,
+      ok: { callback: (e, button) => button.form.elements.path.value },
+      rejectClose: false
+    });
+    if ( typeof path === "string" ) return item.update({ "system.tokenImg": path.trim() });
+    return null;
+  }
+
   static PARTS = {
     header: { template: "systems/dbu-rpg/templates/actor/header.hbs" },
     alerts: { template: "systems/dbu-rpg/templates/actor/alerts.hbs" },
@@ -83,6 +262,7 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     skills: { template: "systems/dbu-rpg/templates/actor/tab-skills.hbs", scrollable: [""] },
     combat: { template: "systems/dbu-rpg/templates/actor/tab-combat.hbs", scrollable: [""] },
     techniques: { template: "systems/dbu-rpg/templates/actor/tab-techniques.hbs", scrollable: [""] },
+    adventure: { template: "systems/dbu-rpg/templates/actor/tab-adventure.hbs", scrollable: [""] },
     transformations: { template: "systems/dbu-rpg/templates/actor/tab-transformations.hbs", scrollable: [""] },
     traits: { template: "systems/dbu-rpg/templates/actor/tab-traits.hbs", scrollable: [""] },
     gear: { template: "systems/dbu-rpg/templates/actor/tab-gear.hbs", scrollable: [""] },
@@ -98,6 +278,7 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         { id: "skills", icon: "fa-solid fa-list-check" },
         { id: "combat", icon: "fa-solid fa-hand-fist" },
         { id: "techniques", icon: "fa-solid fa-burst" },
+        { id: "adventure", icon: "fa-solid fa-compass" },
         { id: "transformations", icon: "fa-solid fa-fire-flame-curved" },
         { id: "traits", icon: "fa-solid fa-dna" },
         { id: "gear", icon: "fa-solid fa-suitcase" },
@@ -188,8 +369,11 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         raceOk: raceMatches(s.race, sys.races?.length ? sys.races : race),
         typeLabel: L(DBU.transformationTypes[s.transType] ?? s.transType),
         mastered: s.mastery >= s.masteryNeeded ? "full" : (s.mastery > 0 ? "partial" : "none"),
+        // The Mastery beyond Fully Mastered that a Transcendent Trait needs shows as "+"
+        masteryText: `${Math.min(s.mastery, s.masteryNeeded)}/${s.masteryNeeded}${s.mastery > s.masteryNeeded ? "+" : ""}`,
         canMaster: (s.transType !== "awakening") && !s.baseAspects?.some(a => a.key === "peaked"),
         masteryTip: masteryTooltip(s),
+        tokenVideo: /\.(webm|mp4|m4v|ogv)$/i.test(s.tokenImg ?? ""),
         pending: s.pendingChoices?.length ?? 0
       };
     });
@@ -237,6 +421,11 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     Object.assign(context, {
       ...triggerOptions(),
       combatInfo,
+      traitGroups: traitGroups(actor, items),
+      advGroups: adventuringGroups(actor),
+      ...battlePowerInfo(sys),
+      advInCombat: !!encounterOf(actor),
+      advStretch: (sys.adventure?.stretchAt ?? null) !== null,
       powerBoxes, powerNext: power + 1, powerCanExceed: power >= 2,
       resourceRows,
       rules: R,
@@ -268,6 +457,8 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       lifePct: Math.clamp(Math.round((sys.life.value / Math.max(1, sys.life.max)) * 100), 0, 100),
       kiPct: Math.clamp(Math.round((sys.ki.value / Math.max(1, sys.ki.max)) * 100), 0, 100),
       capPct: Math.clamp(Math.round((sys.capacity.value / Math.max(1, sys.capacity.max)) * 100), 0, 100),
+      dkpPct: Math.clamp(Math.round(((sys.dkp?.value ?? 0) / Math.max(1, sys.dkp?.max ?? 0)) * 100), 0, 100),
+      dkpTip: L(sys.dkp?.usable ? "DBU.Dkp.TipOn" : "DBU.Dkp.TipOff"),
       healthLabel: L(`DBU.Threshold.${sys.health.current}`),
       thresholds: DBU.thresholds.map(k => ({
         key: k, label: L(`DBU.Threshold.${k}`), below: sys.health.below[k], mark: sys.thresholds[k],
@@ -418,7 +609,8 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     const item = DBUActorSheet.#item.call(this, target);
     if ( !item ) return;
     const s = item.system;
-    const next = Math.clamp((s.mastery ?? 0) + (Number(target.dataset.delta) || 0), 0, s.masteryNeeded);
+    // One Mastery more than Fully Mastered unlocks a Transcendent Trait
+    const next = Math.clamp((s.mastery ?? 0) + (Number(target.dataset.delta) || 0), 0, s.masteryMax);
     if ( next === s.mastery ) return;
     const { announceMastery } = await import("../combat/mastery.mjs");
     const before = s.mastery ?? 0;
@@ -480,6 +672,7 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       case "healingSurge": return actor.surge("healing");
       case "kiSurge": return actor.surge("ki");
       case "combatRecovery": return actor.combatRecovery();
+      case "empower": return actor.empower();
       case "revertAll": return actor.revert();
       case "resetRound": {
         const sys = actor.system;
@@ -493,7 +686,7 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       case "instantRecovery": return actor.resetEncounter({ instantRecovery: true });
       case "fullRest": return actor.update({
         "system.life.value": actor.system.life.max, "system.ki.value": actor.system.ki.max,
-        "system.capacity.value": actor.system.capacity.max
+        "system.capacity.value": actor.system.capacity.max, "system.dkp.value": actor.system.dkp.max
       });
       default: return null;
     }

@@ -20,6 +20,9 @@ export function onRenderChatMessage(message, html) {
       const doc = t?.tokenUuid ? fromUuidSync(t.tokenUuid) : (t?.actorUuid ? fromUuidSync(t.actorUuid) : null);
       const actor = doc?.actor ?? doc;
       if ( actor && !actor.isOwner ) b.remove();
+      // Divine Flex: only for a defender in the God Ki State who has that God Maneuver
+      else if ( (b.dataset.mode === "divineFlex") && !(actor?.system?.dkp?.usable
+        && actor.items.some(i => (i.type === "maneuver") && i.system.god && /flex/i.test(i.name))) ) b.remove();
     });
   }
 }
@@ -35,10 +38,28 @@ async function onCardButton(event, message) {
       case "wound": await rollWound(message); break;
       case "damage": await applyAttackDamage(message, Number(index)); break;
       case "retarget": await retargetAttack(message); break;
+      case "updateTransformations":
+      case "skipTransformationUpdate": {
+        const update = await import("./compendium-update.mjs");
+        if ( dbuAction === "updateTransformations" ) await update.applyTransformationUpdates();
+        else await update.skipTransformationUpdate();
+        button.closest(".dbu-card-buttons")?.remove();
+        return;
+      }
       case "stressTest": {
         const actor = await fromUuid(actorUuid);
         if ( actor?.isOwner ) await actor.rollStressTest();
         else ui.notifications.warn(game.i18n.localize("DBU.Notify.NotOwner"));
+        break;
+      }
+      case "burstLimit": {
+        const actor = await fromUuid(actorUuid);
+        if ( !actor?.isOwner ) { ui.notifications.warn(game.i18n.localize("DBU.Notify.NotOwner")); break; }
+        const p = JSON.parse(button.dataset.payload || "{}");
+        const item = actor.items.get(p.itemId);
+        if ( !item ) break;
+        const { triggerBurstLimit } = await import("./combat/trait-actions.mjs");
+        await triggerBurstLimit(actor, item, p.trait);
         break;
       }
       case "applyTrigger": {

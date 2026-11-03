@@ -2,7 +2,7 @@ import { DBU } from "../config.mjs";
 import { dbuRoll, postInfoCard } from "../dice/roller.mjs";
 import { openAttackDialog, applyDamageToActor } from "../combat/attack.mjs";
 import { categoryToDice } from "../rules/dice.mjs";
-import { addTimedCondition, addTimedPower, dropTimedPower, inCombat, renewTimedPower } from "../combat/triggers.mjs";
+import { addTimedCondition, addTimedPower, dropTimedPower, encounterOf, inCombat, renewTimedPower } from "../combat/triggers.mjs";
 import { footLegProne, offerRegeneratorRemoval } from "../combat/injuries.mjs";
 
 const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
@@ -192,11 +192,16 @@ export class DBUActor extends Actor {
     });
   }
 
-  async rollSkill(key, { difficulty } = {}) {
+  /**
+   * Skill Check. penalty: lowers the Dice Score (Pickpocket against the same Character again); subtitle replaces the
+   * usual one; messageMode: "gmroll" / "blindroll" for a roll the player should not see.
+   */
+  async rollSkill(key, { difficulty, penalty = 0, penaltyLabel = "", subtitle, messageMode } = {}) {
     const S = this.system.skills[key];
     if ( !S ) return null;
     if ( S.autoFail ) {
-      return postInfoCard({ actor: this, title: `${S.label}`, lines: [L("DBU.Skill.AutoFail", { skill: S.label })] });
+      await postInfoCard({ actor: this, title: `${S.label}`, lines: [L("DBU.Skill.AutoFail", { skill: S.label })] });
+      return { total: 0, autoFail: true };
     }
     const def = DBU.skills[key];
     const parts = [
@@ -205,12 +210,13 @@ export class DBUActor extends Actor {
       { label: "Gifted Student", value: this.system.giftedStudent },
       { label: L("DBU.Bonus"), value: S.total - S.attrBonus - S.rankBonus - this.system.giftedStudent }
     ];
+    if ( penalty ) parts.push({ label: penaltyLabel || L("DBU.Penalty"), value: -penalty });
     const tn = difficulty ? DBU.difficulties[difficulty]?.tn : undefined;
     return dbuRoll({
       actor: this, kind: "skill", title: S.label,
-      subtitle: tn ? `${L(DBU.difficulties[difficulty].label)} (TN ${tn})` : L("DBU.Roll.SkillCheck"),
+      subtitle: subtitle ?? (tn ? `${L(DBU.difficulties[difficulty].label)} (TN ${tn})` : L("DBU.Roll.SkillCheck")),
       critTarget: S.crit, botchRange: S.botch, parts,
-      critDice: [{ number: 1, faces: 4 }], botchPenalty: 2, target: tn
+      critDice: [{ number: 1, faces: 4 }], botchPenalty: 2, target: tn, messageMode
     });
   }
 
@@ -252,7 +258,7 @@ export class DBUActor extends Actor {
    * Stress Test: 1d10 + 1 + Stress Bonus against the (combined) Stress Test Requirement.
    * @param {Item} [transformation]  Transformation being entered (otherwise: those currently active)
    */
-  async rollStressTest(transformation = null, { grade } = {}) {
+  async rollStressTest(transformation = null, { grade, penalty = 0 } = {}) {
     const sys = this.system;
     const req = this.stressRequirement(transformation, { grade });
     // New Level of Power: automatic success at any Stress Test for that Transformation, unless used in conjunction
@@ -267,6 +273,8 @@ export class DBUActor extends Actor {
       return { success: true, requirement: req, automatic: true };
     }
     const parts = [{ label: "+1", value: 1 }, { label: "Stress Bonus", value: sys.stress.bonus }];
+    // Divine Pulse: −1 Stress Bonus per Action spent on it, for that Maneuver
+    if ( penalty ) parts.push({ label: "Divine Pulse", value: -penalty });
     // Fused Transformation: no Health Threshold penalty to the Stress Bonus for a Fused Form
     const fusedForms = (this.type === "fusion") ? (sys.fusion.fusedForms ?? []) : [];
     const tested = transformation ? [transformation] : alone;
@@ -399,8 +407,11 @@ export class DBUActor extends Actor {
   /*  Transformations                             */
   /* -------------------------------------------- */
 
-  /** Transformation Maneuver: check requirements, roll the Stress Test, apply Legend Realized. */
-  async transform(item, { grade } = {}) {
+  /**
+   * Transformation Maneuver: check requirements, roll the Stress Test, apply Legend Realized.
+   * free: no Stress Test to enter it (Holy Transformation); stressPenalty: Stress Bonus lowered for it (Divine Pulse).
+   */
+  async transform(item, { grade, free = false, stressPenalty = 0 } = {}) {
     const sys = this.system;
     const ts = item.system;
     const problems = [];
@@ -408,7 +419,7 @@ export class DBUActor extends Actor {
     if ( sys.effectiveConditions.stressExhaustion && !ts.aspects.some(a => a.key === "natural") ) problems.push(L("DBU.Trans.ErrExhausted"));
     if ( sys.ki.value <= 0 ) problems.push(L("DBU.Trans.ErrNoKi"));
     const topReq = ts.topReq - (ts.prelude ? 1 : 0);
-    if ( (sys.top.current < topReq) && !this.isBoss ) problems.push(L("DBU.Val.TransTop", { name: item.name, req: topReq, top: sys.top.current }));
+    if ( (sys.top.current < topReq) && !this.isBoss && !ts.ignoreTop ) problems.push(L("DBU.Val.TransTop", { name: item.name, req: topReq, top: sys.top.current }));
     const { raceMatches } = await import("../rules/validation.mjs");
     if ( sys.race && !raceMatches(ts.race, sys.races?.length ? sys.races : sys.race) ) problems.push(L("DBU.Val.TransRace", { name: item.name, race: ts.race }));
     // A Plump or Frail Fusion stays in its Normal State
@@ -433,8 +444,8 @@ export class DBUActor extends Actor {
     const staying = sys.transformation.active.filter(t => (t.id !== item.id) && (ts.countsAsForm ? !t.system.countsAsForm : t.system.countsAsForm));
     let success = true;
     let roll = null;
-    if ( !natural && !(newLevel && !staying.length) ) {
-      roll = await this.rollStressTest(item, { grade });
+    if ( !free && !natural && !(newLevel && !staying.length) ) {
+      roll = await this.rollStressTest(item, { grade, penalty: stressPenalty });
       success = roll.success;
     }
     if ( !success ) return roll;
@@ -447,7 +458,11 @@ export class DBUActor extends Actor {
       if ( !ts.countsAsForm && !t.system.countsAsForm ) leave.push(t);
     }
     const updates = leave.map(t => ({ _id: t.id, "system.active": false }));
-    updates.push({ _id: item.id, "system.active": true, "system.viaManeuver": true, "system.everEntered": true, ...(grade ? { "system.grade": grade } : {}) });
+    // Entering an Enhancement (or changing its Grade) through the maneuver is when its Burst Limit may be triggered
+    const { burstTraits, burstWindow } = await import("../combat/trait-actions.mjs");
+    const bursts = (ts.transType === "enhancement") ? burstTraits(item) : [];
+    updates.push({ _id: item.id, "system.active": true, "system.viaManeuver": true, "system.everEntered": true,
+      ...(grade ? { "system.grade": grade } : {}), ...(bursts.length ? { "flags.dbu-rpg.burstWindow": burstWindow(this) } : {}) });
     await this.updateEmbeddedDocuments("Item", updates);
 
     // Legend Realized: first time per Combat Encounter in each Form
@@ -475,7 +490,21 @@ export class DBUActor extends Actor {
         lines.push(L("DBU.Trans.LegendRealized", { n: amount }));
       }
     }
-    if ( ts.transType === "enhancement" ) lines.push(L("DBU.Trans.BurstLimit"));
+    // Burst Limit [1/Encounter] (a New Level of Power in this Enhancement allows another one)
+    const buttons = [];
+    if ( bursts.length ) {
+      const again = !!item.system.newLevel;
+      const fighting = !!encounterOf(this);
+      if ( fighting && this.system.combat.burstUsed && !again ) lines.push(L("DBU.Burst.UsedLine"));
+      else {
+        lines.push(L(again && fighting && this.system.combat.burstUsed ? "DBU.Burst.OfferAgain" : "DBU.Burst.Offer"));
+        for ( const trait of bursts ) {
+          buttons.push({ action: "burstLimit", icon: "fa-solid fa-explosion", label: `Burst Limit: ${trait}`, actorUuid: this.uuid,
+            payload: JSON.stringify({ itemId: item.id, trait }) });
+        }
+      }
+    }
+    else if ( ts.transType === "enhancement" ) lines.push(L("DBU.Trans.BurstLimit"));
     // Round Limiter of a Temporary Fusion: the first Transformation with a ToP Requirement of 4+ shortens it
     if ( this.type === "fusion" ) {
       const { fusionTransformed } = await import("../fusion/fusion.mjs");
@@ -491,7 +520,7 @@ export class DBUActor extends Actor {
     const rampaging = ts.aspects.find(a => a.key === "rampaging");
     if ( rampaging ) lines.push(L(rampaging.level >= 2 ? "DBU.Trans.Rampaging2" : "DBU.Trans.Rampaging"));
     if ( ts.aspects.some(a => a.key === "bursting") ) lines.push(L("DBU.Trans.Bursting"));
-    await postInfoCard({ actor: this, title: item.name, subtitle: L("DBU.Trans.Maneuver"), lines, img: item.img });
+    await postInfoCard({ actor: this, title: item.name, subtitle: L("DBU.Trans.Maneuver"), lines, img: item.img, buttons });
     return roll ?? { success: true };
   }
 
@@ -594,13 +623,15 @@ export class DBUActor extends Actor {
     return 0;
   }
 
-  /** Energy Charge Maneuver: 2(bT) KP, +1 Energy Charge, Guard Down until the attack. */
+  /** Energy Charge Maneuver: 2(bT) KP (or Divine Ki Points, if preferred in the God Ki State), +1 Energy Charge, Guard Down until the attack. */
   async energyCharge() {
     const sys = this.system;
     const cost = 2 * sys.top.base;
-    if ( (sys.ki.value < cost) || (sys.capacity.value < cost) ) return ui.notifications.error(L("DBU.Attack.ErrKi", { need: cost, have: Math.min(sys.ki.value, sys.capacity.value) }));
+    const { kiPayment } = await import("../combat/divine.mjs");
+    const pay = kiPayment(sys, cost, { divine: !!(sys.dkp?.usable && sys.dkp.prefer) });
+    if ( pay.problems.length ) return ui.notifications.error(pay.problems.join(" "));
     await this.update({
-      "system.ki.value": sys.ki.value - cost, "system.capacity.value": sys.capacity.value - cost,
+      ...pay.updates,
       "system.combat.energyCharges": (sys.combat.energyCharges ?? 0) + 1, "system.conditions.guardDown": 1,
       ...this._spendAction(1)
     });
@@ -724,6 +755,12 @@ export class DBUActor extends Actor {
     return openAttackDialog(this, options);
   }
 
+  /** Empower Maneuver: send Ki Points (or Divine Ki Points, between characters in God Ki) to the targeted Ally. */
+  async empower() {
+    const { empower } = await import("../combat/divine.mjs");
+    return empower(this);
+  }
+
   /* -------------------------------------------- */
   /*  Conditions and States                       */
   /* -------------------------------------------- */
@@ -753,6 +790,7 @@ export class DBUActor extends Actor {
       "system.combat.attacksThisRound": 0, "system.combat.momentumUsed": false, "system.combat.reducedMomentum": false,
       "system.combat.surgeUsed": false, "system.combat.willToSurviveUsed": false, "system.combat.ultimatesUsed": 0,
       "system.combat.absoluteAttacks": 0, "system.combat.legendRealized": [], "system.combat.topBoost": 0,
+      "system.combat.burstUsed": false,
       "system.combat.stressBonus": 0, "system.combat.actions": 3, "system.combat.counters": 1,
       "system.thresholds.bruised": "", "system.thresholds.injured": "", "system.thresholds.critical": ""
     };
@@ -766,8 +804,9 @@ export class DBUActor extends Actor {
     const itemUpdates = [];
     for ( const i of this.items ) {
       if ( (i.type === "signature") && i.system.usedThisEncounter ) itemUpdates.push({ _id: i.id, "system.usedThisEncounter": false });
-      if ( (i.type === "transformation") && (i.system.newLevel || i.system.legendRealized) ) {
-        itemUpdates.push({ _id: i.id, "system.newLevel": false, "system.legendRealized": false });
+      if ( (i.type === "transformation") && (i.system.newLevel || i.system.legendRealized || i.system.grandAwakening) ) {
+        // A Grand Awakening lasts until the end of the Combat Encounter
+        itemUpdates.push({ _id: i.id, "system.newLevel": false, "system.legendRealized": false, "system.grandAwakening": false });
       }
     }
     if ( itemUpdates.length ) await this.updateEmbeddedDocuments("Item", itemUpdates);

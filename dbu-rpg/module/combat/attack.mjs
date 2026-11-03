@@ -20,8 +20,10 @@ const FLAG = "dbu-rpg";
  * @param {object} [options]
  * @param {Item} [options.signature]
  * @param {string} [options.profile]
+ * @param {object} [options.divine]         A God Maneuver attack: {name, forceDkp, category, costFactor, profile}
+ * @param {boolean} [options.outOfSequence] An Out-of-Sequence attack (no Action spent by default)
  */
-export async function openAttackDialog(actor, { signature = null, profile = null } = {}) {
+export async function openAttackDialog(actor, { signature = null, profile = null, divine = null, outOfSequence = false } = {}) {
   const sys = actor.system;
   const sig = signature?.system ?? null;
   const comp = sig?.computed ?? null;
@@ -43,18 +45,28 @@ export async function openAttackDialog(actor, { signature = null, profile = null
   const weaponOptions = [`<option value="">${L("DBU.Attack.Unarmed")}</option>`,
     ...weapons.map(w => `<option value="${w.id}">${w.name} (${L(DBU.foundations[w.system.weaponType])})</option>`)].join("");
   const pending = sys.combat.energyCharges ?? 0;
+  // Divine Ki Points (God Ki State): the cost and the Ki Wager are paid separately, each from one pool
+  const dkp = sys.dkp?.usable ? `<div class="dbu-checks dbu-dkp-checks">
+      ${divine?.forceDkp ? `<span><i class="fa-solid fa-sun"></i> ${L("DBU.Dkp.CostForced")}</span>`
+        : `<label><input type="checkbox" name="dkpCost" ${sys.dkp.prefer ? "checked" : ""}> ${L("DBU.Dkp.Cost")}</label>`}
+      <label><input type="checkbox" name="dkpWager" ${sys.dkp.prefer ? "checked" : ""}> ${L("DBU.Dkp.Wager")}</label>
+      <small>DKP ${sys.dkp.value}/${sys.dkp.max} · ${L("DBU.Dkp.HalfCapacity")}</small>
+    </div>` : "";
 
   const content = `
   <div class="dbu-dialog">
+    ${divine ? `<p class="dbu-dialog-sig"><strong><i class="fa-solid fa-sun"></i> ${divine.name}</strong> — ${L(divine.costFactor < 1
+      ? "DBU.God.StrikeNote" : "DBU.God.AttackNote")}</p>` : ""}
     ${sig ? `<p class="dbu-dialog-sig"><strong>${signature.name}</strong> — ${L(`DBU.Sig.Level.${sig.level}`)} · ${prof?.label ?? ""} ·
       ${comp.kpUnits + comp.kpAdjust}(T) KP · ${comp.tp} TP</p>`
-      : `<div class="form-group"><label>${L("DBU.Attack.Profile")}</label><select name="profile">${profileOptions}</select></div>`}
+      : `<div class="form-group"><label>${L("DBU.Attack.Profile")}</label><select name="profile" ${divine?.profile ? "disabled" : ""}>${profileOptions}</select></div>`}
     <div class="form-group"><label>${L("DBU.Attack.Foundation")}</label><select name="foundation">${foundationOptions}</select></div>
     <div class="form-group"><label>${L("DBU.Attack.Weapon")}</label><select name="weaponId">${weaponOptions}</select></div>
     <div class="form-group"><label>${L("DBU.Attack.Wager")} (${L("DBU.Attack.WagerMax", { max: maxWager })})</label>
       <input type="number" name="wager" value="0" min="0" step="1"></div>
     ${(rules().desperation && !sys.optional.desperationUsed) ? `<div class="form-group"><label>${L("DBU.Attack.LifeWager", { max: Math.floor(sys.capacity.max / 2) })}</label>
       <input type="number" name="lifeWager" value="0" min="0" step="1"></div>` : ""}
+    ${dkp}
     <div class="form-group"><label>${L("DBU.Attack.Charges")} (${L("DBU.Attack.Pending", { n: pending })})</label>
       <input type="number" name="extraCharges" value="0" min="0" step="1"></div>
     <div class="form-group"><label>${L("DBU.Attack.StrikeBonus")}</label><input type="number" name="strikeBonus" value="0" step="1"></div>
@@ -64,7 +76,7 @@ export async function openAttackDialog(actor, { signature = null, profile = null
       <label><input type="checkbox" name="longRange"> ${L("DBU.Attack.LongRange")}</label>
       <label><input type="checkbox" name="oblivious" ${sys.combat.hidden ? "checked" : ""}> ${L("DBU.Attack.Oblivious")}</label>
       <label><input type="checkbox" name="rapid"> ${L("DBU.Attack.Rapid")}</label>
-      <label><input type="checkbox" name="spendAction" checked> ${L("DBU.Attack.SpendAction")}</label>
+      <label><input type="checkbox" name="spendAction" ${outOfSequence ? "" : "checked"}> ${L("DBU.Attack.SpendAction")}</label>
       <label><input type="checkbox" name="ignoreLimits"> ${L("DBU.Attack.IgnoreLimits")}</label>
     </div>
     ${rules().injurySystem ? `<div class="form-group"><label>${L("DBU.Injury.Intended")}</label><select name="injuryType">
@@ -73,7 +85,7 @@ export async function openAttackDialog(actor, { signature = null, profile = null
   </div>`;
 
   const data = await DialogV2.wait({
-    window: { title: sig ? signature.name : L("DBU.Attack.Basic"), icon: "fa-solid fa-hand-fist" },
+    window: { title: divine?.name ?? (sig ? signature.name : L("DBU.Attack.Basic")), icon: "fa-solid fa-hand-fist" },
     position: { width: 460 },
     content,
     buttons: [
@@ -96,7 +108,8 @@ export async function openAttackDialog(actor, { signature = null, profile = null
     rejectClose: false
   });
   if ( !data || (data === "cancel") ) return null;
-  return executeAttack(actor, { ...data, signatureId: signature?.id ?? null, profile: sig ? profileKey : data.profile, targets });
+  return executeAttack(actor, { ...data, signatureId: signature?.id ?? null, targets, divine,
+    profile: sig ? profileKey : (divine?.profile ?? data.profile) });
 }
 
 /**
@@ -146,6 +159,9 @@ export async function executeAttack(actor, opts) {
   let minKp = Math.ceil(minUnits * kpT);
   if ( sys.costs.perfectKiControl ) minKp = Math.min(minKp, 2 * kpT);
   kp = Math.max(minKp, kp);
+  // God Strike: 1/4 (rounded up) of the Profile's Ki Point Cost
+  const divine = opts.divine ?? null;
+  if ( divine?.costFactor && (divine.costFactor !== 1) ) kp = Math.ceil(kp * divine.costFactor);
   // Ballistics: Basic Attacks with a Ballistic Weapon cost no Ki; Signatures cost half
   if ( ballistic ) kp = sig ? Math.ceil(kp / 2) : 0;
   if ( opts.calledShot ) kp += 2 * T;
@@ -156,24 +172,38 @@ export async function executeAttack(actor, opts) {
     if ( (weapon.system.ammo.value ?? 0) < ammoCost ) problems.push(L("DBU.Attack.ErrAmmo", { need: ammoCost, have: weapon.system.ammo.value }));
   }
 
+  /* ----- Divine Ki Points (God Ki State) ----- */
+  // The Ki Point Cost and the Ki Wager are two payments, each from a single pool; DKP use 1/2 (rounded up) of the
+  // Capacity Rate
+  const divineOk = !!sys.dkp?.usable;
+  if ( divine?.forceDkp && !divineOk ) problems.push(L("DBU.Dkp.ErrState"));
+  const costDkp = divineOk && (!!opts.dkpCost || !!divine?.forceDkp);
+  const wagerDkp = divineOk && !!opts.dkpWager && (sig?.superProfile !== "allOut");
+  const capacityOf = (n, fromDkp) => (fromDkp ? Math.ceil(n / 2) : n);
+
   /* ----- Ki Wager ----- */
   let wager = Math.max(0, Number(opts.wager) || 0);
-  const capacityLeft = sys.capacity.value - kp;
+  const capacityLeft = sys.capacity.value - capacityOf(kp, costDkp);
+  // How much can still be wagered with the Capacity left (DKP only use half of it)
+  const wagerRoom = Math.max(0, wagerDkp ? 2 * capacityLeft : capacityLeft);
   let wagerLimit = Math.floor(sys.capacity.max / 2);
-  if ( comp?.fullWager ) wagerLimit = Math.max(0, capacityLeft);
+  if ( comp?.fullWager ) wagerLimit = wagerRoom;
   const wired = weapon?.system.qualities?.some(q => /wired/i.test(q.name));
   if ( ballistic ) wagerLimit = wired ? Math.floor(sys.capacity.max / 4) : 0;
   // Desperation Rules: Life Points may join the Ki Wager (up to 1/2 of the Capacity)
   const lifeWager = (R.desperation && !sys.optional.desperationUsed) ? Math.max(0, Number(opts.lifeWager) || 0) : 0;
   if ( lifeWager > Math.floor(sys.capacity.value / 2) ) problems.push(L("DBU.Attack.ErrLifeWager", { max: Math.floor(sys.capacity.value / 2) }));
   if ( lifeWager >= sys.life.value ) problems.push(L("DBU.Attack.ErrLifeWagerLP"));
-  if ( sig?.superProfile === "allOut" ) wager = Math.min(sys.ki.value - kp, sys.capacity.max);
-  if ( comp?.allOrNothing ) wager = Math.max(0, Math.min(wagerLimit, capacityLeft));
+  if ( sig?.superProfile === "allOut" ) wager = Math.min(sys.ki.value - (costDkp ? 0 : kp), sys.capacity.max);
+  if ( comp?.allOrNothing ) wager = Math.max(0, Math.min(wagerLimit, wagerRoom));
   if ( wager > wagerLimit ) problems.push(L("DBU.Attack.ErrWagerMax", { max: wagerLimit }));
-  const totalKi = kp + wager;
-  if ( totalKi > sys.ki.value ) problems.push(L("DBU.Attack.ErrKi", { need: totalKi, have: sys.ki.value }));
-  if ( (sig?.superProfile !== "allOut") && (totalKi > sys.capacity.value) ) {
-    problems.push(L("DBU.Attack.ErrCapacity", { need: totalKi, have: sys.capacity.value }));
+  const kiPaid = (costDkp ? 0 : kp) + (wagerDkp ? 0 : wager);
+  const dkpPaid = (costDkp ? kp : 0) + (wagerDkp ? wager : 0);
+  const capacityUsed = capacityOf(kp, costDkp) + capacityOf(wager, wagerDkp);
+  if ( kiPaid > sys.ki.value ) problems.push(L("DBU.Attack.ErrKi", { need: kiPaid, have: sys.ki.value }));
+  if ( dkpPaid > (sys.dkp?.value ?? 0) ) problems.push(L("DBU.Dkp.ErrNotEnough", { need: dkpPaid, have: sys.dkp?.value ?? 0 }));
+  if ( (sig?.superProfile !== "allOut") && (capacityUsed > sys.capacity.value) ) {
+    problems.push(L("DBU.Attack.ErrCapacity", { need: capacityUsed, have: sys.capacity.value }));
   }
 
   /* ----- Actions ----- */
@@ -206,14 +236,17 @@ export async function executeAttack(actor, opts) {
   if ( (sig?.superProfile === "multiProfile") && DBU.profiles[sig.multiProfile] ) category = Math.max(category, DBU.profiles[sig.multiProfile].cat);
   if ( opts.calledShot ) category += 1;
   if ( (profileKey === "megaFlare") && (charges >= 7) ) category += 1;
+  // Divine Attack: +1 Damage Category
+  if ( divine?.category ) category += divine.category;
 
   /* ----- Pay ----- */
   const update = {
-    "system.ki.value": Math.max(0, sys.ki.value - totalKi),
+    "system.ki.value": Math.max(0, sys.ki.value - kiPaid),
     "system.combat.attacksThisRound": (sys.combat.attacksThisRound ?? 0) + 1,
     "system.combat.energyCharges": 0
   };
-  if ( sig?.superProfile !== "allOut" ) update["system.capacity.value"] = Math.max(0, sys.capacity.value - totalKi);
+  if ( dkpPaid ) update["system.dkp.value"] = Math.max(0, sys.dkp.value - dkpPaid);
+  if ( sig?.superProfile !== "allOut" ) update["system.capacity.value"] = Math.max(0, sys.capacity.value - capacityUsed);
   if ( (sig?.superProfile === "allOut") || comp?.allOrNothing ) update["system.capacity.value"] = 0;
   if ( game.combat?.started && opts.spendAction ) update["system.combat.actions"] = Math.max(0, sys.combat.actions - actionCost);
   if ( pending && sys.conditions.guardDown ) update["system.conditions.guardDown"] = 0;
@@ -274,11 +307,14 @@ export async function executeAttack(actor, opts) {
   }
   if ( ballistic ) notesExtra.push(L("DBU.Attack.Ballistic", { ammo: ammoCost, left: weapon.system.ammo.value }));
   if ( lifeCost > 0 ) notesExtra.push(L("DBU.Attack.LifeCost", { n: lifeCost }));
+  if ( dkpPaid ) notesExtra.push(L("DBU.Dkp.Paid", { cost: costDkp ? kp : 0, wager: wagerDkp ? wager : 0, cap: capacityUsed }));
 
   const attack = {
-    attackerUuid: actor.uuid, name: signature?.name ?? `${L("DBU.Attack.Basic")}: ${prof.label}`,
+    attackerUuid: actor.uuid,
+    name: signature?.name ?? (divine ? `${divine.name}: ${prof.label}` : `${L("DBU.Attack.Basic")}: ${prof.label}`),
     signatureId: signature?.id ?? null, profile: profileKey, foundation, weaponId: weapon?.id ?? null,
     kp, wager: wager + lifeWager, charges: totalCharges, chargeCategory, category, ballistic: !!ballistic,
+    dkp: { cost: costDkp, wager: wagerDkp, paid: dkpPaid },
     caliber: ballistic ? (weapon.system.caliber ?? 0) : 0,
     calledShot: !!opts.calledShot, injuryType: opts.calledShot ? (opts.injuryType || "") : "",
     longRange: !!opts.longRange, oblivious: !!opts.oblivious,
@@ -385,7 +421,9 @@ export async function rollDefense(message, index, mode = "dodge") {
   const T = sys.top.current;
   const bT = sys.top.base;
   const strike = attack.strike.total;
-  const usesCounter = ["parry", "guard", "directHit", "crossCounter", "powerFlare"].includes(mode);
+  const usesCounter = ["parry", "guard", "directHit", "crossCounter", "powerFlare", "divineFlex"].includes(mode);
+  // Divine Flex (God Maneuver): 2(bT) Divine Ki Points, only in the God Ki State
+  if ( (mode === "divineFlex") && !sys.dkp?.usable ) return ui.notifications.warn(L("DBU.Dkp.ErrState"));
   const rec = { mode, total: 0, natural: null, crit: false };
   const update = {};
 
@@ -424,10 +462,23 @@ export async function rollDefense(message, index, mode = "dodge") {
   else if ( mode === "guard" ) {
     const extra = Math.min(attack.charges, 4) * bT;
     const cost = Math.ceil((sys.costs.guard + extra) * sys.costs.guardMultiplier);
-    if ( cost > sys.ki.value ) ui.notifications.warn(L("DBU.Attack.ErrKi", { need: cost, have: sys.ki.value }));
-    update["system.ki.value"] = Math.max(0, sys.ki.value - cost);
-    update["system.capacity.value"] = Math.max(0, sys.capacity.value - cost);
+    // Paid with Divine Ki Points when the defender prefers them (God Ki State): half the Capacity
+    const divine = !!(sys.dkp?.usable && sys.dkp.prefer);
+    const have = divine ? sys.dkp.value : sys.ki.value;
+    if ( cost > have ) ui.notifications.warn(L(divine ? "DBU.Dkp.ErrNotEnough" : "DBU.Attack.ErrKi", { need: cost, have }));
+    update[divine ? "system.dkp.value" : "system.ki.value"] = Math.max(0, have - cost);
+    update["system.capacity.value"] = Math.max(0, sys.capacity.value - (divine ? Math.ceil(cost / 2) : cost));
     rec.cost = cost;
+    rec.dkp = divine;
+    hit = true;
+  }
+  else if ( mode === "divineFlex" ) {
+    const cost = 2 * bT;
+    if ( cost > sys.dkp.value ) ui.notifications.warn(L("DBU.Dkp.ErrNotEnough", { need: cost, have: sys.dkp.value }));
+    update["system.dkp.value"] = Math.max(0, sys.dkp.value - cost);
+    update["system.capacity.value"] = Math.max(0, sys.capacity.value - Math.ceil(cost / 2));
+    rec.cost = cost;
+    rec.dkp = true;
     hit = true;
   }
   else {
@@ -572,6 +623,11 @@ export function computeDamage(targetActor, attack, attacker = null, def = null) 
     category -= 1;
     lines.push(L("DBU.Damage.Guard"));
   }
+  // Divine Flex: −1 Damage Category, and it counts as the Direct Hit option
+  if ( def?.mode === "divineFlex" ) {
+    category -= 1;
+    lines.push(L("DBU.Damage.DivineFlex"));
+  }
   category = Math.clamp(category, 1, 3);
 
   // Damage Reduction
@@ -582,7 +638,7 @@ export function computeDamage(targetActor, attack, attacker = null, def = null) 
 
   // Soak
   let soak = tsys.aptitudes.soak;
-  if ( def?.mode === "directHit" ) soak = soak + Math.floor(soak / 2);
+  if ( ["directHit", "divineFlex"].includes(def?.mode) ) soak = soak + Math.floor(soak / 2);
   if ( (attack.profile === "pinpoint") && attacker ) {
     const ins = attacker.system.attributes.in.mod * (attack.strike?.crit ? 2 : 1);
     soak = Math.max(0, soak - ins);
@@ -599,6 +655,8 @@ export function computeDamage(targetActor, attack, attacker = null, def = null) 
   lines.push(L("DBU.Damage.Breakdown", {
     wound, dr, soak: soakApplied, cat: L(DBU.damageCategories[category]), damage
   }));
+  // Divine Flex with no Damage taken: the Opponent loses Life Points equal to your Soak Value
+  if ( (def?.mode === "divineFlex") && (damage === 0) ) lines.push(L("DBU.Damage.DivineFlexReflect", { n: tsys.aptitudes.soak }));
   return { damage, category, dr, soakApplied, wound, lines };
 }
 

@@ -106,6 +106,22 @@ async function askChoice(item, choice, { required }) {
 }
 
 /**
+ * Switch on the modifiers/triggers of the chosen option(s) of a Trait only (a Foundation detail fills "{foundation}").
+ * @returns {object[]}  The list, changed in place
+ */
+export function toggleOptions(list, trait, selected, detail = "") {
+  const prefix = optionLabel(trait, "");
+  return list.map(x => {
+    if ( !String(x.label ?? "").startsWith(prefix) ) return x;
+    const option = x.label.slice(prefix.length);
+    const on = selected.includes(option);
+    const y = { ...x, active: on };
+    if ( on && detail && ("target" in y) ) y.target = String(y.target).replace("{foundation}", detail);
+    return y;
+  });
+}
+
+/**
  * Record a choice on every Transformation of the actor that has it (later Stages inherit the trait) and switch
  * on the modifiers/triggers of the chosen option(s) only.
  */
@@ -119,21 +135,10 @@ export async function applyChoice(actor, choice, selected, detail = "") {
     const choices = foundry.utils.deepClone(src.choices);
     choices[index].selected = selected;
     choices[index].detail = detail;
-    const prefix = optionLabel(choice.trait, "");
-    const toggle = list => list.map(x => {
-      if ( !String(x.label ?? "").startsWith(prefix) ) return x;
-      const option = x.label.slice(prefix.length);
-      const on = selected.includes(option);
-      const y = { ...x, active: on };
-      if ( on && detail ) {
-        if ( "target" in y ) y.target = String(y.target).replace("{foundation}", detail);
-      }
-      return y;
-    });
     updates.push({
       _id: item.id, "system.choices": choices,
-      "system.modifiers": toggle(foundry.utils.deepClone(src.modifiers ?? [])),
-      "system.triggers": toggle(foundry.utils.deepClone(src.triggers ?? []))
+      "system.modifiers": toggleOptions(foundry.utils.deepClone(src.modifiers ?? []), choice.trait, selected, detail),
+      "system.triggers": toggleOptions(foundry.utils.deepClone(src.triggers ?? []), choice.trait, selected, detail)
     });
   }
   if ( !updates.length ) return;

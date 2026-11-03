@@ -1073,6 +1073,61 @@ def effect_choices(effects, trait):
 # "Transformation Type: **Form" and "**Transformation Type:** Form" are both used on the site
 TT_RE = re.compile(r"Transformation Type:\s*\*\*")
 
+# '#### **Burst LimitScarlet Multiplier**:', '#### **Mastery TraitsSharpened Instinct (1)**:', '#### **MasteryControlled
+# Darkness**:', '#### **Legendary Trait**Undying Namekian:', '#### **Mastery TraitCold as Ice:**' are all used on the site
+TRAIT_HEAD_RE = re.compile(r"^#{2,4} \*\*(Mastery Traits?|Mastery|Burst Limit|Legendary Trait|Grand Awakening|Transcendent Trait)(.*)$")
+# An effect written on the same line as its trait's heading ('...your fury.(**1**)-[**Triggered/Transform**]: ...')
+INLINE_EFFECT_RE = re.compile(r"\((?:\*\*)?\d+(?:\*\*)?\)-\[|(?<![\w*])-\[\*\*")
+GLUED_EFFECT_RE = re.compile(r"(?<=\S)(?=\((?:\*\*)?\d+(?:\*\*)?\)-\[)")
+
+
+def trait_heading(line):
+    """(kind, name, effect written on the heading line or '') of a Transformation Trait heading, or None."""
+    m = TRAIT_HEAD_RE.match(line)
+    if m:
+        kind = m.group(1).lower()
+        if kind.startswith("mastery"):
+            kind = "mastery trait"
+        rest = m.group(2)
+        n = (re.match(r"^\*\*\s*([^:*]+?)\s*:\s*(.*)$", rest) if rest.startswith("**")
+             else re.match(r"^([^*]+?)\s*(?::\s*\*\*|\*\*\s*:)\s*(.*)$", rest))
+        if not n:
+            return None
+        name, tail = n.group(1).strip(), n.group(2)
+    else:
+        m = re.match(r"^\*\*([^*]+?)\*\*:\s*(.*)$", line)
+        if not m:
+            return None
+        kind, name, tail = "trait", m.group(1).strip(), m.group(2)
+        if name.lower().startswith(("racial requirement", "transformation", "prerequisite", "stress", "tier of power", "aspects")):
+            return None
+    e = INLINE_EFFECT_RE.search(tail)
+    return kind, name, (tail[e.start():] if e else "")
+
+
+def tidy_trait_lines(seg):
+    """One effect per line: a bold opened on one line and closed on the next ('**Spited Divinity:' / '**(**1**)-[...'),
+    and several effects glued on one line, are split the way the other pages write them."""
+    out = []
+    for k, line in enumerate(seg):
+        s = line.strip()
+        nxt = seg[k + 1].strip() if k + 1 < len(seg) else ""
+        m = re.match(r"^\*\*([^*]+?):\s*$", s)
+        if m and nxt.startswith("**("):
+            out.append(f"**{m.group(1).strip()}**:")
+            continue
+        if s.startswith("**(") and out and out[-1].endswith("**:"):
+            s = s[2:]
+        head = trait_heading(s)
+        if head and head[2]:
+            out.append(s[:len(s) - len(head[2])].rstrip())
+            s = head[2]
+        if INLINE_EFFECT_RE.match(s):
+            out += [p for p in GLUED_EFFECT_RE.split(s) if p]
+        else:
+            out.append(line if s == line.strip() else s)
+    return out
+
 
 def build_transformations():
     pages = set()
@@ -1097,10 +1152,9 @@ def build_transformations():
         cur["end"] = len(lines)
         blocks.append(cur)
         blocks = [b for b in blocks if any(TT_RE.search(l) for l in lines[b["start"]:b["end"]])]
-        prev_traits = []  # (trait mods, trigs, choices) inherited by higher stages
         prev_race = ""
         for b in blocks:
-            seg = lines[b["start"]:b["end"]]
+            seg = tidy_trait_lines(lines[b["start"]:b["end"]])
             fields = {}
             for l in seg:
                 m = FIELD_RE.match(l.strip())
@@ -1124,24 +1178,16 @@ def build_transformations():
             graded = any(a["key"] == "graded" for a in aspects)
             # Traits
             traits, own_mods, own_trigs, structure = [], [], [], []
-            own_choices, mastery_aspects = [], []
+            own_choices, mastery_aspects, legendary = [], [], set()
+            ignore_top = False
             in_mastery = False
             i = bonus_start + 2 if bonus_start else 0
             while i < len(seg):
-                line = seg[i].strip()
-                kind = "trait"
-                m = re.match(r"^#{2,4} \*\*(Mastery Trait|Burst Limit|Legendary Trait|Grand Awakening|Transcendent Trait|Mastery Traits?)(.+?)\*\*:", line)
-                if m:
-                    kind = m.group(1).lower()
-                    name = m.group(2).strip()
-                else:
-                    m = re.match(r"^\*\*([^*]+?)\*\*:", line)
-                    name = m.group(1).strip() if m else None
-                    if name and (name.lower().startswith(("racial requirement", "transformation", "prerequisite", "stress", "tier of power", "aspects"))):
-                        name = None
-                if not name:
+                head = trait_heading(seg[i].strip())
+                if not head:
                     i += 1
                     continue
+                kind, name, _ = head
                 effects, j = parse_effects(seg, i + 1)
                 if not effects:
                     i += 1
@@ -1161,23 +1207,39 @@ def build_transformations():
                         kind = "mastery trait"
                 if trans_type == "awakening" and req:
                     cond = f"@Z >= {req.group(1)}"
+                # A Grand Awakening does nothing until the Full Awakening Maneuver activates it (@GA); a Transcendent
+                # Trait needs a Mastery beyond Fully Mastered (@MX) and, except its Permanent effects, being Transcended
+                if kind == "grand awakening":
+                    cond = " && ".join(c for c in [cond, "@GA >= 1"] if c)
+                if kind == "transcendent trait":
+                    cond = "@MX >= 1"
                 if mastery_level:
                     for e in effects:
-                        if "Permanent" in e["keywords"]:
+                        # A Passive effect changes the Aspects too while in the Transformation (Evil Aura's 'Reduce the
+                        # level of the Rampaging Aspect by 1 level'), unless only under a condition
+                        if "Permanent" in e["keywords"] or (re.search(r"\bPassive\b", e["keywords"])
+                                                            and not CONDITIONAL_RE.match(clean(e["text"]))):
                             mastery_aspects += mastery_aspect_changes(e["text"], mastery_level)
+                # 'For the sake of entering and remaining in this Transformation, ignore its Tier of Power Requirement'
+                elif any("Permanent" in e["keywords"] and IGNORE_TOP_RE.search(clean(e["text"])) for e in effects):
+                    ignore_top = True
                 own_choices += effect_choices(effects, name)
                 mods, trigs, st = compile_effects(effects, name, cond)
+                if kind == "transcendent trait":
+                    for mm in mods + trigs:
+                        if not mm.get("always"):
+                            mm["condition"] += " && @TR >= 1"
                 if "legendary" in kind:
-                    for mm in mods:
+                    legendary.add(name)
+                    for mm in mods + trigs:
                         mm["always"] = True
                 own_mods += mods
                 own_trigs += trigs
                 traits.append(f"{name}{' [' + kind + ']' if kind != 'trait' else ''}")
                 structure.append(f"<strong>{name}</strong>{' (' + kind + ')' if kind != 'trait' else ''}: " + "; ".join(st))
                 i = j
-            inherited_mods = [m for t in prev_traits for m in t[0]]
-            inherited_trigs = [t2 for t in prev_traits for t2 in t[1]]
-            inherited_choices = [c for t in prev_traits for c in t[2]]
+            # Only its own Traits here: what it gains from lower Stages or its listed Transformation (Variant) is added
+            # once every Transformation is known (inherit_traits)
             system = {
                 "transType": trans_type, "subtype": subtype, "origin": fields.get("awakening origin", "").lower(),
                 "race": race, "prerequisites": fields.get("prerequisite(s)", ""), "line": fields.get("transformation line", ""),
@@ -1187,9 +1249,8 @@ def build_transformations():
                 "bonuses": {k: ("" if v == "*" else v) for k, v in bonuses.items()},
                 "aspects": aspects, "traits": traits, "graded": graded, "grade": 1,
                 "stacks": 1, "maxStacks": int(max_stacks.group(1)) if max_stacks else 1,
-                "modifiers": inherited_mods + own_mods, "triggers": inherited_trigs + own_trigs,
-                "choices": [dict(c) for c in inherited_choices] + own_choices, "masteryAspects": mastery_aspects,
-                "gradeAspects": grade_aspects(seg),
+                "modifiers": own_mods, "triggers": own_trigs, "choices": own_choices, "masteryAspects": mastery_aspects,
+                "gradeAspects": grade_aspects(seg), "ignoreTop": ignore_top, "inherited": [],
                 "homebrew": False,
                 "summary": " · ".join(x for x in [
                     f"{trans_type.capitalize()} {subtype}".strip(), f"ToP {int(top.group(1)) if top else 1}+",
@@ -1208,14 +1269,103 @@ def build_transformations():
                     system["modifiers"].append({"target": tgt, "value": val, "condition": "", "label": lab, "active": True, "always": False})
                     STATS["modifiers"] += 1
                 system["summary"] = system["summary"].replace(" · bônus por Grade (ver tabela)", " · bônus por Grade automatizados")
-            if trans_type in ("form", "evolved"):
-                prev_traits.append(([m for m in own_mods if "@M" not in m["condition"]], [t for t in own_trigs if "@M" not in t["condition"]],
-                                    own_choices))
             group = {"awakening": f"Awakenings ({subtype or '—'})", "enhancement": f"Enhancements ({subtype or '—'})",
                      "form": f"Forms ({subtype or '—'})", "evolved": "Evolved Stages"}[trans_type]
             fold = folder("transformations", group.title() if False else group)
-            add_item("transformations", b["name"], "transformation", system, slug, b["name"], structure, fold,
-                     key=f"{slug}:{b['name']}")
+            doc = add_item("transformations", b["name"], "transformation", system, slug, b["name"], structure, fold,
+                           key=f"{slug}:{b['name']}")
+            variant = next((a["param"] for a in aspects if a["key"] == "variant" and a["param"]), "")
+            TRANSFORMATIONS.append({"doc": doc, "name": b["name"], "slug": slug, "type": trans_type,
+                                    "line": system["line"], "stage": system["stage"], "variant": variant,
+                                    "legendary": legendary, "structure": structure})
+    inherit_traits()
+
+
+IGNORE_TOP_RE = re.compile(r"\bignore (?:its|the) Tier of Power Requirement\b", re.I)
+CONDITIONAL_RE = re.compile(r"^\s*(?:While|If|When|Whenever|During|Upon|After|Before|As long|Once|Each time)\b", re.I)
+TRANSFORMATIONS = []  # every Transformation built, for the Traits they inherit
+
+
+def base_trait(name):
+    """'Blue Flame of Power (Red Flame of Life) [legendary trait]' → 'Blue Flame of Power (Red Flame of Life)'."""
+    return re.sub(r"\s*\[[^\]]*\]\s*$", "", name).strip()
+
+
+def replaced_traits(traits):
+    """Traits a Transformation replaces: the name in brackets after one of its own ('Mixed S-Cells (S-Cells)').
+    A number in brackets is a Mastery level ('Tamed Blue Flame (1)'), not a replacement."""
+    out = set()
+    for t in traits:
+        m = re.search(r"\(([^)]+)\)\s*$", base_trait(t))
+        if m and not m.group(1).strip().isdigit():
+            out.add(m.group(1).strip())
+    return out
+
+
+def inherit_traits():
+    """Higher Stages gain the Traits of all lower Stages of their Transformation Line (on any page), and Variants all
+    the Traits of their listed Transformation, except the Traits they replace (Evolving Traits / 'Name (Replaced)').
+    Not inherited: Evolved Stages (higher Stages never use them), Legendary Traits a lower Stage already gives at all
+    times, and a lower Stage's Mastery-gated effects stay gated by the higher Stage's own Mastery ('@M')."""
+    by_name = {t["name"]: t for t in TRANSFORMATIONS}
+    memo = {}
+
+    def lower_stage(t):
+        # The Transformation one Stage below in the same Line: the listed one rather than a Variant, same page first
+        below = [o for o in TRANSFORMATIONS if o["type"] == "form" and o["line"] == t["line"] and o["stage"] < t["stage"]]
+        if not below:
+            return None
+        top = max(o["stage"] for o in below)
+        options = [o for o in below if o["stage"] == top]
+        options.sort(key=lambda o: (bool(o["variant"]), o["slug"] != t["slug"]))
+        return options[0]
+
+    def keeps(label, replaced):
+        return not any(label == r or label.startswith(f"{r} —") or label.startswith(f"{r} (") for r in replaced)
+
+    def effective(t):
+        if t["name"] in memo:
+            return memo[t["name"]]
+        memo[t["name"]] = None  # a loop in the data gives nothing more
+        s = t["doc"]["system"]
+        own = {"mods": list(s["modifiers"]), "trigs": list(s["triggers"]), "choices": list(s["choices"]),
+               "mastery": list(s["masteryAspects"]), "ignoreTop": s.get("ignoreTop", False), "from": [], "traits": []}
+        parent, variant = None, False
+        if t["variant"] and t["variant"] in by_name:
+            parent, variant = by_name[t["variant"]], True
+        elif t["type"] == "form" and t["line"] and t["stage"] > 0:
+            parent = lower_stage(t)
+        got = effective(parent) if parent else None
+        if got:
+            replaced = replaced_traits(s["traits"])
+            # A lower Stage's Legendary Trait is already possessed at all times through that Stage
+            legendary = set() if variant else got["legendary"]
+            ok = lambda x: keeps(x.get("label", ""), replaced) and (x.get("label", "") not in legendary)
+            own["mods"] = [m for m in got["mods"] if ok(m)] + own["mods"]
+            own["trigs"] = [x for x in got["trigs"] if ok(x)] + own["trigs"]
+            own["choices"] = [dict(c) for c in got["choices"] if keeps(c.get("trait", ""), replaced)] + own["choices"]
+            # A Variant's name counts as its listed Transformation's: its Mastery Traits change the Variant's Aspects too
+            if variant:
+                own["mastery"] = [c for c in got["mastery"] if c not in own["mastery"]] + own["mastery"]
+            own["ignoreTop"] = own["ignoreTop"] or got["ignoreTop"]
+            own["from"] = got["from"] + [parent["name"]]
+            # The names of the Traits gained this way, for the sheet (the Traits in use)
+            gained = got["traits"] + [{"trait": n, "from": parent["name"], "slug": parent["slug"]}
+                                      for n in parent["doc"]["system"]["traits"]]
+            own["traits"] = [x for x in gained if keeps(base_trait(x["trait"]), replaced)
+                             and (base_trait(x["trait"]) not in legendary)]
+        own["legendary"] = (got["legendary"] if got else set()) | {base_trait(n) for n in t["legendary"]}
+        memo[t["name"]] = own
+        return own
+
+    for t in TRANSFORMATIONS:
+        e = effective(t)
+        if not e or not e["from"]:
+            continue
+        s = t["doc"]["system"]
+        s["modifiers"], s["triggers"], s["choices"] = e["mods"], e["trigs"], e["choices"]
+        s["masteryAspects"], s["ignoreTop"], s["inherited"] = e["mastery"], e["ignoreTop"], e["traits"]
+        s["description"] = description(t["slug"], t["name"], t["structure"] + [f"Herda os traços de: {', '.join(e['from'])}"])
 
 
 # ---------------------------------------------------------------------------
@@ -1315,6 +1465,16 @@ def build_maneuvers():
                   "kpCost": f.get("kp cost", ""), "frequency": freq, "requirement": f.get("base maneuver", ""),
                   "summary": f"{f.get('maneuver type', 'Modifier')} · {f.get('action cost', '')} · KP {f.get('kp cost', '')}"}
         add_item("maneuvers", name, "maneuver", system, "actions-maneuvers", name, [], fold, key=f"core:{name}")
+    # God Maneuvers (God Ki page): gained through Traits, paid with Divine Ki Points
+    lines = read("god-ki")
+    fold = folder("maneuvers", "God Maneuvers")
+    for name, freq, f in entry_blocks(lines):
+        if "dkp cost" not in f:
+            continue
+        system = {"maneuverType": f.get("maneuver type", "Standard"), "actionCost": f.get("action cost", ""), "kpCost": "",
+                  "dkpCost": f.get("dkp cost", ""), "god": True, "frequency": freq, "requirement": "God Ki",
+                  "summary": f"God Maneuver · {f.get('maneuver type', 'Standard')} · {f.get('action cost', '')} · DKP {f.get('dkp cost', '')}"}
+        add_item("maneuvers", name, "maneuver", system, "god-ki", name, [], fold, key=f"god:{name}")
 
 
 def build_items():

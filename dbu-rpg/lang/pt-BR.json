@@ -36,7 +36,8 @@
       "progression": "Progressão",
       "optional": "Opcionais",
       "bio": "Biografia",
-      "fusion": "Fusão"
+      "fusion": "Fusão",
+      "adventure": "Aventura"
     },
     "ItemTab": {
       "details": "Detalhes",
@@ -375,7 +376,9 @@
       "Already": "O dano já foi aplicado a este alvo.",
       "Raw": "Dano direto (ignora Soak/RD)",
       "TakenMods": "categoria recebida {cat} · dano extra {extra}",
-      "Overkill": "Overkill: dano acima de 1/3 do LP máximo — o alvo não pode ativar efeitos Triggered/Defeated."
+      "Overkill": "Overkill: dano acima de 1/3 do LP máximo — o alvo não pode ativar efeitos Triggered/Defeated.",
+      "DivineFlex": "Divine Flex: −1 Damage Category (conta como Direct Hit).",
+      "DivineFlexReflect": "Divine Flex sem dano: o atacante perde {n} LP (o Soak do defensor), se nada mais absorveu o ataque."
     },
     "Momentum": {
       "Title": "Bonus Momentum",
@@ -432,7 +435,8 @@
       "EverEnteredTip": "Marcado sozinho na primeira vez que o personagem entra nesta transformação. Desmarcado, a próxima entrada em combate dá New Level of Power.",
       "NewLevelWaiting": "New Level of Power pendente: ele vale quando o personagem entrar nesta transformação participando de um combate (no Combat Tracker).",
       "GradeAspects": "Grade {n}: ganha {list}.",
-      "Rampaging2": "Rampaging (LV2): Compelled contra o personagem mais próximo, aliado ou oponente."
+      "Rampaging2": "Rampaging (LV2): Compelled contra o personagem mais próximo, aliado ou oponente.",
+      "Enter": "Entrar"
     },
     "Sig": {
       "Level": {
@@ -772,7 +776,9 @@
       "Poisoned": "Poisoned: −{dmg} LP.",
       "Suffocating": "Suffocating: −{dmg} LP.",
       "GravityProne": "Gravidade GI {gi}: caiu (Prone).",
-      "GravityDamage": "Gravidade GI 4+: −{dmg} LP ao cair."
+      "GravityDamage": "Gravidade GI 4+: −{dmg} LP ao cair.",
+      "DrainingDkp": "Draining no estado God Ki: −{n} DKP.",
+      "NoEnergyDkp": "Divine Ki Points em 0: sai das transformações e fica em Stress Exhaustion (No Energy das formas com God Ki)."
     },
     "Power": {
       "Max": "Já tem 2 stacks de Power.",
@@ -1171,7 +1177,8 @@
       "AllocateButton": "Distribuir",
       "Choice": "{name}: escolha pendente em {traits}.",
       "ChoiceButton": "Escolher",
-      "Rampaging2": "Rampaging (LV2): Compelled contra o personagem mais próximo (aliado ou oponente) no início de cada turno (1 Karma ignora até o próximo turno)."
+      "Rampaging2": "Rampaging (LV2): Compelled contra o personagem mais próximo (aliado ou oponente) no início de cada turno (1 Karma ignora até o próximo turno).",
+      "NoDkp": "Divine Ki Points em 0 numa transformação com God Ki: pela regra No Energy você sai das transformações e fica em Stress Exhaustion."
     },
     "Trigger": {
       "Title": "Gatilhos de turno/rodada",
@@ -1222,7 +1229,8 @@
         "encounter": "até o fim do encontro"
       },
       "Expired": "{label}: {what} terminou",
-      "ExpiredTitle": "Efeitos encerrados — {name}"
+      "ExpiredTitle": "Efeitos encerrados — {name}",
+      "ExpiredModifier": "{label} terminou."
     },
     "Name": "Nome",
     "Split": {
@@ -1317,7 +1325,9 @@
       "SectionHint": "o que cada nível de maestria muda nos Aspects (aplicado sozinho)",
       "Regains": "Volta a ter: {list}",
       "Drops": "Deixa de ter: {list}",
-      "Max": "máx. {n}"
+      "Max": "máx. {n}",
+      "Transcendent": "Maestria além de Fully Mastered: o Transcendent Trait vale enquanto a Enhancement estiver Transcended (os efeitos [Permanent] dele valem sempre).",
+      "TranscendentTip": "uma maestria além de Fully Mastered libera o Transcendent Trait"
     },
     "Boss": {
       "Label": "Boss (vilão)",
@@ -1477,6 +1487,215 @@
     "Grade": {
       "Section": "Aspectos por Grade",
       "SectionHint": "o que cada Grade aplica, junto com os dos Grades abaixo (aplicado sozinho)"
+    },
+    "Dkp": {
+      "ErrState": "Divine Ki Points só podem ser usados no estado God Ki.",
+      "ErrNotEnough": "Divine Ki Points insuficientes: precisa de {need}, tem {have}.",
+      "CostForced": "Custo pago em DKP",
+      "Cost": "Pagar o custo em DKP",
+      "Wager": "Ki Wager em DKP",
+      "HalfCapacity": "DKP gastam metade da Capacity",
+      "Paid": "Pago em Divine Ki Points: custo {cost}, Wager {wager} (Capacity usada no ataque: {cap}).",
+      "Filled": "Divine Ki Points cheios: {n} DKP.",
+      "TipOn": "Divine Ki Points: no estado God Ki pagam custos em KP gastando metade da Capacity. Enchem no início de cada combate.",
+      "TipOff": "Divine Ki Points guardados: só podem ser usados no estado God Ki. Enchem no início de cada combate.",
+      "PreferTip": "Qual pool paga os custos no estado God Ki (o padrão do ataque, o Guard e o Energy Charge). Clique para trocar."
+    },
+    "Empower": {
+      "NoTarget": "Marque (target) o aliado que vai receber o Ki.",
+      "Text": "Para cada Ação gasta, envie até o dobro do seu Might ({might} → {n}) ao aliado, e o dobro disso se ele estiver no seu alcance corpo a corpo. Enviar não reduz a sua Capacity.",
+      "Melee": "Aliado no alcance corpo a corpo (dobro)",
+      "Pool": "Enviar",
+      "Amount": "Quantidade (0 = o máximo possível)",
+      "Hint": "DKP só entre dois personagens no estado God Ki. O aliado não passa do máximo dele.",
+      "Done": "{n} {pool} enviados para {name} (limite {limit} com {actions} Ação(ões)).",
+      "Capped": "Limitado pelo que você tinha, pelo limite do Empower ou pelo máximo do aliado.",
+      "Exploit": "Exploitable: todos os oponentes adjacentes.",
+      "Tip": "Empower: marque o aliado (target) e envie KP, ou DKP se os dois estiverem em God Ki."
+    },
+    "God": {
+      "Use": "Usar a God Maneuver (gasta DKP)",
+      "ManeuverTip": "God Maneuver: paga com Divine Ki Points, só no estado God Ki.",
+      "FlexTip": "Divine Flex (God Maneuver, 2(bT) DKP, 1 Counter Action): −1 Damage Category e conta como Direct Hit.",
+      "AttackNote": "o custo do Profile é pago em DKP e o ataque tem +1 Damage Category.",
+      "StrikeNote": "custa 1/4 (arredondado para cima) do custo em KP do Profile, pago em DKP.",
+      "RoundLimit": "{name} já foi usada {n}× nesta rodada.",
+      "EncounterLimit": "{name} já foi usada {n}× neste encontro.",
+      "NoGodKiForm": "Nenhuma transformação com o Aspect God Ki para entrar nesta ficha.",
+      "Form": "Transformação",
+      "StrikeProfile": "Escolha o Profile do God Strike. A escolha fica salva (pela regra, ela é feita ao ganhar acesso à manobra).",
+      "Breathing": "Recupera {n} LP (Healing Surge, com Surgency). Gastou {dkp} DKP.",
+      "Flame": "+2 stacks de Power até o fim do seu próximo turno e +{dkp} KP (gastou {dkp} DKP). Conta como Power Up para outros efeitos.",
+      "Counter": "Gastou {dkp} DKP e 1 Counter Action: faça o Basic Attack contra esse oponente, fora de sequência. Se ele passar de um Health Threshold ou for derrotado, o ataque dele é cancelado (ele recupera o KP e a Capacity gastos, mas perde as Ações).",
+      "FlexOnCard": "Divine Flex é uma defesa: use o botão ☀ na sua linha do cartão do ataque inimigo.",
+      "Holy": "Gastou {dkp} DKP: entra em {name} sem Stress Test (os próximos Stress Tests são normais).",
+      "PulseText": "Divine Pulse funciona como o Transformation Maneuver e custa 1(bT) = {bT} DKP por Ação. Cada Ação dá −1 no Stress Bonus deste teste e +1(T) no AMB (FO/MA) da transformação até você sair dela.",
+      "Pulse": "Divine Pulse ({n} Ação(ões), {dkp} DKP): entrando em {name} com −{n} no Stress Bonus. Se entrar, ganha +{n}(T) em FO e MA até sair dela.",
+      "Variable": "Custo em DKP variável ({cost}): desconte na barra DKP da ficha.",
+      "Paid": "Gastou {dkp} DKP.",
+      "Hint": {
+        "divine_movement": "Mova-se para qualquer quadrado dentro do seu Boosted Speed. Não provoca Exploit e conta como Movement Maneuver.",
+        "divine_roar": "Might Clash contra todos os personagens numa Destructive Sphere AoE centrada em você: quem perder fica em Guard Down e Impediment até o fim do seu próximo turno, e Minions (menos Special Minions) são derrotados.",
+        "god_bind": "Might Clash contra um oponente no seu alcance corpo a corpo: se vencer, ele fica Pinned. Manter custa 2 Ações no início de cada turno seu. Também serve fora de sequência (1 Counter Action) quando um oponente no seu alcance te ataca: se ele perder, o ataque é cancelado.",
+        "god_finisher": "Use a Signature Technique criada para o God Finisher (até 50 TP, com Required State (God Ki)) pelo botão de ataque com 'Pagar o custo em DKP' marcado: o custo em DKP é o custo em KP dela."
+      }
+    },
+    "Update": {
+      "Title": "Atualizar as transformações das fichas",
+      "Text": "O compêndio de transformações mudou (traços herdados dos Stages de baixo e das variantes). {n} transformação(ões) nas fichas podem ser atualizadas:",
+      "Directory": "Itens do mundo",
+      "More": "… e mais {n}.",
+      "Keeps": "Ficam como estão: as escolhas já feitas, a maestria, o Grade, o estado e os modificadores adicionados à mão.",
+      "Apply": "Atualizar",
+      "Skip": "Agora não",
+      "Done": "{n} transformação(ões) atualizadas a partir do compêndio."
+    },
+    "Traits": {
+      "InUse": "Traços em uso",
+      "InUseHint": "o que o personagem pode usar agora: muda ao transformar, reverter ou dominar",
+      "From": "de {name}",
+      "ClickTip": "Clique: texto no chat",
+      "Legendary": "Legendary Traits",
+      "LegendaryHint": "possuídos o tempo todo, mesmo fora da forma",
+      "Uses": "Usos",
+      "None": "Sem traços listados",
+      "Nothing": "Nenhum traço em uso.",
+      "Inherited": "Traços herdados",
+      "InheritedHint": "dos Stages abaixo, ou da transformação listada (Variant)"
+    },
+    "Per": {
+      "round": "por rodada",
+      "encounter": "por encontro",
+      "character": "por personagem"
+    },
+    "Burst": {
+      "NotActive": "{name} não está ativa.",
+      "Used": "Burst Limit já usado neste encontro (1/Encounter).",
+      "UsedLine": "Burst Limit já usado neste encontro.",
+      "UsedTip": "Já usado neste encontro (um New Level of Power nesta Enhancement libera outro).",
+      "Window": "O Burst Limit só pode ser ativado ao entrar em {name} (ou mudar o Grade) pela Transformation Maneuver. Ativar mesmo assim?",
+      "Triggered": "Burst Limit de {name} ativado (1/Encounter).",
+      "Again": "Liberado de novo pelo New Level of Power.",
+      "Recovery": "Burst Recovery (Transcended): +{n} KP.",
+      "Offer": "Pode ativar o Burst Limit agora (1/Encounter).",
+      "OfferAgain": "New Level of Power: pode ativar o Burst Limit de novo.",
+      "Trigger": "Ativar",
+      "ButtonTip": "Ativa o Burst Limit (1/Encounter): ao entrar na Enhancement ou mudar o Grade pela Transformation Maneuver."
+    },
+    "Grand": {
+      "Active": "{name} já está ativo.",
+      "NoStacks": "{name} não tem Stacks.",
+      "Confirm": "O Grand Trigger foi cumprido neste encontro? Full Awakening Maneuver (1/Encounter, 1 Action): ativa o Grand Awakening até o fim do encontro e recupera 1/4 (arredondado para cima) dos LP e KP máximos.",
+      "Activated": "{name} ativo até o fim do encontro.",
+      "Regain": "+{life} LP e +{ki} KP.",
+      "ButtonTip": "Full Awakening Maneuver: ativa {name} (com o Grand Trigger cumprido)."
+    },
+    "TokenImg": {
+      "Section": "Imagem do token",
+      "Hint": "o token troca para ela nesta forma e volta à imagem dele ao sair",
+      "Label": "Imagem nesta forma",
+      "Set": "Escolher a imagem do token nesta forma",
+      "Change": "Trocar a imagem do token nesta forma",
+      "Clear": "Tirar a imagem desta forma",
+      "Title": "Imagem do token — {name}",
+      "NoBrowse": "Sem permissão para navegar nos arquivos: cole o caminho ou a URL da imagem (o mestre pode liberar a permissão “Usar o navegador de arquivos”)."
+    },
+    "Penalty": "Penalidade",
+    "Adv": {
+      "Hint": "Adventuring Maneuvers: só fora de combate. Aparecem os que o personagem tem (2+ ranks na perícia, um item, habilidade ou traço).",
+      "NewSession": "Nova sessão de aventura",
+      "NewSessionTip": "Zera os usos (Session Limit) deste personagem",
+      "NewSessionAll": "Nova sessão para todos",
+      "NewSessionAllText": "Zerar os usos de Adventuring Maneuvers de todos os personagens?",
+      "NewSessionDone": "Nova sessão de aventura: usos zerados ({n} personagem(ns)).",
+      "InCombatBanner": "Em combate: os Adventuring Maneuvers ficam bloqueados até o fim do encontro.",
+      "InCombat": "{name} é um Adventuring Maneuver: só pode ser usado fora de combate.",
+      "NotAvailable": "O personagem não tem {name}.",
+      "Limit": "{name} já foi usado {n} vez(es) nesta sessão (Session Limit). Comece uma nova sessão de aventura na aba Aventura.",
+      "StretchPending": "Stretch feito: se um combate começar em até 1 hora (tempo do mundo), +1(T) nas Combat Rolls nas 3 primeiras rodadas.",
+      "StretchReady": "Vale se um combate começar em até 1 hora (tempo do mundo do Foundry).",
+      "StretchOn": "Stretch de {name}: +1(T) nas Combat Rolls até o fim da 3ª rodada.",
+      "Use": "Usar",
+      "Self": "você",
+      "Target": "Alvo",
+      "Skill": "Perícia",
+      "CareRest": "Também conta como Rest para o alvo",
+      "CareRestLine": "O alvo também conta como se tivesse usado Rest (sem gastar o limite dele).",
+      "Healed": "{name}: +{life} LP e +{ki} KP.",
+      "HealedLife": "{name}: +{life} LP.",
+      "HoldingBackText": "Stacks de Holding Back (0 a {max}). Ao entrar em combate, escolha se mantém.",
+      "HoldingBackSet": "Holding Back: {n} stack(s).",
+      "CheckOk": "{skill}: {total} — sucesso.",
+      "CheckFail": "{skill}: {total} — falha.",
+      "ClashText": "Clash: {skill} contra {vs} do alvo (o alvo usa a melhor; empate fica com o alvo).",
+      "ClashWin": "{target}: {mine} contra {theirs} ({skill}) — venceu.",
+      "ClashLose": "{target}: {mine} contra {theirs} ({skill}) — perdeu.",
+      "NoTargets": "Escolha pelo menos um alvo.",
+      "OncePerTarget": "{name} já foi usado contra {target} nesta sessão.",
+      "GaugeResult": "PL {pl} · Alignment {alignment}",
+      "MightText": "Might Clash contra o personagem absorvido.",
+      "Maneuver": "Adventuring Maneuver",
+      "Time": "tempo: {time}",
+      "UsesLine": "Uso {n}/{max} nesta sessão.",
+      "UsesFree": "Uso {n} nesta sessão (sem limite).",
+      "Universal": "todos",
+      "GroupUniversal": "Universais",
+      "GroupSkill": "Das perícias (2+ ranks)",
+      "GroupItem": "De itens, habilidades e traços",
+      "Via": "Vem de",
+      "TimeCol": "Tempo",
+      "LimitCol": "Usos",
+      "LimitTip": "Usos nesta sessão / Session Limit",
+      "EffectCol": "Efeito",
+      "None": "Nenhum Adventuring Maneuver.",
+      "Effect": {
+        "takeBreather": "Recupera 1/10 dos LP e KP máximos.",
+        "rest": "Recupera metade dos LP e KP máximos.",
+        "stretch": "Se entrar em combate em até 1 hora: +1(T) nas Combat Rolls nas 3 primeiras rodadas.",
+        "pickpocket": "Clash (Thievery vs Perception/Thievery): vencendo, rouba um Basic Item do alvo. −3 a cada nova tentativa contra o mesmo alvo na sessão.",
+        "obscure": "Clash (Stealth vs Perception) contra todos por perto: quem perde não percebe você (Surprise Round, ou entrar no combate só quando quiser).",
+        "tuneUp": "Refaz um Vehicle ou Battle Jacket igual, com o seu PL atual (e a sua Scholarship, se for maior).",
+        "fullRepair": "Um Vehicle ou Battle Jacket recupera 1/5 de LP (e KP) a cada 2 horas de conserto. Também conserta armas.",
+        "create": "Teste de Craft da especialidade (ou Medicine/Cooking para os Basic Items delas) contra a dificuldade do item; falhando, pode pagar o tempo e tentar de novo.",
+        "recall": "Lembra uma informação da sua especialidade útil para a situação.",
+        "research": "Teste de Knowledge (dificuldade do ARC) sobre um assunto: sucesso dá informação útil; falha, algo pouco útil.",
+        "care": "O alvo recupera 1/4 dos LP máximos e pode contar como se tivesse usado Rest (sem gastar o limite dele).",
+        "gauge": "Clash (Clairvoyance vs Concealment) contra quem você sente: vencendo, descobre o PL e o Alignment. Uma vez por alvo na sessão.",
+        "tame": "Cria um Minion da raça Animal.",
+        "powerRegulation": "Ganha ou perde stacks de Holding Back à vontade; ao entrar em combate, escolhe se mantém.",
+        "profiling": "Clash (Intuition vs Bluff/Intuition): o ARC conta algo da personalidade e das intenções do alvo, verdade se você vencer e mentira se perder (só o GM vê o resultado). Uma vez por alvo na sessão.",
+        "scavenge": "Teste de Survival (dificuldade do ARC): sucesso dá Ingredients, mais quanto mais passar.",
+        "scam": "+1 Riches por 1 dia.",
+        "fraud": "Teste de Bluff (dificuldade do ARC): o povo da área acredita no boato. Área: 2~3 ranks, uma cidade; 4, um país; 5, um planeta.",
+        "frighten": "Clash (Intimidation vs Intuition/Intimidation): vencendo, +1 Alarm Rating com o alvo por 1 dia. Uma vez por alvo na sessão.",
+        "befriend": "Clash (Persuasion vs Intuition/Persuasion): vencendo, +1 Affection Rating com o alvo por 1 dia. Uma vez por alvo na sessão.",
+        "mingle": "Conversa com o povo de um lugar: ganha as informações que eles tenham e, voltando várias vezes, Affection Rating.",
+        "recruit": "Cria um Minion; a raça é decidida pelo ARC.",
+        "cook": "Teste de Cooking: cria uma Meal (decida antes o custo em Ingredients e a dificuldade). Ao entrar em combate, vale só a última Meal comida.",
+        "scan": "Mede a força de um personagem (regra no item).",
+        "itemSearch": "Procura um item; com o Dragon Radar, só Dragon Balls.",
+        "riceCooker": "Gasta 1 Ingredient e faz um Snack (Basic Item).",
+        "teleport": "Vem da Instant Transmission. O site não publica o tempo nem o limite (clique no nome para o texto da habilidade).",
+        "instantUnderstanding": "Vem do Mind Reading. O site não publica o tempo nem o limite (clique no nome para o texto da habilidade).",
+        "longDistancePortal": "Vem do Portal Creation. O site não publica o tempo nem o limite (clique no nome para o texto da habilidade).",
+        "foresight": "Vem da Precognition. O site não publica o tempo nem o limite (clique no nome para o texto da habilidade).",
+        "magicalSight": "Vem da Second Sight. O site não publica o tempo nem o limite (clique no nome para o texto da habilidade).",
+        "morph": "Vem do Shapeshift. O site não publica o tempo nem o limite (clique no nome para o texto da habilidade).",
+        "destroy": "Vem do Hakai. O site não publica o tempo nem o limite (clique no nome para o texto da habilidade).",
+        "starConsume": "Destrói um planeta próximo e ganha a Lifeforce dele.",
+        "replicateSelf": "Gasta 2 Lifeforce: cria um Metal Self (Duplicate Minion) que você controla.",
+        "robotFactory": "Gasta 1 Lifeforce: cria um Minion da raça Robot.",
+        "releaseAbsorbed": "Might Clash para tirar um personagem absorvido de dentro de você."
+      }
+    },
+    "BP": {
+      "Label": "Poder de Luta",
+      "Setting": "Fórmula do Poder de Luta",
+      "SettingHint": "Poder de Luta (leitura de scouter) mostrado abaixo das barras de LP e KP. Variáveis: @PL, @T (ToP atual, já com Holding Back), @bT (ToP base), @fo, @ag, @te, @sc, @in, @ma, @pe (Modificadores atuais), @ki, @kiNatural (KP máximo natural, sem multiplicadores), @kiRatio (KP atual / KP natural), @life, @lifeMax. Potência: pow(x, y). Em branco, volta ao padrão.",
+      "Formula": "0,78 × 1,75^(PL−1) × 1,4^(ToP−1) × (FO + (AG + TE)/4)³ × KP restante (mín. 10%)",
+      "Custom": "Fórmula do mundo: {formula}",
+      "Values": "PL {pl} · ToP {t} · FO {fo} + (AG {ag} + TE {te})/4 = {w}",
+      "Ki": "KP {ki} de {natural} naturais ({pct}%)"
     }
   }
 }

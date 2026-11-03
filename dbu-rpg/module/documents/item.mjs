@@ -59,7 +59,9 @@ export class DBUItem extends Item {
       lines.push(`${c.tp} TP · ${c.kpUnits + c.kpAdjust}(T) KP · ${L(DBU.damageCategories[c.damageCategory])}`);
     }
     if ( this.type === "uniqueAbility" ) lines.push(`${this.system.tpCost} TP · KP ${this.system.kpCost || "—"} · ${this.system.maneuverType} (${this.system.actionCost})`);
-    if ( this.type === "maneuver" ) lines.push(`${this.system.maneuverType} · ${this.system.actionCost} · KP ${this.system.kpCost || "—"}`);
+    if ( this.type === "maneuver" ) {
+      lines.push(`${this.system.maneuverType} · ${this.system.actionCost} · ${this.system.god ? `DKP ${this.system.dkpCost || "—"}` : `KP ${this.system.kpCost || "—"}`}`);
+    }
     const desc = this.system.description ? await foundry.applications.ux.TextEditor.implementation.enrichHTML(this.system.description) : "";
     const link = this.system.source?.url ? `<a href="${this.system.source.url}" target="_blank" rel="noopener">${L("DBU.Item.OpenSite")}</a>` : "";
     return postInfoCard({ actor: this.actor, title: this.name, subtitle: L(`TYPES.Item.${this.type}`), lines,
@@ -80,6 +82,14 @@ export class DBUItem extends Item {
       case "transformation":
         if ( this.system.transType === "awakening" ) return this.toChat();
         return this.system.active ? actor.revert(this) : actor.transform(this);
+      case "maneuver":
+        // God Maneuvers spend Divine Ki Points; Empower sends Ki to an Ally
+        if ( this.system.god ) {
+          const { useGodManeuver } = await import("../combat/divine.mjs");
+          return useGodManeuver(actor, this);
+        }
+        if ( /^empower$/i.test(this.name.trim()) ) return actor.empower();
+        return this.toChat();
       default: return this.toChat();
     }
   }

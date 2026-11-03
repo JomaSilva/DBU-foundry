@@ -34,12 +34,17 @@
             <span data-tooltip="Stacks">{{t.s.stacks}}/{{t.s.maxStacks}}</span>
             <a data-action="itemStack" data-field="system.stacks" data-delta="1"><i class="fa-solid fa-plus"></i></a>
           {{else}}
+            <span class="dbu-token-img">
+              <a data-action="tokenImg" data-tooltip="{{#if t.s.tokenImg}}{{localize 'DBU.TokenImg.Change'}}{{else}}{{localize 'DBU.TokenImg.Set'}}{{/if}}">
+                {{#if t.s.tokenImg}}{{#if t.tokenVideo}}<i class="fa-solid fa-film"></i>{{else}}<img src="{{t.s.tokenImg}}" alt="">{{/if}}{{else}}<i class="fa-regular fa-image none"></i>{{/if}}</a>
+              {{#if t.s.tokenImg}}<a data-action="tokenImg" data-clear="1" data-tooltip="{{localize 'DBU.TokenImg.Clear'}}"><i class="fa-solid fa-xmark"></i></a>{{/if}}
+            </span>
             <a class="dbu-transform-btn {{#if t.s.active}}on{{/if}}" data-action="itemUse" data-tooltip="{{#if t.s.active}}{{localize 'DBU.Trans.Revert'}}{{else}}{{localize 'DBU.Trans.Transform'}}{{/if}}">
               <i class="fa-solid {{#if t.s.active}}fa-power-off{{else}}fa-fire-flame-curved{{/if}}"></i></a>
             {{#if t.canMaster}}
             <span class="dbu-mastery {{#if (eq t.mastered "full")}}full{{/if}}" data-tooltip="{{t.masteryTip}}">
               <a data-action="itemMastery" data-delta="-1"><i class="fa-solid fa-minus"></i></a>
-              <a data-action="itemMastery" data-delta="1" class="dbu-mastery-badge"><i class="fa-solid fa-graduation-cap"></i> {{t.s.mastery}}/{{t.s.masteryNeeded}}</a>
+              <a data-action="itemMastery" data-delta="1" class="dbu-mastery-badge"><i class="fa-solid fa-graduation-cap"></i> {{t.masteryText}}</a>
               <a data-action="itemMastery" data-delta="1"><i class="fa-solid fa-plus"></i></a>
             </span>
             {{/if}}

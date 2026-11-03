@@ -281,6 +281,30 @@ Insight — conferido na planilha, ver seção 5.1.)
 | Persuasion | Talk | Befriend, Mingle, Recruit |
 | Performance | Hype | — |
 
+(A página de Perícias chama o de Survival de "Forage"; a página Adventure o define como **Scavenge**.)
+
+### 5.1b Adventuring Maneuvers (página Adventure)
+- Só **fora de Combat Encounters**. Cada um tem **Time Cost** (sem passar o tempo todo, não ganha o efeito) e
+  **Session Limit** (a maioria 1 por Adventuring Session); pode ter pré-requisito.
+- **Universais:** Take a Breather (1 h, recupera 1/10 de LP e KP), Rest (8 h, metade de LP e KP).
+- **Skilled** (2+ ranks): os da tabela acima. Limites e tempos: Stretch 1 (2 min), Pickpocket ∞ (1 min; −3 por
+  tentativa repetida no mesmo alvo), Obscure ∞, Tune Up 1 (4 h), Full Repair 1 (2~10 h), Recall 1 (1 min), Research
+  1 (2 h), Care 1 (2 h), Gauge ∞ (1 min; 1× por alvo), Tame 1 (1 dia), Power Regulation ∞, Profiling ∞ (1 min; 1×
+  por alvo), Scavenge 1 (2 h), Scam 1 (2 h), Fraud 1 (4 h), Frighten ∞ (1× por alvo), Befriend ∞ (1× por alvo),
+  Mingle 1 (2 h), Recruit 1 (1 dia), Cook ∞ (1 h; só a última Meal vale no combate), Create 1 (tempo pelo item).
+- **De outras fontes:** Scan (Scouter equipado, Scout Scope), Item Search (Dragon Radar), Rice Cooker (1 h,
+  1 Ingredient → Snack), Teleport (Instant Transmission), Instant Understanding (Mind Reading), Long Distance Portal
+  (Portal Creation), Foresight (Precognition), Magical Sight (Second Sight), Morph (Shapeshift), Destroy (Hakai), Star
+  Consume, Replicate Self e Robot Factory (Big Gete Star Integration), Recruit pela metade do tempo (Commander:
+  Minion Collector), Create com Use Magic (Magical Materialization), remover absorvido (Roomy Biology: Might Clash,
+  1 min, 2 por sessão). O site não publica tempo nem limite dos que vêm de Unique Abilities.
+- **Adventurous** (palavra-chave): efeito de traço usável fora de combate.
+
+### Poder de Luta (leitura de scouter — não é regra do DBU)
+`0,78 × 1,75^(PL−1) × 1,4^(ToP atual−1) × (FO + (AG + TE)/4)³ × (KP atual / KP natural, mín. 10%)`, com os
+Modificadores atuais. Calibrado no anime: PL 1 ≈ 400 (Goku/Piccolo no início do Z), PL 4 ≈ 8.000 (Goku), PL 5 ≈
+18.000 (Vegeta, saga Saiyajin), PL 10 ≈ 530.000 (Freeza suprimido). Configurável pelo mestre.
+
 ---
 
 ## 6. Encontros de Combate
@@ -498,6 +522,19 @@ Insight — conferido na planilha, ver seção 5.1.)
   tem 2 Grades). Um Aspect com nível "LVG" tem tantos níveis quanto o Grade atual.
 - **Stages** (Forms): "S" = estágio; estágios herdam traços dos anteriores; precisa ter os
   anteriores. Stage 0 = Null Stage (conta como estado normal, sem Ki Multiplier).
+  - Herdam os **traços**, não os AMB: cada Stage usa os da sua tabela.
+  - Mais de uma forma no mesmo Stage: no Stage de cima, escolhe-se de qual delas herdar (o sistema usa a forma
+    principal, a que não é variante).
+  - **Evolving Traits:** "Traço (Traço de baixo)" substitui aquele traço do Stage de baixo.
+  - A Mastery Trait de um Stage de baixo só vale no de cima quando ele também estiver dominado.
+  - Evolved Stages não entram na herança: o SSJ3 herda do SSJ2, não do Ascended.
+  - **Variants:** contam como a transformação listada para efeitos e pré-requisitos. Herdam todos os traços dela,
+    menos os substituídos ("Nome (Original)"), e não podem ser usadas junto com ela.
+  - **Legendary Traits:** possuídos o tempo todo depois do acesso à forma; não somam com eles mesmos. Um Null
+    Stage não tem o seu; se a forma tiver mais de um, escolhe-se um ao ganhar acesso.
+  - **Metamorphosis:** Suppression of Power (Full Suppression, Stage 0) ignora o requisito de ToP para entrar e
+    permanecer; herdado por todos os Stages. Entrar antes do ToP com a forma enfraquecida só existe hoje pelo
+    Aspect **Prelude**.
 - **Step-by-Step:** de uma Form para outra de maior requisito de ToP: −1 no requisito (−2 se mesma
   linha), só no teste inicial.
 - **New Level of Power** (1ª vez que ganha acesso em combate): +1 ToP, +1(bT) Stress Bonus,
@@ -505,7 +542,14 @@ Insight — conferido na planilha, ver seção 5.1.)
   automático nos Stress Tests dela.
 - **Forms:** **Ki Multiplier** (KP máx ×2 e Max Capacity +1/2 quando entra via Transformation
   Maneuver). **Legend Realized** (1×/transformação/encontro): recupera LP e KP = 2d10(T) + PL.
-- **Enhancements:** **Burst Limit** [1/Enc] ao entrar ou mudar de Grade.
+- **Enhancements:** **Burst Limit** [1/Enc]: ao entrar numa Enhancement pela Transformation Maneuver, ou mudar o
+  Grade dela pela manobra, pode-se ativar o traço Burst Limit dela. É um por encontro no total (qualquer
+  Enhancement); o New Level of Power numa Enhancement libera o Burst Limit dela de novo.
+  - **Burst Recovery:** numa Enhancement Transcended (ou entrando numa), ativar um Burst Limit recupera 1/2 do KP
+    máximo.
+  - **Transcendent Trait:** com o Aspect Transcendent, depois de Fully Mastered, mais uma maestria libera o
+    Transcendent Trait, que vale enquanto a Enhancement estiver Transcended; os efeitos [Permanent] dele valem
+    mesmo sem estar Transcended.
 - **Awakenings:** Stacks (Z), tipos Lesser/Greater/Super (1 Super por personagem), origem
   Body/Mind. **Limite de Awakenings por ToP base:**
 
@@ -519,12 +563,28 @@ Insight — conferido na planilha, ver seção 5.1.)
 | 6 | 7 | 3 |
 | 7 | 7 | 4 |
 
-- **Full Awakening Maneuver** [1/Enc]: ativa o Grand Awakening; recupera 1/4 (arred. p/ cima) de LP/KP.
+- **Grand Awakening:** traço de cada Super Awakening que não faz nada até ser ativado. Exige o **Grand Trigger**
+  (condição listada no próprio traço) cumprido no encontro, que libera a **Full Awakening Maneuver** [1/Enc,
+  1 Action]: ativa o Grand Awakening até o fim do encontro e recupera 1/4 (arred. p/ cima) de LP/KP.
+- **Traços de Awakening "Nome (n)"** só valem com n Stacks ou mais.
+- **Permanent:** efeito de traço de transformação que vale mesmo fora dela.
 - **Mastery:** Mastery Trait; Difficult [LV] exige masterizar várias vezes ("M"). Os efeitos Permanent
   da Mastery Trait mudam os Aspects: "perde o Innate State (Feral)" tira só esse estado (o Wrathful continua no
   Raging); "reduz o Rampaging em 1 nível" vale depois do nível dado pelo Grade. "M levels" = um nível por maestria
   (M = número de maestrias), até o "(max. N)" quando houver; "gains N level(s)" soma aos níveis que o Aspect já tem,
   enquanto "gains the X (LVN) Aspect" deixa o Aspect com pelo menos N níveis.
+- **God Ki** (estado especial): quem está numa transformação com o Aspect God Ki fica no estado God Ki. Ele dá
+  acesso aos Divine Ki Points, +3(T) em Wound e Soak, e vence Concealment contra quem não sente God Ki.
+- **Divine Ki Points (DKP):** pool separado = 1/2 do KP máximo (sem Ki Multiplier, arred. p/ baixo), cheio no
+  início de cada encontro para quem tem acesso a uma forma com God Ki (ou está no estado). Só se usa no estado God
+  Ki, como se fosse KP, com estas regras:
+  - gasta 1/2 (arred. p/ cima) da Capacity Rate;
+  - Draining no estado God Ki tira DKP = 1/2 do KP perdido;
+  - um pagamento (custo de uma manobra, ou um Ki Wager) sai de um pool só;
+  - Empower pode mandar DKP a um aliado também em God Ki;
+  - o No Energy das formas com God Ki depende dos DKP.
+- **God Maneuvers:** ganhas por traço e pagas em DKP: Divine Attack, Breathing, Counter, Flame, Flex, Movement,
+  Pulse, Roar, God Bind, God Strike, God Finisher e Holy Transformation (custos e frequências no compêndio).
 
 ### 12.1 Aspectos com efeito numérico automatizável
 | Aspecto | Efeito |

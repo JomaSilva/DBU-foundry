@@ -87,6 +87,14 @@
 .dbu-bar.life .fill { background: var(--dbu-life); }
 .dbu-bar.ki .fill { background: var(--dbu-ki); }
 .dbu-bar.capacity .fill { background: var(--dbu-cap); }
+/* Divine Ki Points: dimmed outside the God Ki State */
+.dbu-bar.dkp .fill { background: linear-gradient(90deg, #f6d365, #fda085); }
+.dbu-bar.dkp.off { opacity: 0.55; }
+.dbu-bar .bar-status.dkp-pay { cursor: pointer; }
+.dbu-bar .bar-status.dkp-pay.on { background: #d4a017; color: #2a1f00; }
+.dbu-dkp-checks { border: 1px dashed #d4a017; border-radius: 6px; padding: 4px 6px; }
+.dbu-dkp-cost { color: #b8860b; font-weight: 700; }
+.dbu-card .dbu-divine { color: #d4a017; }
 .dbu-bar > *:not(.fill) { position: relative; }
 .dbu-bar .bar-label { width: 110px; font-weight: 700; }
 .dbu-bar input { width: 4.5em; background: #ffffffdd !important; color: #1c1b22 !important; }
@@ -102,7 +110,7 @@
   flex: 0 0 auto; display: flex; flex-wrap: wrap; gap: 2px; padding: 4px 8px 0; background: var(--dbu-blue); border: none; margin: 0;
 }
 .dbu.sheet nav.sheet-tabs a {
-  color: #dbe6ff; padding: 6px 8px; border-radius: 6px 6px 0 0; font-weight: 600; font-size: 0.85em; display: flex; gap: 5px; align-items: center;
+  color: #dbe6ff; padding: 6px 6px; border-radius: 6px 6px 0 0; font-weight: 600; font-size: 0.82em; display: flex; gap: 4px; align-items: center;
   white-space: nowrap; flex: 0 0 auto;
 }
 .dbu.sheet nav.sheet-tabs a.active { background: var(--dbu-bg); color: var(--dbu-blue); }
@@ -424,3 +432,54 @@ label.wide input { width: 100%; }
 .dbu-fusion-attr.on { background: var(--dbu-orange); border-color: var(--dbu-orange); color: #fff; }
 .dbu-fusion-attr.off { opacity: 0.35; cursor: not-allowed; }
 .dbu-cond-held { margin-left: 4px; color: var(--dbu-orange); font-size: 0.85em; }
+
+/* ----- Combat tab: Traits in use ----- */
+.dbu-active-traits { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; margin-bottom: 8px; }
+.dbu-trait-group { border: 1px solid var(--dbu-line); border-radius: 8px; background: var(--dbu-panel); padding: 6px 8px; min-width: 0; }
+.dbu-trait-group header { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.dbu-trait-group header img { border: none; border-radius: 4px; object-fit: cover; flex: 0 0 auto; }
+.dbu-trait-group header i { color: var(--dbu-orange); width: 24px; text-align: center; }
+.dbu-trait-group header > div { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.dbu-trait-group header small { color: var(--dbu-muted); font-size: 0.8em; }
+.dbu-trait-group header button { flex: 0 0 auto; width: auto; font-size: 0.8em; height: 24px; line-height: 1; }
+.dbu-trait-aspects { font-size: 0.78em; color: var(--dbu-muted); margin: -2px 0 4px; }
+.dbu-trait-group ul { list-style: none; margin: 0; padding: 0; }
+.dbu-trait-group li.dbu-trait { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 4px; padding: 2px 4px;
+  border-left: 3px solid var(--dbu-line); margin: 2px 0; font-size: 0.9em; }
+.dbu-trait-group li.dbu-trait > a { font-weight: 600; }
+.dbu-trait-group li.kind-mastery { border-left-color: var(--dbu-orange); }
+.dbu-trait-group li.kind-burst { border-left-color: var(--dbu-red); }
+.dbu-trait-group li.kind-legendary { border-left-color: var(--dbu-yellow); }
+.dbu-trait-group li.kind-transcendent { border-left-color: #8e44ad; }
+.dbu-trait-group li.kind-grand { border-left-color: #8e44ad; }
+.dbu-trait-group li .tag { margin-left: 0; }
+.dbu-trait-group li.kind-burst .tag { background: #fde2e1; color: var(--dbu-red); }
+.dbu-trait-group li.kind-mastery .tag { background: var(--dbu-orange-soft); color: var(--dbu-orange); }
+.dbu-trait-group li .tag.dim { background: #e5e7eb; color: #4b5563; }
+.dbu-trait-group li button { width: auto; height: 20px; line-height: 1; font-size: 0.8em; padding: 0 6px; margin-left: auto; }
+.dbu-trait-choice { font-size: 0.85em; color: var(--dbu-blue); }
+.theme-dark .dbu-trait-choice { color: #8fb0ff; }
+.dbu-trait-from { flex-basis: 100%; color: var(--dbu-muted); font-size: 0.78em; }
+.dbu-trait-group.chips ul { display: flex; flex-wrap: wrap; gap: 4px; }
+.dbu-trait-group.chips li.dbu-trait { border: 1px solid var(--dbu-line); border-radius: 999px; padding: 1px 8px; margin: 0; }
+.dbu-trait-text { max-height: 260px; overflow-y: auto; font-size: 0.9em; }
+/* Token image of a Transformation (Transformations tab) */
+.dbu-token-img { display: inline-flex; align-items: center; gap: 2px; margin-right: 4px; }
+.dbu-token-img img { width: 22px; height: 22px; object-fit: cover; border: 1px solid var(--dbu-orange); border-radius: 4px; vertical-align: middle; }
+.dbu-token-img .none { color: var(--dbu-muted); }
+
+/* ----- Adventure tab ----- */
+.dbu-adv-combat { background: #fde2e1; color: var(--dbu-red); border-radius: 6px; padding: 4px 8px; font-weight: 700; }
+.theme-dark .dbu-adv-combat { background: #4a1f1f; color: #ffb4b4; }
+.dbu-adv td.dbu-controls button { width: auto; height: 24px; line-height: 1; font-size: 0.85em; padding: 0 8px; }
+.dbu-adv td.dbu-controls button[disabled] { opacity: 0.45; cursor: not-allowed; }
+.dbu-adv-targets { display: flex; flex-direction: column; gap: 2px; max-height: 220px; overflow-y: auto; }
+
+/* ----- Battle Power (scouter reading) under the Life and Ki bars ----- */
+.dbu-battle-power { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 24px; padding: 0 10px;
+  border-radius: 6px; background: linear-gradient(90deg, #06200d 0%, #0d3a19 60%, #12471f 100%); border: 1px solid #2fbf4f;
+  box-shadow: inset 0 0 6px #2fbf4f55; cursor: help; }
+.dbu-battle-power .bp-label { color: #9dffb0; font-size: 0.78em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.dbu-battle-power .bp-label i { margin-right: 4px; }
+.dbu-battle-power .bp-value { color: #7dff8a; font-family: "Courier New", ui-monospace, monospace; font-weight: 700; font-size: 1.15em;
+  letter-spacing: 0.06em; text-shadow: 0 0 6px #39ff6a; }

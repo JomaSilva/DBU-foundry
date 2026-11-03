@@ -4,6 +4,7 @@ import {
   categoryLabel, categoryToDice, critDiceCategory, diceToFormula, greaterDiceCategory, topDiceCategory
 } from "./dice.mjs";
 import { roundDown } from "./formula.mjs";
+import { battlePower } from "./battle-power.mjs";
 import { AWAKENING_POINTS, godHoned, gravityFor, limitedPower, martialDieCategory, rules } from "../optional-rules.mjs";
 import { allocTotal, resourceSlug, splitLimits } from "./resources.mjs";
 import { danceHalved } from "../fusion/fusion-rules.mjs";
@@ -179,10 +180,19 @@ export function prepareActorData(sys, actor) {
   const capMax = Math.floor(capBase * (1 + (0.25 * Math.min(powerStacks, 2))) * (kiMultiplier ? 1.5 : 1)
     * (buckets["capacity.mult"]?.total ?? 1) / (2 ** fatigued));
   sys.ki.max = Math.max(0, kiMax);
+  // The natural maximum (no Ki Multiplier, no Form multiplier): the Battle Power compares the Ki Points left to it
+  sys.ki.natural = Math.max(0, kiBase);
   sys.capacity.max = Math.max(0, capMax);
   data.kiMax = sys.ki.max;
   data.capacityMax = sys.capacity.max;
   data.kiLow = (sys.ki.value < (sys.ki.max / 4)) ? 1 : 0;
+  // Divine Ki Points: 1/2 of the Maximum Ki Points without the Ki Multiplier, for whoever has a Transformation with the
+  // God Ki Aspect (or is in the God Ki State); they can only be used in the God Ki State
+  const inGodKi = (sys._effectiveStates?.godKi ?? 0) > 0;
+  sys.dkp.max = Math.floor(data.kiMaxBase / 2);
+  sys.dkp.access = inGodKi || transformations.some(t => t.system.aspects.some(a => a.key === "godKi"));
+  sys.dkp.usable = inGodKi;
+  data.dkp = sys.dkp.value;
 
   /* ----- Stage 1: Attribute Scores and Modifiers ----- */
   data.scores = { ...rawScores };
@@ -579,6 +589,10 @@ export function prepareActorData(sys, actor) {
     capacity: sys.capacity.value, capacityMax: sys.capacity.max,
     superStacks, power: powerStacks, stress: sys.stress.bonus
   };
+  // Battle Power (the scouter reading), with the world's formula
+  const formula = globalThis.game?.settings?.settings?.has("dbu-rpg.battlePowerFormula")
+    ? game.settings.get("dbu-rpg", "battlePowerFormula") : undefined;
+  sys.battlePower = battlePower(sys, formula);
 }
 
 export { roundDown };
