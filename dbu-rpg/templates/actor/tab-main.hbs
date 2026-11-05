@@ -16,7 +16,7 @@
         <tbody>
           {{#each attributes as |a|}}
           <tr class="{{#if a.over}}dbu-error-row{{/if}}">
-            <td class="dbu-attr-name"><strong>{{a.abbr}}</strong> {{a.label}}</td>
+            <td class="dbu-attr-name"><strong>{{a.abbr}}</strong> <span class="dbu-attr-label">{{a.label}}</span></td>
             <td class="center">{{a.racial}}</td>
             <td><input type="number" name="system.attributes.{{a.key}}.points" value="{{a.points}}" min="0" data-dtype="Number"></td>
             <td><input type="number" name="system.attributes.{{a.key}}.bonus" value="{{a.bonus}}" data-dtype="Number"></td>
@@ -71,6 +71,7 @@
       <div class="dbu-attack-row">
         <select name="dbuProfile">{{selectOptions profileOptions valueAttr="value" labelAttr="label"}}</select>
         <button type="button" data-action="attack"><i class="fa-solid fa-hand-fist"></i> {{localize "DBU.Attack.Basic"}}</button>
+        <button type="button" class="dbu-mobile-only" data-action="pickTargets" data-tooltip="{{localize 'DBU.Targets.Tip'}}"><i class="fa-solid fa-bullseye"></i> {{localize "DBU.Targets.Button"}}</button>
       </div>
 
       <h3 class="dbu-section">{{localize "DBU.Aptitudes"}}</h3>

@@ -9,8 +9,9 @@ const KNOWLEDGE = ["knowledgeScience", "knowledgeProfession", "knowledgeHistory"
 
 /**
  * key: i18n key of its effect (DBU.Adv.Effect.<key>); skills: 2+ Skill Ranks in any of them; sources: items that give
- * it ({ type, names, equipped }); limit: Session Limit (Infinity = unlimited, null = not published); time: Time Cost;
- * use: what the Use button does (info | breather | rest | care | stretch | holdingBack | check | clash | might);
+ * it ({ type, names, pattern, equipped }); limit: Session Limit (Infinity = unlimited, null = not published); time:
+ * Time Cost; use: what the Use button does (info | breather | rest | care | stretch | holdingBack | check | clash |
+ * might | scan);
  * check: the Skills of its Skill Check; clash: { skills, vs, multi, secret, oncePerTarget, penaltyPerTarget };
  * page / section: where its official text is.
  */
@@ -52,9 +53,11 @@ export const ADVENTURING_MANEUVERS = [
   { key: "cook", name: "Cook", skills: ["cooking"], limit: Infinity, time: "1 Hour", use: "check", check: ["cooking"],
     page: "cooking", section: "Cook Maneuver" },
   // Given by items, Unique Abilities, Awakenings and Talents
-  { key: "scan", name: "Scan", limit: null, time: null, use: "info", page: "basic-items-accessories",
-    sources: [{ type: "item", names: ["Scouter [Tech]", "Scouter"], equipped: true, section: "Scouter [Tech]" },
-      { type: "item", names: ["Scout Scope"], section: "Scout Scope" }] },
+  // Scan: a Scouter (equipped, or Integrated by Onboard Computer / 3D Scan Mode) or a Scout Scope (combat/scan.mjs)
+  { key: "scan", name: "Scan", limit: null, time: null, use: "scan", page: "basic-items-accessories",
+    sources: [{ type: "item", names: ["Scouter [Tech]", "Scouter"], pattern: /\bscouter\b/i, equipped: true, section: "Scouter [Tech]" },
+      { type: "item", names: ["Scout Scope"], section: "Scout Scope" },
+      { type: "racialTrait", names: ["Onboard Computer"] }, { type: "talent", names: ["3D Scan Mode"] }] },
   { key: "itemSearch", name: "Item Search", limit: null, time: null, use: "info", page: "basic-items-accessories",
     sources: [{ type: "item", names: ["Dragon Radar"], section: "Dragon Radar" }] },
   { key: "riceCooker", name: "Rice Cooker", limit: 1, time: "1 Hour", use: "info", page: "basic-items-accessories",
@@ -88,16 +91,20 @@ export const ADVENTURING_BY_KEY = Object.fromEntries(ADVENTURING_MANEUVERS.map(m
 
 const norm = s => String(s ?? "").trim().toLowerCase();
 
-/** Does the character have this item (by name or by the compendium section it came from), in use when it must be? */
+/**
+ * Does the character have this item (by name, a name pattern or the compendium section it came from), in use when it
+ * must be?
+ */
 function hasSource(items, source) {
   const names = source.names.map(norm);
   return items.find(i => {
     if ( i.type !== source.type ) return false;
-    if ( !names.includes(norm(i.name)) && !names.includes(norm(i.system?.source?.section)) ) return false;
+    if ( !names.includes(norm(i.name)) && !names.includes(norm(i.system?.source?.section))
+      && !source.pattern?.test(i.name ?? "") ) return false;
     // An Awakening gives its Traits while it has Stacks; an Accessory only while equipped
     if ( (i.type === "transformation") && (i.system?.transType === "awakening") ) return (i.system?.stacks ?? 0) > 0;
+    if ( (i.type === "item") && ((i.system?.quantity ?? 1) <= 0) ) return false;
     if ( source.equipped && (i.system?.itemType === "accessory") ) return !!i.system?.equipped;
-    if ( i.type === "item" ) return (i.system?.quantity ?? 1) > 0;
     return true;
   }) ?? null;
 }

@@ -339,6 +339,9 @@ label.wide input { width: 100%; }
 .dbu-card-note { font-size: 0.85em; margin: 3px 0; }
 .dbu-card-buttons { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
 .dbu-card-buttons button { flex: 1; font-size: 0.85em; line-height: 24px; }
+/* The four Craft DCs of a Scouter: two per row; the Scan answers as wide as their text */
+.dbu-card-buttons button[data-dbu-action="scouterDc"] { flex: 1 1 calc(50% - 2px); white-space: nowrap; }
+.dbu-card-buttons button:is([data-dbu-action="scanResist"], [data-dbu-action="scanAccept"]) { flex: 1 1 auto; white-space: nowrap; }
 .dbu-lines { margin: 4px 0; padding-left: 16px; }
 .dbu-targets { width: 100%; border-collapse: collapse; margin: 4px 0; }
 .dbu-targets td { padding: 2px; border-bottom: 1px solid #8884; vertical-align: middle; }
@@ -425,6 +428,9 @@ label.wide input { width: 100%; }
 .dbu-fusion-tech label { display: flex; flex-direction: column; gap: 2px; margin: 6px 0; }
 .dbu-nlop { cursor: pointer; }
 .dbu-nlop.on { background: var(--dbu-orange); color: #fff; }
+/* Awakening Stacks: Temporary ones, and what each Stack picked or holds */
+.dbu-temp-stack { border-style: dashed; }
+.dbu-stack-picks { display: block; opacity: 0.8; font-size: 0.85em; line-height: 1.25; }
 .dbu-official-preview { padding: 6px 10px; border: 1px solid var(--dbu-line); border-radius: 8px; background: var(--dbu-panel); }
 .dbu-fusion-balanced { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; }
 .dbu-fusion-attr { display: inline-block; min-width: 34px; text-align: center; padding: 1px 8px; border: 1px solid var(--dbu-line);
@@ -483,3 +489,29 @@ label.wide input { width: 100%; }
 .dbu-battle-power .bp-label i { margin-right: 4px; }
 .dbu-battle-power .bp-value { color: #7dff8a; font-family: "Courier New", ui-monospace, monospace; font-weight: 700; font-size: 1.15em;
   letter-spacing: 0.06em; text-shadow: 0 0 6px #39ff6a; }
+/* The same reading on the Scan card */
+.dbu-scan-readout { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0 2px; padding: 4px 10px;
+  border-radius: 6px; background: linear-gradient(90deg, #06200d 0%, #0d3a19 60%, #12471f 100%); border: 1px solid #2fbf4f;
+  box-shadow: inset 0 0 6px #2fbf4f55; }
+.dbu-scan-readout span { color: #9dffb0; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.dbu-scan-readout strong { color: #7dff8a; font-family: "Courier New", ui-monospace, monospace; font-size: 1.3em;
+  letter-spacing: 0.06em; text-shadow: 0 0 6px #39ff6a; }
+
+/* ----- Height, Grapple and forced movement ----- */
+.dbu-height-panel { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 4px 0 6px; }
+.dbu-height-panel .dbu-height-mode { flex-basis: 100%; color: var(--dbu-muted); font-size: 0.85em; cursor: help; }
+.dbu-height-now { border: 1px solid var(--dbu-line); border-radius: 999px; padding: 1px 10px; font-weight: 700; }
+.dbu-height-now.aloft { background: #29a3d6; border-color: #1f63c4; color: #fff; }
+.dbu-height-panel a[data-action="height"] { font-size: 1.05em; padding: 0 2px; }
+.dbu-height-panel .dbu-hint { margin: 0; }
+.dbu-grapple-status { margin: 2px 0 6px; padding: 3px 8px; border-radius: 6px; background: var(--dbu-orange-soft); font-weight: 700; }
+.dbu-compass { display: grid; grid-template-columns: repeat(3, 34px); gap: 3px; flex: 0 0 auto; }
+.dbu-compass label { flex: none; }
+.dbu-compass input { display: none; }
+.dbu-compass span { display: flex; align-items: center; justify-content: center; height: 30px; border: 1px solid var(--dbu-line);
+  border-radius: 6px; cursor: pointer; font-size: 1.1em; }
+.dbu-compass input:checked + span { background: var(--dbu-orange); border-color: var(--dbu-orange); color: #fff; }
+.dbu-forced-move .form-group input[type="number"] { flex: 0 0 70px; }
+.dbu-hardness .dbu-checks label { cursor: help; }
+.dbu-targets .dbu-kb-done { display: block; color: var(--dbu-blue); font-weight: 700; }
+.theme-dark .dbu-targets .dbu-kb-done { color: #8fb0ff; }

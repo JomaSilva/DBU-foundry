@@ -613,6 +613,22 @@
      "label": "Artificial Warrior — opção: Genetic Aggressor",
      "active": false,
      "always": false
+    },
+    {
+     "target": "dodge",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Artificial Warrior — opção: Genetic Agility",
+     "active": false,
+     "always": false
+    },
+    {
+     "target": "speed",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Artificial Warrior — opção: Genetic Agility",
+     "active": false,
+     "always": false
     }
    ],
    "triggers": [],
@@ -1541,7 +1557,24 @@
    "category": "mind",
    "tier": "subrace",
    "active": true,
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "might",
+     "value": "1(T)",
+     "condition": "@below == 0",
+     "label": "Glass Mastery",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "save.corporeal",
+     "value": "1(T)",
+     "condition": "@below == 0",
+     "label": "Glass Mastery",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [
     {
      "event": "startOfTurn",
@@ -1566,14 +1599,14 @@
      "active": true
     }
    ],
-   "summary": "Glass Tribe · subrace · Mind · 6 efeito(s), 0 automatizado(s)",
+   "summary": "Glass Tribe · subrace · Mind · 6 efeito(s), 1 automatizado(s)",
    "factor": "Glass User",
    "source": {
     "slug": "glass-tribe",
     "section": "Glass Mastery",
     "url": "https://dbu-rpg.com/glass-tribe/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/glass-tribe/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/glass-tribe</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li><li>(4) [Triggered] — manual</li><li>(5) [Triggered/Start of Turn] — lembrete</li><li>(6) [Triggered/Start of Combat Encounter] — lembrete</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/glass-tribe/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/glass-tribe</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li><li>(4) [Triggered] — manual</li><li>(5) [Triggered/Start of Turn] — lembrete</li><li>(6) [Triggered/Start of Combat Encounter] — lembrete</li></ul>"
   },
   "effects": [],
   "folder": "h9DhDxqsnai4Nljd",
@@ -2034,16 +2067,32 @@
      "label": "Rubbery Body",
      "active": true,
      "always": false
+    },
+    {
+     "target": "soak",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Rubbery Body",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "defenseValue",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Rubbery Body",
+     "active": true,
+     "always": false
     }
    ],
    "triggers": [],
-   "summary": "Majins · primary · Body · 8 efeito(s), 1 automatizado(s)",
+   "summary": "Majins · primary · Body · 8 efeito(s), 2 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Rubbery Body",
     "url": "https://dbu-rpg.com/majins/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/majins/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/majins</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li><li>(4) [Passive] — manual</li><li>(5) [Passive] — manual</li><li>(6) [Passive] — manual</li><li>(7) [Triggered] — manual</li><li>(8) [Triggered, 1/Round] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/majins/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/majins</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — auto</li><li>(3) [Passive] — manual</li><li>(4) [Passive] — manual</li><li>(5) [Passive] — manual</li><li>(6) [Passive] — manual</li><li>(7) [Triggered] — manual</li><li>(8) [Triggered, 1/Round] — manual</li></ul>"
   },
   "effects": [],
   "folder": "hN57VIUqWap416Rk",
@@ -2215,15 +2264,24 @@
    "category": "body",
    "tier": "secondary",
    "active": true,
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "strike.physical",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Elastic Tentacle",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
-   "summary": "Majins · secondary · Body · 3 efeito(s), 0 automatizado(s)",
+   "summary": "Majins · secondary · Body · 3 efeito(s), 1 automatizado(s)",
    "source": {
     "slug": "majins",
     "section": "Elastic Tentacle",
     "url": "https://dbu-rpg.com/majins/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/majins/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/majins</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Triggered] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/majins/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/majins</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — auto</li><li>(3) [Triggered] — manual</li></ul>"
   },
   "effects": [],
   "folder": "hN57VIUqWap416Rk",
@@ -4176,15 +4234,40 @@
    "category": "mind",
    "tier": "primary",
    "active": true,
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "speed",
+     "value": "1(T)",
+     "condition": "@below >= 2",
+     "label": "Fight or Flight",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "soak",
+     "value": "1(T)",
+     "condition": "@below >= 2",
+     "label": "Fight or Flight",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "defenseValue",
+     "value": "1(T)",
+     "condition": "@below >= 2",
+     "label": "Fight or Flight",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
-   "summary": "Animals · primary · Mind · 2 efeito(s), 0 automatizado(s)",
+   "summary": "Animals · primary · Mind · 2 efeito(s), 1 automatizado(s)",
    "source": {
     "slug": "animals",
     "section": "Fight or Flight",
     "url": "https://dbu-rpg.com/animals/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/animals/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/animals</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Automatic/Threshold] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/animals/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/animals</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Automatic/Threshold] — manual</li></ul>"
   },
   "effects": [],
   "folder": "rXUOCBqFAQYZeIbu",
@@ -4554,15 +4637,32 @@
    "category": "mind",
    "tier": "secondary",
    "active": true,
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "soak",
+     "value": "1(T)",
+     "condition": "@below >= 2",
+     "label": "Mind for Combat",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "defenseValue",
+     "value": "1(T)",
+     "condition": "@below >= 2",
+     "label": "Mind for Combat",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
-   "summary": "Creatures · secondary · Mind · 3 efeito(s), 0 automatizado(s)",
+   "summary": "Creatures · secondary · Mind · 3 efeito(s), 1 automatizado(s)",
    "source": {
     "slug": "creatures",
     "section": "Mind for Combat",
     "url": "https://dbu-rpg.com/creatures/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/creatures/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/creatures</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Triggered/State, 1/Round] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/creatures/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/creatures</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — auto</li><li>(3) [Triggered/State, 1/Round] — manual</li></ul>"
   },
   "effects": [],
   "folder": "eOB6pcKf5pwsalRR",
@@ -5281,15 +5381,40 @@
    "category": "body",
    "tier": "secondary",
    "active": true,
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "speed",
+     "value": "1(T)",
+     "condition": "@below == 0",
+     "label": "Raised Gravity",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "defenseValue",
+     "value": "1(T)",
+     "condition": "@below == 0",
+     "label": "Raised Gravity",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "awareness",
+     "value": "1(T)",
+     "condition": "@below == 0",
+     "label": "Raised Gravity",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
-   "summary": "Zooners · secondary · Body · 3 efeito(s), 0 automatizado(s)",
+   "summary": "Zooners · secondary · Body · 3 efeito(s), 1 automatizado(s)",
    "source": {
     "slug": "zooners",
     "section": "Raised Gravity",
     "url": "https://dbu-rpg.com/zooners/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/zooners/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/zooners</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Triggered, 1/Round] — manual</li><li>(3) [Triggered/Power, 1/Round] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/zooners/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/zooners</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Triggered, 1/Round] — manual</li><li>(3) [Triggered/Power, 1/Round] — manual</li></ul>"
   },
   "effects": [],
   "folder": "1mzmYvUy5W4AwNXQ",
@@ -6124,7 +6249,32 @@
    "replaces": "",
    "maxFactor": 1,
    "active": true,
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "wound.signature",
+     "value": "2(T)",
+     "condition": "@below == 0",
+     "label": "Zooner-Raised",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "combat",
+     "value": "-1(bT)",
+     "condition": "@below >= 2",
+     "label": "Zooner-Raised",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "soak",
+     "value": "-1(bT)",
+     "condition": "@below >= 2",
+     "label": "Zooner-Raised",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Fator Alternate Upbringing · substitui um traço Secundário · pré-req.: This Factor Trait can only be gained at Character Creation.",
    "source": {
@@ -6132,7 +6282,7 @@
     "section": "Zooner-Raised",
     "url": "https://dbu-rpg.com/alternate-upbringing/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/alternate-upbringing/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/alternate-upbringing</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Triggered, 1/Round] — manual</li><li>(4) [Triggered, 1/Round] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/alternate-upbringing/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/alternate-upbringing</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — auto</li><li>(3) [Triggered, 1/Round] — manual</li><li>(4) [Triggered, 1/Round] — manual</li></ul>"
   },
   "effects": [],
   "folder": "5yeddYofA9Q6bsr5",
@@ -6445,6 +6595,22 @@
      "label": "Life Support",
      "active": true,
      "always": false
+    },
+    {
+     "target": "soak",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Life Support",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "surgency",
+     "value": "2(T)",
+     "condition": "",
+     "label": "Life Support",
+     "active": true,
+     "always": false
     }
    ],
    "triggers": [],
@@ -6454,7 +6620,7 @@
     "section": "Life Support",
     "url": "https://dbu-rpg.com/cybernetic-enhancement/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/cybernetic-enhancement/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/cybernetic-enhancement</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — auto</li><li>(3) [Passive] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/cybernetic-enhancement/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/cybernetic-enhancement</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — auto</li><li>(3) [Passive] — auto</li></ul>"
   },
   "effects": [],
   "folder": "POSXPKvmGFqxABVm",
@@ -7080,6 +7246,22 @@
      "label": "Mummy",
      "active": true,
      "always": false
+    },
+    {
+     "target": "dr",
+     "value": "2(bT)",
+     "condition": "",
+     "label": "Mummy",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "surgency",
+     "value": "2(bT)",
+     "condition": "",
+     "label": "Mummy",
+     "active": true,
+     "always": false
     }
    ],
    "triggers": [],
@@ -7089,7 +7271,7 @@
     "section": "Mummy",
     "url": "https://dbu-rpg.com/monster/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/monster/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/monster</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li><li>(4) [Triggered/Defeated] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/monster/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/monster</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — auto</li><li>(3) [Passive] — manual</li><li>(4) [Triggered/Defeated] — manual</li></ul>"
   },
   "effects": [],
   "folder": "iKnww22J1PAaw1YS",
@@ -7367,7 +7549,24 @@
    "replaces": "",
    "maxFactor": 1,
    "active": true,
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "mod.in",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Psychic",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "save.cognitive",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Psychic",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Fator Mutation · substitui um traço Secundário",
    "source": {
@@ -7375,7 +7574,7 @@
     "section": "Psychic",
     "url": "https://dbu-rpg.com/mutation/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/mutation/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/mutation</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li><li>(4) [Passive] — manual</li><li>(5) [Triggered, 1/Round] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/mutation/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/mutation</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — auto</li><li>(3) [Passive] — manual</li><li>(4) [Passive] — manual</li><li>(5) [Triggered, 1/Round] — manual</li></ul>"
   },
   "effects": [],
   "folder": "R00XG0lHnSsO3Gdi",
@@ -8317,7 +8516,24 @@
    "replaces": "Uncanny Monster",
    "maxFactor": 1,
    "active": true,
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "soak",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Genetic Focus: Majins",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "defenseValue",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Genetic Focus: Majins",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Fator Bio-Focus · substitui Uncanny Monster · pré-req.: Genetic Splicing Factor",
    "source": {
@@ -8325,7 +8541,7 @@
     "section": "Genetic Focus: Majins",
     "url": "https://dbu-rpg.com/bio-focus/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/bio-focus/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/bio-focus</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Prerequisite] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li><li>(4) [Passive] — manual</li><li>(5) [Triggered/Threshold] — manual</li><li>(6) [Triggered, 1/Encounter] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/bio-focus/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/bio-focus</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Prerequisite] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li><li>(4) [Passive] — auto</li><li>(5) [Triggered/Threshold] — manual</li><li>(6) [Triggered, 1/Encounter] — manual</li></ul>"
   },
   "effects": [],
   "folder": "dJSgdoIXENJvNb4j",
@@ -8678,6 +8894,14 @@
      "label": "Android Cybernetics [Cognitive]",
      "active": true,
      "always": false
+    },
+    {
+     "target": "ki.max",
+     "value": "(2)*@PL",
+     "condition": "",
+     "label": "Android Cybernetics [Cognitive]",
+     "active": true,
+     "always": false
     }
    ],
    "triggers": [
@@ -8710,7 +8934,7 @@
     "section": "Android Cybernetics [Cognitive]",
     "url": "https://dbu-rpg.com/genetic-splicing/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/genetic-splicing/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/genetic-splicing</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — manual</li><li>(3) [Triggered] — manual</li><li>(4) [Triggered/Start of Combat Round] — auto</li><li>(5) [Triggered, 1/Encounter] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/genetic-splicing/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/genetic-splicing</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — auto</li><li>(3) [Triggered] — manual</li><li>(4) [Triggered/Start of Combat Round] — auto</li><li>(5) [Triggered, 1/Encounter] — manual</li></ul>"
   },
   "effects": [],
   "folder": "J5nGq0M4x5rPPj2I",
@@ -8900,7 +9124,24 @@
    "replaces": "",
    "maxFactor": 3,
    "active": true,
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "combat",
+     "value": "1(T)",
+     "condition": "@below >= 2",
+     "label": "Earthling Genes [Morale]",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "soak",
+     "value": "1(T)",
+     "condition": "@below >= 2",
+     "label": "Earthling Genes [Morale]",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Fator Genetic Splicing · substitui um traço Secundário",
    "source": {
@@ -8908,7 +9149,7 @@
     "section": "Earthling Genes [Morale]",
     "url": "https://dbu-rpg.com/genetic-splicing/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/genetic-splicing/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/genetic-splicing</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li><li>(4) [Triggered, 1/Round] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/genetic-splicing/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/genetic-splicing</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — auto</li><li>(3) [Passive] — manual</li><li>(4) [Triggered, 1/Round] — manual</li></ul>"
   },
   "effects": [],
   "folder": "J5nGq0M4x5rPPj2I",
@@ -9444,7 +9685,16 @@
    "replaces": "",
    "maxFactor": 3,
    "active": true,
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "ki.max",
+     "value": "(2)*@PL",
+     "condition": "",
+     "label": "Yardrat Genes [Cognitive or Impulsive]",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Fator Genetic Splicing · substitui um traço Secundário",
    "source": {
@@ -9452,7 +9702,7 @@
     "section": "Yardrat Genes [Cognitive or Impulsive]",
     "url": "https://dbu-rpg.com/genetic-splicing/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/genetic-splicing/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/genetic-splicing</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Triggered] — manual</li><li>(3) [Triggered] — manual</li><li>(4) [Triggered, 1/Round] — manual</li><li>(5) [Option] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/genetic-splicing/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/genetic-splicing</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Triggered] — manual</li><li>(3) [Triggered] — manual</li><li>(4) [Triggered, 1/Round] — manual</li><li>(5) [Option] — manual</li></ul>"
   },
   "effects": [],
   "folder": "J5nGq0M4x5rPPj2I",
@@ -10141,7 +10391,32 @@
    "replaces": "Powerful Physique",
    "maxFactor": 1,
    "active": true,
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "stress",
+     "value": "1",
+     "condition": "@res.battleborn >= 4",
+     "label": "Alternative Warrior Race",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "strike",
+     "value": "1(T)",
+     "condition": "@res.battleborn >= 6",
+     "label": "Alternative Warrior Race",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "dodge",
+     "value": "1(T)",
+     "condition": "@res.battleborn >= 6",
+     "label": "Alternative Warrior Race",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Fator Alternate Universe Saiyan · substitui Powerful Physique · pré-req.: Tailless option selected for Saiyan Heritage",
    "source": {
@@ -10149,7 +10424,7 @@
     "section": "Alternative Warrior Race",
     "url": "https://dbu-rpg.com/alternate-universe-saiyan/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/alternate-universe-saiyan/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/alternate-universe-saiyan</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li><li>(4) [Triggered, 1/Encounter] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/alternate-universe-saiyan/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/alternate-universe-saiyan</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — auto</li><li>(3) [Passive] — manual</li><li>(4) [Triggered, 1/Encounter] — manual</li></ul>"
   },
   "effects": [],
   "folder": "jT3ruKc9zIgyELDD",
@@ -10242,6 +10517,14 @@
    "active": true,
    "modifiers": [
     {
+     "target": "wound",
+     "value": "2(T)",
+     "condition": "@res.battleborn >= 4",
+     "label": "Warrior of Two Worlds",
+     "active": true,
+     "always": false
+    },
+    {
      "target": "strike",
      "value": "1(T)",
      "condition": "@below >= 2",
@@ -10255,6 +10538,22 @@
      "condition": "@below >= 2",
      "label": "Warrior of Two Worlds",
      "active": true,
+     "always": false
+    },
+    {
+     "target": "speed.boosted",
+     "value": "1(bT)",
+     "condition": "@below >= 2",
+     "label": "Warrior of Two Worlds — opção: Inherited Freedom",
+     "active": false,
+     "always": false
+    },
+    {
+     "target": "defenseValue",
+     "value": "1(bT)",
+     "condition": "@below >= 2",
+     "label": "Warrior of Two Worlds — opção: Inherited Freedom",
+     "active": false,
      "always": false
     },
     {
@@ -10273,7 +10572,7 @@
     "section": "Warrior of Two Worlds",
     "url": "https://dbu-rpg.com/half-saiyan/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/half-saiyan/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/half-saiyan</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — auto</li><li>(3) [Option] — auto</li><li>(4) [Choice] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/half-saiyan/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/half-saiyan</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — auto</li><li>(3) [Option] — auto</li><li>(4) [Choice] — manual</li></ul>"
   },
   "effects": [],
   "folder": "Fp4cz50qFcuHtDD4",

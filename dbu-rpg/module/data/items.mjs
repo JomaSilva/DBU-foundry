@@ -130,6 +130,22 @@ export class TransformationData extends BaseItemData {
       grandAwakening: new BooleanField({ initial: false }),
       stacks: intField(1, { min: 0 }),
       maxStacks: intField(1, { min: 1 }),
+      // Temporary Awakening Stacks (the newest Stacks): Level 1 (the ARC may let the character keep it at the end of the
+      // Combat Encounter) or Level 2 (removed then), and the encounter it was gained in
+      tempStacks: new ArrayField(new SchemaField({
+        level: intField(1, { min: 1, max: 2 }),
+        combat: new StringField({ blank: true, initial: "" })
+      })),
+      // Stacks that neither count towards the Awakening Limit nor give the Attribute Modifier Bonus (the Spirit Control
+      // Stack of a Yardrat)
+      freeStacks: intField(0, { min: 0 }),
+      // What each Stack holds, oldest Stack first: the Absorbed Character of a stack of Absorption, the Merged Character of
+      // a stack of Unified
+      stackNotes: new ArrayField(new StringField({ blank: true, initial: "" })),
+      // What a Stack holds, asked when one is gained ("Absorbed Character"); empty: nothing to ask
+      stackNote: new StringField({ blank: true, initial: "" }),
+      // Tier of Power Requirement of each Stack when they differ ("2,3": the second Stack needs ToP 3+)
+      stackTop: new StringField({ blank: true, initial: "" }),
       grade: intField(1, { min: 0 }),
       maxGrade: intField(0, { min: 0 }),
       graded: new BooleanField({ initial: false }),
@@ -186,7 +202,15 @@ export class TransformationData extends BaseItemData {
         pick: intField(1, { min: 1 }),
         selected: new ArrayField(new StringField()),
         detail: new StringField({ blank: true, initial: "" }),
-        subs: new ArrayField(new StringField())
+        subs: new ArrayField(new StringField()),
+        // Chosen again for every Stack of an Awakening: `pick` options per Stack, `selected` oldest Stack first
+        // ("Each time you gain a stack of Ki Technician, gain access to a Technical Trait of your choice")
+        perStack: new BooleanField({ initial: false }),
+        // The same option may be chosen for several Stacks; noRepeatLast: but not for two Stacks in a row
+        repeat: new BooleanField({ initial: false }),
+        noRepeatLast: new BooleanField({ initial: false }),
+        // The options are items of this compendium: choosing one adds that item while the Stack lasts
+        pack: new StringField({ blank: true, initial: "" })
       })),
       // Aura drawn around the token while the Transformation is active ("auto": by name, e.g. Super Saiyan → gold)
       aura: new SchemaField({
@@ -218,18 +242,36 @@ export class TransformationData extends BaseItemData {
     return this.masteryNeeded + (this.allTraits.some(t => /\[transcendent trait\]/.test(t)) ? 1 : 0);
   }
 
-  /** Formula variables of its Traits: Grade, Stage, Stacks (Z), Mastery, Masteries beyond Fully Mastered (MX),
-   * Transcended (TR) and Grand Awakening active (GA). */
+  /** Formula variables of its Traits: Grade, Stage, Stacks (Z), Stacks that give the Attribute Modifier Bonus (ZB),
+   * Stacks that are not Temporary Awakenings (ZP), Mastery, Masteries beyond Fully Mastered (MX), Transcended (TR) and
+   * Grand Awakening active (GA). */
   get formulaContext() {
     return {
-      G: this.grade, S: this.stage, Z: this.stacks, M: this.mastery, MX: Math.max(0, this.mastery - this.masteryNeeded),
+      G: this.grade, S: this.stage, Z: this.stacks, ZB: this.bonusStacks, ZP: this.stacks - this.tempCount,
+      M: this.mastery, MX: Math.max(0, this.mastery - this.masteryNeeded),
       TR: this.transcended ? 1 : 0, GA: this.grandAwakening ? 1 : 0
     };
   }
 
-  /** Choices that still have to be made. */
+  /** Stacks that are Temporary Awakenings (the newest ones). */
+  get tempCount() {
+    return Math.min(this.stacks, this.tempStacks?.length ?? 0);
+  }
+
+  /** Stacks that give the Attribute Modifier Bonus. */
+  get bonusStacks() {
+    return Math.max(0, this.stacks - (this.freeStacks ?? 0));
+  }
+
+  /** Stacks that count towards the Awakening Limit: each one is an Awakening of its type (not a Temporary one). */
+  get limitStacks() {
+    if ( this.temporary ) return 0;
+    return Math.max(0, this.stacks - this.tempCount - (this.freeStacks ?? 0));
+  }
+
+  /** Choices that still have to be made (a per-Stack choice needs `pick` options for every Stack). */
   get pendingChoices() {
-    return (this.choices ?? []).filter(c => (c.selected?.length ?? 0) < c.pick);
+    return (this.choices ?? []).filter(c => (c.selected?.length ?? 0) < (c.perStack ? c.pick * this.stacks : c.pick));
   }
 
   /** The Grade (its Aspects and "(LVG)" levels) and the Mastery Traits reached change the Aspects. */

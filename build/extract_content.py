@@ -76,13 +76,33 @@ for name, key in [("impulsive", "impulsive"), ("corporeal", "corporeal"), ("cogn
     TARGETS[f"{name} saving throw"] = [f"save.{key}"]
     TARGETS[f"{name} saving throws"] = [f"save.{key}"]
     TARGETS[f"{name} save"] = [f"save.{key}"]
+    TARGETS[f"{name} saves"] = [f"save.{key}"]
 for word, key in ATTRS.items():
     TARGETS[f"{word} modifier"] = [f"mod.{key}"]
     TARGETS[f"{word} score"] = [f"score.{key}"]
 for ab, key in ABBR.items():
     TARGETS[f"attribute modifier ({ab.lower()})"] = [f"mod.{key}"]
 
-VALUE_RE = r"(-?\d+(?:\.\d+)?(?:\((?:b?T)\))?|[GZMLS]\((?:b?T)\)|\d+/\d+(?:\((?:b?T)\))?)"
+VALUE_RE = r"(-?\d+(?:\.\d+)?(?:\((?:b?T)\))?|[GZMLS]\((?:b?T)\)|\d+[GZMLS]\((?:b?T)\)|\d+/\d+(?:\((?:b?T)\))?)"
+
+
+LEGACY = {"on": False}
+
+
+def phrase_targets(phrase):
+    """Targets of a phrase, also a list of them ("Wound Rolls, Surgency, and Soak Value"); None when one is unknown."""
+    if phrase in TARGETS or LEGACY["on"]:
+        return TARGETS.get(phrase)
+    parts = [x.strip() for x in re.split(r",\s*(?:and\s+)?|\s+and\s+", phrase) if x.strip()]
+    if len(parts) < 2:
+        return None
+    out = []
+    for x in parts:
+        t = TARGETS.get(re.sub(r"^your ", "", x))
+        if not t:
+            return None
+        out += t
+    return out
 STATE_WORDS = {"raging": "raging", "mindful": "mindful", "superior": "superior", "undying": "undying", "surging": "surging",
                "determined": "determined", "entrusted": "entrusted", "god ki": "godKi"}
 
@@ -113,6 +133,14 @@ def condition_prefix(text):
     m = re.match(r"^While you (?:have|possess) (\d+)\+ stacks? of Battle Born applied to your (Strike|Dodge|Wound) Rolls?, (.*)$", t, re.I)
     if m:
         return (f"@res.battleborn_{m.group(2).lower()} >= {m.group(1)}", None, m.group(3))
+    m = None if LEGACY["on"] else re.match(r"^While you (?:have|possess) (\d+)\+ stacks? of Battle Born, (.*)$", t, re.I)
+    if m:
+        return (f"@res.battleborn >= {m.group(1)}", None, m.group(2))
+    m = None if LEGACY["on"] else re.match(r"^While you are below the (Bruised|Injured|Critical) Health Threshold and "
+                                           r"(?:have|possess) (\d+)\+ stacks? of Battle Born, (.*)$", t, re.I)
+    if m:
+        n = {"bruised": 1, "injured": 2, "critical": 3}[m.group(1).lower()]
+        return (f"@below >= {n} && @res.battleborn >= {m.group(2)}", None, m.group(3))
     m = re.match(r"^For each Health Threshold you are below, (.*)$", t, re.I)
     if m:
         return ("", "@below", m.group(1))
@@ -132,6 +160,10 @@ def to_value(v):
     m = re.fullmatch(r"(\d+)/(\d+)\((b?T)\)", v)
     if m:
         return f"{m.group(1)}/{m.group(2)}({m.group(3)})"
+    # "2Z(T)": twice the Stacks
+    m = re.fullmatch(r"(\d+)([GZMLS])\((b?T)\)", v)
+    if m:
+        return f"({m.group(1)}*{m.group(2)})({m.group(3)})"
     return v
 
 
@@ -139,7 +171,8 @@ def sentences(text):
     """Split an effect into sentences, keeping "Additionally," follow-ups as separate clauses."""
     t = clean(text)
     t = re.split(r"\s+- ", t)[0]  # drop option bullets glued to the text
-    parts = [p.strip() for p in re.split(r"(?<=[a-z0-9)\]])\.\s+(?=[A-Z])", t) if p.strip()]
+    # "(max. Z)" is not the end of a sentence
+    parts = [p.strip() for p in re.split(r"(?<=[a-z0-9)\]])(?<!max)\.\s+(?=[A-Z])", t) if p.strip()]
     return [re.sub(r"^Additionally, (\w)", lambda m: m.group(1).upper(), p) for p in parts]
 
 
@@ -150,6 +183,12 @@ def compile_passive(text, label):
         if re.fullmatch(r"You are Unnatural\.?", s):
             out.append({"target": "flag.unnatural", "value": "1", "condition": "", "label": label, "active": True, "always": False})
             continue
+        # "Double this bonus if you possess 3 Super Stacks" (Hefty Muscle): the sentence before counts twice then
+        dm = None if LEGACY["on"] else re.fullmatch(r"Double this bonus (?:if|while) you (?:possess|have) (\d+)\+? Super Stacks\.?", s)
+        if dm and out:
+            for m in out:
+                m["value"] = f"({m['value']})*(@superStacks >= {dm.group(1)} ? 2 : 1)"
+            continue
         mods = compile_passive_one(s, label)
         if not mods:
             break
@@ -157,15 +196,104 @@ def compile_passive(text, label):
     return out
 
 
+AWAKENING_NAMES = {}  # slug of the name → name, for "for every stack of Absorption you possess" (filled before the Transformations)
+
+
+def awakening_slug(name):
+    return re.sub(r"[^a-z0-9]", "", clean(name).lower())
+
+
+def per_level_amount(v):
+    """'Z', '2', '1/2 (rounded up) of Z', '1/2 of Z (rounded up)' → a formula, or None."""
+    v = clean(v)
+    if re.fullmatch(r"\d+|[ZG]", v):
+        return v
+    m = re.fullmatch(r"1/2(?: \(rounded (up|down)\))? of ([ZG])(?: \(rounded (up|down)\))?", v)
+    if m:
+        return f"{'ceil' if 'up' in (m.group(1) or m.group(3) or '') else 'floor'}({m.group(2)}/2)"
+    return None
+
+
+def stack_gain_mods(text, label):
+    """'Upon gaining a stack of this Awakening, gain a Character Perk ...': what every Stack gives, as modifiers."""
+    t = clean(text).rstrip(".")
+    m = re.match(r"^(?:Upon gaining|Each time you gain|When you gain) a stack of this Awakening, gain (a|an|\d+) Character Perks?"
+                 r"(?: to spend immediately)?$", t, re.I)
+    if m:
+        n = "1" if not m.group(1).isdigit() else m.group(1)
+        return [{"target": "perks", "value": "Z" if n == "1" else f"{n}*Z", "condition": "", "label": label, "active": True,
+                 "always": False}]
+    m = re.match(r"^(?:Upon gaining|Each time you gain|When you gain) a stack of this Awakening, gain (\d+) Attribute Points?"
+                 r"(?: to (?:be )?spen[dt] immediately)? and (\d+) Technique Points$", t, re.I)
+    if m:
+        return [{"target": "attributePoints", "value": f"{m.group(1)}*Z" if m.group(1) != "1" else "Z", "condition": "",
+                 "label": label, "active": True, "always": False},
+                {"target": "tp", "value": f"{m.group(2)}*Z", "condition": "", "label": label, "active": True, "always": False}]
+    return []
+
+
 def compile_passive_one(text, label):
     """Compile one sentence of a [Passive] effect into modifiers, or [] when the wording is not recognised."""
     text = clean(text).rstrip(".")
+    gained = [] if LEGACY["on"] else stack_gain_mods(text, label)
+    if gained:
+        return gained
     pre = condition_prefix(text)
     if not pre:
         return []
     cond, mult, rest = pre
     rest = rest.strip().rstrip(".")
+    if LEGACY["on"]:
+        return compile_passive_rest(cond, mult, re.sub(r"\s*\(rounded (up|down)\)", "", rest), label)
+    # "... by Z for each Power Level reached": per Power Level (Life Points) or times the Power Level (Ki Points)
+    m = re.match(r"^Increase your (Maximum Life Points and Maximum Ki Points|Maximum Life and Ki Points|Maximum Life Points|"
+                 r"Life Points|Maximum Ki Points) by (.+?) for (?:each|every) Power Level (?:reached|you possess|you have)$", rest, re.I)
+    if m and per_level_amount(m.group(2)):
+        amount = per_level_amount(m.group(2))
+        what = m.group(1).lower()
+        out = []
+        if "life" in what:
+            out.append({"target": "life.perLevel", "value": amount, "condition": cond, "label": label, "active": True, "always": False})
+        if "ki" in what:
+            out.append({"target": "ki.max", "value": f"({amount})*@PL", "condition": cond, "label": label, "active": True,
+                        "always": False})
+        return out
     rest = re.sub(r"\s*\(rounded (up|down)\)", "", rest)
+    # "... for every 2 stacks of Absorption you possess": times the Stacks of that Awakening
+    m = re.match(r"^(.*?) for (?:every|each) (?:(\d+) )?stacks? of (?:the )?([A-Z][\w' -]+?)(?: Awakening)? you possess$", rest)
+    if m and awakening_slug(m.group(3)) in AWAKENING_NAMES:
+        k = f"@awk.{awakening_slug(m.group(3))}"
+        per = f"floor({k}/{m.group(2)})" if m.group(2) and m.group(2) != "1" else k
+        mult = f"({mult})*{per}" if mult else per
+        rest = m.group(1)
+    # "Increase the Dice Score of your Steadfast Checks by 1 for each Health Threshold you are below (max. Z)"
+    m = re.match(r"^Increase the Dice Score of your Steadfast Checks by (\d+) for each Health Threshold you are below "
+                 r"\(max\.? ?([ZG]|\d+)\)$", rest, re.I)
+    if m:
+        return [{"target": "steadfast", "value": f"min(@below*{m.group(1)}, {m.group(2)})", "condition": cond, "label": label,
+                 "active": True, "always": False}]
+    # "Increase the Wound Rolls of your Energy Attacks by 2(T)": the Combat Rolls of one Foundation
+    m = re.match(rf"^Increase the (Strike|Wound|Strike and Wound) Rolls (?:of|for) your (Physical|Energy|Magic|Physical and Energy|"
+                 rf"Energy and Magic|Physical and Magic) Attacks by {VALUE_RE}$", rest, re.I)
+    if m:
+        rolls = ["strike", "wound"] if " and " in m.group(1).lower() else [m.group(1).lower()]
+        val = to_value(m.group(3))
+        if mult:
+            val = f"({val})*{mult}"
+        return [{"target": f"{r}.{f.strip().lower()}", "value": val, "condition": cond, "label": label, "active": True,
+                 "always": False} for r in rolls for f in re.split(r"\s+and\s+", m.group(2))]
+    m = re.match(rf"^Increase the (Strike|Wound) Rolls of your Signature Techniques by {VALUE_RE}$", rest, re.I)
+    if m:
+        val = to_value(m.group(2))
+        if mult:
+            val = f"({val})*{mult}"
+        return [{"target": f"{m.group(1).lower()}.signature", "value": val, "condition": cond, "label": label, "active": True,
+                 "always": False}]
+    return compile_passive_rest(cond, mult, rest, label)
+
+
+def compile_passive_rest(cond, mult, rest, label):
+    """The part of compile_passive_one after its leading condition (and the Awakening Stack patterns)."""
     # Trailing condition: "... by 1(T) while in a Form and/or Enhancement"
     tm = re.match(r"^(.*?) (while .+)$", rest, re.I)
     if tm:
@@ -182,9 +310,10 @@ def compile_passive_one(text, label):
         if len(values) != len(targets):
             return False
         for tgt, val in zip(targets, values):
-            val = to_value(val)
-            if not re.fullmatch(VALUE_RE, val):
+            raw = val.strip().rstrip(".,").replace(" ", "")
+            if not re.fullmatch(VALUE_RE, raw) or (LEGACY["on"] and re.fullmatch(r"\d+[GZMLS]\((?:b?T)\)", raw)):
                 return False
+            val = to_value(raw)
             expr = val if sign > 0 else f"-{val}"
             if mult:
                 expr = f"({expr})*{mult}"
@@ -195,12 +324,13 @@ def compile_passive_one(text, label):
     if m:
         phrase = m.group(2).lower().replace("the dice score of your ", "").strip()
         phrase = re.sub(r"^your ", "", phrase)
-        targets = TARGETS.get(phrase)
+        targets = phrase_targets(phrase)
         vals = [m.group(3)] + ([m.group(4)] if m.group(4) else [])
         if targets and emit(targets, vals, 1 if m.group(1).lower() == "increase" else -1):
             return mods
         return []
-    m = re.match(rf"^Reduce the Ki Point Cost of (?:all )?(?:your )?Attacking Maneuvers by {VALUE_RE}$", rest, re.I)
+    m = re.match(rf"^Reduce the Ki Point Cost of (?:all )?{'' if LEGACY['on'] else '(?:of )?'}(?:your )?Attacking Maneuvers by {VALUE_RE}$",
+                 rest, re.I)
     if m and emit(["kpCost.attack"], [m.group(1)], -1):
         return mods
     m = re.match(rf"^Increase the Ki Point Cost of (?:all )?(?:your )?Attacking Maneuvers by {VALUE_RE}$", rest, re.I)
@@ -1081,6 +1211,18 @@ INLINE_EFFECT_RE = re.compile(r"\((?:\*\*)?\d+(?:\*\*)?\)-\[|(?<![\w*])-\[\*\*")
 GLUED_EFFECT_RE = re.compile(r"(?<=\S)(?=\((?:\*\*)?\d+(?:\*\*)?\)-\[)")
 
 
+# '# **Wizarding TraitsBaneful Black Magic**: ...' opens a group of Traits (Technical Traits, Perfect Traits...)
+GROUP_HEAD_RE = re.compile(r"^#{1,4} \*\*([A-Z][A-Za-z' -]+?) Traits([A-Z][^*]*?)\*\*\s*:\s*(.*)$")
+
+
+def trait_group(line):
+    """The group a heading opens ('Wizarding' for '# **Wizarding TraitsBaneful Black Magic**:'), or ''."""
+    m = GROUP_HEAD_RE.match(line)
+    if not m or re.search(r"Racial|Species|Factor|Mastery|Legendary|Transcendent", m.group(1)):
+        return ""
+    return m.group(1).strip()
+
+
 def trait_heading(line):
     """(kind, name, effect written on the heading line or '') of a Transformation Trait heading, or None."""
     m = TRAIT_HEAD_RE.match(line)
@@ -1094,8 +1236,12 @@ def trait_heading(line):
         if not n:
             return None
         name, tail = n.group(1).strip(), n.group(2)
+    elif trait_group(line):
+        g = GROUP_HEAD_RE.match(line)
+        kind, name, tail = "trait", g.group(2).strip(), g.group(3)
     else:
-        m = re.match(r"^\*\*([^*]+?)\*\*:\s*(.*)$", line)
+        # "**Name**: ..." and "**Name:** ..." are both used on the site
+        m = re.match(r"^\*\*([^*]+?)\*\*:\s*(.*)$", line) or re.match(r"^\*\*([^*:]+?):\*\*\s*(.*)$", line)
         if not m:
             return None
         kind, name, tail = "trait", m.group(1).strip(), m.group(2)
@@ -1129,11 +1275,121 @@ def tidy_trait_lines(seg):
     return out
 
 
+# "Each time you gain a stack of Warlock, gain access to a Wizarding Trait of your choice"
+STACK_GROUP_RE = re.compile(r"(?:(?:Each time|When) you gain|Upon gaining) (?:access to )?a stack of (?:this Awakening|[A-Z][\w' -]+?), "
+                            r"gain access to an? ([A-Z][\w' -]+?) Trait\b")
+def stack_gain_effect(text, own):
+    """'Upon gaining a stack of this Awakening, ...' (or of the Awakening by its name): an effect of every new Stack."""
+    name = re.escape(clean(own))
+    return bool(re.match(rf"^(?:(?:Each time|When|Whenever) you gain|Upon gaining) (?:access to )?a stack of (?:this Awakening|"
+                         rf"(?:the )?{name}(?: Awakening)?)(?: during a Combat Encounter)?, ", clean(text), re.I))
+ATTRIBUTE_WORDS = ["Agility", "Force", "Tenacity", "Scholarship", "Insight", "Magic", "Personality"]
+ELEMENTS = ["Dark", "Earth", "Fire", "Ice", "Light", "Lightning", "Metal", "Plantlife", "Poison", "Water", "Wind"]
+# What each Stack holds (asked when it is gained)
+STACK_NOTES = {"Absorption": "Absorbed Character", "Unified": "Merged Character"}
+
+
+def page_trait_names(slug, after=None):
+    """Trait names on a page ('**Name**:' and the first one of a group heading), from the line `after` on."""
+    out, on = [], after is None
+    for line in read(slug):
+        t = line.strip()
+        if not on:
+            on = t == after
+            continue
+        g = GROUP_HEAD_RE.match(t)
+        m = re.match(r"^\*\*([^*]+?)\*\*:", t)
+        name = g.group(2).strip() if (g and trait_group(t)) else (m.group(1).strip() if m else "")
+        if name and name not in out:
+            out.append(name)
+    return out
+
+
+def factor_trait_names(factor):
+    return [d["name"] for d in PACKS.get("racial-traits", []) if d.get("_type") == "Item"
+            and (d["system"].get("factor") or "").lower() == factor.lower()]
+
+
+def stack_choice(trait, n, options, pick=1, repeat=False, no_repeat_last=False, pack="", cid=None):
+    return {"id": cid or f"{trait}#{n}", "trait": trait, "options": options, "pick": pick, "selected": [], "detail": "", "subs": [],
+            "perStack": True, "repeat": repeat, "noRepeatLast": no_repeat_last, "pack": pack}
+
+
+def option_mods(trait, table):
+    """Modifiers of per-Stack options, compiled switched off: each Stack that picks the option applies them once."""
+    out = []
+    for option, mods in table.items():
+        for tgt, val in mods:
+            out.append({"target": tgt, "value": val, "condition": "", "label": f"{trait} — opção: {option}", "active": False,
+                        "always": False})
+    return out
+
+
+def stack_overrides(name):
+    """Per-Stack choices whose wording is too free-form for the compiler: (choices, modifiers, (trait, n) handled)."""
+    if name == "Results of Training":
+        t = "Steady Progress"
+        return ([stack_choice(t, 1, ["Agility", "Tenacity"], repeat=True),
+                 stack_choice(t, 4, ["Strike", "Dodge", "Wound"], repeat=True, no_repeat_last=True)],
+                option_mods(t, {"Agility": [("mod.ag", "1")], "Tenacity": [("mod.te", "1")],
+                                "Strike": [("strike", "1(T)")], "Dodge": [("dodge", "1(T)")], "Wound": [("wound", "1(T)")]}),
+                {(t, 1), (t, 4)})
+    if name == "Vocation Gain":
+        t = "Additional Vocation"
+        amb = {"Warrior": ["fo", "te", "ma"], "Mage": ["in", "ma"], "Martial Artist": ["ag", "fo"], "Priest": ["in", "ma"],
+               "Thief": ["ag", "in"], "Ranger": ["ag", "ag"], "Dancer": ["pe", "pe"]}
+        table = {k: [(f"mod.{a}", str(v.count(a))) for a in dict.fromkeys(v)] for k, v in amb.items()}
+        return ([stack_choice(t, 1, list(amb) + ["Gadabout"])], option_mods(t, table), {(t, 1)})
+    if name == "Absorption":
+        t = "Assimilated Power"
+        table = {w: [(f"mod.{ATTRS[w.lower()]}", "1")] for w in ATTRIBUTE_WORDS}
+        return ([stack_choice(t, 0, ATTRIBUTE_WORDS, pick=3, repeat=True, cid=f"{t}#amb")], option_mods(t, table), {(t, 1)})
+    if name == "Unified":
+        # The Merged Character of each Stack is asked when it is gained (STACK_NOTES)
+        return [], [], {("Entrusted Everything", 1)}
+    if name == "Elemental Force":
+        t = "Flash of the Elements (1)"
+        return ([stack_choice(t, 1, [f"Elemental ({e})" for e in ELEMENTS])], [], {(t, 1)})
+    if name == "Bestial Transfiguration":
+        t = "Reawakened Beast"
+        return ([stack_choice(t, 1, page_trait_names("bestial-traits"))], [], {(t, 1)})
+    if name == "Diverse Leader":
+        t = "Leadership Training"
+        return ([stack_choice(t, 3, page_trait_names("commander", after="Leadership Traits"))], [], {(t, 3)})
+    if name == "Spirit Control":
+        t = "Spiritual Apprentice"
+        uas = [re.match(r"^## \*\*(.+?)\*\*$", l.strip()).group(1) for l in read("spirit-control")
+               if re.match(r"^## \*\*(.+?)\*\*$", l.strip())]
+        return ([stack_choice(t, 2, uas)], [], {(t, 2)})
+    if name == "Bio-Diversity":
+        t = "Genetic Smoothie"
+        return ([stack_choice(t, 1, factor_trait_names("Genetic Splicing"), pack="dbu-rpg.racial-traits")], [], {(t, 1)})
+    if name == "Cybernetic Upgrade":
+        t = "Installed Cybernetics"
+        return ([stack_choice(t, 1, factor_trait_names("Cybernetic Enhancement") + ["Regain a Secondary Racial Trait"],
+                              pack="dbu-rpg.racial-traits")], [], {(t, 1)})
+    return [], [], set()
+
+
+# Effects compiled by hand: (page slug, trait, effect) → modifiers (the trait's "(n)" condition is added)
+EFFECT_OVERRIDES = {
+    # Saiyan Spirit (3): in the Undying State entered through Saiyan Heritage, Soak and Wound +Z(bT)
+    ("zenkai", "Saiyan Spirit", 3): [("soak", "Z(bT)", "@states.undying >= 1"), ("wound", "Z(bT)", "@states.undying >= 1")],
+    # Planetary Diet (2): only a Stack that is not a Temporary Awakening (the second one) gives the Ki Points
+    ("fruits-might", "Planetary Diet (2)", 2): [("ki.max", "(2)*@PL", "@ZP >= 2")],
+}
+
+
 def build_transformations():
     pages = set()
     for r in MENU:
         if r["slug"] and not r["slug"].startswith("http") and r["slug"] not in HOMEBREW:
             pages.add(r["slug"])
+    for slug in pages:
+        lines = read(slug)
+        if lines and any("Awakening Type" in l for l in lines):
+            title = lines[0].lstrip("# ").strip()
+            AWAKENING_NAMES[awakening_slug(title)] = title
     for slug in sorted(pages):
         lines = read(slug)
         text = "\n".join(lines)
@@ -1181,10 +1437,16 @@ def build_transformations():
             own_choices, mastery_aspects, legendary = [], [], set()
             ignore_top = False
             in_mastery = False
+            # Groups of Traits (Technical Traits...) and the effects that pick one of them for every Stack
+            groups, group, group_picks, stack_gains = {}, "", [], []
             i = bonus_start + 2 if bonus_start else 0
             while i < len(seg):
                 head = trait_heading(seg[i].strip())
                 if not head:
+                    # "Minion Class Traits" on a line of its own opens a group too
+                    label = re.fullmatch(r"([A-Z][A-Za-z' -]+) Traits", seg[i].strip())
+                    if label:
+                        group = label.group(1).strip()
                     i += 1
                     continue
                 kind, name, _ = head
@@ -1192,6 +1454,20 @@ def build_transformations():
                 if not effects:
                     i += 1
                     continue
+                opened = trait_group(seg[i].strip())
+                if opened:
+                    group = opened
+                elif kind != "trait":
+                    group = ""
+                if group and kind == "trait":
+                    groups.setdefault(group, []).append(name)
+                if trans_type == "awakening":
+                    for e in effects:
+                        gm = STACK_GROUP_RE.search(clean(e["text"]))
+                        if gm:
+                            group_picks.append((name, e["n"], gm.group(1).strip()))
+                        elif stack_gain_effect(e["text"], b["name"]) and not stack_gain_mods(e["text"], name):
+                            stack_gains.append((name, e["n"]))
                 req = re.search(r"\((\d)\)\s*$", name)
                 cond = ""
                 # A Mastery Trait heading starts the mastery section; the next "Name (2)" traits need more masteries
@@ -1224,7 +1500,19 @@ def build_transformations():
                 elif any("Permanent" in e["keywords"] and IGNORE_TOP_RE.search(clean(e["text"])) for e in effects):
                     ignore_top = True
                 own_choices += effect_choices(effects, name)
+                # A Trait of a group picked once (Aura Traits, Domain Traits, Minion Class Traits...) is compiled as before
+                # the Awakening Stack patterns: those groups are not choices yet, so their Traits all stay switched on, and
+                # the new patterns would only add bonuses the character may not have picked. A group picked for every Stack
+                # (Technical Traits...) is a per-Stack choice, which switches its Traits on as they are picked.
+                stack_group = trans_type == "awakening" and any(g == group for (_, _, g) in group_picks)
+                LEGACY["on"] = bool(group and kind == "trait" and not stack_group)
                 mods, trigs, st = compile_effects(effects, name, cond)
+                LEGACY["on"] = False
+                for e in effects:
+                    for tgt, val, c in EFFECT_OVERRIDES.get((slug, name, e["n"]), []):
+                        mods.append({"target": tgt, "value": val, "condition": " && ".join(x for x in [c, cond] if x), "label": name,
+                                     "active": True, "always": False})
+                        st[effects.index(e)] = st[effects.index(e)].replace("— manual", "— auto").replace("— lembrete", "— auto")
                 if kind == "transcendent trait":
                     for mm in mods + trigs:
                         if not mm.get("always"):
@@ -1238,6 +1526,33 @@ def build_transformations():
                 traits.append(f"{name}{' [' + kind + ']' if kind != 'trait' else ''}")
                 structure.append(f"<strong>{name}</strong>{' (' + kind + ')' if kind != 'trait' else ''}: " + "; ".join(st))
                 i = j
+            # Awakening Stacks: a choice for every Stack (a Trait of a group, or one of the hand-written ones), and a
+            # reminder for the other "upon gaining a stack" effects
+            stack_top, stack_note = "", ""
+            if trans_type == "awakening":
+                handled = set()
+                for tname, n, gname in group_picks:
+                    if gname in groups:
+                        own_choices.append(stack_choice(tname, n, groups[gname]))
+                        handled.add((tname, n))
+                extra_choices, extra_mods, done = stack_overrides(b["name"])
+                own_choices += extra_choices
+                own_mods += extra_mods
+                handled |= done
+                for tname, n in stack_gains:
+                    if (tname, n) in handled:
+                        continue
+                    req_n = re.search(r"\((\d)\)\s*$", tname)
+                    own_trigs.append({"event": "stackGain", "effect": "message", "value": f"efeito ({n})", "resource": "",
+                                      "condition": f"@Z >= {req_n.group(1)}" if req_n else "", "mode": "remind",
+                                      "duration": "none", "label": tname, "active": True})
+                # "Tier of Power Requirement. 2+ (3+ for second stack)"
+                sm = re.search(r"\((\d)\+ for (?:the )?(second|third|fourth|2nd|3rd|4th) stack\)",
+                               fields.get("tier of power requirement", "") or "", re.I)
+                if sm and top:
+                    pos = {"second": 2, "2nd": 2, "third": 3, "3rd": 3, "fourth": 4, "4th": 4}[sm.group(2).lower()]
+                    stack_top = ",".join([top.group(1)] * (pos - 1) + [sm.group(1)])
+                stack_note = STACK_NOTES.get(b["name"], "")
             # Only its own Traits here: what it gains from lower Stages or its listed Transformation (Variant) is added
             # once every Transformation is known (inherit_traits)
             system = {
@@ -1248,7 +1563,8 @@ def build_transformations():
                 "stressReq": int(stress.group(1)) if stress else 0, "topReq": int(top.group(1)) if top else 1,
                 "bonuses": {k: ("" if v == "*" else v) for k, v in bonuses.items()},
                 "aspects": aspects, "traits": traits, "graded": graded, "grade": 1,
-                "stacks": 1, "maxStacks": int(max_stacks.group(1)) if max_stacks else 1,
+                "stacks": 1, "maxStacks": int(max_stacks.group(1)) if max_stacks else 1, "stackTop": stack_top,
+                "stackNote": stack_note,
                 "modifiers": own_mods, "triggers": own_trigs, "choices": own_choices, "masteryAspects": mastery_aspects,
                 "gradeAspects": grade_aspects(seg), "ignoreTop": ignore_top, "inherited": [],
                 "homebrew": False,

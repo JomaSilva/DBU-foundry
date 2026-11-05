@@ -414,6 +414,7 @@ DBU.modifierTargets = {
   "life.max": "DBU.Target.lifeMax", "life.perLevel": "DBU.Target.lifePerLevel", "rlm": "RLM",
   "ki.max": "DBU.Target.kiMax", "capacity.max": "DBU.Target.capacityMax",
   "tp": "DBU.Target.tp", "tp.perSI": "DBU.Target.tpPerSI",
+  "perks": "DBU.Target.perks", "attributePoints": "DBU.Target.attributePoints",
   "superStacks": "Super Stacks", "muscle": "DBU.Target.muscle",
   "kpCost.attack": "DBU.Target.kpCostAttack", "kpCost.ua": "DBU.Target.kpCostUA",
   "charge.category": "DBU.Target.chargeCategory",

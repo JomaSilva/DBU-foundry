@@ -19,7 +19,10 @@
           <a data-action="itemEdit">{{t.item.name}}</a>
           {{#if t.s.line}}<small>{{t.s.line}} {{#if t.s.stage}}S{{t.s.stage}}{{/if}}</small>{{/if}}
           {{#if t.s.subtype}}<span class="tag">{{t.s.subtype}}</span>{{/if}}
-          {{#if t.pending}}<span class="tag warn" data-tooltip="{{localize 'DBU.Choice.PendingTip'}}"><i class="fa-solid fa-list-check"></i> {{t.pending}}</span>{{/if}}
+          {{#if t.tempStacks}}<span class="tag dbu-temp-stack" data-tooltip="{{localize 'DBU.Stack.TempTag'}}"><i class="fa-solid fa-hourglass-half"></i> {{t.tempStacks}}</span>{{/if}}
+          {{#if t.pending}}<a class="tag warn" data-action="chooseStack" data-tooltip="{{localize 'DBU.Choice.PendingTip'}}"><i class="fa-solid fa-list-check"></i> {{t.pending}}</a>{{/if}}
+          {{#each t.stackPicks as |p|}}<small class="dbu-stack-picks">{{p}}</small>{{/each}}
+          {{#if t.stackNotes}}<small class="dbu-stack-picks">{{t.stackNotes}}</small>{{/if}}
           {{#if t.s.newLevel}}<a class="tag dbu-nlop on" data-action="newLevel" data-tooltip="{{localize 'DBU.Trans.NewLevelActiveTip'}}"><i class="fa-solid fa-bolt"></i> NLoP</a>
           {{else if t.s.newLevelPending}}<a class="tag dbu-nlop" data-action="newLevel" data-tooltip="{{localize 'DBU.Trans.NewLevelPendingTag'}}"><i class="fa-regular fa-hourglass"></i> NLoP</a>{{/if}}
           {{#unless t.raceOk}}<i class="fa-solid fa-triangle-exclamation warn" data-tooltip="{{localize 'DBU.Trans.RaceWarn'}}: {{t.s.race}}"></i>{{/unless}}
@@ -30,9 +33,9 @@
         <td class="dbu-small">{{t.aspects}}</td>
         <td class="dbu-controls">
           {{#if (eq t.s.transType "awakening")}}
-            <a data-action="itemStack" data-field="system.stacks" data-delta="-1"><i class="fa-solid fa-minus"></i></a>
-            <span data-tooltip="Stacks">{{t.s.stacks}}/{{t.s.maxStacks}}</span>
-            <a data-action="itemStack" data-field="system.stacks" data-delta="1"><i class="fa-solid fa-plus"></i></a>
+            <a data-action="itemStack" data-field="system.stacks" data-delta="-1" data-tooltip="{{localize 'DBU.Stack.MinusTip'}}"><i class="fa-solid fa-minus"></i></a>
+            <span data-tooltip="{{t.stackTip}}">{{t.s.stacks}}/{{t.s.maxStacks}}</span>
+            <a data-action="itemStack" data-field="system.stacks" data-delta="1" data-tooltip="{{localize 'DBU.Stack.PlusTip'}}"><i class="fa-solid fa-plus"></i></a>
           {{else}}
             <span class="dbu-token-img">
               <a data-action="tokenImg" data-tooltip="{{#if t.s.tokenImg}}{{localize 'DBU.TokenImg.Change'}}{{else}}{{localize 'DBU.TokenImg.Set'}}{{/if}}">

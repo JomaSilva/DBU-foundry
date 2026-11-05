@@ -298,12 +298,21 @@ Insight — conferido na planilha, ver seção 5.1.)
   Consume, Replicate Self e Robot Factory (Big Gete Star Integration), Recruit pela metade do tempo (Commander:
   Minion Collector), Create com Use Magic (Magical Materialization), remover absorvido (Roomy Biology: Might Clash,
   1 min, 2 por sessão). O site não publica tempo nem limite dos que vêm de Unique Abilities.
+- **Scan** (Scouter equipado; Scouter integrado do Onboard Computer, Master, e do 3D Scan Mode, Grandmaster; Scout
+  Scope): em combate custa 1 Ação (Scouter) ou 3 (Scout Scope). O alvo pode rolar Concealment contra o Craft DC do
+  Scouter (no Scout Scope é Qualified, e só para quem está em Holding Back ou percebeu o Scan). Passando, nada
+  acontece e ele passa direto contra aquele tipo de aparelho até o fim do encontro (no Scout Scope, até baixar o
+  Holding Back). Senão, revela o ToP atual e, se ele for o base, o PL. O sistema também mostra o Poder de Luta.
+  Um Scouter de Craft DC Expert ou menor é destruído quando alguém de ToP 2+ (o de Qualified) ou 3+ (o de Expert)
+  usa a manobra Power Up a até 15 quadrados dele, ou a centenas de milhas fora de combate (no sistema: a cena
+  toda). O ToP é o atual; o Scout Scope e os Scouters integrados (Master e Grandmaster) não quebram.
 - **Adventurous** (palavra-chave): efeito de traço usável fora de combate.
 
 ### Poder de Luta (leitura de scouter — não é regra do DBU)
-`0,78 × 1,75^(PL−1) × 1,4^(ToP atual−1) × (FO + (AG + TE)/4)³ × (KP atual / KP natural, mín. 10%)`, com os
-Modificadores atuais. Calibrado no anime: PL 1 ≈ 400 (Goku/Piccolo no início do Z), PL 4 ≈ 8.000 (Goku), PL 5 ≈
-18.000 (Vegeta, saga Saiyajin), PL 10 ≈ 530.000 (Freeza suprimido). Configurável pelo mestre.
+`0,56 × 1,7^(PL−1) × 1,55^(ToP atual−1) × (FO + AG/2 + TE/4)³ × (KP atual / KP natural, mín. 10%)`, com os
+Modificadores atuais (FO primeiro, depois AG, depois TE). Calibrado no anime: PL 1 ≈ 400 (Goku/Piccolo no início do Z), PL 4 ≈ 8.000 (Goku), PL 5 ≈
+18.000 (Vegeta, saga Saiyajin), PL 10 ≈ 530.000 (Freeza suprimido). Configurável pelo mestre. O Scan que dá certo
+também mostra esse número do alvo a quem escaneou.
 
 ---
 
@@ -501,6 +510,53 @@ Modificadores atuais. Calibrado no anime: PL 1 ≈ 400 (Goku/Piccolo no início 
 | Triggered [1/Round] | Modificador | — | — | atrasa um Maneuver |
 | Draining Attack [1/Round] | Modificador especial | 1 | 2(T) | +1 categoria; recupera LP = dano e KP = 1/2 dano |
 
+### 11.1 Altura, Grapple, arremessos e colisões (Battlefields, Battle Environments, Flight)
+
+- **Altura no token:** a elevação do token, sobre o piso do Level da cena. Sem a regra Flight, o nível de High
+  Environment (0 Chão, 1 Low Sky, 2 High Sky, 3 Local Space, 4 Deep Space) fica como 8 quadrados × nível; com a regra
+  Flight, a Verticality é 1 quadrado por stack.
+- **Distância:** quadrados no grid entre as casas mais próximas + a altura (8 por nível de diferença; com Flight, a
+  diferença de Verticality). Long Range = 9+ quadrados.
+- **Soar** [1/Round, 1 Ação; Special Maneuver de 2+ ranks em Flight]: sem Flight, +1(bT) Defense Value até o
+  início do próximo turno e ±1 nível (0 volta ao Battle Environment do quadrado). Com Flight: até 8 Verticality e
+  +1(T) no Desvio até o início do próximo turno; Frequent Flyer dobra o bônus, dá +8 Verticality e o uso Instant.
+  GI 2+ não deixa usar o Soar.
+- **Falling** (início da rodada, sem Flight): sem 1+ rank em Flight nem acesso ao Soar, desce 1 nível; saindo do
+  Low Sky, Acrobatics (Qualified) ou Collision Damage com o quadrado. Deep Space só entra ou sai com o ARC.
+- **Flight, início do turno:** perde toda a Verticality, a não ser com a Unique Ability Flight. **Prone** zera a
+  Verticality mesmo assim e tira 1(bT) LP a cada 2 perdidas (máx. 4(bT)). Heightened Gravity soma x(bT) a isso e ao
+  Hitting the Floor (o sistema usa x = Gravity Intensity sofrida; pode passar do máximo).
+- **Grapple Check** = Clash Strike vs Strike/Dodge (o defensor usa o maior; empate do defensor). O Grappler é
+  sempre o Initiator dos Grapple Checks do Grapple, então quem tenta escapar ganha no empate. No Grapple: Guard Down
+  nos dois até acabar. **Launch:** até Might quadrados, qualquer direção. **Pin:** −1(bT) no Grapple Check, depois
+  Might Clash. **Thrust:** Push Back = 1/2 Might (arred. para baixo) em linha reta para longe, Collision Damage em
+  dobro; Knock Prone = Clash Impulsive/Corporeal (o sistema usa o maior dos dois de cada lado), perdendo → Guard
+  Down até o fim do turno de quem usou.
+- **Knockback** (Vantagem; grátis com o Perfil Launching; todo ataque no Local Space e no Deep Space): causando dano,
+  depois do Wound, Might Clash; vencendo, até Might quadrados em linha reta para longe (de quem ataca; numa AoE, do
+  quadrado-alvo: o sistema deixa escolher a direção). Forceful Launch +1(T) quadrados e Clash por rank; Precise Strike
+  com crítico no Acerto: +1/2 dos quadrados; Super Launch: Clash vencido e LP perdido = quadrados que ele moveria;
+  Launching: dano de colisão em dobro; Perfect Positioning: +1(T) no Clash; já tendo Knockback, o Local Space soma
+  1(bT) e o Deep Space 2(bT) ao Might do Clash e dos quadrados (com a regra Flight, o Space de 16+ conta como Local
+  Space).
+- **Movimento forçado com altura:** com Flight, cada Verticality ganha/perdida tira 1 quadrado da movimentação;
+  chegar a 0 por efeito de outro = **Hitting the Floor** (+1(bT) por 2 de Verticality, máx. 4(bT)). Sem Flight,
+  **Vertical Launch**: 8+ quadrados podem virar metade + 1 nível; sair do Low Sky assim = Ground Collision.
+- **Hardness Value** = 1(bT) no Rank 0, senão 2 × Rank (bT), pelo ToP base de quem colide. Collision Damage tira
+  LP direto. **Feature Collision:** para antes da Feature. **Character Collision:** os dois como Hardness Rank 2 e
+  Prone; o atingido pode gastar 1 Counter: Movement fora de sequência ou Might Clash contra quem moveu (ele é o
+  Initiator: precisa vencer; vencendo, ninguém colide). A Feature sofre 1/2 (arred. para cima) do ToP de quem
+  causou; os LP dela = Hardness Rank (Resilient dobra).
+- **Qualidades:** Glass +1 Rank; Metallic Rank 3+; Dangerous ×2; Bouncy, Rubbery e Fragile metade (Fragile é
+  destruída e o movimento segue, a segunda para); Soft → Prone; Burning → 1 Broken, Shocking → Impediment e Sharp →
+  2 DOT, por 1 rodada (até o fim deste turno na próxima rodada). **Sudden Stop** (Counter): até 1/2 Might quadrados a
+  menos e metade do dano.
+- **AoE e altura:** com Flight, alcança até o número da Magnitude em Verticality (Minor = 0); sem Flight, Minor e
+  Standard só o mesmo nível, maiores 1 nível, Destructive 2; Deep Space só do próprio Deep Space. O sistema conta a
+  Verticality pela faixa ocupada (Large 2, Enormous 4, Gigantic 8; Colossal 16, seguindo o dobro, não publicado).
+- **Não automatizado:** Crouch, teto de Verticality (Limited Verticality), Pulled In, o movimento em par dentro do
+  Grapple, o deslocamento das qualidades Bouncy/Rubbery e os detalhes de Charging Assault, Drop Down e Dragon Flight.
+
 ---
 
 ## 12. Transformações
@@ -567,6 +623,16 @@ Modificadores atuais. Calibrado no anime: PL 1 ≈ 400 (Goku/Piccolo no início 
   (condição listada no próprio traço) cumprido no encontro, que libera a **Full Awakening Maneuver** [1/Enc,
   1 Action]: ativa o Grand Awakening até o fim do encontro e recupera 1/4 (arred. p/ cima) de LP/KP.
 - **Traços de Awakening "Nome (n)"** só valem com n Stacks ou mais.
+- **Stacks:** um Awakening pode ser ganho várias vezes, até o Maximum No of Stacks. Cada stack aplica o bônus de
+  atributo de novo, mas não repete os traços; "Z" num efeito é o número de stacks. Cada stack conta como um
+  Awakening do seu tipo para o limite (os de Temporary Awakening não contam). Alguns traços pedem uma escolha a cada
+  stack (Technical Trait do Ki Technician, Vocation do Vocation Gain, Absorbed Character do Absorption...). No
+  Absorption e no Vocation Gain, cada stack tem o próprio bônus de atributo, no lugar do da tabela.
+- **Temporary Awakening:** dura até o fim do combate e não conta para o limite nem dá New Level of Power. Nível 1:
+  o ARC pode deixar o personagem ficar com ele (aí passa a contar no limite). Nível 2: sai sem discussão.
+- **Born for Battle (Saiyan, 4º efeito) [1/Enc]:** ao cair abaixo do Critical Health Threshold (ou usar um efeito
+  Triggered/Defeated), ganha um stack de Zenkai como Temporary Awakening nível 1. Com o On the Brink (Zenkai com 3
+  stacks), entra no Surging State até o fim do próximo turno, ignorando o 2º efeito do Surging.
 - **Permanent:** efeito de traço de transformação que vale mesmo fora dela.
 - **Mastery:** Mastery Trait; Difficult [LV] exige masterizar várias vezes ("M"). Os efeitos Permanent
   da Mastery Trait mudam os Aspects: "perde o Innate State (Feral)" tira só esse estado (o Wrathful continua no
@@ -751,7 +817,8 @@ Ativadas pelo GM em **Configurações › Regras Adicionais**. Relações princi
 | Path to Godhood | após PL 30: God Levels → Stress Bonus, categoria dos Dados de ToP, Legend Perks |
 | Path to Power | PL1 em 5 Martial Levels: 40 LP/30 KP +5 por ML, Martial Dice d4→d10, limites próprios |
 | Gag Rules | Gag Maneuver (Clash Morale) com perda de LP |
-| Style Change, Off-Guard, Ping Pong, United Transformation, Factor Restoration, Full Power Mastery, Dragon Balls, Characteristics, Flight, Generations, Horde Battles, Roles | referência/parcial: lembretes, campos na ficha e checagens simples |
+| Flight | Verticality nos tokens (marcador), perda no início do turno (não com a Unique Ability Flight), Prone no ar, Soar com Verticality e Desvio, Hitting the Floor, arremesso trocando quadrados por Verticality, alcance e AoE pela Verticality, Céu (>8) e Espaço (16+). Ver 11.1 |
+| Style Change, Off-Guard, Ping Pong, United Transformation, Factor Restoration, Full Power Mastery, Dragon Balls, Characteristics, Generations, Horde Battles, Roles | referência/parcial: lembretes, campos na ficha e checagens simples |
 
 ## 21. Testes situacionais (alertas da ficha)
 

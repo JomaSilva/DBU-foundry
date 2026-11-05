@@ -47,11 +47,13 @@ function auraContext(item) {
   };
 }
 
-/** Select options for turn/round triggers (shared with the actor sheet). */
-export function triggerOptions() {
+/** Select options for turn/round triggers (shared with the actor sheet; an item's may also run when an Awakening gains a
+ * Stack). */
+export function triggerOptions({ stackGain = false } = {}) {
   const map = (keys, prefix) => keys.map(k => ({ value: k, label: L(`${prefix}.${k}`) }));
+  const events = ["startOfRound", "endOfRound", "startOfTurn", "endOfTurn", "startOfEncounter", ...(stackGain ? ["stackGain"] : [])];
   return {
-    triggerEvents: map(["startOfRound", "endOfRound", "startOfTurn", "endOfTurn", "startOfEncounter"], "DBU.Trigger.EventLabel"),
+    triggerEvents: map(events, "DBU.Trigger.EventLabel"),
     triggerEffects: map(["life", "ki", "capacity", "counters", "actions", "resource", "resourceSet", "state", "condition", "message"], "DBU.Trigger.Effect"),
     triggerModes: map(["auto", "ask", "remind"], "DBU.Trigger.Mode"),
     triggerDurations: map(["none", "endOfTurn", "startOfNextTurn", "endOfNextTurn", "endOfRound", "encounter"], "DBU.Trigger.Duration")
@@ -125,7 +127,7 @@ export class DBUItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
       aspectOptions: [{ value: "", label: "—" }, ...opt(DBU.aspects, v => v.label)],
       modifierTargets: Object.entries(DBU.modifierTargets).map(([k, v]) => ({ value: k, label: `${L(v)} [${k}]` })),
       talentCategories: DBU.talentCategories.map(c => ({ value: c, label: c })),
-      ...triggerOptions(),
+      ...triggerOptions({ stackGain: item.type === "transformation" }),
       sizeOptions: DBU.SIZE_ORDER.map(k => ({ value: k, label: L(DBU.sizes[k].label) }))
     });
     if ( item.type === "signature" ) this.#prepareSignature(context);

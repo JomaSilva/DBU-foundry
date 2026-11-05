@@ -4,14 +4,20 @@ import { clearTimed, expireTimed, runTriggers } from "../combat/triggers.mjs";
 import { clearRegeneratorInjuries } from "../combat/injuries.mjs";
 import { fusionSkipTurn, fusionStartRound } from "../fusion/fusion.mjs";
 import { fillDkp, noEnergy } from "../combat/divine.mjs";
+import { heightEndOfTurn, heightStartOfRound, heightStartOfTurn } from "../combat/movement.mjs";
+import { endGrapple, grappleOf } from "../combat/grapple.mjs";
+import { defeatedLosesStacks, endEncounterStacks } from "../combat/awakening.mjs";
 
 const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
 
 /**
  * Combat automation (runs only on the active GM's client):
- * - start of round: Capacity, Actions and Counter Actions reset, Diminishing Defense/Offense cleared, Power Advantage
- * - start of turn: Damage Over Time, Draining aspect, Straining reminder, Ki at 0 ends Transformations
- * - end of turn: Poisoned and Suffocating
+ * - start of round: Capacity, Actions and Counter Actions reset, Diminishing Defense/Offense cleared, Power Advantage,
+ *   Falling out of the High Environments
+ * - start of turn: Damage Over Time, Draining aspect, Straining reminder, Ki at 0 ends Transformations, Verticality lost
+ *   (Flight Optional Rule)
+ * - end of turn: Poisoned and Suffocating, Heightened Gravity brings fliers down
+ * - end of the encounter: Instant Recovery, Temporary Awakening Stacks (Level 2 removed, Level 1 decided by the GM)
  */
 export class DBUCombat extends Combat {
 
@@ -67,6 +73,8 @@ export class DBUCombat extends Combat {
       whisper: game.users.filter(u => u.isGM).map(u => u.id) });
     // Fusions: Round Limiter and their rolled Initiative after the first turn
     await fusionStartRound(this);
+    // High Environments: characters who cannot fly go down a rank
+    await heightStartOfRound(this);
     // Start of Combat Round triggers (Namekian regeneration, Infinite Energy, Battle Born on even rounds...)
     for ( const p of parts ) await runTriggers(p.actor, "startOfRound", { round: context.round });
   }
@@ -134,7 +142,11 @@ export class DBUCombat extends Combat {
     }
     if ( sys.effectiveConditions.compelled ) lines.push(L("DBU.Turn.Compelled"));
     if ( sys.combat.power > 0 ) lines.push(L("DBU.Turn.Power", { n: sys.combat.power }));
+    // Flight Optional Rule: the Verticality is lost at the start of the turn
+    lines.push(...await heightStartOfTurn(combatant));
     if ( lines.length ) await postInfoCard({ actor, title: L("DBU.Turn.Start", { name: actor.name }), lines, buttons });
+    // Absorption: a Defeated character loses every stack of it (6th effect of Assimilated Power)
+    await defeatedLosesStacks(actor);
     await runTriggers(actor, "startOfTurn", { round: context.round, turn: context.turn });
   }
 
@@ -174,8 +186,11 @@ export class DBUCombat extends Combat {
       await actor.update(updates);
       if ( updates["system.conditions.prone"] ) await actor.toggleStatusEffect("prone", { active: true }).catch(() => null);
     }
+    lines.push(...await heightEndOfTurn(combatant));
     if ( lines.length ) await postInfoCard({ actor, title: L("DBU.Turn.End", { name: actor.name }), lines });
     await expireTimed(actor, "endOfTurn");
+    // What this character's effects caused "until the end of your turn" on others (Thrust, Collisions)
+    for ( const p of this._participants() ) await expireTimed(p.actor, "endOfTurn", { source: actor.uuid });
     await runTriggers(actor, "endOfTurn", { round: context.round, turn: context.turn });
   }
 }
@@ -216,15 +231,20 @@ export async function onCombatDeleted(combat) {
   if ( !game.user.isActiveGM || !game.settings.get("dbu-rpg", "combatAutomation") ) return;
   if ( !combat.started ) return;
   const done = new Set();
+  const actors = [];
   const lines = [];
   for ( const c of combat.combatants ) {
     const actor = c.actor;
     if ( !actor?.system?.top || done.has(actor.uuid) ) continue;
     done.add(actor.uuid);
+    actors.push(actor);
     await clearTimed(actor);
+    if ( grappleOf(actor) ) await endGrapple(actor);
     await actor.resetEncounter({ instantRecovery: true });
     lines.push(L("DBU.Combat.InstantRecovery", { name: actor.name }));
     if ( await clearRegeneratorInjuries(actor) ) lines.push(L("DBU.Injury.RegenEncounter", { name: actor.name }));
   }
   if ( lines.length ) await postInfoCard({ title: L("DBU.Combat.End"), lines, img: "icons/svg/combat.svg" });
+  // Temporary Awakenings: Level 2 ones go, the GM decides about Level 1 ones
+  for ( const actor of actors ) await endEncounterStacks(actor);
 }

@@ -7,10 +7,15 @@ import { encounterOf, powerTimers } from "../combat/triggers.mjs";
 import { changeStacks, openAllocationDialog } from "../combat/stacks.mjs";
 import { newResource } from "../rules/resources.mjs";
 import { activeTraits, traitStructure } from "../rules/traits.mjs";
+import { stackGroups } from "../rules/awakening.mjs";
 import { aspectLabel } from "../rules/aspects.mjs";
 import { traitKindLabel } from "../combat/trait-actions.mjs";
 import { availableAdventuringManeuvers, sessionUses } from "../rules/adventuring.mjs";
-import { DEFAULT_BATTLE_POWER_FORMULA } from "../rules/battle-power.mjs";
+import { DEFAULT_BATTLE_POWER_FORMULA, battlePowerWeight } from "../rules/battle-power.mjs";
+import { actorTokens, heightMode, heightText, stepHeight, tokenHeight } from "../canvas/height.mjs";
+import { hasFlightAbility, hasSoar, soar } from "../combat/movement.mjs";
+import { escape, grapple, grappleOf, launch, moveTarget, pin, release, thrust } from "../combat/grapple.mjs";
+import { scan, scanButton } from "../combat/scan.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -23,6 +28,19 @@ function masteryTooltip(s) {
   if ( traits.length ) lines.push(traits.join(" · "));
   if ( s.masteryMax > s.masteryNeeded ) lines.push(L("DBU.Mastery.TranscendentTip"));
   return lines.join(" — ");
+}
+
+/** An Awakening's row: its Temporary and free Stacks, and what each Stack picked or holds. */
+function stackInfo(s) {
+  if ( s.transType !== "awakening" ) return {};
+  const picks = (s.choices ?? []).filter(c => c.perStack && c.selected?.length)
+    .map(c => `${c.trait}: ${stackGroups(c).map((g, k) => `${k + 1}) ${g.join(" + ")}`).join(" · ")}`);
+  const notes = (s.stackNotes ?? []).map((n, k) => (n ? `${k + 1}) ${n}` : "")).filter(Boolean);
+  const tip = [L("DBU.Stack.Tip")];
+  if ( s.tempCount ) tip.push(L("DBU.Stack.TipTemp", { n: s.tempCount }));
+  if ( s.freeStacks ) tip.push(L("DBU.Stack.TipFree", { n: s.freeStacks }));
+  return { tempStacks: s.tempCount ?? 0, freeStacks: s.freeStacks ?? 0, stackPicks: picks, stackNotes: notes.join(" · "),
+    stackTip: tip.join("<br>") };
 }
 
 const KIND_CSS = { "mastery trait": "mastery", "burst limit": "burst", "legendary trait": "legendary",
@@ -49,7 +67,7 @@ function traitGroups(actor, items) {
     const sub = [s.subtype ? `${type} ${s.subtype.capitalize()}` : type];
     if ( s.line && s.stage ) sub.push(`${s.line} S${s.stage}`);
     if ( s.graded ) sub.push(`Grade ${s.grade}`);
-    if ( s.transType === "awakening" ) sub.push(`${s.stacks}/${s.maxStacks} Stacks`);
+    if ( s.transType === "awakening" ) sub.push(`${s.stacks}/${s.maxStacks} Stacks${s.tempCount ? ` (${L("DBU.Stack.TempShort", { n: s.tempCount })})` : ""}`);
     else if ( s.mastery ) sub.push(`Mastery ${Math.min(s.mastery, s.masteryNeeded)}/${s.masteryNeeded}${s.mastery > s.masteryNeeded ? "+" : ""}`);
     if ( s.transcended ) sub.push("Transcended");
     if ( s.newLevel ) sub.push("New Level of Power");
@@ -78,10 +96,27 @@ function traitGroups(actor, items) {
   return groups;
 }
 
-/**
- * The Adventuring Maneuvers the character has (Adventure tab), grouped: Universal, from Skills with 2+ Skill Ranks,
- * and from items, Unique Abilities, Awakenings and Talents. Only the ones the character qualifies for are listed.
- */
+/** Height of the character's token (Combat tab) and its Grapple, if any. */
+function heightInfo(actor) {
+  const mode = heightMode();
+  const token = actorTokens(actor)[0];
+  const h = token ? tokenHeight(token.document) : null;
+  const g = grappleOf(actor);
+  const fly = [hasSoar(actor) ? "Soar" : "", hasFlightAbility(actor) ? "Flight" : ""].filter(Boolean).join(" · ");
+  return {
+    height: {
+      hasToken: !!token, text: h ? heightText(h) : "", aloft: !!h?.value,
+      mode: L(mode === "flight" ? "DBU.Altitude.ModeFlight" : "DBU.Altitude.ModeLevels"),
+      tip: L(mode === "flight" ? "DBU.Altitude.TipFlight" : "DBU.Altitude.TipLevels"), fly: fly || L("DBU.Altitude.NoFlight")
+    },
+    grapple: g ? {
+      grappler: g.role === "grappler", grappled: g.role === "grappled",
+      text: L(g.role === "grappler" ? "DBU.Grapple.YouHold" : "DBU.Grapple.YouAreHeld", { name: g.name ?? "" })
+        + (g.pinned ? ` · ${L("DBU.Grapple.PinnedShort")}` : "")
+    } : null
+  };
+}
+
 /** Battle Power line of the header: the number, and how it was reached in the tooltip. */
 function battlePowerInfo(sys) {
   const bp = sys.battlePower ?? { value: 0, data: {} };
@@ -90,7 +125,7 @@ function battlePowerInfo(sys) {
   const nf = new Intl.NumberFormat(lang);
   const formula = game.settings.get("dbu-rpg", "battlePowerFormula");
   const custom = formula && (formula !== DEFAULT_BATTLE_POWER_FORMULA);
-  const w = (d.fo ?? 0) + (((d.ag ?? 0) + (d.te ?? 0)) / 4);
+  const w = battlePowerWeight(d);
   const lines = [
     `<strong>${L("DBU.BP.Label")}: ${nf.format(bp.value)}</strong> (${new Intl.NumberFormat(lang, { notation: "compact" }).format(bp.value)})`,
     custom ? L("DBU.BP.Custom", { formula: foundry.utils.escapeHTML(formula) }) : L("DBU.BP.Formula"),
@@ -100,6 +135,10 @@ function battlePowerInfo(sys) {
   return { bpText: nf.format(bp.value), bpTip: lines.join("<br>") };
 }
 
+/**
+ * The Adventuring Maneuvers the character has (Adventure tab), grouped: Universal, from Skills with 2+ Skill Ranks,
+ * and from items, Unique Abilities, Awakenings and Talents. Only the ones the character qualifies for are listed.
+ */
 function adventuringGroups(actor) {
   const sys = actor.system;
   const uses = sys._source.adventure?.uses ?? [];
@@ -146,6 +185,18 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       itemChat: DBUActorSheet.#onItemChat,
       itemToggle: DBUActorSheet.#onItemToggle,
       itemStack: DBUActorSheet.#onItemStack,
+      // Phones have no T key: target the scene's tokens from a list
+      pickTargets: async function() {
+        const { pickTargets } = await import("../targets.mjs");
+        return pickTargets(this.actor);
+      },
+      // What the Stacks of an Awakening still have to pick
+      chooseStack: async function(event, target) {
+        const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);
+        if ( !item ) return;
+        const { chooseTransformationOptions } = await import("../combat/choices.mjs");
+        return chooseTransformationOptions(this.actor, item, { required: false });
+      },
       itemMastery: DBUActorSheet.#onItemMastery,
       condition: DBUActorSheet.#onCondition,
       state: DBUActorSheet.#onState,
@@ -196,7 +247,15 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         return newAdventuringSession(game.actors.filter(a => ["character", "npc", "fusion"].includes(a.type)));
       },
       // Which pool pays the Ki Point costs in the God Ki State (attacks, Guard, Energy Charge)
-      dkpPrefer: function() { return this.actor.update({ "system.dkp.prefer": !this.actor.system.dkp.prefer }); }
+      dkpPrefer: function() { return this.actor.update({ "system.dkp.prefer": !this.actor.system.dkp.prefer }); },
+      // Height of the character's token: 1 Verticality (Flight Optional Rule) or 1 rank of High Environment
+      height: async function(event, target) {
+        const token = actorTokens(this.actor)[0];
+        if ( !token ) return ui.notifications.warn(L("DBU.Altitude.NoToken"));
+        const step = (event.shiftKey && (heightMode() === "flight")) ? 5 : 1;
+        await stepHeight(token, Number(target.dataset.delta) * step);
+        return this.render();
+      }
     }
   };
 
@@ -374,7 +433,8 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         canMaster: (s.transType !== "awakening") && !s.baseAspects?.some(a => a.key === "peaked"),
         masteryTip: masteryTooltip(s),
         tokenVideo: /\.(webm|mp4|m4v|ogv)$/i.test(s.tokenImg ?? ""),
-        pending: s.pendingChoices?.length ?? 0
+        pending: s.pendingChoices?.length ?? 0,
+        ...stackInfo(s)
       };
     });
     const groupTrans = type => transformations.filter(t => t.s.transType === type);
@@ -424,6 +484,8 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       traitGroups: traitGroups(actor, items),
       advGroups: adventuringGroups(actor),
       ...battlePowerInfo(sys),
+      ...heightInfo(actor),
+      scan: scanButton(actor),
       advInCombat: !!encounterOf(actor),
       advStretch: (sys.adventure?.stretchAt ?? null) !== null,
       powerBoxes, powerNext: power + 1, powerCanExceed: power >= 2,
@@ -497,6 +559,12 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   /** @override */
   async _onDropItem(event, item) {
     if ( !this.actor.isOwner ) return null;
+    // An Awakening the character already has: gaining it again is a Stack more (up to its Maximum No of Stacks)
+    if ( (item.type === "transformation") && (item.system.transType === "awakening") && (item.parent !== this.actor) ) {
+      const A = await import("../combat/awakening.mjs");
+      const have = A.awakeningNamed(this.actor, item.name);
+      if ( have && (have.system.maxStacks > 1) ) return A.gainStack(this.actor, have, { temp: event.shiftKey ? 1 : 0 });
+    }
     // Replace the race instead of stacking two
     if ( (item.type === "race") && (item.parent !== this.actor) ) {
       const old = this.actor.items.filter(i => i.type === "race");
@@ -600,6 +668,15 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     if ( !item ) return;
     const field = target.dataset.field;
     const delta = Number(target.dataset.delta) || 0;
+    // An Awakening's Stacks: the chat card says what changed, each new Stack makes its choices; Shift+click gains a
+    // Temporary Stack (until the end of the Combat Encounter)
+    if ( (field === "system.stacks") && (item.system.transType === "awakening") ) {
+      const A = await import("../combat/awakening.mjs");
+      if ( delta < 0 ) return A.loseStack(this.actor, item, { n: -delta });
+      const temp = event.shiftKey ? await A.askTempLevel(item) : 0;
+      if ( temp === null ) return;
+      return A.gainStack(this.actor, item, { temp });
+    }
     const cur = Number(foundry.utils.getProperty(item, field)) || 0;
     await item.update({ [field]: Math.max(0, cur + delta) });
   }
@@ -673,7 +750,16 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       case "kiSurge": return actor.surge("ki");
       case "combatRecovery": return actor.combatRecovery();
       case "empower": return actor.empower();
+      case "scan": return scan(actor);
       case "revertAll": return actor.revert();
+      case "soar": return soar(actor);
+      case "grapple": return grapple(actor);
+      case "launch": return launch(actor);
+      case "pin": return pin(actor);
+      case "escape": return escape(actor);
+      case "release": return release(actor);
+      case "thrust": return thrust(actor);
+      case "moveTarget": return moveTarget(actor);
       case "resetRound": {
         const sys = actor.system;
         return actor.update({
@@ -732,7 +818,13 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     return this.actor.applyManualDamage({ wound, category, raw });
   }
 
-  static #onOpenCompendium(event, target) {
+  static async #onOpenCompendium(event, target) {
+    // On a phone or tablet items cannot be dragged onto the sheet: a list to tap instead
+    const { mobileActive } = await import("../mobile.mjs");
+    if ( mobileActive() ) {
+      const { openCompendiumPicker } = await import("../compendium-picker.mjs");
+      return openCompendiumPicker(this, target.dataset.pack);
+    }
     const pack = game.packs.get(`dbu-rpg.${target.dataset.pack}`);
     pack?.render(true);
   }

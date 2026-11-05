@@ -16,7 +16,8 @@
     "dbu.mjs"
   ],
   "styles": [
-    "styles/dbu.css"
+    "styles/dbu.css",
+    "styles/mobile.css"
   ],
   "languages": [
     {

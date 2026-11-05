@@ -63,10 +63,14 @@ function updateFor(item, entry, labels) {
   const custom = list => (list ?? []).filter(m => !labels.has(m.label));
   modifiers = [...modifiers, ...custom(src.modifiers)];
   triggers = [...triggers, ...custom(src.triggers)];
+  // What an Awakening's Stacks ask (the Absorbed Character) and their own Tier of Power Requirements
+  const stackFields = { stackNote: fresh.stackNote ?? "", stackTop: fresh.stackTop ?? "" };
   const changed = (plain(modifiers) !== plain(src.modifiers)) || (plain(triggers) !== plain(src.triggers))
-    || (plain(choices) !== plain(src.choices)) || (JSON.stringify(fresh.traits) !== JSON.stringify(src.traits));
+    || (plain(choices) !== plain(src.choices)) || (JSON.stringify(fresh.traits) !== JSON.stringify(src.traits))
+    || Object.entries(stackFields).some(([k, v]) => (src[k] ?? "") !== v);
   if ( !changed ) return null;
-  return { _id: item.id, "system.modifiers": modifiers, "system.triggers": triggers, "system.choices": choices, "system.traits": fresh.traits };
+  return { _id: item.id, "system.modifiers": modifiers, "system.triggers": triggers, "system.choices": choices, "system.traits": fresh.traits,
+    "system.stackNote": stackFields.stackNote, "system.stackTop": stackFields.stackTop };
 }
 
 /** Every Transformation on the sheets (and in the Items directory) that the compendium would change. */

@@ -1,5 +1,6 @@
 import { DBU } from "../config.mjs";
 import { postInfoCard } from "../dice/roller.mjs";
+import { blockedOptions, stackGroups } from "../rules/awakening.mjs";
 
 const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
 const { DialogV2 } = foundry.applications.api;
@@ -20,9 +21,12 @@ function conditionText(condition) {
   }).join(", ");
 }
 
-/** Short description of what an option does, from its compiled modifiers and triggers. */
+/** Short description of what an option does, from its compiled modifiers and triggers (an option that is a Trait of the
+ * Transformation itself, a Technical Trait of Ki Technician: that Trait's own). */
 function optionSummary(item, trait, option) {
-  const label = optionLabel(trait, option);
+  let label = optionLabel(trait, option);
+  const all = [...(item.system.modifiers ?? []), ...(item.system.triggers ?? [])];
+  if ( !all.some(x => x.label === label) && all.some(x => x.label === option) ) label = option;
   const parts = [];
   for ( const m of item.system.modifiers ?? [] ) {
     if ( m.label !== label ) continue;
@@ -49,6 +53,10 @@ function optionSummary(item, trait, option) {
 export async function chooseTransformationOptions(actor, item, { required = true, all = false } = {}) {
   const list = all ? (item.system.choices ?? []) : (item.system.pendingChoices ?? []);
   for ( const choice of foundry.utils.deepClone(list) ) {
+    if ( choice.perStack ) {
+      if ( !(await chooseStackPicks(actor, item, choice, { required, again: all })) ) return false;
+      continue;
+    }
     const result = await askChoice(item, choice, { required });
     if ( !result ) return false;
     await applyChoice(actor, choice, result.selected, result.detail);
@@ -56,11 +64,109 @@ export async function chooseTransformationOptions(actor, item, { required = true
   return !(actor.items.get(item.id)?.system.pendingChoices?.length);
 }
 
-async function askChoice(item, choice, { required }) {
-  const multiple = choice.pick > 1;
+/**
+ * The picks of a per-Stack choice for every Stack that still lacks them ("Each time you gain a stack of Warlock, gain
+ * access to a Wizarding Trait of your choice"). `again` starts over from the first Stack.
+ */
+async function chooseStackPicks(actor, item, choice, { required, again = false }) {
+  let current = foundry.utils.deepClone(choice);
+  if ( again && current.selected?.length ) {
+    await setStackPicks(actor, item, current, [], []);
+    current.selected = [];
+  }
+  const pick = Math.max(1, current.pick ?? 1);
+  for ( let guard = 0; guard < 20; guard++ ) {
+    const owned = actor.items.get(item.id);
+    const stacks = owned?.system.stacks ?? 0;
+    if ( (current.selected?.length ?? 0) >= pick * stacks ) return true;
+    const groups = stackGroups(current);
+    const last = groups.at(-1) ?? [];
+    const partial = (last.length && (last.length < pick)) ? last : [];
+    const stack = partial.length ? groups.length : groups.length + 1;
+    const blocked = blockedOptions(current, partial);
+    const result = await askChoice(owned, current, { required, pick: pick - partial.length, blocked, stack,
+      defaults: suggestedPicks(owned, current, stack, pick - partial.length, blocked) });
+    if ( !result ) return false;
+    const selected = [...(current.selected ?? []), ...result.selected];
+    await setStackPicks(actor, owned, current, selected, result.selected);
+    current = { ...current, selected };
+  }
+  return true;
+}
+
+const ATTRIBUTE_NAMES = { Agility: "ag", Force: "fo", Tenacity: "te", Scholarship: "sc", Insight: "in", Magic: "ma", Personality: "pe" };
+
+/**
+ * Picks to suggest for a Stack: when the options are Attributes and the Stack holds a character of the world (the
+ * Absorbed Character of a stack of Absorption), that character's highest Attribute Scores.
+ */
+function suggestedPicks(item, choice, stack, n, blocked) {
+  if ( !choice.options.every(o => o in ATTRIBUTE_NAMES) ) return [];
+  const name = item.system.stackNotes?.[stack - 1];
+  const other = name ? game.actors.getName(name) : null;
+  const scores = other?.system?.attributes;
+  if ( !scores ) return [];
+  const score = o => scores[ATTRIBUTE_NAMES[o]]?.score ?? 0;
+  return choice.options.filter(o => !blocked.has(o)).sort((a, b) => score(b) - score(a)).slice(0, n);
+}
+
+/**
+ * Store the picks of a per-Stack choice. When its options are compendium items, picks add those items (and picks
+ * taken away remove them); its effects follow the picks on their own (rules/awakening.mjs).
+ * @param {string[]|null} [added]  The picks just made, for the chat card (null: the new ones at the end)
+ */
+export async function setStackPicks(actor, item, choice, selected, added = null) {
+  const src = item._source?.system ?? item.system;
+  const choices = foundry.utils.deepClone(src.choices ?? []);
+  const index = choices.findIndex(c => c.id === choice.id);
+  if ( index < 0 ) return;
+  const before = choices[index].selected ?? [];
+  choices[index].selected = selected;
+  await item.update({ "system.choices": choices });
+  if ( choice.pack ) {
+    // Items of picks no longer there go; new picks bring theirs
+    const left = [...selected];
+    const drop = [];
+    for ( const doc of actor.items.filter(i => (i.flags?.["dbu-rpg"]?.grantedBy?.item === item.id)
+      && (i.flags["dbu-rpg"].grantedBy.choice === choice.id)) ) {
+      const k = left.indexOf(doc.flags["dbu-rpg"].grantedBy.option);
+      if ( k >= 0 ) left.splice(k, 1);
+      else drop.push(doc.id);
+    }
+    if ( drop.length ) await actor.deleteEmbeddedDocuments("Item", drop);
+    if ( left.length ) await grantItems(actor, item, choice, left);
+  }
+  const shown = added ?? selected.slice(before.length);
+  if ( shown.length ) {
+    const stack = Math.ceil(selected.length / Math.max(1, choice.pick ?? 1));
+    await postInfoCard({ actor, img: item.img, title: L("DBU.Choice.Chosen", { name: actor.name }),
+      lines: [L("DBU.Stack.Picked", { trait: choice.trait, n: stack, list: shown.join(", ") })] });
+  }
+}
+
+/** Add the compendium items of these picks (a Factor Trait of the Genetic Splicing Factor...), marked as theirs. */
+async function grantItems(actor, item, choice, options) {
+  const pack = game.packs.get(choice.pack);
+  if ( !pack ) return;
+  const index = await pack.getIndex();
+  const data = [];
+  for ( const option of options ) {
+    const entry = index.find(e => e.name === option);
+    if ( !entry ) continue;
+    const doc = (await pack.getDocument(entry._id))?.toObject();
+    if ( !doc ) continue;
+    delete doc._id;
+    foundry.utils.setProperty(doc, "flags.dbu-rpg.grantedBy", { item: item.id, choice: choice.id, option });
+    data.push(doc);
+  }
+  if ( data.length ) await actor.createEmbeddedDocuments("Item", data);
+}
+
+async function askChoice(item, choice, { required, pick = choice.pick, blocked = new Set(), stack = 0, defaults = [] }) {
+  const multiple = pick > 1;
   const rows = choice.options.map(o => `
-    <label class="dbu-choice-option">
-      <input type="${multiple ? "checkbox" : "radio"}" name="option" value="${foundry.utils.escapeHTML(o)}">
+    <label class="dbu-choice-option${blocked.has(o) ? " dbu-dim" : ""}">
+      <input type="${multiple ? "checkbox" : "radio"}" name="option" value="${foundry.utils.escapeHTML(o)}"${blocked.has(o) ? " disabled" : ""}${defaults.includes(o) ? " checked" : ""}>
       <span><strong>${o}</strong><small>${optionSummary(item, choice.trait, o)}</small></span>
     </label>`).join("");
   const foundations = choice.subs?.length ? `<div class="form-group dbu-choice-sub" hidden>
@@ -68,13 +174,16 @@ async function askChoice(item, choice, { required }) {
     <select name="detail">${["physical", "energy", "magic"].map(f => `<option value="${f}">${L(DBU.foundations[f])}</option>`).join("")}</select>
   </div>` : "";
   const content = `<div class="dbu-dialog dbu-choice">
-    <p>${L(multiple ? "DBU.Choice.PickN" : "DBU.Choice.Pick1", { trait: choice.trait, name: item.name, n: choice.pick })}</p>
+    <p>${stack ? L("DBU.Stack.PickLine", { trait: choice.trait, name: item.name, n: pick })
+      : L(multiple ? "DBU.Choice.PickN" : "DBU.Choice.Pick1", { trait: choice.trait, name: item.name, n: pick })}</p>
+    ${stack ? `<p class="hint">${L(choice.repeat ? "DBU.Stack.PickHintRepeat" : "DBU.Stack.PickHint", { n: stack })}</p>` : ""}
     ${rows}${foundations}
     <p class="hint">${L(required ? "DBU.Choice.HintRequired" : "DBU.Choice.Hint")}</p>
   </div>`;
   for ( let attempt = 0; attempt < 5; attempt++ ) {
     const data = await DialogV2.wait({
-      window: { title: L("DBU.Choice.Title", { name: item.name }), icon: "fa-solid fa-list-check" },
+      window: { title: stack ? L("DBU.Stack.PickTitle", { name: item.name, n: stack }) : L("DBU.Choice.Title", { name: item.name }),
+        icon: "fa-solid fa-list-check" },
       position: { width: 520 },
       content,
       buttons: [
@@ -99,8 +208,8 @@ async function askChoice(item, choice, { required }) {
       rejectClose: false
     });
     if ( !data || (data === "later") ) return null;
-    if ( data.selected.length === choice.pick ) return data;
-    ui.notifications.warn(L("DBU.Choice.WrongCount", { n: choice.pick }));
+    if ( data.selected.length === pick ) return data;
+    ui.notifications.warn(L("DBU.Choice.WrongCount", { n: pick }));
   }
   return null;
 }

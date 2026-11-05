@@ -49,6 +49,29 @@ async function handle({ action, uuid, data, options }) {
       await storeDamageOnMessage(data.messageId, data.targetIndex, data.damage);
       break;
     }
+    case "attackKnockback": {
+      const { storeKnockbackOnMessage } = await import("./combat/attack.mjs");
+      await storeKnockbackOnMessage(data.messageId, data.targetIndex, data.knockback);
+      break;
+    }
+    // The scanned Character's owner answered a Scan card someone else posted
+    case "scanResult": {
+      const { storeScanOnMessage } = await import("./combat/scan.mjs");
+      await storeScanOnMessage(data.messageId, data.scan);
+      break;
+    }
+    // A player's Power Up destroys Scouters of tokens hidden from the players: the GM posts those cards
+    case "scouterBreak": {
+      const { breakScouters } = await import("./combat/scan.mjs");
+      await breakScouters(data.actorUuid, data.power, data.entries, { hidden: true });
+      break;
+    }
+    // Effects of a player's Maneuver on documents the player does not own (forced movement, Collisions, Grapple)
+    case "ops": {
+      const { applyOps } = await import("./combat/movement.mjs");
+      await applyOps(data.ops ?? []);
+      break;
+    }
     // A player fuses or defuses: the GM moves the tokens and the combatants
     case "fusion": {
       const fusion = await fromUuid(data.uuid);

@@ -11,9 +11,36 @@
         <button type="button" data-action="maneuver" data-maneuver="kiSurge"><i class="fa-solid fa-fire"></i> Ki Surge</button>
         <button type="button" data-action="maneuver" data-maneuver="combatRecovery"><i class="fa-solid fa-mug-hot"></i> Combat Recovery</button>
         <button type="button" data-action="maneuver" data-maneuver="empower" data-tooltip="{{localize 'DBU.Empower.Tip'}}"><i class="fa-solid fa-hand-holding-heart"></i> Empower</button>
+        {{#if scan}}<button type="button" data-action="maneuver" data-maneuver="scan" data-tooltip="{{scan.tip}}"><i class="fa-solid fa-crosshairs"></i> Scan <small>{{scan.cost}}</small></button>{{/if}}
         <button type="button" data-action="roll" data-type="clash" data-key="might"><i class="fa-solid fa-dumbbell"></i> Might Clash</button>
         <button type="button" data-action="roll" data-type="stress"><i class="fa-solid fa-bolt-lightning"></i> Stress Test</button>
         <button type="button" data-action="maneuver" data-maneuver="revertAll"><i class="fa-solid fa-rotate-left"></i> Revert</button>
+      </div>
+
+      <h3 class="dbu-section">{{localize "DBU.Altitude.Section"}}</h3>
+      <div class="dbu-height-panel">
+        <span class="dbu-height-mode" data-tooltip="{{height.tip}}"><i class="fa-solid fa-circle-info"></i> {{height.mode}}</span>
+        {{#if height.hasToken}}
+        <span class="dbu-height-now {{#if height.aloft}}aloft{{/if}}"><i class="fa-solid fa-arrows-up-down"></i> {{height.text}}</span>
+        <a data-action="height" data-delta="1" data-tooltip="{{localize 'DBU.Altitude.UpTip'}}"><i class="fa-solid fa-angles-up"></i></a>
+        <a data-action="height" data-delta="-1" data-tooltip="{{localize 'DBU.Altitude.DownTip'}}"><i class="fa-solid fa-angles-down"></i></a>
+        {{else}}
+        <span class="dbu-hint">{{localize "DBU.Altitude.NoToken"}}</span>
+        {{/if}}
+        <span class="dbu-hint" data-tooltip="{{localize 'DBU.Altitude.FlyTip'}}">{{height.fly}}</span>
+      </div>
+      {{#if grapple}}<p class="dbu-grapple-status"><i class="fa-solid fa-hands"></i> {{grapple.text}}</p>{{/if}}
+      <div class="dbu-maneuver-grid">
+        <button type="button" data-action="maneuver" data-maneuver="soar" data-tooltip="{{localize 'DBU.Altitude.SoarTip'}}"><i class="fa-solid fa-dove"></i> Soar</button>
+        {{#unless grapple}}<button type="button" data-action="maneuver" data-maneuver="grapple" data-tooltip="{{localize 'DBU.Grapple.GrappleTip'}}"><i class="fa-solid fa-hands"></i> Grapple</button>{{/unless}}
+        {{#if grapple.grappler}}
+        <button type="button" data-action="maneuver" data-maneuver="launch" data-tooltip="{{localize 'DBU.Grapple.LaunchTip'}}"><i class="fa-solid fa-person-falling-burst"></i> Launch</button>
+        <button type="button" data-action="maneuver" data-maneuver="pin" data-tooltip="{{localize 'DBU.Grapple.PinTip'}}"><i class="fa-solid fa-hand"></i> Pin</button>
+        <button type="button" data-action="maneuver" data-maneuver="release"><i class="fa-solid fa-hand-holding"></i> {{localize "DBU.Grapple.Release"}}</button>
+        {{/if}}
+        {{#if grapple.grappled}}<button type="button" data-action="maneuver" data-maneuver="escape" data-tooltip="{{localize 'DBU.Grapple.EscapeHint'}}"><i class="fa-solid fa-person-running"></i> {{localize "DBU.Grapple.Escape"}}</button>{{/if}}
+        <button type="button" data-action="maneuver" data-maneuver="thrust" data-tooltip="{{localize 'DBU.Grapple.ThrustTip'}}"><i class="fa-solid fa-hand-back-fist"></i> Thrust</button>
+        <button type="button" data-action="maneuver" data-maneuver="moveTarget" data-tooltip="{{localize 'DBU.Move.Tip'}}"><i class="fa-solid fa-person-walking-arrow-right"></i> {{localize "DBU.Move.Title"}}</button>
       </div>
 
       <h3 class="dbu-section">{{localize "DBU.CombatTrackers"}}</h3>

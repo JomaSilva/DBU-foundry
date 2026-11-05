@@ -1849,7 +1849,16 @@
     "skills": [],
     "race": ""
    },
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "wound.energy",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Enhanced Shot",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Energy Attack · N/A",
    "source": {
@@ -1857,7 +1866,7 @@
     "section": "Enhanced Shot",
     "url": "https://dbu-rpg.com/talents/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li></ul>"
   },
   "effects": [],
   "folder": "VbbDUP4aYSTBtNPO",
@@ -2855,7 +2864,16 @@
     ],
     "race": ""
    },
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "wound.magic",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Magic Blaster",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Magic Attack · 2+ Skill Ranks in Use Magic",
    "source": {
@@ -2863,7 +2881,7 @@
     "section": "Magic Blaster",
     "url": "https://dbu-rpg.com/talents/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Triggered, 1/Round] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Triggered, 1/Round] — manual</li></ul>"
   },
   "effects": [],
   "folder": "tUAxSHyihdihkkHV",
@@ -3610,7 +3628,24 @@
     "skills": [],
     "race": ""
    },
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "defenseValue",
+     "value": "1(T)",
+     "condition": "",
+     "label": "High Speed Ace",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "speed",
+     "value": "1(T)",
+     "condition": "",
+     "label": "High Speed Ace",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Mobility · Agility Score of 6+",
    "source": {
@@ -3618,7 +3653,7 @@
     "section": "High Speed Ace",
     "url": "https://dbu-rpg.com/talents/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — manual</li></ul>"
   },
   "effects": [],
   "folder": "fajCYyY4ZrfbzDWs",
@@ -3832,7 +3867,16 @@
     "skills": [],
     "race": ""
    },
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "wound.physical",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Enhanced Fist",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Physical Attack · N/A",
    "source": {
@@ -3840,7 +3884,7 @@
     "section": "Enhanced Fist",
     "url": "https://dbu-rpg.com/talents/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Triggered, 1/Round] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Triggered, 1/Round] — manual</li></ul>"
   },
   "effects": [],
   "folder": "0BJfwNO6XwuuKijF",
@@ -3870,7 +3914,16 @@
     "skills": [],
     "race": ""
    },
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "wound.physical",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Iron Fist",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Physical Attack · Enhanced Fist",
    "source": {
@@ -3878,7 +3931,7 @@
     "section": "Iron Fist",
     "url": "https://dbu-rpg.com/talents/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Triggered, 1/Encounter] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Triggered, 1/Encounter] — manual</li></ul>"
   },
   "effects": [],
   "folder": "0BJfwNO6XwuuKijF",
@@ -4118,7 +4171,16 @@
     "skills": [],
     "race": ""
    },
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "strike.signature",
+     "value": "1(T)",
+     "condition": "",
+     "label": "3D Scan Mode",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Racial · Android Race, Lock On Racial Trait",
    "source": {
@@ -4126,7 +4188,7 @@
     "section": "3D Scan Mode",
     "url": "https://dbu-rpg.com/talents/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li><li>(4) [Passive] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li><li>(4) [Passive] — auto</li></ul>"
   },
   "effects": [],
   "folder": "chIi2RanhS823XQf",
@@ -4743,7 +4805,16 @@
     "skills": [],
     "race": "Earthling"
    },
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "strike.signature",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Zooming Third Eye",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Racial · Earthling, Triclops Factor",
    "source": {
@@ -4751,7 +4822,7 @@
     "section": "Zooming Third Eye",
     "url": "https://dbu-rpg.com/talents/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — auto</li></ul>"
   },
   "effects": [],
   "folder": "chIi2RanhS823XQf",
@@ -5396,7 +5467,16 @@
     "skills": [],
     "race": "Namekian"
    },
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "wound.physical",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Namekian Finger",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Racial · Namekian",
    "source": {
@@ -5404,7 +5484,7 @@
     "section": "Namekian Finger",
     "url": "https://dbu-rpg.com/talents/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li></ul>"
   },
   "effects": [],
   "folder": "chIi2RanhS823XQf",
@@ -8036,7 +8116,24 @@
     "skills": [],
     "race": ""
    },
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "wound.physical",
+     "value": "(1(T))*(@superStacks >= 3 ? 2 : 1)",
+     "condition": "",
+     "label": "Hefty Muscle",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "wound.energy",
+     "value": "(1(T))*(@superStacks >= 3 ? 2 : 1)",
+     "condition": "",
+     "label": "Hefty Muscle",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Super Stack · Muscular Warrior, Force Score of 8+",
    "source": {
@@ -8044,7 +8141,7 @@
     "section": "Hefty Muscle",
     "url": "https://dbu-rpg.com/talents/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Triggered, 1/Round] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Triggered, 1/Round] — manual</li></ul>"
   },
   "effects": [],
   "folder": "vnC4DE7v3u2JnmVw",
@@ -8129,7 +8226,7 @@
    "modifiers": [
     {
      "target": "soak",
-     "value": "1(T)",
+     "value": "(1(T))*(@superStacks >= 3 ? 2 : 1)",
      "condition": "",
      "label": "Steel Muscle",
      "active": true,
@@ -9662,7 +9759,24 @@
     "skills": [],
     "race": ""
    },
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "combat",
+     "value": "1(bT)",
+     "condition": "@below >= 3",
+     "label": "Battle at the Edge",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "soak",
+     "value": "1(bT)",
+     "condition": "@below >= 3",
+     "label": "Battle at the Edge",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Threshold · High Risk Battler",
    "source": {
@@ -9670,7 +9784,7 @@
     "section": "Battle at the Edge",
     "url": "https://dbu-rpg.com/talents/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Triggered/Defeated] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Triggered/Defeated] — manual</li></ul>"
   },
   "effects": [],
   "folder": "1fZudjrK5oN5NLit",
@@ -11273,7 +11387,16 @@
     "skills": [],
     "race": ""
    },
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "life.perLevel",
+     "value": "2",
+     "condition": "",
+     "label": "God-like Physique",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Miscellaneous · Superhuman Physique, Tier of Power 5+",
    "source": {
@@ -11281,7 +11404,7 @@
     "section": "God-like Physique",
     "url": "https://dbu-rpg.com/talents/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — manual</li></ul>"
   },
   "effects": [],
   "folder": "BW1EQEzbmjqFcGLz",
@@ -11484,7 +11607,16 @@
     "skills": [],
     "race": ""
    },
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "wound.signature",
+     "value": "1(T)",
+     "condition": "@states.superior >= 1",
+     "label": "Arrogance",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [],
    "summary": "Miscellaneous · N/A",
    "source": {
@@ -11492,7 +11624,7 @@
     "section": "Arrogance",
     "url": "https://dbu-rpg.com/talents/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — manual</li><li>(3) [Triggered, 1/Encounter] — manual</li></ul>"
+   "description": "<p><a href=\"https://dbu-rpg.com/talents/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/talents</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — auto</li><li>(3) [Triggered, 1/Encounter] — manual</li></ul>"
   },
   "effects": [],
   "folder": "BW1EQEzbmjqFcGLz",

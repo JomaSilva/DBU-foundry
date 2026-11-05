@@ -1,0 +1,159 @@
+/* ==========================================================================
+   Mobile mode (body.dbu-mobile, module/mobile.mjs): phones and small tablets
+   ========================================================================== */
+
+/* ----- Foundry's interface: room for the canvas and a full-width sidebar ----- */
+body.dbu-mobile {
+  --sidebar-width: calc(100vw - 64px);
+}
+body.dbu-mobile #interface { max-width: 100vw; overflow: hidden; }
+/* The hotbar, the scene list, the camera views and the chat pop-ups next to the sidebar do not fit */
+body.dbu-mobile #hotbar,
+body.dbu-mobile #ui-left-column-2,
+body.dbu-mobile #ui-right-column-1,
+body.dbu-mobile #camera-views { display: none !important; }
+body.dbu-mobile #ui-left { padding: 8px; gap: 8px; --control-size: 38px; }
+/* With the sidebar open, the scene tools would sit under its tabs */
+body.dbu-mobile:has(#sidebar-content.expanded) #ui-left { visibility: hidden; }
+body.dbu-mobile #sidebar-tabs { padding: 8px 6px 8px 0; }
+body.dbu-mobile #sidebar-tabs > menu { gap: 6px; }
+body.dbu-mobile #sidebar-tabs .ui-control { --control-size: 38px; }
+body.dbu-mobile #notifications { top: 8px; padding: 0 8px; }
+body.dbu-mobile #pause { transform: scale(0.6); }
+
+/* ----- Windows: sheets fill the screen, the others fit in it ----- */
+body.dbu-mobile .application:has(> .window-header) { max-width: 100vw; max-height: 100dvh; }
+body.dbu-mobile .application.sheet:has(> .window-header),
+body.dbu-mobile .application.dbu:not(.dialog):has(> .window-header),
+body.dbu-mobile .application.dbu-picker-dialog {
+  left: 0 !important; top: 0 !important; width: 100vw !important; height: 100dvh !important; max-height: 100dvh !important;
+  border-radius: 0;
+}
+body.dbu-mobile .application > .window-header { min-height: 42px; padding: 2px 6px; }
+body.dbu-mobile .application > .window-header .header-control { --button-size: 36px; min-width: 36px; min-height: 36px; }
+body.dbu-mobile .application .window-resize-handle { display: none; }
+body.dbu-mobile .application.dialog .dialog-buttons { flex-wrap: wrap; }
+body.dbu-mobile .application.dialog .dialog-buttons button { min-height: 40px; flex: 1 1 140px; }
+/* Phones zoom into a field with small text: 16px avoids it */
+body.dbu-mobile .application input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+body.dbu-mobile .application select,
+body.dbu-mobile .application textarea,
+body.dbu-mobile #chat-message { font-size: 16px; }
+
+/* ----- DBU sheets ----- */
+/* The whole sheet scrolls (the header goes up out of the way); the tabs stay at the top */
+body.dbu-mobile .dbu.sheet .window-content { display: block; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; }
+body.dbu-mobile .dbu.sheet .window-content > .tab { overflow: visible; padding: 6px 8px 24px; }
+body.dbu-mobile .dbu.sheet nav.sheet-tabs { position: sticky; top: 0; z-index: 3; }
+
+/* Header: portrait and name on top, the rest under them */
+body.dbu-mobile .dbu-header { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 6px 8px; padding: 8px; }
+body.dbu-mobile .dbu-header .dbu-header-main { display: contents; }
+body.dbu-mobile .dbu-header .dbu-portrait { width: 56px; height: 56px; grid-row: 1; align-self: center; }
+body.dbu-mobile .dbu-header .dbu-name-row { grid-column: 2; flex-wrap: wrap; gap: 4px 6px; min-width: 0; }
+body.dbu-mobile .dbu-header input.dbu-name { font-size: 1.2em; height: 36px; min-width: 0; flex: 1 1 100%; }
+body.dbu-mobile .dbu-header .dbu-header-grid,
+body.dbu-mobile .dbu-header .dbu-bars,
+body.dbu-mobile .dbu-header > :not(.dbu-portrait):not(.dbu-header-main) { grid-column: 1 / -1; }
+/* Item sheets: the name next to the image, the tags and the summary under them */
+body.dbu-mobile .dbu-header.item .dbu-item-meta,
+body.dbu-mobile .dbu-header.item .dbu-summary { grid-column: 1 / -1; }
+body.dbu-mobile .dbu-header.item input.dbu-name { grid-column: 2; align-self: center; }
+body.dbu-mobile .dbu-header-grid { gap: 4px; }
+body.dbu-mobile .dbu-header-grid > label, body.dbu-mobile .dbu-header-grid > .dbu-stat { padding: 2px 6px; flex: 1 1 auto; }
+body.dbu-mobile .dbu-header-grid .value { font-size: 1.1em; }
+body.dbu-mobile .dbu-bar { gap: 4px; }
+body.dbu-mobile .dbu-bar .bar-label { width: 64px; flex: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.dbu-mobile .dbu-bar input { width: 3.6em; }
+body.dbu-mobile .dbu-bar .bar-max { min-width: 0; }
+body.dbu-mobile .dbu-bar .bar-btn { padding: 4px 6px; }
+body.dbu-mobile .dbu-bar .bar-status { padding: 0 4px; font-size: 0.85em; }
+
+/* A phone turned sideways: a lower header (the bars side by side) */
+@media (max-height: 500px) {
+  body.dbu-mobile .dbu-header { grid-template-columns: 40px minmax(0, 1fr); padding: 6px 8px; }
+  body.dbu-mobile .dbu-header .dbu-portrait { width: 40px; height: 40px; }
+  body.dbu-mobile .dbu-header input.dbu-name { height: 30px; font-size: 1.05em; }
+  body.dbu-mobile .dbu-header .dbu-bars { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 8px; }
+}
+
+/* Tabs: one row that slides sideways */
+body.dbu-mobile .dbu.sheet nav.sheet-tabs { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; padding: 4px 6px 0; }
+body.dbu-mobile .dbu.sheet nav.sheet-tabs::-webkit-scrollbar { display: none; }
+body.dbu-mobile .dbu.sheet nav.sheet-tabs a { padding: 9px 10px; font-size: 0.9em; }
+
+/* One column on a phone (a tablet keeps two), and grids of two at most */
+@media (max-width: 699px) {
+  body.dbu-mobile .dbu .dbu-columns { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+}
+body.dbu-mobile .dbu .dbu-aptitudes,
+body.dbu-mobile .dbu .dbu-maneuver-grid,
+body.dbu-mobile .dbu .dbu-maneuver-grid.small { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+body.dbu-mobile .dbu .dbu-form-grid { grid-template-columns: minmax(0, 1fr); }
+body.dbu-mobile .dbu .dbu-sig-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+body.dbu-mobile .dbu .dbu-attr-inputs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+body.dbu-mobile .dbu .dbu-trackers { grid-template-columns: minmax(0, 1fr); }
+body.dbu-mobile .dbu .dbu-tp-line { flex-direction: column; gap: 4px; }
+
+/* Tables slide sideways instead of squeezing their text (module/mobile.mjs puts them in a box) */
+body.dbu-mobile .dbu .dbu-table-wrap { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
+body.dbu-mobile .dbu .dbu-table td { padding: 5px 4px; }
+body.dbu-mobile .dbu .dbu-table th { padding: 4px 3px; }
+body.dbu-mobile .dbu .dbu-table input[type="number"] { width: 3.2em; }
+/* Attributes: the abbreviation is enough, so the Score and the Modifier fit */
+body.dbu-mobile .dbu .dbu-attributes .dbu-attr-label { display: none; }
+/* Bigger targets for a finger */
+body.dbu-mobile .dbu .dbu-controls a,
+body.dbu-mobile .dbu a.bar-btn,
+body.dbu-mobile .dbu .dbu-add { display: inline-block; padding: 6px 5px; margin-left: 0; font-size: 1.05em; }
+body.dbu-mobile .dbu.sheet input[type="checkbox"] { --checkbox-size: 20px; }
+body.dbu-mobile .dbu .dbu-roll-btn { padding: 10px 8px; }
+body.dbu-mobile .dbu .dbu-maneuver-grid button { height: 38px; }
+/* Less important columns of the Transformations list */
+body.dbu-mobile .dbu .dbu-trans th:nth-child(6), body.dbu-mobile .dbu .dbu-trans td:nth-child(6) { display: none; }
+/* Row buttons wrap onto several lines instead of pushing the table out of the screen */
+body.dbu-mobile .dbu .dbu-table .dbu-controls { white-space: normal; min-width: 0; text-align: right; }
+body.dbu-mobile .dbu .dbu-table .dbu-controls > * { display: inline-block; margin: 1px; }
+body.dbu-mobile .dbu .dbu-table .dbu-controls .dbu-mastery { white-space: nowrap; }
+body.dbu-mobile .dbu .dbu-items td:nth-child(2) { min-width: 96px; }
+/* Skills: the name (the roll) stays in view when the table slides sideways */
+body.dbu-mobile .dbu .dbu-skills th:first-child,
+body.dbu-mobile .dbu .dbu-skills td:first-child { position: sticky; left: 0; z-index: 1; background: var(--dbu-panel); box-shadow: 2px 0 4px #0003; }
+body.dbu-mobile .dbu .dbu-skills th:first-child { background: var(--dbu-blue); }
+body.dbu-mobile .dbu .dbu-skills td:first-child input.dbu-inline { width: 7em; }
+
+/* Buttons only a phone needs (targets without the T key) */
+.dbu-mobile-only { display: none !important; }
+body.dbu-mobile .dbu-mobile-only { display: revert !important; }
+body.dbu-mobile .dbu .dbu-attack-row { flex-wrap: wrap; }
+body.dbu-mobile .dbu .dbu-attack-row select { flex: 1 1 100%; }
+body.dbu-mobile .dbu .dbu-attack-row button { flex: 1 1 40%; min-height: 40px; }
+
+/* ----- Chat cards and dialogs ----- */
+body.dbu-mobile .dbu-card button, body.dbu-mobile .dbu-card-buttons button { min-height: 38px; }
+body.dbu-mobile .dbu-choice-option { padding: 6px 4px; }
+
+/* ----- Compendium list (instead of dragging) ----- */
+.dbu-picker { display: flex; flex-direction: column; gap: 6px; height: 100%; min-height: 0; }
+.dbu-picker input[type="search"] { width: 100%; height: 34px; }
+.dbu-picker .hint { margin: 0; font-size: 0.85em; opacity: 0.8; }
+.dbu-picker-list { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 2px; }
+.dbu-picker-entry { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 4px 6px; min-height: 44px; }
+.dbu-picker-entry img { width: 32px; height: 32px; border: none; flex: none; }
+.dbu-picker-entry span { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.dbu-picker-entry small { opacity: 0.75; font-size: 0.8em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dbu-picker-list li.added .dbu-picker-entry { border-color: var(--color-level-success, #2e7d32); }
+.dbu-picker-list li.added .dbu-picker-entry i::before { content: "\f00c"; }
+/* The list scrolls inside the window, with the search box on top and the buttons at the bottom */
+.application.dbu-picker-dialog .window-content { display: flex; flex-direction: column; overflow: hidden; background: var(--dbu-bg); color: var(--dbu-ink); }
+.application.dbu-picker-dialog .window-content > form { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.application.dbu-picker-dialog .dialog-content { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+.application.dbu-picker-dialog .dbu-picker { flex: 1; min-height: 0; }
+
+/* ----- Targets list (no T key on a phone) ----- */
+.dbu-targets { display: flex; flex-direction: column; gap: 4px; }
+.dbu-target-option { display: flex; align-items: center; gap: 8px; padding: 4px 6px; min-height: 44px; border: 1px solid var(--dbu-line, #8884); border-radius: 6px; }
+.dbu-target-option img { width: 36px; height: 36px; border: none; object-fit: contain; flex: none; }
+.dbu-target-option span { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.dbu-target-option small { opacity: 0.75; }
+.dbu-target-option:has(input:checked) { border-color: var(--dbu-orange, #f26b1d); box-shadow: inset 0 0 0 1px var(--dbu-orange, #f26b1d); }

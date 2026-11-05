@@ -1,6 +1,7 @@
 import { DBU } from "../config.mjs";
 import { limitedPower, rules } from "../optional-rules.mjs";
 import { FUSION_AWAKENING_LIMITS, FUSION_METHODS, FUSION_TRAIT_LIMITS } from "../fusion/fusion-rules.mjs";
+import { awakeningCounts, stackTopReq } from "./awakening.mjs";
 
 /**
  * Rule checks for a DBU character sheet. Returns a list of problems:
@@ -195,6 +196,13 @@ export function validateActor(sys, actor) {
     if ( (s.transType === "awakening") && (s.stacks > s.maxStacks) ) {
       add("error", "transformations", "DBU.Val.AwakeningStacks", { name: t.name, max: s.maxStacks });
     }
+    // A Stack with its own Tier of Power Requirement (Strongest Form: 3+ for the second Stack)
+    if ( (s.transType === "awakening") && s.stackTop && !actor.isBoss ) {
+      for ( let n = 2; n <= s.stacks; n++ ) {
+        const req = stackTopReq(s, n);
+        if ( req > bT ) { add("error", "transformations", "DBU.Val.StackTop", { name: t.name, n, req, top: bT }); break; }
+      }
+    }
     if ( (s.transType === "form") && (s.stage > 1) && s.line ) {
       const lower = trans.filter(o => (o.system.line === s.line) && (o.system.stage < s.stage) && (o.system.stage > 0));
       const stages = new Set(lower.map(o => o.system.stage));
@@ -207,14 +215,13 @@ export function validateActor(sys, actor) {
       if ( !initialItem?.system.isMastered ) add("warning", "transformations", "DBU.Val.SpecialEnh", { name: t.name, initial: s.initialEnhancement });
     }
   }
-  const awak = trans.filter(t => (t.system.transType === "awakening") && !t.system.temporary
-    && !(R.limitBreaking && t.system.ignoreLimit));
+  // Every Stack is an Awakening for the Awakening Limit, except Temporary ones (and those an effect gives for free)
+  const counts = awakeningCounts(trans, { skip: t => R.limitBreaking && t.system.ignoreLimit });
   // A Fusion has its own Awakening Limit
   const limitTable = isFusion ? FUSION_AWAKENING_LIMITS : DBU.AWAKENING_LIMITS;
   const limits = limitTable[bT] ?? limitTable[7];
-  const lesser = awak.filter(t => t.system.subtype === "lesser").length;
-  const greater = awak.filter(t => t.system.subtype === "greater").length;
-  const superA = awak.filter(t => t.system.subtype === "super").length;
+  const { lesser, greater } = counts;
+  const superA = counts.super;
   if ( R.awakeningPoints && (prog.awakeningPoints !== null) ) {
     const spent = lesser + (2 * greater);
     if ( !noLimit && (spent > prog.awakeningPoints) ) add("error", "transformations", "DBU.Val.AwakPoints", { spent, max: prog.awakeningPoints });

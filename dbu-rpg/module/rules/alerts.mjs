@@ -62,7 +62,7 @@ export function computeAlerts(sys, actor) {
   /* ----- Choices still to make: Awakenings (always on) and Transformations switched on without choosing ----- */
   for ( const t of actor.items ) {
     if ( (t.type !== "transformation") || !t.system.pendingChoices?.length || !t.system.isActive ) continue;
-    add("urgent", `choice:${t.id}`, L("DBU.Alert.Choice", { name: t.name, traits: t.system.pendingChoices.map(c => c.trait).join(", ") }),
+    add("urgent", `choice:${t.id}`, L("DBU.Alert.Choice", { name: t.name, traits: [...new Set(t.system.pendingChoices.map(c => c.trait))].join(", ") }),
       `choice:${t.id}`, L("DBU.Alert.ChoiceButton"), "fa-solid fa-list-check");
   }
 

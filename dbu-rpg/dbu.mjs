@@ -18,13 +18,15 @@ import { onRenderChatMessage } from "./module/chat.mjs";
 import { registerSocket } from "./module/socket.mjs";
 import { refreshAllAuras, registerTokenAuras } from "./module/canvas/token-auras.mjs";
 import { registerTokenForms } from "./module/canvas/token-forms.mjs";
+import { refreshAllHeightMarkers, registerHeight } from "./module/canvas/height.mjs";
 import { SIGNATURE_SUMMARIES } from "./module/rules/signature.mjs";
 import { OPTIONAL_RULES, OptionalRulesConfig } from "./module/optional-rules.mjs";
 import * as formula from "./module/rules/formula.mjs";
 import { openAttackDialog } from "./module/combat/attack.mjs";
 import { inCombat } from "./module/combat/triggers.mjs";
 import { autoOfficialText } from "./module/rules/official-text.mjs";
-import { DEFAULT_BATTLE_POWER_FORMULA } from "./module/rules/battle-power.mjs";
+import { DEFAULT_BATTLE_POWER_FORMULA, LEGACY_BATTLE_POWER_FORMULAS } from "./module/rules/battle-power.mjs";
+import { registerMobile } from "./module/mobile.mjs";
 
 const TEMPLATES = [
   "systems/dbu-rpg/templates/parts/triggers.hbs",
@@ -89,9 +91,12 @@ Hooks.once("init", () => {
   DSC.registerSheet(Item, "dbu-rpg", DBUItemSheet, { makeDefault: true, label: "DBU.Sheet.Item" });
 
   registerSettings();
+  // Phones and small tablets: a layout that fits the screen (styles/mobile.css)
+  registerMobile();
   registerHelpers();
   registerTokenAuras();
   registerTokenForms();
+  registerHeight();
   foundry.applications.handlebars.loadTemplates(TEMPLATES);
 });
 
@@ -148,6 +153,10 @@ Hooks.once("ready", async () => {
     await game.settings.set("dbu-rpg", "nlopPendingMigrated", true);
   }
   if ( game.user.isActiveGM ) {
+    // A world that saved an earlier default Battle Power formula follows the current one
+    if ( LEGACY_BATTLE_POWER_FORMULAS.includes(game.settings.get("dbu-rpg", "battlePowerFormula")) ) {
+      await game.settings.set("dbu-rpg", "battlePowerFormula", DEFAULT_BATTLE_POWER_FORMULA);
+    }
     await refreshTransformationData().catch(err => console.error("DBU | Transformation data refresh", err));
     // The compendium's Traits changed (a Stage's or a Variant's inheritance...): offer to update the sheets
     const { offerTransformationUpdate } = await import("./module/compendium-update.mjs");
@@ -175,6 +184,12 @@ const refreshCombatSheets = (combat) => {
 };
 Hooks.on("combatTurnChange", refreshCombatSheets);
 Hooks.on("deleteCombat", refreshCombatSheets);
+// The Combat tab shows the height of the character's token
+Hooks.on("updateToken", (token, changes) => {
+  if ( !("elevation" in changes) ) return;
+  const sheet = token.actor?.sheet;
+  if ( sheet?.rendered ) sheet.render();
+});
 
 /*
  * New Level of Power: a Form or Enhancement new to the character comes with it pending (its first time in a Combat
@@ -203,12 +218,20 @@ Hooks.on("updateItem", (item, changes, options, userId) => {
     item.unsetFlag("dbu-rpg", "divinePulse");
   }
 });
-// Awakenings are always on: their Option effects are chosen as soon as the character gains them
+// Awakenings are always on: their Option effects are chosen as soon as the character gains them (and what their first
+// Stack holds, the Absorbed Character of a stack of Absorption, is asked first)
 Hooks.on("createItem", async (item, options, userId) => {
   if ( (userId !== game.user.id) || (item.type !== "transformation") || !(item.parent instanceof Actor) ) return;
-  if ( (item.system.transType !== "awakening") || !item.system.pendingChoices?.length ) return;
+  if ( item.system.transType !== "awakening" ) return;
+  const s = item.system;
+  if ( s.stackNote && (s.stacks > 0) && !s.stackNotes?.[0] && !options.dbuFusionSync ) {
+    const { askStackNote } = await import("./module/combat/awakening.mjs");
+    const note = await askStackNote(item.parent, item);
+    if ( note ) await item.update({ "system.stackNotes": [note] });
+  }
+  if ( !item.parent.items.get(item.id)?.system.pendingChoices?.length ) return;
   const { chooseTransformationOptions } = await import("./module/combat/choices.mjs");
-  chooseTransformationOptions(item.parent, item, { required: false });
+  chooseTransformationOptions(item.parent, item.parent.items.get(item.id), { required: false });
 });
 /*
  * Fusions follow their Fused Characters: a change to a Fused Character (or to the Fusion's own choices)
@@ -274,6 +297,8 @@ function registerSettings() {
     onChange: () => {
       for ( const actor of game.actors ) actor.reset();
       for ( const app of foundry.applications.instances.values() ) if ( app.rendered ) app.render();
+      // Flight Optional Rule on or off: Verticality or ranks of High Environment on the tokens
+      refreshAllHeightMarkers();
     }
   });
   // Battle Power (scouter reading) shown under the Life and Ki bars: the GM may tune its formula

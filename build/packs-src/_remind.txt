@@ -83,6 +83,7 @@ Special Analysis | startOfTurn | Triggered/Start of Turn, 1/Encounter | All Oppo
 Enhanced Class — opção: Elite | startOfRound | Triggered/Start of Combat Round | While your Ki Points exceed 1/2 of your Maximum Ki Points, regain 2(bT) Ki Points
 Celestial Perfection | startOfTurn | Triggered/Start of Turn | You may spend 1 Counter Action to enter the God Ki Special State until the start of your next turn
 In the Realm of Angels | startOfTurn | Triggered/Start of Turn | You may spend 3(bT) Divine Ki Points to remove a Combat Condition you are suffering from (except Pinned, Suffocating, Transfigured, or Poisoned)
+Measured Monstrosity | startOfTurn | Triggered/Start of Turn, 1/Encounter | If there are no Weakened Prey in the Combat Encounter, use a Healing Surge as an Out-of-Sequence Maneuver
 Spirit of Battle | startOfTurn | Triggered/Start of Turn | Use the Power Up Maneuver as an Out-of-Sequence Maneuver
 Snapping Fury | startOfTurn | Automatic/Start of Turn | You lose all stacks of Power
 Utmost Divinity | startOfTurn | Triggered/Start of Turn | Regain x(bT) Life Points, where x is equal to your current number of Divine Battle Born stacks
@@ -163,6 +164,7 @@ Songs of Heroism | startOfTurn | Triggered/Start of Turn, 1/Encounter | You may 
 Beauty, Love, Hype | startOfTurn | Triggered/Start of Turn, 1/Encounter | If you are Hyped, you can stop being Hyped to regain Ki Points equal to double your Personality Modifier
 Support Units | startOfRound | Passive | Supports ignore the Follower rule for Minions, and are treated as additional Characters that you control (they are still considered Minions), but they only gain
 Unlocked Energy | startOfTurn | Triggered/Start of Turn, 1/Encounter | Use a Ki Surge as an Out-of-Sequence Maneuver
+Truly Infinite | startOfTurn | Automatic/Start of Turn | If your Ki Points are a negative value, reduce your Life Points by the difference between your current Ki Points and 0
 Every Conceivable Advantage | startOfTurn | Triggered/Start of Turn, 1/Encounter | Use the Intuit Maneuver as an Out-of-Sequence Maneuver
 Jacket Crafter | startOfEncounter | Automatic/Start of Combat Encounter | If you only possess a single Battle Jacket, double its Maximum Life Points and then that Battle Jacket regains Life Points equal to 1/2 of its Maximum Life Poin
 Evil Magic | startOfTurn | Triggered/Start of Turn | Create a Super Signature Technique with a TP Cost up to the maximum Technique Point Cost for your base Tier of Power
@@ -259,7 +261,7 @@ Tension at its Peak | startOfTurn | Constant/Start of Turn | If you possess 5+ T
 Superior Captain (Mind) | startOfTurn | Triggered/Start of Turn | If you are not Hyped, you may use the Hype Maneuver as an Out-of-Sequence Maneuver
 Superior Tactician (Mind) | startOfTurn | Triggered/Start of Turn | If you have no Analyzed Opponent, you may use the Analysis Maneuver as an Out-of-Sequence Maneuver
 Supreme Emperor (Body) | startOfTurn | Triggered/Start of Turn | While in your Form with the highest Tier of Power Requirement, gain a stack of Overwhelm
-I’m Shining!! (S-Cells) | startOfRound | Triggered/Transform, Triggered/Start of Combat Round, Resource | Gain a stack of Dama Charge (max
+I’m Shining!! (S-Cells) | startOfRound | Triggered/Transform, Triggered/Start of Combat Round, Resource | Gain a stack of Dama Charge (max. S+1)
 Super Genetic Transformation | startOfRound | Triggered/Start of Combat Round | Regain 2(bT) Life and Ki Points for every Repeated Aspect you possess
 Chaotic Genes (Majin) | startOfRound | Triggered/Start of Combat Round | Roll the Chaos Dice and gain its effects (see
 Sparking Momentum | startOfRound | Triggered/Start of Combat Round, 1/Encounter | Take your Turn immediately, ignoring the current Initiative Order

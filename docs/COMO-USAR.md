@@ -28,34 +28,65 @@ de internet):
 - Para desligar, use **Configurações › Configurar Sistema › Carregar o texto oficial
   automaticamente** (vale só para o seu computador).
 
+## Celular e tablet
+
+O Foundry é feito para telas de 1024 × 768 ou mais. Numa tela menor (celular em pé ou deitado, tablet em pé), o
+sistema liga o **modo celular** sozinho:
+- **Interface:** a barra lateral (chat, atores, combate) abre na largura da tela pelas abas da borda direita; a
+  hotbar, a lista de cenas, as câmeras e os pop-ups de chat ao lado dela ficam escondidos para sobrar mapa. O aviso
+  grande de resolução do Foundry vira uma nota curta.
+- **Janelas:** fichas, a lista do compêndio e as Regras Opcionais ocupam a tela inteira; diálogos (ataque,
+  escolhas, Scan...) cabem na largura. Os botões ficam maiores para o dedo, e os campos usam letra de 16px para o
+  celular não dar zoom ao tocar.
+- **Ficha:** a ficha rola inteira (o cabeçalho sobe) e as abas ficam presas no topo, numa linha que desliza para o
+  lado. No celular em pé, o conteúdo fica numa coluna só; no tablet, continuam duas. As tabelas largas (Perícias)
+  deslizam para o lado com o nome preso à esquerda, e os botões das linhas (transformar, maestria, stacks) quebram
+  em mais linhas em vez de sair da tela.
+- **Sem arrastar:** no celular não dá para arrastar itens para a ficha. Os botões de compêndio da ficha (📖) abrem
+  uma **lista com busca**: tocar num item põe ele na ficha do mesmo jeito que arrastar (raça nova troca a antiga, um
+  Awakening repetido ganha um stack). A lista fica aberta para adicionar vários; **Abrir o compêndio** mostra a
+  janela normal.
+- **Sem a tecla T:** o botão **Alvos** (aba Principal, ao lado de Ataque Básico) abre a lista dos tokens da cena para
+  marcar os alvos. Atacar sem alvo abre essa lista primeiro, e o **Re-mirar** do cartão também usa a lista. Os alvos
+  valem para tudo (ataque, Scan, Grapple...).
+- **Configurações › Configurar Sistema › Modo celular:** Automático (pelo tamanho da tela), Sempre ligado ou
+  Desligado. Vale só para o aparelho em que foi escolhido. Ao girar um tablet para uma tela grande, as janelas
+  voltam ao tamanho normal.
+- O mapa, as ferramentas de cena e a tela de entrada são do próprio Foundry e continuam pensados para computador:
+  no celular, o mais prático é usar a ficha e o chat, e deixar o mapa com o mestre.
+
 ## A ficha de personagem
 
 - **Cabeçalho:** nome, PL, ToP (atual/base), LP, KP e Capacidade com barras, Karma, rodada do
   combate e "SEU TURNO" quando é a vez do personagem.
 - **Poder de Luta** (logo abaixo das barras de LP e KP): o número que um scouter leria. Não é regra do DBU, é uma
   leitura da ficha calibrada no anime:
-  `0,78 × 1,75^(PL−1) × 1,4^(ToP atual−1) × (FO + (AG + TE)/4)³ × KP restante`.
-  - Conta os **Modificadores** atuais: a transformação sobe o número (o SSJ1 multiplica por ~3 e o Blue por ~50 no
-    Goku de PL 25). Insight, Magic, Scholarship e Personality não entram.
+  `0,56 × 1,7^(PL−1) × 1,55^(ToP atual−1) × (FO + AG/2 + TE/4)³ × KP restante`.
+  - Conta os **Modificadores** atuais: FO pesa mais, depois AG (metade) e TE (um quarto). Numa ficha de PL 5, +1 FO
+    sobe o número ~24%, +1 AG ~12% e +1 TE ~6%. A transformação sobe o número (o SSJ1 multiplica por ~3 e o Blue por
+    ~48 no Goku de PL 25). Insight, Magic, Scholarship e Personality não entram.
   - **KP restante** = KP atual ÷ KP máximo natural (sem Ki Multiplier nem multiplicador de forma). Gastando KP o
     número cai (no mínimo 10%); numa forma com o KP acima do natural, ele sobe.
   - O **Holding Back** baixa o ToP atual e, com ele, o número.
-  - Com fichas típicas: PL 1 (FO 6, AG 4, TE 4) ≈ 400; PL 4 (FO 9, AG 7, TE 7) ≈ 8.100; PL 5 (FO 9, AG 6, TE 6) ≈
-    17.700; PL 10 (FO 10, AG 8, TE 4) ≈ 517.000.
+  - Com fichas típicas: PL 1 (FO 6, AG 4, TE 4) ≈ 408; PL 4 (FO 9, AG 7, TE 7) ≈ 7.960; PL 5 (FO 9, AG 6, TE 6) ≈
+    17.800; PL 10 (FO 10, AG 8, TE 4) ≈ 538.000.
   - O mestre pode trocar a fórmula em **Configurações › Configurar Sistema › Fórmula do Poder de Luta** (a dica lista
     as variáveis; em branco volta ao padrão). O tooltip do número mostra a conta.
+  - Um **Scan** com Scouter ou Scout Scope lê esse número no inimigo (ver "Scan" em "Rolagens e ataques").
 - **Alertas:** faixa logo abaixo do cabeçalho com testes obrigatórios e lembretes (ver "Alertas").
 - **Principal:** atributos (Score, bônus racial, Modificador), aptidões (Initiative, Haste,
   Awareness, Defense Value, Soak, DR, Speed, Might, Surgency), Testes de Resistência e condições.
   Clique em um valor para rolar.
 - **Condições com cadeado** (aba Combate) estão sendo mantidas por outra coisa, por exemplo um ferimento
   Internal do Injury System, que segura 1 stack de Fatigued, ou um ícone de condição no token. O
-  tooltip diz o que é. Para tirar, ignore ou remova o ferimento na aba Opcionais.
+  tooltip diz o que é. Para tirar, ignore ou remova o ferimento na aba Opcionais. Num Grapple, o Guard Down (e o
+  Pinned do Pin) fica com cadeado até o Grapple acabar.
 - **Perícias:** ranks, bônus raciais e de talentos, limites de ranks por PL e orçamento.
 - **Combate:** no alto, os **Traços em uso** (ver "Transformações"). Depois, Acerto (Strike), Desvio (Dodge),
   Dano (Wound), dados de ToP, Greater Dice, crítico e botch, contadores do combate (Ações, Counter Actions,
   Power, Super Stacks, Energy Charges, Diminishing Defense, Holding Back, DOT), manobras rápidas (Power Up,
-  Energy Charge, Surge, Combat Recovery) e o botão **Atacar**.
+  Energy Charge, Surge, Combat Recovery, e o Scan para quem tem Scouter) e o botão **Atacar**. A seção **Altura, Grapple e arremesso** tem a
+  altura do token, o Soar, o Grapple e os arremessos (ver "Altura, voo, Grapple e arremessos").
 - **Técnicas:** Signature Techniques (com construtor de Vantagens/Desvantagens que calcula TP e
   KP), Unique Abilities e Manobras Especiais.
 - **Aventura:** os **Adventuring Maneuvers** que o personagem tem, e só eles:
@@ -65,7 +96,8 @@ de internet):
     (Clairvoyance), Tame (Creature Handling), Power Regulation (Concealment), Profiling (Intuition), Scavenge
     (Survival), Scam e Fraud (Bluff), Cook e Create (Cooking), Frighten (Intimidation), Befriend, Mingle e Recruit
     (Persuasion).
-  - **De itens, habilidades e traços**: Scan (Scouter equipado ou Scout Scope), Item Search (Dragon Radar), Rice
+  - **De itens, habilidades e traços**: Scan (Scouter equipado, Scout Scope ou Scouter integrado do Onboard
+    Computer e do 3D Scan Mode), Item Search (Dragon Radar), Rice
     Cooker, Teleport (Instant Transmission), Instant Understanding (Mind Reading), Long Distance Portal (Portal
     Creation), Foresight (Precognition), Magical Sight (Second Sight), Morph (Shapeshift), Destroy (Hakai), Star
     Consume, Replicate Self e Robot Factory (Big Gete Star Integration), Recruit (Awakening Commander, na metade do
@@ -82,6 +114,7 @@ de internet):
       - Gauge, Profiling, Frighten e Befriend valem uma vez por alvo na sessão.
       - Vencendo o Gauge, o PL e o Alignment do alvo chegam só para quem usou (e o mestre).
       - O Profiling rola às cegas e só o mestre vê o resultado.
+    - **Scan** abre o mesmo cartão do Scan de combate, sem custo de Ações (ver "Scan" em "Rolagens e ataques").
     - **Power Regulation** ajusta o Holding Back.
     - **Stretch** fica pendente e, se um combate começar em até 1 hora do tempo do mundo, dá +1(T) nas Combat Rolls
       até o fim da 3ª rodada.
@@ -110,6 +143,41 @@ de internet):
   Steadfast, Massive Damage, Overkill, Bonus Momentum e Diminishing Defense.
 - O GM aplica o dano em atores que o jogador não controla (via socket); o jogador não precisa de
   permissão no alvo.
+- **Knockback:** ataques com a Vantagem Knockback, com o Perfil Launching (que a ganha de graça) ou feitos no
+  Espaço Local ou no Espaço Profundo mostram "Knockback" no cartão. Depois do **Aplicar dano**, cada alvo que levou
+  dano ganha o botão **Knockback**, só para o atacante:
+  - rola o Might Clash (o alvo ganha o empate) e, vencendo, abre o arremesso: até o seu Might em quadrados, em
+    linha reta para longe de você (em qualquer direção se o ataque tem AoE), com altura e colisões;
+  - **Forceful Launch:** +1(T) quadrados e +1(T) no Clash por rank. **Perfect Positioning:** +1(T) no Clash;
+  - **Precise Strike:** com crítico no Acerto, metade a mais de quadrados;
+  - **Super Launch:** vence o Clash sem rolar, e o alvo perde LP igual aos quadrados escolhidos, mesmo que bata
+    antes;
+  - **Launching:** dano de colisão em dobro. **Espaço Local / Espaço Profundo:** a técnica que já tem Knockback soma
+    1(bT) / 2(bT) ao Might do Clash e dos quadrados;
+  - o cartão mostra o resultado ("Knockback 10 quadrados" ou "resistido"), e o botão some.
+- **Scan:** com um Scouter equipado, um Scout Scope ou um Scouter integrado (Onboard Computer: Master; 3D Scan
+  Mode: Grandmaster), a aba Combate ganha o botão **Scan**. Fora de combate ele é o Adventuring Maneuver da aba
+  Aventura.
+  - Escolha o aparelho e o alvo (o marcado primeiro). Em combate custa **1 Ação** (Scouter) ou **3** (Scout Scope).
+  - O cartão do Scan dá ao dono do alvo os botões **Concealment** e **Deixar ler**. O Concealment rola contra o
+    Craft DC do Scouter (Qualified no Scout Scope, que só vale para quem está em Holding Back ou percebeu o Scan). Se
+    o Craft DC do item for variável, o diálogo pergunta uma vez e salva o escolhido no campo Craft DC do item.
+  - **Escondendo:** nada acontece, e até o fim do encontro ele passa direto no Concealment contra aquele tipo de
+    aparelho. Contra o Scout Scope, só enquanto não baixar o Holding Back.
+  - **Falhando ou deixando ler:** quem escaneou (e o mestre) recebe, sussurrada, a leitura: **ToP atual**, **Power
+    Level** (só se o ToP atual for o base, sem forma, Holding Back ou Breakthrough) e o **Poder de Luta** do alvo,
+    pela fórmula do mundo, com o KP e o Holding Back daquele momento.
+- **Scouter explodindo:** quando alguém de ToP atual 2+ usa o botão **Power Up**, os Scouters equipados de Craft DC
+  Qualified (ou menor) por perto são destruídos; com ToP 3+, os de Expert também. Master, Grandmaster, Scout Scope e
+  os Scouters integrados aguentam.
+  - "Por perto" é até **15 quadrados** (contando a altura) num encontro de combate; fora de combate, a cena toda
+    (a regra fala em centenas de milhas). O próprio Scouter de quem deu o Power Up também conta.
+  - O Scouter destruído perde 1 de quantidade e, se era o último, sai do equipamento. Sai um cartão
+    **Scouter destruído!** com quem perdeu o quê; o botão **Desfazer (mestre)** devolve tudo.
+  - Scouter sem Craft DC definido (o do compêndio é variável): sai um cartão para o dono escolher o Craft DC
+    (Qualified, Expert, Master ou Grandmaster). Ele fica salvo no item e, se for fraco demais para aquele Power Up,
+    o Scouter explode na hora. Outro Power Up antes da resposta não repete a pergunta, só a atualiza se for mais forte.
+  - Token escondido dos jogadores: os cartões dele vão só para o mestre.
 
 ## Transformações
 
@@ -196,6 +264,39 @@ de internet):
 - **Grand Awakening:** o traço Grand Awakening de um Super Awakening fica desligado até o botão **Full Awakening**
   do quadro do Awakening (1 por encontro, 1 ação). O sistema mostra o Grand Trigger, pergunta se ele foi cumprido,
   liga o traço até o fim do encontro e devolve 1/4 de LP e KP (arredondado para cima).
+- **Stacks de Awakening:** na aba Transformações, o − e o + ao lado de "2/7" tiram e dão stacks.
+  - Cada stack soma o bônus de atributo de novo, libera os traços "Nome (n)" e aumenta o Z dos efeitos (Surgency
+    Z(bT), LP por Power Level...). O cartão no chat mostra o bônus total do Awakening, o que passou a valer ou deixou
+    de valer, os efeitos que crescem com o Z e os Perks e pontos ganhos.
+  - Arrastar para a ficha um Awakening que ela já tem dá um stack a mais, em vez de criar um item repetido.
+  - O + para no máximo de stacks. O **Awakening Limit conta cada stack** (menos os temporários e os livres), e a
+    ficha avisa quando passa. O Strongest Form pede ToP 3+ no 2º stack.
+  - **Escolha a cada stack:** a janela abre ao ganhar o stack; fechou sem escolher, o alerta da ficha lembra (botão
+    com a lista, também ao lado do nome do Awakening). Perder o stack desfaz as escolhas dele.
+    - Ki Technician (Technical Trait), Warlock (Wizarding Trait) e Perfection (Perfect Trait): só os traços
+      escolhidos valem, com os bônus deles (Focused Blaster +2(T) no Wound de Energy Attacks...).
+    - Results of Training: Agility ou Tenacity (+1 no bônus de atributo) e um Combat Roll com +1(T), sem repetir o
+      do stack anterior.
+    - Vocation Gain: a Vocation do stack, com o bônus de atributo dela (Gadabout fica à mão).
+    - Absorption: o Absorbed Character (nome, com a lista dos personagens do mundo) e os 3 atributos do bônus, já
+      marcados com os 3 maiores do personagem absorvido. Unified: o Merged Character.
+    - Bio-Diversity e Cybernetic Upgrade: o Factor Trait escolhido entra na ficha e sai junto com o stack.
+    - Elemental Force (Favored Element), Bestial Transfiguration (Bestial Trait), Diverse Leader (Leadership Trait) e
+      Spirit Control (Spiritual Unique Ability): a escolha fica registrada na ficha; o efeito é aplicado à mão.
+  - **Perks e pontos:** Results of Training dá +1 Character Perk por stack, Results of Intense Training +2, e Vocation
+    Gain +1 Attribute Point e +5 TP. Tudo já entra na Progressão.
+  - **Stack temporário (Temporary Awakening):** Shift+clique no + pergunta o nível. A etiqueta ⏳ mostra quantos há.
+    Eles não contam para o limite nem dão New Level of Power, e são os primeiros a sair no −. No fim do combate, os
+    de nível 2 saem sozinhos; para os de nível 1, o mestre recebe um cartão com **Manter** (viram permanentes) e
+    **Tirar**. Um Awakening marcado como Temporary Awakening inteiro também gera esse cartão.
+  - **Stacks livres** (aba Detalhes do Awakening): não contam para o limite nem dão bônus de atributo, como o Spirit
+    Control que um Yardrat ganha na criação.
+  - **Automático:** um Saiyan com **Born for Battle** que cai abaixo do Critical Threshold em combate (1 vez por
+    encontro) ganha um stack temporário nível 1 de **Zenkai**; se não tiver o Zenkai, ele entra na ficha. Com o
+    **On the Brink** (3 stacks), em vez disso entra no Surging State até o fim do próximo turno. No **Absorption**,
+    quem está derrotado no início do turno perde todos os stacks, e o chat diz quem foi libertado.
+  - Efeitos de outras transformações que contam stacks ("for every stack of Absorption you possess", no Absorbed
+    Power e no Namekian Potential) usam os stacks da ficha.
 - **Imagem do token por forma:** na aba Transformações, o ícone 🖼 de cada Form ou Enhancement escolhe a imagem do
   token nela (também em Detalhes › Imagem do token). Ao entrar na forma, os tokens do personagem trocam para essa
   imagem; ao sair, voltam à imagem de sempre. Uma Form vale mais que uma Enhancement quando as duas têm imagem.
@@ -327,6 +428,89 @@ Enquanto uma transformação está ativa, o token mostra uma aura animada em vol
 - Todos os jogadores veem as auras. Quem achar pesado pode desligar só para si em **Configurações › Configurar
   Sistema › Auras de transformação nos tokens**.
 
+## Altura, voo, Grapple e arremessos
+
+A altura fica na **elevação do token** e aparece num **marcador** acima dele (no lugar do número de elevação do
+Foundry). Há dois jeitos de contar, conforme a regra opcional **Flight** (Configurações › Regras Adicionais):
+
+- **Sem a regra Flight (padrão do Battleground):** os níveis de High Environment: Chão, **Céu Baixo**, **Céu
+  Alto**, **Espaço Local** e **Espaço Profundo**. Cada nível vale 8 quadrados de distância. Entrar ou sair do
+  Espaço Profundo só com o mestre.
+- **Com a regra Flight:** a **Verticality**, 1 por quadrado de altura. O marcador mostra o número, com "Céu" acima
+  de 8 e "Espaço" a partir de 16.
+
+**Mudar a altura:** as setas ▲▲/▼▼ no HUD do token (clique direito no token, logo abaixo da elevação) ou na aba
+Combate. Com a regra Flight, Shift muda 5 de uma vez. O botão **Soar** faz o Soar Maneuver:
+
+- sem Flight: +1(bT) de Defense Value até o início do seu próximo turno e sobe ou desce 1 nível;
+- com Flight: ganha até 8 Verticality (16 com o talento Frequent Flyer, que também deixa usar como Instant) e
+  +1(T) no Desvio (2(T) com Frequent Flyer) até o início do seu próximo turno;
+- gasta 1 Ação, avisa se já foi usado na rodada e é bloqueado com Gravity Intensity 2+.
+
+**Quem voa:** 2+ ranks em Flight, o Soar Maneuver na ficha, uma Unique Ability chamada Flight (ou Dragon Flight)
+ou um Jetpack dão o Soar. A Unique Ability Flight e o Jetpack também guardam a Verticality no início do turno.
+
+**No combate (Automação de combate ligada):**
+
+- **Com Flight, início do turno:** quem não tem a Unique Ability Flight perde toda a Verticality. Prone no ar
+  cai até o chão mesmo com Flight e perde 1(bT) LP a cada 2 de Verticality (até 4(bT), mais com gravidade).
+- **Sem Flight, início da rodada (Falling):** quem não tem rank em Flight nem o Soar desce 1 nível. Saindo do Céu
+  Baixo, rola Acrobatics (Qualified); se falhar, bate no chão.
+- **Gravity Intensity 2+:** no fim do turno, quem está no alto volta ao chão.
+- **Distância:** o diálogo de ataque mostra a distância de cada alvo contando a altura (a diferença de
+  Verticality, ou 8 quadrados por nível) e já marca **Long Range** quando todos estão a 9+ quadrados.
+- **AoE:** o cartão do ataque avisa quem está fora do alcance vertical da AoE (com Flight, até o número da
+  Magnitude em Verticality; sem Flight, Minor e Standard só no mesmo nível, Large e Huge 1 nível, Destructive 2).
+
+**Grapple (aba Combate, com o alvo marcado):**
+
+- **Grapple:** Clash Strike × Strike/Dodge (o defensor usa o melhor dos dois e ganha o empate). Vencendo, os dois
+  ficam no Grapple com Guard Down. Perdendo, o cartão lembra do Exploit do alvo. Se o alvo tem cauda, dá para
+  agarrar a cauda (−2(T), sem Tail Attack). Agarrar quem já está num Grapple pede um Might Clash contra o Grappler.
+- **Launch:** Grapple Check; vencendo, solta e arremessa o agarrado até o seu Might em quadrados, em qualquer
+  direção. Perdendo, ele escapa.
+- **Pin** (2 Ações): Grapple Check −1(bT) e Might Clash; vencendo os dois, o agarrado fica Pinned enquanto durar.
+- **Escapar** (quem está agarrado): Grapple Check com +1(T) por Ação depois da primeira; o empate é de quem foge.
+- **Soltar:** o Grappler encerra o Grapple. O Grapple também acaba com o fim do combate.
+- **Thrust:** Clash Strike × Strike/Dodge; vencendo, **Push Back** (½ Might quadrados em linha reta, para longe,
+  com dano de colisão em dobro) ou **Knock Prone** (Clash Impulsive/Corporeal: Prone, ou Guard Down no alvo até o
+  fim do seu turno).
+- **Mover alvo:** para outros efeitos que empurram ou arremessam (Express Ticket, Terrain Slam, traços...; o
+  Knockback das técnicas tem botão próprio no cartão de ataque):
+  quadrados, exatos ou "até", em linha reta para longe ou não, e dano em dobro.
+- Quem está fora de um Grapple e move alguém que está nele faz antes um Might Clash contra o Grappler.
+
+**O arremesso** (Launch, Push Back, Mover alvo) abre um diálogo com os quadrados, a direção (uma rosa dos ventos,
+ou "para longe de quem move") e a altura:
+
+- **Com Flight:** cada Verticality que o alvo sobe ou desce gasta 1 quadrado da movimentação.
+- **Sem Flight:** com 8+ quadrados, o **Vertical Launch** corta a movimentação pela metade e muda o alvo 1 nível.
+- **Sudden Stop:** se o alvo usar a Counter Action, marque: até ½ Might dele de quadrados a menos e metade do dano
+  de colisão.
+
+O token vai em linha reta, quadrado por quadrado, e o sistema resolve o que houver no caminho:
+
+- **Parede (Feature):** o token para antes dela e o sistema pergunta a dureza.
+- **Outro personagem na mesma altura (Character Collision):** pergunta se ele reage com uma Counter Action (Might
+  Clash contra quem moveu, ou sair do caminho). Sem reação, os dois levam o dano de Hardness Rank 2 e ficam Prone.
+- **Chão:** com Flight, chegar a Verticality 0 é o **Hitting the Floor** (+1(bT) a cada 2 de Verticality perdida,
+  até 4(bT)). Sem Flight, descer do Céu Baixo por Vertical Launch é **Ground Collision**. Nos dois casos o sistema
+  pergunta a dureza do chão.
+
+**A pergunta da dureza:** o Hardness Rank (0 areia/água, 1 madeira/cascalho, 2 pedra/cimento, 3 metal, 4 metal
+reforçado, 5 Katchin), já com o dano para aquele personagem (1(bT) no Rank 0, senão 2 × Rank (bT)), e as
+qualidades:
+
+- Glass (+1 Rank), Metallic (Rank 3+), Dangerous (×2), Bouncy/Rubbery/Fragile (metade; a Fragile é destruída e o
+  movimento continua);
+- Soft (Prone), Burning (Broken por 1 rodada), Shocking (Impediment por 1 rodada), Sharp (+2 DOT);
+- **Usar como padrão da cena** guarda a dureza do chão para as próximas vezes;
+- **Não há Feature (passa)** deixa o token seguir.
+
+O dano sai dos LP direto (sem Soak), com os limiares e o Steadfast de sempre. O cartão diz quanto a Feature sofreu
+(½ do ToP de quem causou; os LP dela são o Hardness Rank). Quando o jogador não é dono do alvo, o mestre aplica os
+efeitos. A rolagem do defensor é feita no computador de quem usou a manobra.
+
 ## Combate automatizado
 
 Com **Automação de combate** ligada (configuração do mundo), o GM controla o Combat Tracker e o
@@ -334,12 +518,13 @@ sistema faz o resto. Cada ficha sabe em que rodada está e se é o seu turno.
 
 - **Início do encontro:** gatilhos "Start of Combat Encounter".
 - **Início de cada rodada:** Capacidade cheia, Ações (3 + Power Advantage − Reduced Momentum),
-  Counter Actions, Diminishing Defense/Offense zerados, e gatilhos "Start of Combat Round"
-  (regeneração Namekiana, Infinite Energy, Battle Born em rodadas pares...).
+  Counter Actions, Diminishing Defense/Offense zerados, Falling (sem a regra Flight) e gatilhos "Start of
+  Combat Round" (regeneração Namekiana, Infinite Energy, Battle Born em rodadas pares...).
 - **Início do seu turno:** DOT, Draining, Ki 0 (sai da transformação), Straining (botão de Stress
-  Test), lembretes de Compelled e Power, efeitos temporários que acabam, e gatilhos "Start of Turn".
-- **Fim do seu turno:** Poisoned, Suffocating, Gravidade, efeitos que duram "até o fim do seu
-  turno" e gatilhos "End of Turn".
+  Test), lembretes de Compelled e Power, efeitos temporários que acabam, perda da Verticality (regra Flight) e
+  gatilhos "Start of Turn".
+- **Fim do seu turno:** Poisoned, Suffocating, Gravidade (com GI 2+ volta ao chão), efeitos que duram "até o fim
+  do seu turno" (também os que você causou nos outros, como o Guard Down do Thrust) e gatilhos "End of Turn".
 - **Fim do encontro:** Instant Recovery (+1/10 de LP e KP), recursos e contadores zerados.
 
 ## Gatilhos de turno e rodada
@@ -379,7 +564,8 @@ Modo e Duração.
 - **Power:** as caixas de seleção ao lado de "Power" são os stacks. Marcar uma caixa dá o stack sem
   gastar Ação; o botão **Power Up** gasta 1 Ação e respeita o limite de 2 por rodada (com 2 stacks, ele
   renova a duração de um deles). Em combate, cada stack sai sozinho no fim do seu próximo turno, e a Max
-  Capacity (+1/4 nos 2 primeiros stacks) acompanha.
+  Capacity (+1/4 nos 2 primeiros stacks) acompanha. Só o botão conta como a manobra Power Up, que pode explodir
+  os Scouters fracos por perto (ver "Scouter explodindo"); as caixas não.
 
 ## Técnicas de exemplo
 

@@ -1,4 +1,4 @@
-import { applyAttackDamage, retargetAttack, rollDefense, rollWound } from "./combat/attack.mjs";
+import { applyAttackDamage, knockbackTarget, retargetAttack, rollDefense, rollWound } from "./combat/attack.mjs";
 import { applyTriggerEffect } from "./combat/triggers.mjs";
 
 /** Wire the buttons of DBU chat cards. */
@@ -13,7 +13,7 @@ export function onRenderChatMessage(message, html) {
   if ( attack ) {
     const attacker = fromUuidSync(attack.attackerUuid);
     if ( attacker && !attacker.isOwner ) {
-      root.querySelectorAll("[data-dbu-action='wound'], [data-dbu-action='retarget']").forEach(b => b.remove());
+      root.querySelectorAll("[data-dbu-action='wound'], [data-dbu-action='retarget'], [data-dbu-action='knockback']").forEach(b => b.remove());
     }
     root.querySelectorAll("[data-dbu-action='defense']").forEach(b => {
       const t = attack.targets?.[Number(b.dataset.index)];
@@ -25,6 +25,19 @@ export function onRenderChatMessage(message, html) {
         && actor.items.some(i => (i.type === "maneuver") && i.system.god && /flex/i.test(i.name))) ) b.remove();
     });
   }
+  // Scan: only the scanned Character's owner answers (Concealment or let the reading through)
+  const scan = message.getFlag("dbu-rpg", "scan");
+  if ( scan && !fromUuidSync(scan.targetUuid)?.isOwner ) {
+    root.querySelectorAll("[data-dbu-action='scanResist'], [data-dbu-action='scanAccept']").forEach(b => b.remove());
+  }
+  // A Scouter's Craft DC is told by its owner (or the GM); only the GM undoes the Scouters a Power Up destroyed
+  const ask = message.getFlag("dbu-rpg", "scouterAsk");
+  if ( ask && !game.user.isGM && !fromUuidSync(ask.itemUuid)?.isOwner ) {
+    root.querySelectorAll("[data-dbu-action='scouterDc']").forEach(b => b.remove());
+  }
+  if ( !game.user.isGM ) root.querySelectorAll("[data-dbu-action='scouterUndo']").forEach(b => b.remove());
+  // Only the GM decides whether a Level 1 Temporary Awakening stays
+  if ( !game.user.isGM ) root.querySelectorAll("[data-dbu-action='awakKeep'], [data-dbu-action='awakDrop']").forEach(b => b.remove());
 }
 
 async function onCardButton(event, message) {
@@ -37,7 +50,30 @@ async function onCardButton(event, message) {
       case "defense": await rollDefense(message, Number(index), mode); break;
       case "wound": await rollWound(message); break;
       case "damage": await applyAttackDamage(message, Number(index)); break;
+      case "knockback": await knockbackTarget(message, Number(index)); break;
       case "retarget": await retargetAttack(message); break;
+      case "scanResist":
+      case "scanAccept": {
+        const { resolveScan } = await import("./combat/scan.mjs");
+        await resolveScan(message, dbuAction === "scanResist");
+        break;
+      }
+      case "scouterDc":
+      case "scouterUndo": {
+        const S = await import("./combat/scan.mjs");
+        const done = (dbuAction === "scouterDc")
+          ? await S.answerScouterDc(message, JSON.parse(button.dataset.payload || "{}").dc)
+          : await S.undoScouterBreak(message);
+        // Until the new card arrives (through the GM for a player), the question cannot be answered twice
+        if ( done ) button.closest(".dbu-card-buttons")?.remove();
+        return;
+      }
+      case "awakKeep":
+      case "awakDrop": {
+        const { resolveKeep } = await import("./combat/awakening.mjs");
+        if ( await resolveKeep(message, dbuAction === "awakKeep") ) button.closest(".dbu-card-buttons")?.remove();
+        return;
+      }
       case "updateTransformations":
       case "skipTransformationUpdate": {
         const update = await import("./compendium-update.mjs");

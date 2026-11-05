@@ -4,6 +4,8 @@
  * Racial Traits and its Talents. Pure functions over item data, so they can be checked outside Foundry.
  */
 
+import { unchosenTraits } from "./awakening.mjs";
+
 /** Order of the Trait kinds inside a Transformation. */
 const KIND_ORDER = ["trait", "burst limit", "mastery trait", "transcendent trait", "grand awakening", "legendary trait"];
 
@@ -26,11 +28,13 @@ export function traitStructure(html) {
 /**
  * Can a Trait of this active Transformation be used now?
  * Mastery Traits from their Mastery level (inherited ones by this Transformation's own Mastery: a higher Stage only
- * benefits from a lower Stage's Mastery Trait once it is also Mastered); an Awakening's "Name (n)" Trait from n Stacks;
- * a Transcendent Trait with one Mastery beyond Fully Mastered while Transcended; a Grand Awakening once activated.
+ * benefits from a lower Stage's Mastery Trait once it is also Mastered); an Awakening's "Name (n)" Trait from n Stacks,
+ * and a Trait one of its Stacks picks (a Technical Trait of Ki Technician) once picked; a Transcendent Trait with one
+ * Mastery beyond Fully Mastered while Transcended; a Grand Awakening once activated.
  */
 export function traitUsable(s, t) {
   const mastery = s.mastery ?? 0;
+  if ( (s.transType === "awakening") && unchosenTraits(s).has(t.name) ) return false;
   switch ( t.kind ) {
     case "mastery trait": return mastery >= Math.max(1, t.level);
     case "transcendent trait": return !!s.transcended && (mastery > (s.masteryNeeded ?? 1));

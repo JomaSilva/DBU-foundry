@@ -8,6 +8,7 @@ import { battlePower } from "./battle-power.mjs";
 import { AWAKENING_POINTS, godHoned, gravityFor, limitedPower, martialDieCategory, rules } from "../optional-rules.mjs";
 import { allocTotal, resourceSlug, splitLimits } from "./resources.mjs";
 import { danceHalved } from "../fusion/fusion-rules.mjs";
+import { awakeningStacks } from "./awakening.mjs";
 
 /** Base Tier of Power from Power Level: 1-4 → 1, 5-9 → 2 ... 30 → 7. */
 export function baseTopFromPL(pl) {
@@ -64,6 +65,12 @@ export function prepareActorData(sys, actor) {
   const cond = {};
   for ( const [key, def] of Object.entries(DBU.conditions) ) {
     cond[key] = Math.min(def.max, Math.max(sys.conditions?.[key] ?? 0, statuses.has(key) ? 1 : 0));
+  }
+  // In a Grapple both characters suffer Guard Down; a Pin Maneuver keeps the Grappled Pinned while it lasts
+  const grapple = actor.flags?.["dbu-rpg"]?.grapple;
+  if ( grapple ) {
+    cond.guardDown = Math.max(cond.guardDown, 1);
+    if ( grapple.pinned && (grapple.role === "grappled") ) cond.pinned = 1;
   }
   sys.effectiveConditions = cond;
   // Unnatural: cannot gain the Suffocating or Poisoned Combat Conditions
@@ -140,7 +147,9 @@ export function prepareActorData(sys, actor) {
     inForm: activeForms.length ? 1 : 0, inEnhancement: activeEnh.length ? 1 : 0,
     enhancementCount: active.filter(t => t.system.transType === "enhancement").length,
     life: sys.life.value, ki: sys.ki.value, capacity: sys.capacity.value,
-    alignment: sys.zsoul.alignment, kiLow: 0
+    alignment: sys.zsoul.alignment, kiLow: 0,
+    // Stacks of each Awakening ("for every stack of Absorption you possess": @awk.absorption)
+    awk: awakeningStacks(actor.items)
   };
 
   // ToP must be known before modifiers are collected (Scaling reads it)
@@ -151,6 +160,8 @@ export function prepareActorData(sys, actor) {
 
   /* ----- Stage 0: Tier of Power, Ki Pool, Capacity ----- */
   evaluateModifiers(mods, data, { stage: 0, buckets });
+  // Super Stacks from Aspects and Grades are known now, for the bonuses that grow with them (Hefty Muscle)
+  data.superStacks = Math.clamp((sys.combat.superStacks ?? 0) + sum(buckets, "superStacks"), 0, 3);
   let topCurrent = bT + (sys.combat.topBoost ?? 0) + sum(buckets, "top") + (sys.transformation.newLevel ? 1 : 0);
   topCurrent -= holdingBack;
   if ( (holdingBack >= bT) && (bT > 0) ) topCurrent = 1;
@@ -170,6 +181,10 @@ export function prepareActorData(sys, actor) {
     if ( statuses.has(key) && !((sys.conditions?.[key] ?? 0) > 0) ) {
       (sys.conditionHolds[key] ??= []).push(game.i18n.localize("DBU.Condition.HeldByIcon"));
     }
+  }
+  if ( grapple ) {
+    (sys.conditionHolds.guardDown ??= []).push(`Grapple (${grapple.name ?? ""})`);
+    if ( grapple.pinned && (grapple.role === "grappled") ) (sys.conditionHolds.pinned ??= []).push("Pin Maneuver");
   }
   const kiBase = Math.floor((kiStart + (12 * (pl - 1))) * injuryMult) + sum(buckets, "ki.max");
   const kiMax = Math.floor(kiBase * (kiMultiplier ? 2 : 1) * (buckets["ki.mult"]?.total ?? 1));
@@ -547,6 +562,8 @@ export function prepareActorData(sys, actor) {
     perks.perk += (ml >= 5 ? 1 : 0);
   }
   const honed = (R.pathToGodhood && pl >= 30) ? godHoned(opt) : { self: 0, technique: 0, talent: 0, exceed: 0 };
+  // Character Perks given by effects (Results of Training: one per Stack)
+  perks.perk += sum(buckets, "perks");
   const conv = sys.perks;
   const attributeAdditions = perks.attribute + (conv.attribute ?? 0);
   const talentAdditions = perks.talent + (conv.talent ?? 0) + honed.talent;
@@ -558,7 +575,7 @@ export function prepareActorData(sys, actor) {
   const profileBuyoutCost = R.profileBuyout ? 2 * (opt.boughtProfiles?.length ?? 0) : 0;
   sys.progression = {
     perks, perksAvailable: Math.max(0, perks.perk), perksUsed: (conv.attribute ?? 0) + (conv.talent ?? 0) + (conv.skill ?? 0),
-    attributeAdditions, attributePoints: (attributeAdditions * 2) + pl1Bonus.attributePoints,
+    attributeAdditions, attributePoints: (attributeAdditions * 2) + pl1Bonus.attributePoints + sum(buckets, "attributePoints"),
     attributePointsSpent: DBU.ATTRIBUTES.reduce((t, a) => t + (sys.attributes[a].points ?? 0), 0),
     talentAdditions, skillImprovements,
     skillRanksFromSI: (skillImprovements * 4) + pl1Bonus.ranks + (2 * honed.technique),

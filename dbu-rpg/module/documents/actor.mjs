@@ -55,6 +55,12 @@ export class DBUActor extends Actor {
         if ( v < 0 ) foundry.utils.setProperty(changed, path, 0);
       }
     }
+    // Scout Scope: a Concealment success stops protecting once the Holding Back stacks go below the number they were
+    const scopeHidden = this.getFlag("dbu-rpg", "scanHidden")?.scope;
+    if ( scopeHidden && foundry.utils.hasProperty(changed, "system.combat.holdingBack")
+      && (Number(foundry.utils.getProperty(changed, "system.combat.holdingBack")) < (scopeHidden.holdingBack ?? 0)) ) {
+      foundry.utils.setProperty(changed, "flags.dbu-rpg.scanHidden.scope", null);
+    }
     // A Fusion may use the Karma Points of all of its Fused Characters
     if ( foundry.utils.hasProperty(changed, "system.karma.value") && (this.type !== "fusion") ) {
       const v = foundry.utils.getProperty(changed, "system.karma.value");
@@ -165,6 +171,11 @@ export class DBUActor extends Actor {
       return;
     }
     if ( defeated ) await this._onDefeated();
+    // Born for Battle (Saiyan): knocked through the Critical Health Threshold → a Temporary stack of Zenkai
+    if ( crossed.includes("critical") ) {
+      const { bornForBattle } = await import("../combat/awakening.mjs");
+      await bornForBattle(this);
+    }
   }
 
   async _onDefeated() {
@@ -178,15 +189,19 @@ export class DBUActor extends Actor {
   /*  Rolls                                       */
   /* -------------------------------------------- */
 
-  /** Strike/Dodge/Wound without an attack (free rolls from the sheet). */
-  async rollCombat(type, { foundation = "physical" } = {}) {
+  /**
+   * Strike/Dodge/Wound without an attack (free rolls from the sheet, and the Clashes of Maneuvers: extra parts such
+   * as a penalty, and the Maneuver as subtitle).
+   */
+  async rollCombat(type, { foundation = "physical", extra = [], subtitle } = {}) {
     const sys = this.system;
     const r = type === "wound" ? sys.rolls.wound[foundation] : sys.rolls[type];
     const parts = [...r.parts];
     if ( type === "strike" ) parts.push({ label: L(DBU.foundations[foundation]), value: sys.rolls[`strike_${foundation}`] ?? 0 });
+    parts.push(...extra.filter(p => p?.value));
     return dbuRoll({
       actor: this, kind: type, title: L(`DBU.Roll.${type.capitalize()}`),
-      subtitle: type !== "dodge" ? L(DBU.foundations[foundation]) : "",
+      subtitle: subtitle ?? (type !== "dodge" ? L(DBU.foundations[foundation]) : ""),
       naturalMod: r.natural, critTarget: r.crit, botchRange: r.botch, diceGroups: r.dice, parts,
       critDice: r.critDice, botchPenalty: r.botchPenalty
     });
@@ -230,15 +245,15 @@ export class DBUActor extends Actor {
     });
   }
 
-  /** Might Clash or an Attribute Modifier Clash. */
-  async rollClash(what = "might") {
+  /** Might Clash or an Attribute Modifier Clash (extra: bonuses to its Dice Score, such as Forceful Launch). */
+  async rollClash(what = "might", { extra = [], subtitle = "" } = {}) {
     const sys = this.system;
     const value = what === "might" ? sys.aptitudes.might : sys.attributes[what].mod;
     const label = what === "might" ? "Might" : L(DBU.attributes[what]);
     const r = sys.rolls.strike;
     return dbuRoll({
-      actor: this, kind: "clash", title: L("DBU.Roll.Clash", { what: label }),
-      critTarget: 10, botchRange: 1, diceGroups: r.dice, parts: [{ label, value }],
+      actor: this, kind: "clash", title: L("DBU.Roll.Clash", { what: label }), subtitle,
+      critTarget: 10, botchRange: 1, diceGroups: r.dice, parts: [{ label, value }, ...extra.filter(p => p?.value)],
       critDice: r.critDice, botchPenalty: 2 * sys.top.base
     });
   }
@@ -537,7 +552,8 @@ export class DBUActor extends Actor {
     // In the Combat Encounter, also right before it starts (transforming before "Begin Combat")
     const combat = game.combat;
     const inEncounter = !!combat && combat.combatants.some(c => c.actor?.uuid === this.uuid);
-    if ( !inEncounter || ts.newLevel || ts.temporary ) return false;
+    // A Temporary Awakening (or one whose every Stack is Temporary) cannot grant New Level of Power
+    if ( !inEncounter || ts.newLevel || ts.temporary || ((ts.transType === "awakening") && (ts.tempCount >= ts.stacks)) ) return false;
     if ( !ts.newLevelPending && !(force && !ts.everEntered) ) return false;
     const others = this.items.filter(i => (i.type === "transformation") && (i.id !== item.id) && i.system.newLevel)
       .map(i => ({ _id: i.id, "system.newLevel": false }));
@@ -584,20 +600,31 @@ export class DBUActor extends Actor {
 
   /**
    * Power Up Maneuver [2/Round]: +1 stack of Power until the end of your next turn (max 2). At the limit a stack is
-   * removed and gained again, which renews its duration. Capacity Rate applies to the new Max Capacity.
+   * removed and gained again, which renews its duration. Capacity Rate applies to the new Max Capacity. With Tier of
+   * Power 2+, the weaker Scouters near the character are destroyed (combat/scan.mjs).
    */
   async powerUp() {
     const sys = this.system;
     const fighting = inCombat(this);
     if ( fighting && ((sys.combat.powerUps ?? 0) >= 2) ) return ui.notifications.warn(L("DBU.Power.RoundLimit"));
     const used = fighting ? { "system.combat.powerUps": (sys.combat.powerUps ?? 0) + 1 } : {};
+    let card;
     if ( (sys.combat.power ?? 0) >= 2 ) {
       await this.update({ ...this._spendAction(1), ...used });
       if ( fighting ) await renewTimedPower(this);
-      return postInfoCard({ actor: this, title: "Power Up", lines: [L("DBU.Power.Renewed", { n: sys.combat.power })] });
+      card = await postInfoCard({ actor: this, title: "Power Up", lines: [L("DBU.Power.Renewed", { n: sys.combat.power })] });
     }
-    const gain = await this.gainPower(1, { updates: { ...this._spendAction(1), ...used } });
-    return postInfoCard({ actor: this, title: "Power Up", lines: [L("DBU.Power.Gained", { n: this.system.combat.power, cap: gain })] });
+    else {
+      const gain = await this.gainPower(1, { updates: { ...this._spendAction(1), ...used } });
+      card = await postInfoCard({ actor: this, title: "Power Up", lines: [L("DBU.Power.Gained", { n: this.system.combat.power, cap: gain })] });
+    }
+    try {
+      const { scoutersNearPowerUp } = await import("../combat/scan.mjs");
+      await scoutersNearPowerUp(this);
+    } catch(err) {
+      console.error("DBU | Scouters near the Power Up", err);
+    }
+    return card;
   }
 
   /** Gain stacks of Power (each lasts until the end of your next turn during combat). Returns the Capacity gained. */

@@ -2,6 +2,7 @@ import { DBU } from "../config.mjs";
 import { evaluate, test } from "../rules/formula.mjs";
 import { postInfoCard } from "../dice/roller.mjs";
 import { changeStacks, setStacks } from "./stacks.mjs";
+import { stackChoiceCount } from "../rules/awakening.mjs";
 
 const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
 
@@ -16,13 +17,17 @@ export function collectTriggers(actor, event) {
     const active = s.isActive ?? true;
     const ctx = (item.type === "transformation") ? s.formulaContext : {};
     for ( const t of s.triggers ) {
-      if ( !t.active || (t.event !== event) || !(active || t.always) ) continue;
+      // Per-Stack choices of an Awakening: an option runs once per Stack that picked it, an unpicked Trait not at all
+      const count = (item.type === "transformation") ? stackChoiceCount(s, t.label) : null;
+      if ( ((count === null) ? !t.active : (count === 0)) || (t.event !== event) || !(active || t.always) ) continue;
       if ( t.always ) {
         const key = [t.label, t.event, t.effect, t.value, t.condition].join("|");
         if ( possessed.has(key) ) continue;
         possessed.add(key);
       }
-      list.push({ ...t, source: item.name, ctx });
+      // A reminder shows once however many Stacks picked it
+      const times = ((t.effect === "message") || (t.mode === "remind")) ? Math.min(1, count ?? 1) : (count ?? 1);
+      for ( let k = 0; k < times; k++ ) list.push({ ...t, active: true, source: item.name, ctx });
     }
   }
   for ( const t of actor.system.customTriggers ?? [] ) {
@@ -191,7 +196,7 @@ export function encounterOf(actor) {
   return game.combats?.find(c => c.started && c.combatants.some(cb => cb.actor?.uuid === actor?.uuid)) ?? null;
 }
 
-async function addTimed(actor, { kind, key, prev, level, duration, event, label, rounds = 0 }) {
+async function addTimed(actor, { kind, key, prev, level, duration, event, label, rounds = 0, source = null, skip: forced = null }) {
   const list = foundry.utils.deepClone(actor.getFlag("dbu-rpg", "timed") ?? []);
   const existing = list.find(e => (e.kind === kind) && (e.key === key));
   // "Until the end of your next turn" started during your own turn skips the end of the current turn
@@ -199,29 +204,34 @@ async function addTimed(actor, { kind, key, prev, level, duration, event, label,
   let skip = ((duration === "endOfNextTurn") && ownTurn) ? 1 : 0;
   // "For N Combat Rounds": the current round counts as the first one
   if ( (duration === "endOfRound") && (rounds > 1) ) skip = rounds - 1;
-  if ( existing ) Object.assign(existing, { level, duration, skip, label });
-  else list.push({ kind, key, prev, level, duration, skip, label });
+  if ( forced !== null ) skip = forced;
+  // "endOfSourceTurn": ends with the turn of another character (the one whose effect caused it)
+  const entry = { level, duration, skip, label, ...(source ? { source } : {}) };
+  if ( existing ) Object.assign(existing, entry);
+  else list.push({ kind, key, prev, ...entry });
   await actor.setFlag("dbu-rpg", "timed", list);
 }
 
 /**
  * A Combat Condition that lasts for a while (Stress Exhaustion: until the end of your next turn).
- * Outside of combat nothing ends it automatically.
+ * Outside of combat nothing ends it automatically. duration "endOfSourceTurn" ends it at the end of the turn of the
+ * character with the uuid `source` (skip: how many of those turn ends it outlasts first).
  */
-export async function addTimedCondition(actor, key, prev = 0, level = 1, duration = "endOfNextTurn", label = "", { rounds = 0 } = {}) {
-  if ( !inCombat(actor) ) return;
-  await addTimed(actor, { kind: "condition", key, prev, level, duration, event: "", label, rounds });
+export async function addTimedCondition(actor, key, prev = 0, level = 1, duration = "endOfNextTurn", label = "",
+  { rounds = 0, source = null, skip = null } = {}) {
+  if ( !inCombat(actor) && !encounterOf(actor) ) return;
+  await addTimed(actor, { kind: "condition", key, prev, level, duration, event: "", label, rounds, source, skip });
 }
 
 /**
- * A modifier that lasts a few Combat Rounds (Stretch: +1(T) Combat Rolls for the first 3): it goes into the sheet's
- * custom modifiers under its label and is taken out when it ends.
+ * A modifier that lasts a while (Stretch: +1(T) Combat Rolls for the first 3 Combat Rounds; Soar: until the start of
+ * your next turn): it goes into the sheet's custom modifiers under its label and is taken out when it ends.
  */
-export async function addTimedModifier(actor, modifier, { rounds = 1 } = {}) {
+export async function addTimedModifier(actor, modifier, { rounds = 1, duration = "endOfRound" } = {}) {
   const list = foundry.utils.deepClone(actor.system._source.customModifiers ?? []).filter(m => m.label !== modifier.label);
   list.push(modifier);
   await actor.update({ "system.customModifiers": list });
-  await addTimed(actor, { kind: "modifier", key: modifier.label, prev: 0, level: 0, duration: "endOfRound", event: "",
+  await addTimed(actor, { kind: "modifier", key: modifier.label, prev: 0, level: 0, duration, event: "",
     label: modifier.label, rounds });
 }
 
@@ -282,15 +292,20 @@ async function revert(actor, entry) {
 /**
  * End the timed States/Conditions and Power stacks of an actor whose duration is over at this combat event.
  * Runs before the triggers of the same event, so an effect renewed by them is not ended by mistake.
+ * With `source`, only the effects that end with that character's turn ("endOfSourceTurn").
  */
-export async function expireTimed(actor, event) {
+export async function expireTimed(actor, event, { source = null } = {}) {
   const list = foundry.utils.deepClone(actor?.getFlag("dbu-rpg", "timed") ?? []);
   if ( !list.length ) return;
   const keep = [];
   const lines = [];
   let powerLost = 0;
+  let due = 0;
   for ( const entry of list ) {
-    if ( EXPIRES_AT[entry.duration] !== event ) { keep.push(entry); continue; }
+    const ends = source ? ((event === "endOfTurn") && (entry.duration === "endOfSourceTurn") && (entry.source === source))
+      : (EXPIRES_AT[entry.duration] === event);
+    if ( !ends ) { keep.push(entry); continue; }
+    due += 1;
     if ( entry.skip > 0 ) { entry.skip -= 1; keep.push(entry); continue; }
     if ( entry.kind === "power" ) { powerLost += entry.count ?? 1; continue; }
     if ( entry.kind === "modifier" ) {
@@ -299,6 +314,7 @@ export async function expireTimed(actor, event) {
     }
     if ( await revert(actor, entry) ) lines.push(L("DBU.Trigger.Expired", { label: entry.label || "", what: statusLabel(entry.kind, entry.key) }));
   }
+  if ( !due ) return;
   await actor.setFlag("dbu-rpg", "timed", keep);
   if ( powerLost > 0 ) {
     const before = actor.system.combat.power ?? 0;

@@ -19,7 +19,7 @@ export function limitLabel(limit) {
 const skillLabel = key => L(DBU.skills[key]?.label ?? key);
 
 /** Characters that can be the target: the targeted tokens first, then the tokens of the scene, then the actors. */
-function targetCandidates(actor) {
+export function targetCandidates(actor) {
   const seen = new Set([actor.uuid]);
   const out = [];
   const add = (a, label) => {
@@ -80,6 +80,11 @@ export async function useAdventuringManeuver(actor, key) {
   const used = sessionUses(uses, key);
   if ( Number.isFinite(def.limit) && (used >= def.limit) ) {
     return ui.notifications.warn(L("DBU.Adv.Limit", { name: def.name, n: def.limit }));
+  }
+  // Scan: its own card (the scanned Character may try Concealment) and the use is counted there
+  if ( def.use === "scan" ) {
+    const { scan } = await import("./combat/scan.mjs");
+    return scan(actor);
   }
   const sys = actor.system;
   const lines = [];

@@ -4,6 +4,12 @@ import { categoryToDice } from "../rules/dice.mjs";
 import { emitGM, safeUpdate } from "../socket.mjs";
 import { INJURY_TYPES, limitedPower, rules } from "../optional-rules.mjs";
 import { injuryCheck, requestInjury } from "./injuries.mjs";
+import { outOfAoeHeight, spaceLevel, targetDistances } from "../canvas/height.mjs";
+import { LONG_RANGE, aoeMagnitude } from "../rules/height.mjs";
+import { forcedMove, runOps } from "./movement.mjs";
+import { throughGrapple } from "./grapple.mjs";
+import { mobileActive } from "../mobile.mjs";
+import { pickTargets } from "../targets.mjs";
 
 const { DialogV2 } = foundry.applications.api;
 const FDE = () => foundry.applications.ux.FormDataExtended;
@@ -33,7 +39,17 @@ export async function openAttackDialog(actor, { signature = null, profile = null
   const kpT = sys.top.kp;
   const weapons = sys.weapons.wielded;
   const maxWager = Math.floor(sys.capacity.max / 2);
+  // A phone has no T key: with no target yet, the list of the scene's tokens comes first
+  if ( !game.user.targets?.size && mobileActive() && canvas.tokens?.placeables?.length ) await pickTargets(actor);
   const targets = Array.from(game.user.targets ?? []);
+  // Distance to each target, height included (Verticality, or 8 Squares per rank of High Environment)
+  const distances = targetDistances(actor, targets);
+  const atLongRange = !!distances.length && distances.every(d => d.total >= LONG_RANGE);
+  const targetNames = targets.map(t => {
+    const d = distances.find(e => e.token === t);
+    if ( !d ) return t.name;
+    return `${t.name} (${L(d.vertical ? "DBU.Attack.DistanceHeight" : "DBU.Attack.Distance", { n: d.total, v: d.vertical })})`;
+  }).join(", ");
 
   // Profile Buyout: Basic Attacks only with Multi-Foundation Profiles plus the Profiles bought with TP
   const bought = new Set(sys.optional?.boughtProfiles ?? []);
@@ -73,7 +89,7 @@ export async function openAttackDialog(actor, { signature = null, profile = null
     <div class="form-group"><label>${L("DBU.Attack.WoundBonus")}</label><input type="number" name="woundBonus" value="0" step="1"></div>
     <div class="dbu-checks">
       <label><input type="checkbox" name="calledShot"> ${L("DBU.Attack.CalledShot")}</label>
-      <label><input type="checkbox" name="longRange"> ${L("DBU.Attack.LongRange")}</label>
+      <label><input type="checkbox" name="longRange" ${atLongRange ? "checked" : ""}> ${L("DBU.Attack.LongRange")}</label>
       <label><input type="checkbox" name="oblivious" ${sys.combat.hidden ? "checked" : ""}> ${L("DBU.Attack.Oblivious")}</label>
       <label><input type="checkbox" name="rapid"> ${L("DBU.Attack.Rapid")}</label>
       <label><input type="checkbox" name="spendAction" ${outOfSequence ? "" : "checked"}> ${L("DBU.Attack.SpendAction")}</label>
@@ -81,7 +97,8 @@ export async function openAttackDialog(actor, { signature = null, profile = null
     </div>
     ${rules().injurySystem ? `<div class="form-group"><label>${L("DBU.Injury.Intended")}</label><select name="injuryType">
       <option value="">—</option>${INJURY_TYPES.map(t => `<option value="${t}">${L(`DBU.Injury.${t}`)}</option>`).join("")}</select></div>` : ""}
-    <p class="hint">${targets.length ? L("DBU.Attack.Targets", { names: targets.map(t => t.name).join(", ") }) : L("DBU.Attack.NoTargets")}</p>
+    <p class="hint">${targets.length ? L("DBU.Attack.Targets", { names: targetNames }) : L("DBU.Attack.NoTargets")}
+      ${atLongRange ? `<br>${L("DBU.Attack.LongRangeAuto")}` : ""}</p>
   </div>`;
 
   const data = await DialogV2.wait({
@@ -308,6 +325,14 @@ export async function executeAttack(actor, opts) {
   if ( ballistic ) notesExtra.push(L("DBU.Attack.Ballistic", { ammo: ammoCost, left: weapon.system.ammo.value }));
   if ( lifeCost > 0 ) notesExtra.push(L("DBU.Attack.LifeCost", { n: lifeCost }));
   if ( dkpPaid ) notesExtra.push(L("DBU.Dkp.Paid", { cost: costDkp ? kp : 0, wager: wagerDkp ? wager : 0, cap: capacityUsed }));
+  // AoEs only reach so far up and down (Flight: the Magnitude's number in Verticality; High Environments: ranks)
+  const aoe = sig ? comp.aoe : prof.aoe;
+  if ( aoe ) {
+    const options = sig ? [...sig.advantages, ...sig.disadvantages] : [];
+    const magnitude = aoeMagnitude(aoe, k => options.find(o => o.key === k)?.rank ?? 0);
+    const out = outOfAoeHeight(actor, opts.targets ?? [], magnitude);
+    if ( out.length ) notesExtra.push(L("DBU.Altitude.AoeOut", { names: out.map(t => t.name).join(", "), mag: L(`DBU.Altitude.Mag.${magnitude}`) }));
+  }
 
   const attack = {
     attackerUuid: actor.uuid,
@@ -324,6 +349,8 @@ export async function executeAttack(actor, opts) {
       sustained: comp.sustained, backlash: comp.backlash, twinLinked: comp.twinLinked, deadLink: comp.deadLink,
       shortRange: comp.shortRange, powerBurst: comp.powerBurst, superProfile: sig.superProfile } : null,
     autoHit: fresh.flags.autoHit,
+    knockback: knockbackOf(actor, { comp, sig, profileKey, aoe }),
+    notes: notesExtra,
     targets, wound: null
   };
 
@@ -351,6 +378,21 @@ export async function executeAttack(actor, opts) {
   if ( attack.sig?.backlash ) await actor.update({ "system.life.value": Math.max(0, actor.system.life.value - (2 * bT * attack.sig.backlash)) },
     { dbuSelfInflicted: true });
   return message;
+}
+
+/**
+ * Knockback of an attack: the Signature Advantage, free with the Launching Profile (which doubles the Collision
+ * Damage of that movement), and every Attacking Maneuver in Local Space or Deep Space, where an attack that already has
+ * it adds 1(bT) or 2(bT) to the Might of its Might Clash and Squares. null when the attack has none.
+ */
+function knockbackOf(actor, { comp, sig, profileKey, aoe }) {
+  const own = comp ? !!comp.knockback : (profileKey === "launching");
+  const space = spaceLevel(actor);
+  if ( !own && !space ) return null;
+  return {
+    space: own ? space : 0, forceful: comp?.forcefulLaunch ?? 0, precise: !!comp?.preciseStrike,
+    superLaunch: sig?.superProfile === "superLaunch", double: profileKey === "launching", aoe: !!aoe
+  };
 }
 
 function isFavored(actor, profileKey) {
@@ -700,6 +742,79 @@ export async function storeDamageOnMessage(messageId, index, damage) {
   await refreshAttackMessage(message, attack);
 }
 
+/* -------------------------------------------- */
+/*  Knockback                                   */
+/* -------------------------------------------- */
+
+/**
+ * Button on the attack card, for a target that took Damage: the Might Clash of the Knockback Advantage, then the
+ * target is moved up to the attacker's Might in Squares in a straight line away (any direction for an AoE).
+ *  - Forceful Launch: +1(T) Squares and +1(T) to the Might Clash per rank; Perfect Positioning: +1(T) to the Clash;
+ *  - Precise Strike: with a Critical Result on the Strike Roll, 1/2 more Squares;
+ *  - Super Launch: the Might Clash is won, and the target loses Life Points equal to the Squares it would move;
+ *  - Launching: double Collision Damage; Local / Deep Space: +1(bT) / +2(bT) Might for the Clash and the Squares.
+ */
+export async function knockbackTarget(message, index) {
+  const attack = foundry.utils.deepClone(message.getFlag(FLAG, "attack"));
+  const t = attack?.targets?.[index];
+  const k = attack?.knockback;
+  if ( !t || !k ) return;
+  if ( !(t.damage > 0) ) return ui.notifications.info(L("DBU.Knockback.NoDamage"));
+  if ( t.knockback ) return ui.notifications.info(L("DBU.Knockback.Done"));
+  const attacker = await fromUuid(attack.attackerUuid);
+  if ( !attacker?.isOwner ) return ui.notifications.warn(L("DBU.Notify.NotOwner"));
+  const target = await resolveActor(t);
+  const token = t.tokenUuid ? await fromUuid(t.tokenUuid) : null;
+  if ( !target || !token ) return ui.notifications.warn(L("DBU.Move.NoTargetToken", { name: t.name }));
+  const sys = attacker.system;
+  const T = sys.top.current;
+  const space = (k.space ?? 0) * sys.top.base;
+  const forceful = (k.forceful ?? 0) * T;
+  const positioning = attacker.items.some(i => (i.type === "transformation") && /^perfect positioning$/i.test(i.name)
+    && ((i.system.stacks ?? 0) > 0)) ? T : 0;
+  let squares = sys.aptitudes.might + space + forceful;
+  if ( k.precise && attack.strike?.crit ) squares += Math.floor(squares / 2);
+  const lines = [];
+  let won = true;
+  if ( k.superLaunch ) lines.push(L("DBU.Knockback.Auto"));
+  else {
+    const extra = [{ label: "Forceful Launch", value: forceful }, { label: L("DBU.Knockback.Space"), value: space },
+      { label: "Perfect Positioning", value: positioning }];
+    const mine = await attacker.rollClash("might", { extra, subtitle: "Knockback" });
+    const theirs = await target.rollClash("might", { subtitle: "Knockback" });
+    // The attacker makes the Clash: the target wins ties
+    won = (mine?.total ?? 0) > (theirs?.total ?? 0);
+    lines.push(L(won ? "DBU.Grapple.ClashWin" : "DBU.Grapple.ClashLose",
+      { name: attacker.name, other: target.name, mine: mine?.total ?? 0, theirs: theirs?.total ?? 0 }));
+  }
+  if ( won && k.precise && attack.strike?.crit ) lines.push(L("DBU.Knockback.Precise"));
+  if ( !won ) lines.push(L("DBU.Knockback.Failed", { name: target.name }));
+  await postInfoCard({ actor: attacker, title: "Knockback", subtitle: attack.name, lines });
+  let result = null;
+  if ( won && (await throughGrapple(attacker, target, "Knockback")) ) {
+    result = await forcedMove({ source: attacker, target: token, squares, away: !k.aoe, double: !!k.double,
+      label: `Knockback: ${attack.name}` });
+    if ( result && k.superLaunch && (result.total > 0) ) {
+      await runOps([{ op: "life", uuid: target.uuid, amount: result.total }]);
+      await postInfoCard({ actor: attacker, title: "Super Launch", subtitle: target.name,
+        lines: [L("DBU.Knockback.SuperLaunch", { name: target.name, n: result.total })] });
+    }
+  }
+  const kb = { won, moved: result?.moved ?? 0 };
+  if ( message.isOwner ) await storeKnockbackOnMessage(message.id, index, kb);
+  else emitGM("attackKnockback", { messageId: message.id, targetIndex: index, knockback: kb });
+  return kb;
+}
+
+export async function storeKnockbackOnMessage(messageId, index, knockback) {
+  const message = game.messages.get(messageId);
+  if ( !message ) return;
+  const attack = foundry.utils.deepClone(message.getFlag(FLAG, "attack"));
+  if ( !attack.targets[index] ) return;
+  attack.targets[index].knockback = knockback;
+  await refreshAttackMessage(message, attack);
+}
+
 /**
  * Reduce Life Points (through the GM if needed) and grant Bonus Momentum to the attacker.
  */
@@ -757,6 +872,11 @@ async function resolveActor(t) {
 export async function retargetAttack(message) {
   if ( !message.isOwner ) return ui.notifications.warn(L("DBU.Notify.NotOwner"));
   const attack = foundry.utils.deepClone(message.getFlag(FLAG, "attack"));
+  // On a phone the targets are picked from a list (no T key)
+  if ( mobileActive() ) {
+    const attacker = attack?.attackerUuid ? await fromUuid(attack.attackerUuid) : null;
+    if ( (await pickTargets(attacker?.actor ?? attacker)) === null ) return;
+  }
   const targets = Array.from(game.user.targets ?? []);
   if ( !targets.length ) return ui.notifications.warn(L("DBU.Attack.NoTargets"));
   attack.targets = targets.map(t => ({

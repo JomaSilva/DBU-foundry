@@ -130,6 +130,9 @@
     {{#if (eq source.transType "awakening")}}
     <label>Stacks <input type="number" name="system.stacks" value="{{source.stacks}}" min="0" data-dtype="Number"></label>
     <label>Max Stacks <input type="number" name="system.maxStacks" value="{{source.maxStacks}}" min="1" data-dtype="Number"></label>
+    <label data-tooltip="{{localize 'DBU.Stack.FreeTip'}}">{{localize "DBU.Stack.FreeLabel"}} <input type="number" name="system.freeStacks" value="{{source.freeStacks}}" min="0" data-dtype="Number"></label>
+    {{#if source.tempStacks.length}}<label>{{localize "DBU.Stack.TempLabel"}} <span>{{source.tempStacks.length}}</span></label>{{/if}}
+    {{#if source.stackTop}}<label data-tooltip="{{localize 'DBU.Stack.TopTip'}}">{{localize "DBU.Stack.TopLabel"}} <input type="text" name="system.stackTop" value="{{source.stackTop}}"></label>{{/if}}
     <label class="check"><input type="checkbox" name="system.temporary" {{checked source.temporary}}> {{localize "DBU.Trans.Temporary"}}</label>
     {{else}}
     <label class="check"><input type="checkbox" name="system.graded" {{checked source.graded}}> Graded</label>

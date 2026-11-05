@@ -361,6 +361,10 @@ export function computeSignature(sig, actor = null) {
     shortRange: rank("shortRange"),
     climax: rank("climaxAttack"),
     mandatoryCharge: rank("mandatoryCharge"),
+    // Knockback (free with the Launching Profile) and what pushes it further
+    knockback: !!has("knockback") || free.has("knockback"),
+    forcefulLaunch: rank("forcefulLaunch"),
+    preciseStrike: !!has("preciseStrike"),
     errors, warnings
   };
 }

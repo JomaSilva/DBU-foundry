@@ -2,7 +2,7 @@
   <header class="dbu-card-header">
     <div>
       <h3>{{attack.name}}</h3>
-      <div class="dbu-card-sub">{{category}}{{#if attack.charges}} · {{attack.charges}} Energy Charge(s){{/if}}{{#if attack.wager}} · Wager {{attack.wager}}{{#if attack.dkp.wager}} DKP{{/if}}{{/if}} · {{attack.kp}} {{#if attack.dkp.cost}}DKP{{else}}KP{{/if}}</div>
+      <div class="dbu-card-sub">{{category}}{{#if attack.charges}} · {{attack.charges}} Energy Charge(s){{/if}}{{#if attack.wager}} · Wager {{attack.wager}}{{#if attack.dkp.wager}} DKP{{/if}}{{/if}} · {{attack.kp}} {{#if attack.dkp.cost}}DKP{{else}}KP{{/if}}{{#if attack.knockback}} · Knockback{{/if}}</div>
     </div>
   </header>
   <div class="dbu-card-total {{#if attack.strike.crit}}crit{{/if}} {{#if attack.strike.botch}}botch{{/if}}">
@@ -12,6 +12,7 @@
     {{#if attack.strike.botch}}<span class="flag botch">{{localize "DBU.Roll.Botch"}}</span>{{/if}}
     {{#if attack.autoHit}}<span class="flag tn">{{localize "DBU.Attack.AutoHit"}}</span>{{/if}}
   </div>
+  {{#each attack.notes as |n|}}<p class="dbu-card-note">{{n}}</p>{{/each}}
   <details class="dbu-breakdown-wrap">
     <summary>{{localize "DBU.Roll.Breakdown"}}</summary>
     <ul class="dbu-breakdown">
@@ -38,6 +39,7 @@
         {{#if (eq t.result "hit")}}<span class="hit">{{localize "DBU.Defense.Hit"}}</span>{{else if (eq t.result "miss")}}<span class="miss">{{localize "DBU.Defense.Miss"}}</span>{{else}}<span class="pending">{{localize "DBU.Defense.Pending"}}</span>{{/if}}
         {{#if t.defense}}<small>{{t.defense.mode}}{{#if t.defense.total}} {{t.defense.total}}{{/if}}{{#if t.defense.cost}} ({{t.defense.cost}} {{#if t.defense.dkp}}DKP{{else}}KP{{/if}}){{/if}}</small>{{/if}}
         {{#if (or (eq t.damage 0) t.damage)}}<strong class="dmg">−{{t.damage}} LP</strong>{{/if}}
+        {{#if t.knockback}}<small class="dbu-kb-done">Knockback {{#if t.knockback.won}}{{localize "DBU.Knockback.Moved" n=t.knockback.moved}}{{else}}{{localize "DBU.Knockback.Resisted"}}{{/if}}</small>{{/if}}
       </td>
       <td class="actions">
         {{#unless t.result}}
@@ -52,6 +54,9 @@
         {{#if @root.attack.wound}}{{#unless (eq t.result "miss")}}{{#unless (or (eq t.damage 0) t.damage)}}
         <button type="button" class="dbu-dmg-btn" data-dbu-action="damage" data-index="{{i}}" data-tooltip="{{localize 'DBU.Damage.Apply'}}"><i class="fa-solid fa-heart-crack"></i> {{localize "DBU.Damage.Apply"}}</button>
         {{/unless}}{{/unless}}{{/if}}
+        {{#if (and @root.attack.knockback (gt t.damage 0))}}{{#unless t.knockback}}
+        <button type="button" class="dbu-dmg-btn dbu-kb-btn" data-dbu-action="knockback" data-index="{{i}}" data-tooltip="{{localize 'DBU.Knockback.Tip'}}"><i class="fa-solid fa-person-falling-burst"></i> Knockback</button>
+        {{/unless}}{{/if}}
       </td>
     </tr>
     {{/each}}

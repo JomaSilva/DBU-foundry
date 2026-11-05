@@ -15,13 +15,13 @@ export function modifiersField() {
 
 /**
  * Turn/round triggers carried by an Item (or the Actor): applied by the combat automation.
- * event: startOfRound | endOfRound | startOfTurn | endOfTurn | startOfEncounter
+ * event: startOfRound | endOfRound | startOfTurn | endOfTurn | startOfEncounter | stackGain (an Awakening gains a Stack)
  * effect: life | ki | capacity | counters | actions | resource | resourceSet | message
  * mode: auto (apply) | ask (chat button) | remind (message only)
  */
 export function triggersField() {
   return new ArrayField(new SchemaField({
-    event: new StringField({ initial: "startOfRound", choices: ["startOfRound", "endOfRound", "startOfTurn", "endOfTurn", "startOfEncounter"] }),
+    event: new StringField({ initial: "startOfRound", choices: ["startOfRound", "endOfRound", "startOfTurn", "endOfTurn", "startOfEncounter", "stackGain"] }),
     effect: new StringField({ initial: "life", choices: ["life", "ki", "capacity", "counters", "actions", "resource", "resourceSet", "state", "condition", "message"] }),
     value: new StringField({ required: true, blank: true, initial: "" }),
     resource: new StringField({ required: true, blank: true, initial: "" }),

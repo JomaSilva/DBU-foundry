@@ -1,6 +1,7 @@
 import { DBU } from "../config.mjs";
 import { evaluate, test } from "./formula.mjs";
 import { limitedPower, pushOptionalModifiers, rule } from "../optional-rules.mjs";
+import { stackChoiceCount } from "./awakening.mjs";
 
 /**
  * A rule modifier gathered from any source.
@@ -15,7 +16,7 @@ import { limitedPower, pushOptionalModifiers, rule } from "../optional-rules.mjs
 
 /** Targets resolved before Attribute Modifiers exist (they may only use PL/ToP/state data). */
 const EARLY_TARGETS = new Set(["top", "ki.max", "ki.mult", "capacity.max", "capacity.mult", "topDice.extra", "fatiguedMin",
-  "dotMin", "life.mult"]);
+  "dotMin", "life.mult", "superStacks"]);
 const ATTRIBUTE_TARGETS = /^(score|mod)\./;
 
 export function modifierStage(target) {
@@ -79,7 +80,12 @@ export function collectModifiers(actor, system) {
         if ( a.key === "highSpeed" ) highSpeed.push({ item, ctx });
       }
     }
-    for ( const m of s.modifiers ?? [] ) pushItemModifier(m, item.name, ctx, item.id);
+    for ( const m of s.modifiers ?? [] ) {
+      // Per-Stack choices of an Awakening: an option applies once per Stack that picked it, an unpicked Trait not at all
+      const count = (item.type === "transformation") ? stackChoiceCount(s, m.label) : null;
+      if ( count === null ) pushItemModifier(m, item.name, ctx, item.id);
+      else for ( let k = 0; k < count; k++ ) pushItemModifier({ ...m, active: true }, item.name, ctx, item.id);
+    }
     if ( (item.type === "transformation") && rule("greaterEnhancement") && s.greaterEnhancement && s.transcended ) {
       push({ target: "surgency", value: "1(T)" }, `${item.name} (Dedicated Power)`, ctx, item.id);
       push({ target: "capacity.mult", value: "1.25" }, `${item.name} (Dedicated Power)`, ctx, item.id);
@@ -168,9 +174,10 @@ function pushTransformationBonuses(item, system, push, ctx) {
   for ( const attr of DBU.ATTRIBUTES ) {
     let formula = transformationBonusFormula(item, attr, system);
     if ( !formula ) continue;
-    // Awakenings grant their Attribute Modifier Bonus once per Stack
+    // Awakenings grant their Attribute Modifier Bonus once per Stack (not for a Stack that gives none: a Yardrat's
+    // Spirit Control)
     if ( s.transType === "awakening" ) {
-      formula = `(${formula})*@Z`;
+      formula = `(${formula})*@ZB`;
       // Path to Power (Limited Power): Awakening bonuses −1 per Attribute, never negative
       if ( limitedPower(system) ) formula = `max(0, ${formula} - 1)`;
     }
