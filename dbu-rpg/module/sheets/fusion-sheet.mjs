@@ -138,7 +138,7 @@ function fusionContext(actor) {
     })),
     slots: Array.from({ length: Math.max(0, method.min - A.comps.length) }),
     canAdd: !fs.active && (fs.components.length < method.max),
-    actorOptions: game.actors.filter(a => ["character", "npc"].includes(a.type) && !inList.has(a.uuid))
+    actorOptions: game.actors.filter(a => ["character", "npc", "adversary"].includes(a.type) && !inList.has(a.uuid))
       .map(a => ({ value: a.uuid, label: `${a.name} (PL ${a.system.pl})` })),
     methodOptions: Object.entries(FUSION_METHODS).map(([k, m]) => ({ value: k, label: `${m.label} (${L(`DBU.Fusion.Type.${m.type}`)})` })),
     method: {

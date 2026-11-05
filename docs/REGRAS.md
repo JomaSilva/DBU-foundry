@@ -399,6 +399,15 @@ também mostra esse número do alvo a quem escaneou.
 | Elemental (Water) | Magia | Direct | 8(T) | Threshold → Prone; Bog |
 | Elemental (Wind) | Magia | Direct | 4(T) | efeitos de Slashing |
 
+**Perfis de Transformações e Raças** (só com o item que dá acesso):
+| Perfil | Acesso | Categoria | Custo KP | Efeito resumido |
+|---|---|---|---|---|
+| Barrier Blow | Barrier Focus | Standard | 4(T) | +1/4 do Might no Wound; o dado base é rolado de novo (crítico em qualquer um) |
+| Gravity Cage | Gravity Controller | Direct | 8(T) | ao causar dano: −1/4 do Might do atacante em LP e Might Clash → Prone |
+| Glass | Glass Tribe / Genetic Splicing | Standard | 2(T) | a cada 2 Energy Charges: +1 Categoria (máx. +2) e +1(T) Wound |
+| Time | Time Power | Standard | 10(T) | ao causar dano: Slowed até o fim do próximo turno do atacante, Guard Down até o fim deste |
+| Destruction | Power of Destruction | Lethal | 10(T) | +1 Energy Charge; o dano também baixa o LP máximo até o fim do encontro (0 = apagado) |
+
 ### 9.1 Super Profiles (apenas 1 por ataque; custo somado ao custo mínimo)
 | Super Profile | Custo KP | Pré-requisito | Efeito |
 |---|---|---|---|
@@ -409,7 +418,7 @@ também mostra esse número do alvo a quem escaneou.
 | Genki | — | Unique Ability Energy Gathering | perde Lifeforce: +2(bT) Wound por stack |
 | Giga Flare | 2(T)/Ação | Mega Flare | até 2 Ações; +2 Energy Charges por Ação |
 | Karmic | 2(T) | Z-Soul não Neutra | +1 categoria contra Z-Soul oposta (2× contra Pure) |
-| Multi-Profile | 1(T)/2(T)/3(T) | — | aplica outro Perfil sem seu custo (≤4(T)→1(T); 5–7(T)→2(T); ≥8(T)→3(T)) |
+| Multi-Profile | 1(T)/2(T)/3(T) | — | aplica outro Perfil sem seu custo e o ataque também é daquele Perfil (efeitos e requisitos dos dois; vale a maior categoria) (≤4(T)→1(T); 5–7(T)→2(T); ≥8(T)→3(T)) |
 | Super Beam | 2(T) | Beam | Line AoE; +1 magnitude a cada 2 cargas; +1 categoria nos dados de carga |
 | Super Combination | 2(T) | Combination | Ações extras: +rank Alotta Lotta Attacks e Peppering Blows e +1 Energy Charge por Ação |
 | Super Launch | 2(T) | Launching | vence Might Clash do Knockback; perde LP = quadrados |
@@ -499,8 +508,9 @@ também mostra esse número do alvo a quem escaneou.
 | United Attack [1/Round] | Instant | 1 | custo do perfil | +1/2 do atributo de dano no Wound do aliado; Wager até 1/4 Max Capacity |
 | Blockade | Counter | 1C | 2(T) | Clash Impulsive para bloquear movimento |
 | Defend | Counter | 1C | varia | Parry [0] (Acerto físico no lugar do Desvio; −1(bT) por carga/Power Shot), Direct Hit [0] (+1/2 Soak), Power Flare [0], Cross Counter [0] (Defense Value pela metade + Basic Attack), Guard [8(bT) +1(bT)/carga, máx +4(bT)] (Wound pela metade e −1 categoria). Defend não gera Diminishing Defense |
-| Duel | Counter | 1C | custo do ataque | contra ataque com 2+ cargas ou Wager ≥10(bT); 3 Duel Clashes com maior entre FO/MA |
-| Duel Escape | Counter | 1C | — | Clash Impulsive |
+| Duel | Counter | 1C | custo do ataque | contra ataque com 2+ cargas ou Wager ≥10(bT), com ataque da mesma Fundação (Energia = Magia) ou Power Duel; o atacante recupera o Wager; 3 Duel Clashes (maior entre FO/MA, dados de ToP do Wound, +2(T)/carga, +1(T) por Power Shot, Super Stack, State e stack no Wound; Wager secreto até 1/2 Max Capacity, sem gastar Capacidade); quem vence 2 faz o Wound com a soma dos Wagers (Power Duel: Might + Wagers e o outro fica Shaken); empate refaz, no 3º todos perdem 1/2 dos Wagers em LP; Capacidade de todos a 0 |
+| Duel Escape | Counter | 1C | — | antes do Duel começar: Impulsive Clash contra quem o começou (empate: ele); vencendo, o ataque é anulado e as Ações voltam (o KP não) |
+| United Duel | — | — | — | aliados entram num lado do Duel: cada um aposta até 1/10 da Max Capacity por Clash e dá +1(T); todos perdem a Capacidade no fim |
 | Energy Cancel [1/Round] | Counter | 1C | — | |
 | Exploit | Counter | 1C | — | Basic Attack Out-of-Sequence |
 | Intervene | Counter | 1C | 0 / 2(bT) / 8(bT) | Defense Wall (+1/2 Soak, arred. p/ cima), Deflect, Distant Deflect |
@@ -933,3 +943,48 @@ perícias, PL e equipamento são refeitos; dá para trocar 1 Fusion Modifier.
 | Shared Heritage | mesma raça e menos de 7 traços | RLM ×2; +1(T) AG/FO/TE/MA; +2(T) Wound da Fused Technique por personagem |
 | Synergistic Fusion | 2+1(bT) talentos iguais | +1(T) AG/FO/TE/MA; +3 PL |
 | The Mightiest Fusion | Rivals (Chosen Rival) | +1 ToP; é a própria Rival |
+
+## 24. Adversários (Adversaries)
+
+Resumo da página *Adversaries*. Na ficha, isso fica no Ator do tipo Adversário.
+
+**PCC (Player Character Count):** quantos Personagens de Jogador (não-Minions controlados por um jogador) o
+adversário deve enfrentar. Nem sempre é o número de jogadores: vários adversários podem dividir o grupo.
+
+| Categoria | LP por PL | KP por PL | AP por ToP base | Narrative Stamina | Villainous Traits |
+|---|---|---|---|---|---|
+| Standard | 1 | 1 | — | — | — |
+| Elite | PCC | 2(PCC) | PCC | PCC × 6(bT) | 1 |
+| Villain | 2(PCC) | 4(PCC) | 2(PCC) | PCC × 12(bT) | 2 |
+
+- **Narrative Stamina** (Elite e Villain): ganha no início de cada rodada e perde no fim. Pode ser usada no lugar de
+  KP e, ao levar dano, gasta-se o quanto quiser para reduzir os LP perdidos na mesma quantidade.
+- **One-Man Army:** Elite e Villain ganham PCC Ações de Adversário por rodada no lugar de 1 Counter Action. Elas valem
+  como Counter Actions, e 2 delas usam uma Standard Maneuver de 1 Ação como Instant Maneuver.
+- **Without Capacity:** adversários podem ignorar a Capacidade; evite Ki Wager acima da Max Capacity (no Duel, use a
+  Capacidade normal).
+- **Villainous Karma:** sem Karma na criação e sem limite. No início de cada combate, o Villain ganha PCC Karma e o
+  Elite, 1/2 do PCC (mín. 1); perde tudo no fim. Ao ficar sem Karma, recupera 1/4 do LP e do KP máximos.
+- Adversários não têm Skill Improvements, têm TP ilimitados, ignoram o Attribute Score Limit, o Awakening Limit e os
+  pré-requisitos de Score de Unique Abilities (para ranks de perícia exigidos, bastam 2).
+- **Villainous Maneuvers** podem usar as Ações de Adversário como Ações:
+  - **1-on-1 Duel** [1/Enc]: o PC aceita ou não; sem Narrative Stamina nem One-Man Army até outro entrar; derrotar o PC
+    devolve 1/4 do LP e do KP máximos dele e a manobra.
+  - **Insta-Kill** [1/Enc, 2 Ações]: mata um Minion; Exploitable.
+  - **Area Wipe** [1/Enc, 2 Ações]: ataque Simple contra todos; depois Features e Environmental Qualities somem.
+  - **Planet Burst** [1/Round, 2/Enc, 3 Ações]: custa a Narrative Stamina; Mega Flare com PCC cargas e PCC/2 Power Shot,
+    respondido só com Duel.
+  - **Time to Get Serious** [1/Enc]: −1 Karma, sem condições (menos Suffocating), fim do Grapple, Legend Realized.
+  - **Act Again** [1/Round]: um turno extra em que as Ações de Adversário são as Ações.
+  - **Get Up!** [1/Round, 1 Ação]: o PC derrotado volta com 1/10 do LP (Will to Survive) e não pode ser alvo do
+    adversário até o fim do próximo turno dele.
+  - **"Face Me at Full Power"** [1/Enc]: sem condições (menos Pinned e Suffocating) e Transformation Maneuver na hora.
+  - **"Stop Wasting My Time"** [1/Enc]: o alvo pode se transformar na hora; se o fizer, o adversário ganha o Legend
+    Realized.
+- **Villainous Traits** (exemplos do site): Arrogant and Unstoppable (+2(T) Combat/Soak/Might enquanto Healthy; 1/Enc
+  conta como Healthy até o próximo turno), Dauntless (sem Bonus Momentum contra ele nem Reduced Momentum; LP máx +1/4,
+  −1/4 por limiar cruzado), Desperate Adversary (+1(T) Combat e −1(T) Soak por limiar abaixo; +1 Counter por limiar),
+  Narrative Transformation (uma Form/Line sem Stress Test; Legend Realized em dobro 1/Enc), Second Phase (a maior
+  transformação só depois da primeira derrota, quando volta com 1/2 do LP), Statstick (LP/KP por PL em dobro, +1(T)
+  Combat e Soak, sem Unique Abilities nem Special Maneuvers exceto Soar), Wild Swings (−2(bT) Acerto, +3(T) Wound, 2
+  Absolute Attacks por rodada).

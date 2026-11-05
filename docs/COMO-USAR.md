@@ -10,9 +10,10 @@ Homebrew não foi incluído.
 1. No Foundry, crie um mundo com o sistema **Dragon Ball Universe RPG (DBU)**.
 2. Como GM, abra **Configurações › Configurar Sistema › Regras Adicionais** e marque as regras
    opcionais que valem na sua campanha (ver a página "Regras Adicionais").
-3. Crie um Ator do tipo **Personagem** (jogadores) ou **NPC** (adversários; não é validado contra
-   as regras de criação). Na aba Biografia do NPC, o tipo **Chefe (Boss)** deixa ele entrar em
-   transformações acima do ToP dele (ver "Transformações").
+3. Crie um Ator do tipo **Personagem** (jogadores), **Adversário** (inimigos com as regras de
+   Adversaries: Standard, Elite ou Villain; ver "Adversários") ou **NPC** (outros personagens e Minions).
+   Adversários e NPCs não são validados contra as regras de criação. Na aba Biografia do NPC, o tipo
+   **Chefe (Boss)** deixa ele entrar em transformações acima do ToP dele (ver "Transformações").
 4. Arraste dos compêndios **DBU — Raças**, **Traços Raciais e Fatores**, **Talentos**,
    **Transformações**, **Unique Abilities**, **Manobras Especiais** e **Equipamentos** para a ficha.
 5. Defina o **PL** no cabeçalho, distribua os pontos de atributo e as perícias. Os totais, limites e
@@ -27,6 +28,68 @@ de internet):
 - O botão **Carregar texto oficial** da aba Descrição busca o texto de novo quando quiser.
 - Para desligar, use **Configurações › Configurar Sistema › Carregar o texto oficial
   automaticamente** (vale só para o seu computador).
+
+## Adversários
+
+O Ator do tipo **Adversário** segue as regras de Adversaries do site. O painel **Adversário**, no topo da aba
+Principal, tem a **Categoria** (Standard, Elite ou Villain) e o **PCC** (Player Character Count).
+- **PCC automático no combate:** conta os Personagens de Jogador do combate do adversário (personagens que não são
+  Minions e têm um jogador como dono). Fora de combate, ou num combate sem eles, vale o **PCC da ficha**. Com **Fixo**,
+  vale sempre o número da ficha (por exemplo, quando dois vilões dividem o grupo).
+- **Pela categoria e pelo PCC:** LP e KP a mais por PL, Attribute Points a mais por ToP base (no orçamento de
+  atributos), Narrative Stamina por rodada, Ações de Adversário, Karma por encontro e o número de Villainous Traits.
+  A tabela do painel mostra os valores.
+- **Quando o PCC muda:** um combate começa, ou um jogador entra ou sai no meio. A ficha mostra o PCC novo na hora. LP e
+  KP mudam no começo da rodada seguinte, mantendo o que já tinha perdido (quem estava cheio continua cheio). No fim do
+  combate, volta ao PCC da ficha.
+- **Narrative Stamina (Elite e Villain):** a barra **NS** enche no começo de cada rodada e zera no fim. Por padrão ela
+  paga primeiro o KP dos ataques (há uma caixa no diálogo de ataque) e do Guard, e reduz o dano recebido na mesma
+  quantidade. As duas coisas podem ser desligadas no painel.
+- **One-Man Army (Elite e Villain):** em vez de 1 Counter Action, o adversário ganha PCC **Ações de Adversário** por
+  rodada (o "AA" do cabeçalho), gastas como Counter Actions. O botão **2 Ações de Adversário: Instant** troca 2 delas
+  por 1 Ação para uma Standard Maneuver de 1 Ação usada como Instant.
+- **Villainous Karma:** no começo de cada combate o Villain ganha PCC de Karma e o Elite, metade (mínimo 1). Não há o
+  limite de 4, e o que sobrar some no fim do combate. Na primeira vez que o Karma acaba no combate, o adversário recupera
+  1/4 do LP e do KP máximos.
+- **Sem Capacidade:** ligado por padrão. Ataques e Guard não gastam nem conferem a Capacidade, e o Ki Wager vai até a
+  Max Capacity. **Formas acima do ToP** funciona como o NPC Chefe.
+- **Villainous Maneuvers** (compêndio de Manobras, pasta Villainous Maneuvers): arraste para a ficha e use pelo botão
+  do item. O sistema confere a frequência (por rodada ou encontro) e paga o custo em Ações, usando as Ações de
+  Adversário quando as Ações acabam.
+  - **1-on-1 Duel:** escolha um Personagem de Jogador; o cartão dá ao dono dele (ou ao mestre) **Aceitar** e
+    **Recusar**. Aceito, o adversário fica sem Narrative Stamina e sem One-Man Army. Acaba quando outro personagem
+    ataca um dos dois ou é atacado por eles. Derrotar aquele PC devolve 1/4 do LP e do KP máximos dele e a manobra.
+  - **Insta-Kill:** só contra Minions (ou um "Buddy"); o alvo morre e fica Derrotado. O cartão lembra do Exploitable.
+  - **Area Wipe:** marca todos os outros tokens da cena e abre o ataque Simple fora de sequência. Destruir as Features e
+    as Environmental Qualities fica com o mestre.
+  - **Planet Burst:** gasta a Narrative Stamina e faz um Mega Flare com PCC Energy Charges e PCC/2 Power Shot contra os
+    Personagens de Jogador. Sem Strike Roll: no cartão os alvos só têm o botão **Duel**. Quem perder o Duel leva o dano.
+  - **Time to Get Serious:** gasta 1 Karma, tira todas as condições (menos Suffocating), solta um Grapple em que ele era
+    o agarrado e aplica o Legend Realized.
+  - **Act Again:** um turno extra agora, antes de quem ia agir. Nele as Ações de Adversário viram as Ações do turno. No
+    fim volta o que sobrou como Ações de Adversário, as Ações normais voltam, e o turno interrompido continua sem
+    começar de novo (sem repetir DOT, Draining etc.).
+  - **Get Up!:** levanta um personagem derrotado com 1/10 do LP máximo (conta como o Will to Survive dele). O adversário
+    não pode atacá-lo até o fim do próximo turno dele.
+  - **"Face Me at Full Power":** tira as condições (menos Pinned e Suffocating) e abre a escolha de uma Form ou
+    Enhancement para entrar fora de sequência.
+  - **"Stop Wasting My Time":** o cartão avisa o alvo e tem o botão **Ele se transformou: Legend Realized**.
+- **Villainous Traits** (compêndio de Traços raciais, pasta Villainous Traits):
+  - **Arrogant and Unstoppable:** +2(T) em Combat Rolls, Soak e Might enquanto Healthy. Pelo botão do item (1 vez por
+    encontro), conta como Healthy para todos os seus efeitos até o início do próximo turno (o Desperate Adversary, por
+    exemplo, deixa de contar os limiares).
+  - **Dauntless:** ninguém ganha Bonus Momentum ao derrubá-lo de limiar e ele não sofre Reduced Momentum. LP máximo
+    +1/4, e cada limiar cruzado tira 1/4 dele até o fim do encontro.
+  - **Desperate Adversary:** +1(T) em Combat Rolls e −1(T) no Soak por limiar abaixo; +1 Counter Action por limiar
+    cruzado.
+  - **Narrative Transformation:** pelo botão do item, escolha a Form ou Transformation Line; ela não pede Stress Test
+    quando usada sozinha. O primeiro Legend Realized de cada encontro vale em dobro.
+  - **Second Phase:** a transformação de maior requisito de ToP só fica liberada depois que ele é derrotado pela
+    primeira vez. Nessa hora ele volta com metade do LP máximo e escolhe uma transformação para entrar na hora.
+  - **Statstick:** LP e KP por PL em dobro, +1(T) em Combat Rolls e Soak. Bloqueia Unique Abilities e Special Maneuvers
+    (menos o Soar); as manobras básicas, God e Villainous continuam.
+  - **Wild Swings:** −2(bT) no Acerto e +3(T) no Wound. O diálogo de ataque tem a caixa **Absolute Attack** (2 por
+    rodada).
 
 ## Celular e tablet
 
@@ -138,6 +201,64 @@ sistema liga o **modo celular** sozinho:
 - **Atacar:** escolha a técnica ou o Perfil (Profile), a Fundação, o Ki Wager, Energy Charges e
   opções (Called Shot, Rapid...). O sistema confere as regras (custo mínimo, Capacidade, Wager
   máximo, ações), desconta KP/Capacidade/Ações e rola o Acerto.
+- **Multi-Profile:** a Signature com esse Super Profile também é do segundo Perfil escolhido, e os efeitos dos dois
+  valem no ataque: Cutting, natural mínimo 5 do Clearing, Pinpoint, Crushing, cargas do Beam e do Powered, Mega Flare,
+  Knockback do Launching, Light com Dark etc. Vale a maior Categoria de Dano. As Vantagens que pedem um Perfil aceitam
+  qualquer um dos dois, e as que um Perfil dá de graça não custam TP. A ficha e o cartão mostram "Perfil + Perfil".
+- **Multi-Profile por efeito:** quem tem um efeito que aplica o Multi-Profile na hora do ataque ganha o campo
+  **Multi-Profile** no diálogo de ataque, com os Perfis permitidos e o custo (+1(T), +2(T) ou +3(T) KP, somado também
+  ao custo mínimo). O sistema confere a Fundação, o limite por rodada ou encontro e a regra de um Super Profile só.
+  - **Flash of the Elements** (Elemental Force): Z vezes por rodada, ataques Físicos ou de Energia, um Favored Element.
+  - **Elemental Aura** (Sparking Aura): 1 vez por rodada (sem limite com a Sparking Aura dominada), um Favored Element.
+    Ponha na Sparking Aura um modificador **Favored Element** com o elemento escolhido.
+  - **Elemental Infusion** (item com esse nome): ataques Físicos ou de Energia, um Favored Element.
+  - **Plant Monster:** Elemental (Plantlife). Gasta 1 Sunlight se a ficha tiver esse recurso; sem ele, o cartão lembra.
+  - **Neko Mimicry:** 1 vez por encontro, só em Signature (Copied Technique), um Perfil de uma das suas Signatures.
+  - **Hyper Elemental** (Elemental Force com 2 stacks): numa Signature com Flash of the Elements escolhido, o diálogo
+    libera mais dois campos (apagados até você escolher o Flash): **AoE** Line ou Cone, 1 vez por rodada, com +1
+    Magnitude a cada 2 Energy Charges; e, com 3+ Energy Charges da Energy Charge Maneuver, **mais um Favored Element**
+    sem custo de KP, 1 vez por encontro.
+  - **Elemental Blade** (qualidade de arma): o elemento do campo Favored Element da arma entra sozinho em todo ataque
+    enquanto ela está empunhada.
+  - **Favored Elements** vêm da Elemental Tool empunhada, dos modificadores Favored Element dos itens em uso e dos
+    elementos escolhidos a cada stack do Elemental Force. Valem também para o +1(T) no Acerto e o +2(T) no Wound.
+  - Um Ataque Básico de Elemental (Light) também ganha o Full Wager de graça.
+- **Perfis de Transformações e Raças:** Barrier Blow (Barrier Focus), Gravity Cage (Gravity Controller), Glass (Glass
+  Tribe ou Genetic Splicing), Time (Time Power) e Destruction (Power of Destruction) só aparecem para quem tem o item.
+  Sem ele, o ataque é recusado (o "Ignorar limites" do mestre libera).
+  - **Glass:** +1 Categoria de Dano e +1(T) no Wound a cada 2 Energy Charges (até +2 Categorias).
+  - **Barrier Blow:** o Wound soma 1/4 do Might e rola o dado base mais uma vez (crítico em qualquer um conta).
+  - **Gravity Cage:** ao causar dano, o alvo perde mais 1/4 do seu Might em LP e vocês fazem um Might Clash; vencendo,
+    ele cai Prone (com Gravity Controller, perde outro 1/4 do Might).
+  - **Time:** ao causar dano, o alvo fica Slowed até o fim do seu próximo turno e Guard Down até o fim deste.
+  - **Destruction:** o dano também baixa o LP máximo do alvo até o fim do encontro; em 0, ele é apagado.
+- **Absolute Attack** (Wild Swings, Intense Blast): se o ataque errar um alvo, o botão **Aplicar dano** continua e
+  aplica metade do Wound contra Soak e RD, sem os efeitos de "ao causar dano" do atacante. No máximo 2 por rodada.
+- **Duel Maneuver:** contra um ataque com 2+ Energy Charges ou Ki Wager de 10(bT) ou mais, o cartão mostra ao alvo
+  o botão **Duel** (o ícone de explosão). Ele custa 1 Counter Action e o KP do ataque de resposta: uma Signature, um
+  Ataque Básico da mesma Fundação (Energia e Magia contam como uma) ou o **Power Duel** (sem ataque e sem KP).
+  - O atacante recebe de volta o Ki Wager, KP e Capacidade. Sai um cartão de Duel e, no mapa, os dois ataques se
+    encontram no meio: beams que se empurram (Energia e Magia) ou golpes que se chocam (Físico).
+  - **3 Duel Clashes.** Cada lado clica em **Apostar** e escolhe o Ki Wager em segredo, até 1/2 da Max Capacity. O valor
+    só aparece quando os dois apostam. O Wager gasta KP (Narrative Stamina primeiro, nos adversários), não Capacidade.
+  - A rolagem soma o maior entre Força e Magia, os dados de ToP do Wound do ataque, +2(T) por Energy Charge e +1(T) por
+    Power Shot, Super Stack, State (Raging ou Mindful) e stack de Power ou de recurso no Wound. O Critical Target é o
+    do Wound (Cutting: 5).
+  - Quem vence um Clash empurra o ponto de encontro na direção do outro. Empate no 1º ou no 2º Clash: os Wagers
+    voltam e o Clash é refeito.
+  - **Quem vence 2 Clashes** acerta sem Strike Roll, com um Ki Wager igual à soma de todos os Wagers do Duel. O Wound
+    e o dano saem sozinhos: no cartão do ataque, se for o atacante, ou num cartão novo do ataque de resposta, se for o
+    defensor. No mapa, o beam do vencedor atravessa até o outro, ou o golpe dele acerta.
+  - **Power Duel vencido:** o Wound é o Might + os Wagers, e o perdedor fica Shaken.
+  - **Empate no 3º Clash** (com 1 a 1): todos perdem metade dos Wagers em LP.
+  - No fim, a Capacidade de todos no Duel vai a 0.
+  - **Duel Escape:** antes do primeiro Ki Wager, o atacante tem o botão **Duel Escape** no cartão do Duel (1 Counter
+    Action). É um Impulsive Clash contra quem começou o Duel, que vence o empate. Escapando, o ataque é anulado (os alvos
+    ficam "Errou (Duel Escape)") e o atacante recupera as Ações do ataque, mas não o KP. Falhando, o Duel começa.
+  - **United Duel:** outro alvo do mesmo ataque que clica em **Duel** entra no lado do primeiro. O botão **Entrar no
+    Duel** põe qualquer personagem seu da cena num dos lados. Cada aliado aposta até 1/10 da Max Capacity por Clash, que
+    soma no lado dele com +1(T) por aliado. No fim, todos perdem a Capacidade, e o ataque vencedor acerta todos do outro
+    lado.
 - No cartão do ataque, o alvo clica em **Desviar** (ou Defend/Parry/Guard); o atacante rola o
   **Dano**; depois **Aplicar dano** calcula Soak, DR, categoria de dano, Guard, Broken, limiares,
   Steadfast, Massive Damage, Overkill, Bonus Momentum e Diminishing Defense.
@@ -427,6 +548,25 @@ Enquanto uma transformação está ativa, o token mostra uma aura animada em vol
 - Com uma Form e uma Enhancement ativas ao mesmo tempo, as duas auras aparecem em camadas.
 - Todos os jogadores veem as auras. Quem achar pesado pode desligar só para si em **Configurações › Configurar
   Sistema › Auras de transformação nos tokens**.
+
+## Efeitos de ataque no mapa
+
+Quando o cartão de um ataque aparece no chat, todos veem o efeito saindo do token de quem ataca até cada alvo. Sem
+alvo, aparece só um clarão no atacante. Um crítico no Acerto dá um impacto maior com faíscas.
+- **Ataque Básico:** um efeito simples do Perfil, nas cores da Fundação (Físico laranja, Energia azul, Magia roxo) ou
+  do Elemento. Simple físico e Combination são golpes, Beam é um raio, Blast um cone, Cutting um disco cortante,
+  Wave e Water ondas, Clearing e Fire explosões, Sweeping um giro em volta, Blitz uma investida, Lightning um
+  relâmpago, Earth, Ice e Metal estilhaços, Plantlife vinhas. Glass solta estilhaços de vidro, Gravity Cage um
+  redemoinho roxo, Time uma onda dourada, Destruction uma esfera grande roxa e Barrier Blow um golpe (ou explosão)
+  azul-claro. Os outros são esferas de energia.
+- **Signature Technique:** a aba Detalhes tem a caixa **Efeito visual**.
+  - Forma, tamanho, **Cor** e **Cor do núcleo**. Em branco, valem as do Perfil.
+  - Extras: **Raios**, **Espiral**, **Faíscas**, **Onda de choque**, **Carregar antes** (a energia se junta no
+    personagem antes de sair) e **Tremor** (a tela treme no impacto).
+  - **Testar no mapa** mostra o efeito só para você, até os tokens marcados como alvo. **Voltar ao do Perfil** limpa
+    tudo.
+- O tamanho cresce um pouco com a Categoria de Dano e com as Energy Charges.
+- Quem achar pesado desliga só para si em **Configurações › Configurar Sistema › Efeitos de ataque**.
 
 ## Altura, voo, Grapple e arremessos
 

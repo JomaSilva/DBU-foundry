@@ -9,6 +9,7 @@ import { AWAKENING_POINTS, godHoned, gravityFor, limitedPower, martialDieCategor
 import { allocTotal, resourceSlug, splitLimits } from "./resources.mjs";
 import { danceHalved } from "../fusion/fusion-rules.mjs";
 import { awakeningStacks } from "./awakening.mjs";
+import { adversaryInfo } from "./adversary.mjs";
 
 /** Base Tier of Power from Power Level: 1-4 → 1, 5-9 → 2 ... 30 → 7. */
 export function baseTopFromPL(pl) {
@@ -60,6 +61,9 @@ export function prepareActorData(sys, actor) {
   const pl = Math.clamp(sys.pl ?? 1, 1, fusion ? 60 : 30);
   const bT = baseTopFromPL(pl);
   const statuses = actor.statuses ?? new Set();
+  // Adversaries: Life and Ki Points per Power Level, Attribute Points, Narrative Stamina... by Category and PCC
+  const adv = adversaryInfo(actor, bT);
+  sys.adversaryInfo = adv;
 
   /* ----- Conditions ----- */
   const cond = {};
@@ -125,7 +129,7 @@ export function prepareActorData(sys, actor) {
     for ( const inj of opt.injuries ?? [] ) if ( !inj.ignored ) injuryMult -= (inj.severity === "major" ? 0.2 : 0.1);
     injuryMult = Math.max(0, injuryMult);
   }
-  const prelimLifeMax = Math.floor((lifeStart + lifePerPL + ((rlmBase + (2 * rawScores.te)) * pl)) * injuryMult);
+  const prelimLifeMax = Math.floor((lifeStart + lifePerPL + ((rlmBase + (2 * rawScores.te) + (adv?.lifePerPL ?? 0)) * pl)) * injuryMult);
   const prelimThr = thresholdState(sys.life.value, prelimLifeMax);
 
   /* ----- Shared formula data ----- */
@@ -139,8 +143,10 @@ export function prepareActorData(sys, actor) {
     if ( r.split ) for ( const k of DBU.splitRolls ) resources[`${slug}_${k}`] = r.alloc[k];
   }
   const holdingBack = Math.clamp(sys.combat.holdingBack ?? 0, 0, bT);
+  // Arrogant and Unstoppable (Villainous Trait): treated as Healthy for all of its effects until its next turn
+  const asHealthy = !!actor.flags?.["dbu-rpg"]?.asHealthy;
   const data = {
-    PL: pl, bT, T: bT, below: prelimThr.count, power: Math.max(0, sys.combat.power ?? 0),
+    PL: pl, bT, T: bT, below: asHealthy ? 0 : prelimThr.count, power: Math.max(0, sys.combat.power ?? 0),
     superStacks: sys.combat.superStacks ?? 0, holdingBack,
     states: { ...sys.states }, cond, res: resources,
     transformed: sys.transformation.transformed ? 1 : 0,
@@ -186,7 +192,7 @@ export function prepareActorData(sys, actor) {
     (sys.conditionHolds.guardDown ??= []).push(`Grapple (${grapple.name ?? ""})`);
     if ( grapple.pinned && (grapple.role === "grappled") ) (sys.conditionHolds.pinned ??= []).push("Pin Maneuver");
   }
-  const kiBase = Math.floor((kiStart + (12 * (pl - 1))) * injuryMult) + sum(buckets, "ki.max");
+  const kiBase = Math.floor((kiStart + (12 * (pl - 1)) + ((adv?.kiPerPL ?? 0) * pl)) * injuryMult) + sum(buckets, "ki.max");
   const kiMax = Math.floor(kiBase * (kiMultiplier ? 2 : 1) * (buckets["ki.mult"]?.total ?? 1));
   data.kiMaxBase = Math.floor(kiBase * (buckets["ki.mult"]?.total ?? 1));
   // Power: +1(T) Combat Rolls per stack (effects may exceed 2 stacks); Max Capacity +1/4 for the first 2 stacks only
@@ -263,10 +269,13 @@ export function prepareActorData(sys, actor) {
 
   /* Life Points */
   const rlm = rlmBase + sum(buckets, "rlm");
-  const lifePerLevel = rlm + (2 * score("te")) + sum(buckets, "life.perLevel");
+  const lifePerLevel = rlm + (2 * score("te")) + sum(buckets, "life.perLevel") + (adv?.lifePerPL ?? 0);
   const lifeMax = Math.floor(((Math.floor((lifeStart + lifePerPL + (lifePerLevel * pl)) * injuryMult) + sum(buckets, "life.max")))
     * (buckets["life.mult"]?.total ?? 1));
-  sys.life.max = Math.max(1, lifeMax);
+  // Maximum Life Points lost until the end of the Combat Encounter (Destruction Profile, Dauntless)
+  const maxLifeLoss = Math.max(0, actor.flags?.["dbu-rpg"]?.maxLifeLoss ?? 0);
+  sys.maxLifeLoss = maxLifeLoss;
+  sys.life.max = Math.max(1, lifeMax - maxLifeLoss);
   sys.rlm = rlm;
   data.lifeMax = sys.life.max;
 
@@ -281,7 +290,7 @@ export function prepareActorData(sys, actor) {
     stressPenalty: ignoreThr ? 0 : failed * thresholdPenaltyMult,
     defeated: sys.life.value <= 0 && !(sys._effectiveStates?.undying > 0)
   };
-  data.below = thr.count;
+  data.below = asHealthy ? 0 : thr.count;
   data.failed = failed;
 
   /* Super Stacks */
@@ -532,7 +541,9 @@ export function prepareActorData(sys, actor) {
   sys.damageCategoryTaken = sum(buckets, "damageCategoryTaken") + (prone ? 1 : 0);
   sys.actionsPerRound = Math.max(0, 3 + sum(buckets, "actions") - cond.slowed);
   if ( cond.pinned ) sys.actionsPerRound = Math.min(1, sys.actionsPerRound);
-  sys.countersPerRound = Math.clamp(1 + sum(buckets, "counters"), 0, 6);
+  // One-Man Army (Elite and Villain Adversaries): PCC Adversary Actions instead of 1 Counter Action, spent the same way
+  const counterBase = adv?.oneManArmy ? adv.pcc : 1;
+  sys.countersPerRound = Math.clamp(counterBase + sum(buckets, "counters"), 0, Math.max(6, counterBase));
   sys.dimDefensePerAttack = DBU.DIM_DEFENSE[Math.min(7, bT + sum(buckets, "dimDefenseTop"))] ?? 1;
   sys.maxWeapons = Math.max(0, ((sys._effectiveStates?.multipleArms > 0) ? 4 : 2) + sum(buckets, "weapons"));
   sys.dotMin = sum(buckets, "dotMin");
@@ -575,7 +586,8 @@ export function prepareActorData(sys, actor) {
   const profileBuyoutCost = R.profileBuyout ? 2 * (opt.boughtProfiles?.length ?? 0) : 0;
   sys.progression = {
     perks, perksAvailable: Math.max(0, perks.perk), perksUsed: (conv.attribute ?? 0) + (conv.talent ?? 0) + (conv.skill ?? 0),
-    attributeAdditions, attributePoints: (attributeAdditions * 2) + pl1Bonus.attributePoints + sum(buckets, "attributePoints"),
+    attributeAdditions, attributePoints: (attributeAdditions * 2) + pl1Bonus.attributePoints + sum(buckets, "attributePoints")
+      + ((adv?.apPerTop ?? 0) * bT),
     attributePointsSpent: DBU.ATTRIBUTES.reduce((t, a) => t + (sys.attributes[a].points ?? 0), 0),
     talentAdditions, skillImprovements,
     skillRanksFromSI: (skillImprovements * 4) + pl1Bonus.ranks + (2 * honed.technique),
@@ -599,7 +611,7 @@ export function prepareActorData(sys, actor) {
 
   sys.rollData = {
     ...data,
-    T, bT, PL: pl, below: thr.count, failed,
+    T, bT, PL: pl, below: data.below, failed,
     attributes: Object.fromEntries(DBU.ATTRIBUTES.map(a => [a, { score: score(a), mod: attr(a) }])),
     aptitudes: sys.aptitudes,
     life: sys.life.value, lifeMax: sys.life.max, ki: sys.ki.value, kiMax: sys.ki.max,

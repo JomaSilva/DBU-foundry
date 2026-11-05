@@ -55,12 +55,23 @@ async function rollOnce(config) {
   let natural = Math.clamp(rawNatural + naturalMod, 1, 10);
   if ( minNatural ) natural = Math.max(natural, minNatural);
 
-  let crit = !noCrit && (natural >= critTarget);
+  // Barrier Blow: the Base Die rolled an additional time (no Botch from it; a Critical on it counts, and a Critical
+  // on both Base Dice applies the Critical dice twice)
+  let natural2 = null;
+  if ( config.extraBaseDie ) {
+    const r2 = await new Roll("1d10").evaluate();
+    rolls.push(r2);
+    natural2 = Math.clamp(r2.total + naturalMod, 1, 10);
+  }
+  const crit2 = !noCrit && (natural2 !== null) && (natural2 >= critTarget);
+  const critMain = !noCrit && (natural >= critTarget);
+  let crit = critMain || crit2;
   let botch = !noBotch && !crit && (natural <= botchRange);
   if ( cutting && !crit ) botch = true;
 
   // Extra Dice (ToP, Greater, Energy Charges ...)
   const extra = [];
+  if ( natural2 !== null ) extra.push({ label: config.extraBaseDieLabel ?? "Base Die", formula: "1d10", total: natural2, roll: rolls.at(-1) });
   for ( const g of diceGroups ) {
     const formula = diceToFormula(g.dice);
     if ( !formula ) continue;
@@ -71,7 +82,8 @@ async function rollOnce(config) {
 
   let critRoll = null;
   if ( crit && critDice.length ) {
-    critRoll = await new Roll(diceToFormula(critDice)).evaluate();
+    // A Critical on both Base Dice (Barrier Blow): the Critical dice twice
+    critRoll = await new Roll(diceToFormula((critMain && crit2) ? critDice.map(d => ({ ...d, number: d.number * 2 })) : critDice)).evaluate();
     rolls.push(critRoll);
   }
 

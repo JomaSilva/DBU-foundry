@@ -15,7 +15,7 @@ export function onRenderChatMessage(message, html) {
     if ( attacker && !attacker.isOwner ) {
       root.querySelectorAll("[data-dbu-action='wound'], [data-dbu-action='retarget'], [data-dbu-action='knockback']").forEach(b => b.remove());
     }
-    root.querySelectorAll("[data-dbu-action='defense']").forEach(b => {
+    root.querySelectorAll("[data-dbu-action='defense'], [data-dbu-action='duel']").forEach(b => {
       const t = attack.targets?.[Number(b.dataset.index)];
       const doc = t?.tokenUuid ? fromUuidSync(t.tokenUuid) : (t?.actorUuid ? fromUuidSync(t.actorUuid) : null);
       const actor = doc?.actor ?? doc;
@@ -23,6 +23,12 @@ export function onRenderChatMessage(message, html) {
       // Divine Flex: only for a defender in the God Ki State who has that God Maneuver
       else if ( (b.dataset.mode === "divineFlex") && !(actor?.system?.dkp?.usable
         && actor.items.some(i => (i.type === "maneuver") && i.system.god && /flex/i.test(i.name))) ) b.remove();
+    });
+  }
+  // Duel Maneuver: each side's owner sets its own Ki Wager
+  if ( message.getFlag("dbu-rpg", "duel") ) {
+    root.querySelectorAll("[data-dbu-action='duelWager'], [data-dbu-action='duelEscape']").forEach(b => {
+      if ( !game.user.isGM && !fromUuidSync(b.dataset.actorUuid)?.isOwner ) b.remove();
     });
   }
   // Scan: only the scanned Character's owner answers (Concealment or let the reading through)
@@ -52,6 +58,48 @@ async function onCardButton(event, message) {
       case "damage": await applyAttackDamage(message, Number(index)); break;
       case "knockback": await knockbackTarget(message, Number(index)); break;
       case "retarget": await retargetAttack(message); break;
+      case "duel": {
+        const { startDuel } = await import("./combat/duel.mjs");
+        await startDuel(message, Number(index));
+        break;
+      }
+      case "duelWager": {
+        const { commitDuelWager } = await import("./combat/duel.mjs");
+        await commitDuelWager(message, button.dataset.side, button.dataset.helper ?? "");
+        break;
+      }
+      case "villainOneOnOne":
+      case "villainLegend": {
+        const actor = await fromUuid(actorUuid);
+        const p = JSON.parse(button.dataset.payload || "{}");
+        const V = await import("./combat/villainous.mjs");
+        if ( dbuAction === "villainOneOnOne" ) {
+          // The challenged Player Character's owner (or the GM) answers
+          const asked = actor?.getFlag("dbu-rpg", "oneOnOne");
+          if ( !game.user.isGM && !fromUuidSync(asked?.target ?? "")?.isOwner ) {
+            ui.notifications.warn(game.i18n.localize("DBU.Villain.GmAnswers"));
+            break;
+          }
+          await V.answerOneOnOne(actor, !!p.accept);
+          button.closest(".dbu-card-buttons")?.remove();
+          return;
+        }
+        if ( !actor?.isOwner ) { ui.notifications.warn(game.i18n.localize("DBU.Notify.NotOwner")); break; }
+        const text = await V.applyLegendRealized(actor, p.name ?? "Legend Realized");
+        await (await import("./dice/roller.mjs")).postInfoCard({ actor, title: p.name ?? "Legend Realized", lines: [text] });
+        button.remove();
+        return;
+      }
+      case "duelEscape": {
+        const { escapeDuel } = await import("./combat/duel.mjs");
+        await escapeDuel(message);
+        break;
+      }
+      case "duelJoin": {
+        const { joinDuel } = await import("./combat/duel.mjs");
+        await joinDuel(message);
+        break;
+      }
       case "scanResist":
       case "scanAccept": {
         const { resolveScan } = await import("./combat/scan.mjs");

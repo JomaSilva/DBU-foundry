@@ -36,15 +36,17 @@
       <select name="system.category">
         <option value="body" {{#if (eq source.category "body")}}selected{{/if}}>{{localize "DBU.TraitCat.body"}}</option>
         <option value="mind" {{#if (eq source.category "mind")}}selected{{/if}}>{{localize "DBU.TraitCat.mind"}}</option>
+        <option value="villainous" {{#if (eq source.category "villainous")}}selected{{/if}}>{{localize "DBU.TraitCat.villainous"}}</option>
       </select>
     </label>
     <label>{{localize "DBU.TraitTier.label"}}
       <select name="system.tier">
-        {{#each (object primary="DBU.TraitTier.primary" secondary="DBU.TraitTier.secondary" subrace="DBU.TraitTier.subrace" factor="DBU.TraitTier.factor" benefit="DBU.TraitTier.benefit" drawback="DBU.TraitTier.drawback") as |label key|}}
+        {{#each (object primary="DBU.TraitTier.primary" secondary="DBU.TraitTier.secondary" subrace="DBU.TraitTier.subrace" factor="DBU.TraitTier.factor" benefit="DBU.TraitTier.benefit" drawback="DBU.TraitTier.drawback" role="DBU.TraitTier.role" fusion="DBU.TraitTier.fusion" villainous="DBU.TraitTier.villainous") as |label key|}}
         <option value="{{key}}" {{#if (eq ../source.tier key)}}selected{{/if}}>{{localize label}}</option>
         {{/each}}
       </select>
     </label>
+    {{#if (eq source.tier "villainous")}}<label data-tooltip="{{localize 'DBU.Trait.ChoiceTip'}}">{{localize "DBU.Trait.Choice"}} <input type="text" name="system.choice" value="{{source.choice}}"></label>{{/if}}
     <label>Factor <input type="text" name="system.factor" value="{{source.factor}}"></label>
     <label>{{localize "DBU.Trait.Replaces"}} <input type="text" name="system.replaces" value="{{source.replaces}}"></label>
     <label class="check"><input type="checkbox" name="system.active" {{checked source.active}}> {{localize "DBU.Active"}}</label>
@@ -272,6 +274,26 @@
   {{/inline}}
   {{> sigRows title=(localize "DBU.Sig.Advantages") path="system.advantages" rows=sig.advantages options=sig.advantageGroups}}
   {{> sigRows title=(localize "DBU.Sig.Disadvantages") path="system.disadvantages" rows=sig.disadvantages options=sig.disadvantageGroups}}
+
+  <fieldset class="dbu-fx">
+    <legend><i class="fa-solid fa-wand-magic-sparkles"></i> {{localize "DBU.Fx.Title"}}</legend>
+    <p class="dbu-small dim">{{localize "DBU.Fx.Hint" shape=sig.fx.autoShape}}</p>
+    <div class="dbu-form-grid">
+      <label>{{localize "DBU.Fx.Shape"}} <select name="system.vfx.shape">{{selectOptions sig.fx.shapeOptions selected=source.vfx.shape valueAttr="value" labelAttr="label"}}</select></label>
+      <label>{{localize "DBU.Fx.Size"}} <select name="system.vfx.size">{{selectOptions sig.fx.sizeOptions selected=source.vfx.size valueAttr="value" labelAttr="label"}}</select></label>
+      <label data-tooltip="{{localize 'DBU.Fx.ColorTip'}}">{{localize "DBU.Fx.Color"}} <color-picker name="system.vfx.color" value="{{source.vfx.color}}" placeholder="{{sig.fx.autoColor}}"></color-picker></label>
+      <label data-tooltip="{{localize 'DBU.Fx.Color2Tip'}}">{{localize "DBU.Fx.Color2"}} <color-picker name="system.vfx.color2" value="{{source.vfx.color2}}" placeholder="{{sig.fx.autoColor2}}"></color-picker></label>
+    </div>
+    <div class="dbu-checks">
+      {{#each sig.fx.extras as |e|}}
+      <label data-tooltip="{{e.tip}}"><input type="checkbox" name="system.vfx.{{e.key}}" {{checked e.on}}> {{e.label}}</label>
+      {{/each}}
+    </div>
+    <div class="dbu-fx-buttons">
+      <button type="button" data-action="previewFx" data-tooltip="{{localize 'DBU.Fx.PreviewTip'}}"><i class="fa-solid fa-play"></i> {{localize "DBU.Fx.Preview"}}</button>
+      <button type="button" data-action="resetFx"><i class="fa-solid fa-rotate-left"></i> {{localize "DBU.Fx.Reset"}}</button>
+    </div>
+  </fieldset>
 {{/if}}
 
 {{!-- ================= WEAPON ================= --}}

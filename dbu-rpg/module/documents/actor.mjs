@@ -10,9 +10,10 @@ const { DialogV2 } = foundry.applications.api;
 
 export class DBUActor extends Actor {
 
-  /** Boss villains may enter Transformations whose Tier of Power Requirement is above their own. */
+  /** Boss villains (and Adversaries set so) may enter Transformations whose Tier of Power Requirement is above their own. */
   get isBoss() {
-    return (this.type === "npc") && (this.system.npcType === "boss");
+    return ((this.type === "npc") && (this.system.npcType === "boss"))
+      || ((this.type === "adversary") && !!this.system.adversary?.aboveTop);
   }
 
   /** @override */
@@ -61,8 +62,10 @@ export class DBUActor extends Actor {
       && (Number(foundry.utils.getProperty(changed, "system.combat.holdingBack")) < (scopeHidden.holdingBack ?? 0)) ) {
       foundry.utils.setProperty(changed, "flags.dbu-rpg.scanHidden.scope", null);
     }
-    // A Fusion may use the Karma Points of all of its Fused Characters
-    if ( foundry.utils.hasProperty(changed, "system.karma.value") && (this.type !== "fusion") ) {
+    // Villainous Karma: when an Adversary runs out of Karma Points it regains Life and Ki Points (_onUpdate)
+    if ( foundry.utils.hasProperty(changed, "system.karma.value") ) options.dbuOldKarma = this.system.karma.value;
+    // A Fusion may use the Karma Points of all of its Fused Characters; an Adversary has no limit
+    if ( foundry.utils.hasProperty(changed, "system.karma.value") && !["fusion", "adversary"].includes(this.type) ) {
       const v = foundry.utils.getProperty(changed, "system.karma.value");
       if ( v > 4 ) {
         foundry.utils.setProperty(changed, "system.karma.value", 4);
@@ -78,6 +81,9 @@ export class DBUActor extends Actor {
     if ( options.dbuOldLife !== undefined ) {
       const now = this.system.life.value;
       if ( now !== options.dbuOldLife ) this._processThresholds(options.dbuOldLife, now, options).catch(console.error);
+    }
+    if ( (this.type === "adversary") && (options.dbuOldKarma > 0) && (this.system.karma.value === 0) && !options.dbuEncounterEnd ) {
+      import("../combat/adversary.mjs").then(m => m.villainousKarmaOut(this)).catch(console.error);
     }
     this._notifyNewProblems();
   }
@@ -147,7 +153,9 @@ export class DBUActor extends Actor {
       }
     }
     await this.update(updates);
-    if ( self && game.combat?.started ) await this.update({ "system.combat.reducedMomentum": true });
+    // Dauntless (Villainous Trait): no Reduced Momentum
+    const V = await import("../combat/villainous.mjs");
+    if ( self && game.combat?.started && !V.traitOf(this, "Dauntless") ) await this.update({ "system.combat.reducedMomentum": true });
     // Injury System, Foot/Leg Major Injury: failing a Steadfast Check knocks you Prone
     if ( anyFail && !defeated && (await footLegProne(this)) ) lines.push(L("DBU.Injury.FootLegProne"));
 
@@ -176,6 +184,8 @@ export class DBUActor extends Actor {
       const { bornForBattle } = await import("../combat/awakening.mjs");
       await bornForBattle(this);
     }
+    // Villainous Traits: Desperate Adversary, Dauntless, Second Phase
+    await V.villainousThresholds(this, crossed, defeated);
   }
 
   async _onDefeated() {
@@ -439,6 +449,9 @@ export class DBUActor extends Actor {
     if ( sys.race && !raceMatches(ts.race, sys.races?.length ? sys.races : sys.race) ) problems.push(L("DBU.Val.TransRace", { name: item.name, race: ts.race }));
     // A Plump or Frail Fusion stays in its Normal State
     if ( (this.type === "fusion") && (sys.fusion.dance !== "success") ) problems.push(L(`DBU.Fusion.Dance.${sys.fusion.dance}`));
+    // Second Phase (Villainous Trait): the strongest Transformation waits for the 2nd effect
+    const V = await import("../combat/villainous.mjs");
+    if ( V.secondPhaseLocked(this, item) ) problems.push(L("DBU.Villain.SecondPhaseLocked", { name: item.name }));
     if ( problems.length ) {
       ui.notifications.error(problems.join(" "));
       return null;
@@ -459,7 +472,9 @@ export class DBUActor extends Actor {
     const staying = sys.transformation.active.filter(t => (t.id !== item.id) && (ts.countsAsForm ? !t.system.countsAsForm : t.system.countsAsForm));
     let success = true;
     let roll = null;
-    if ( !free && !natural && !(newLevel && !staying.length) ) {
+    // Narrative Transformation (Villainous Trait): no Stress Test for the chosen Form or Line used alone
+    const narrative = V.narrativeFree(this, item);
+    if ( !free && !natural && !narrative && !(newLevel && !staying.length) ) {
       roll = await this.rollStressTest(item, { grade, penalty: stressPenalty });
       success = roll.success;
     }
@@ -494,7 +509,8 @@ export class DBUActor extends Actor {
       if ( !used.has(item.id) && !twin ) {
         const T = this.system.top.current;
         const r = await new Roll(`${2 * T}d10 + ${this.system.pl}`).evaluate();
-        let amount = r.total * (newLevel ? 2 : 1);
+        // Narrative Transformation (Villainous Trait) [1/Encounter]: twice the Life and Ki Points
+        let amount = r.total * (newLevel ? 2 : 1) * ((await V.narrativeDouble(this)) ? 2 : 1);
         await r.toMessage({ speaker: ChatMessage.getSpeaker({ actor: this }), flavor: `Legend Realized — ${item.name}` });
         used.add(item.id);
         await this.update({
@@ -811,6 +827,8 @@ export class DBUActor extends Actor {
 
   /** Reset per-encounter trackers (Instant Recovery is applied by the combat end hook). */
   async resetEncounter({ instantRecovery = true } = {}) {
+    // An Adversary out of its Combat Encounter goes back to the PCC of its sheet
+    if ( this.type === "adversary" ) this.prepareData();
     const sys = this.system;
     const updates = {
       "system.combat.power": 0, "system.combat.powerUps": 0, "system.combat.energyCharges": 0, "system.combat.dimDefense": 0,
@@ -827,7 +845,18 @@ export class DBUActor extends Actor {
     }
     updates["system.resources"] = (sys.resources ?? []).map(r => ({ ...r, value: 0 }));
     if ( this.type === "fusion" ) updates["system.fusion.stressSaveUsed"] = false;
-    await this.update(updates);
+    // Adversaries lose their remaining Karma Points and Narrative Stamina at the end of each Combat Encounter
+    if ( this.type === "adversary" ) {
+      Object.assign(updates, { "system.karma.value": 0, "system.adversary.stamina": 0, "system.adversary.karmaOut": "",
+        "system.adversary.pccApplied": sys.adversaryInfo?.pcc ?? sys.adversary.pcc,
+        "system.life.value": Math.min(sys.life.max, updates["system.life.value"] ?? sys.life.value),
+        "system.ki.value": Math.min(sys.ki.max, updates["system.ki.value"] ?? sys.ki.value) });
+    }
+    await this.update(updates, { dbuEncounterEnd: true });
+    // The Maximum Life Points lost for the encounter come back (Destruction, Dauntless)
+    if ( this.getFlag("dbu-rpg", "maxLifeLoss") ) await this.unsetFlag("dbu-rpg", "maxLifeLoss");
+    // ...and Arrogant and Unstoppable's "treated as Healthy" ends with it
+    if ( this.getFlag("dbu-rpg", "asHealthy") ) await this.unsetFlag("dbu-rpg", "asHealthy");
     const itemUpdates = [];
     for ( const i of this.items ) {
       if ( (i.type === "signature") && i.system.usedThisEncounter ) itemUpdates.push({ _id: i.id, "system.usedThisEncounter": false });

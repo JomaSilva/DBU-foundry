@@ -54,6 +54,22 @@ async function handle({ action, uuid, data, options }) {
       await storeKnockbackOnMessage(data.messageId, data.targetIndex, data.knockback);
       break;
     }
+    // Duel Maneuver: a side's Ki Wager for the next Duel Clash (the GM rolls once both are in)
+    case "duelWager": {
+      const { applyDuelWager } = await import("./combat/duel.mjs");
+      await applyDuelWager(data.messageId, data.side, data.wager, data.helper ?? "");
+      break;
+    }
+    case "duelEscape": {
+      const { applyDuelEscape } = await import("./combat/duel.mjs");
+      await applyDuelEscape(data.messageId);
+      break;
+    }
+    case "duelJoin": {
+      const { applyDuelJoin } = await import("./combat/duel.mjs");
+      await applyDuelJoin(data.messageId, data.side, data.helper);
+      break;
+    }
     // The scanned Character's owner answered a Scan card someone else posted
     case "scanResult": {
       const { storeScanOnMessage } = await import("./combat/scan.mjs");

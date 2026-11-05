@@ -1,0 +1,50 @@
+<div class="dbu-card dbu-duel">
+  <header class="dbu-card-header">
+    <div>
+      <h3><i class="fa-solid fa-burst"></i> {{localize "DBU.Duel.Title"}}</h3>
+      <div class="dbu-card-sub">{{localize "DBU.Duel.Sub"}}</div>
+    </div>
+  </header>
+  <div class="dbu-duel-sides">
+    {{#each sides as |s|}}
+    <div class="dbu-duel-side">
+      {{#if s.img}}<img src="{{s.img}}" alt="" width="32" height="32">{{/if}}
+      <div class="who"><strong>{{s.name}}</strong><small>{{s.attackName}}{{#if s.charges}} · {{s.charges}} Energy Charge(s){{/if}}</small></div>
+      <div class="wins">{{s.wins}}</div>
+      {{#if s.waiting}}<button type="button" data-dbu-action="duelWager" data-side="{{s.key}}" data-actor-uuid="{{s.actorUuid}}"><i class="fa-solid fa-coins"></i> {{localize "DBU.Duel.WagerButton"}}</button>{{/if}}
+      {{#if s.ready}}<span class="dbu-duel-ready"><i class="fa-solid fa-check"></i> {{localize "DBU.Duel.Ready"}}</span>{{/if}}
+    </div>
+    {{#each s.allies as |h|}}
+    <div class="dbu-duel-side ally">
+      {{#if h.img}}<img src="{{h.img}}" alt="" width="24" height="24">{{/if}}
+      <div class="who"><span>{{h.name}}</span><small>{{localize "DBU.Duel.AllyOf" name=s.name}}</small></div>
+      {{#if h.waiting}}<button type="button" data-dbu-action="duelWager" data-side="{{s.key}}" data-helper="{{h.actorUuid}}" data-actor-uuid="{{h.actorUuid}}"><i class="fa-solid fa-coins"></i> {{localize "DBU.Duel.WagerButton"}}</button>{{/if}}
+      {{#if h.ready}}<span class="dbu-duel-ready"><i class="fa-solid fa-check"></i> {{localize "DBU.Duel.Ready"}}</span>{{/if}}
+    </div>
+    {{/each}}
+    {{/each}}
+  </div>
+  {{#if escape}}<p class="dbu-card-note">{{escape}}</p>{{/if}}
+  {{#if clashes.length}}
+  <ol class="dbu-duel-clashes">
+    {{#each clashes as |c|}}
+    <li class="{{#if c.redo}}redo{{/if}}">
+      <span class="n">{{c.n}}</span>
+      <span class="roll {{#if (eq c.winner 'a')}}won{{/if}}" data-tooltip="{{c.a.detail}}">{{c.a.total}}{{#if c.a.crit}}!{{/if}} <small>(Wager {{c.a.wager}})</small></span>
+      <span class="vs">×</span>
+      <span class="roll {{#if (eq c.winner 'b')}}won{{/if}}" data-tooltip="{{c.b.detail}}">{{c.b.total}}{{#if c.b.crit}}!{{/if}} <small>(Wager {{c.b.wager}})</small></span>
+      <span class="winner">→ {{c.label}}</span>
+    </li>
+    {{/each}}
+  </ol>
+  {{/if}}
+  {{#if done}}
+  <p class="dbu-card-note dbu-duel-result"><strong>{{result}}</strong>{{#if wagered}} · {{localize "DBU.Duel.Total" n=wagered}}{{/if}}</p>
+  {{else}}
+  <p class="dbu-card-note">{{localize "DBU.Duel.Next" n=next}}</p>
+  <div class="dbu-card-buttons">
+    {{#if canEscape}}<button type="button" data-dbu-action="duelEscape" data-actor-uuid="{{attackerUuid}}" data-tooltip="{{localize 'DBU.Duel.EscapeTip'}}"><i class="fa-solid fa-person-running"></i> Duel Escape</button>{{/if}}
+    <button type="button" data-dbu-action="duelJoin" data-tooltip="{{localize 'DBU.Duel.JoinTip'}}"><i class="fa-solid fa-people-group"></i> {{localize "DBU.Duel.Join"}}</button>
+  </div>
+  {{/if}}
+</div>

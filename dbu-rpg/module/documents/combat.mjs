@@ -7,6 +7,7 @@ import { fillDkp, noEnergy } from "../combat/divine.mjs";
 import { heightEndOfTurn, heightStartOfRound, heightStartOfTurn } from "../combat/movement.mjs";
 import { endGrapple, grappleOf } from "../combat/grapple.mjs";
 import { defeatedLosesStacks, endEncounterStacks } from "../combat/awakening.mjs";
+import { adversaryEncounterStart, adversaryRoundEnd, adversaryRoundStart } from "../combat/adversary.mjs";
 
 const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
 
@@ -39,9 +40,12 @@ export class DBUCombat extends Combat {
   async _onStartRound(context) {
     await super._onStartRound(context);
     if ( !this.automation ) return;
+    if ( this.getFlag("dbu-rpg", "actAgainResume") ) await this.unsetFlag("dbu-rpg", "actAgainResume");
     const parts = this._participants();
     const lines = [];
     for ( const p of parts ) {
+      // Adversaries: the PCC of this moment (Adversary Actions, Narrative Stamina)
+      if ( p.actor.type === "adversary" ) p.actor.prepareData();
       const sys = p.actor.system;
       if ( !sys?.top ) continue;
       // Power Advantage: base ToP higher than every Opponent's base ToP → +1 Action
@@ -67,6 +71,10 @@ export class DBUCombat extends Combat {
         "system.combat.absoluteAttacks": 0
       });
       if ( advantage ) lines.push(L("DBU.Combat.PowerAdvantage", { name: p.actor.name }));
+      // Adversaries: Narrative Stamina for the round, Life and Ki Points following a new PCC
+      const adv = adversaryRoundStart(p.actor);
+      if ( Object.keys(adv.updates).length ) await p.actor.update(adv.updates);
+      lines.push(...adv.lines);
     }
     lines.unshift(L("DBU.Combat.RoundReset"));
     await postInfoCard({ title: L("DBU.Combat.Round", { n: context.round }), lines, img: "icons/svg/combat.svg",
@@ -86,6 +94,8 @@ export class DBUCombat extends Combat {
     for ( const p of this._participants() ) {
       await expireTimed(p.actor, "endOfRound");
       await runTriggers(p.actor, "endOfRound", { round: context.round });
+      // Adversaries lose the Narrative Stamina left at the end of each Combat Round
+      await adversaryRoundEnd(p.actor);
     }
   }
 
@@ -95,6 +105,13 @@ export class DBUCombat extends Combat {
     if ( !this.automation ) return;
     const actor = combatant.actor;
     if ( !actor?.system?.top ) return;
+    // Act Again (Villainous Maneuver): an extra turn whose Actions are the Adversary Actions
+    if ( combatant.getFlag("dbu-rpg", "actAgain") ) {
+      const { actAgainTurnStart } = await import("../combat/villainous.mjs");
+      return actAgainTurnStart(combatant);
+    }
+    // ...and the turn it interrupted goes on after it, without starting again
+    if ( this.getFlag("dbu-rpg", "actAgainResume") === combatant.id ) return this.unsetFlag("dbu-rpg", "actAgainResume");
     // A Fused Character that just split off skips its turn this Combat Round
     if ( await fusionSkipTurn(this, combatant) ) return;
     // Timed States/Conditions "until the start of your next turn" end before anything else happens
@@ -157,6 +174,10 @@ export class DBUCombat extends Combat {
     const actor = combatant.actor;
     const sys = actor?.system;
     if ( !sys?.top ) return;
+    const V = await import("../combat/villainous.mjs");
+    // Get Up!: the Adversary may attack that Character again; Act Again: the extra turn ends
+    await V.getUpTurnEnded(this, actor);
+    if ( combatant.getFlag("dbu-rpg", "actAgain") ) return V.actAgainTurnEnd(combatant);
     const lines = [];
     let life = sys.life.value;
     if ( sys.effectiveConditions.poisoned ) {
@@ -222,6 +243,8 @@ export async function onCombatStart(combat) {
     const { applyStretch } = await import("../adventure.mjs");
     const stretched = await applyStretch(c.actor);
     if ( stretched ) await postInfoCard({ actor: c.actor, title: "Stretch", lines: [stretched] });
+    // Adversaries: Life and Ki Points for the PCC of this encounter, Villainous Karma
+    await adversaryEncounterStart(c.actor, combat);
     await runTriggers(c.actor, "startOfEncounter", { round: 0 });
   }
 }

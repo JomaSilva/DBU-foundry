@@ -77,12 +77,20 @@ export class DBUItem extends Item {
     if ( (dance !== "success") && ["signature", "uniqueAbility", "transformation"].includes(this.type) ) {
       return ui.notifications.warn(game.i18n.localize(`DBU.Fusion.Dance.${dance}`));
     }
+    // Statstick (Villainous Trait): no Unique Abilities nor Special Maneuvers (except Soar)
+    const V = await import("../combat/villainous.mjs");
+    if ( V.statstickBlocks(actor, this) ) return ui.notifications.warn(game.i18n.localize("DBU.Villain.StatstickBlock"));
     switch ( this.type ) {
       case "signature": return actor.attack({ signature: this });
       case "transformation":
         if ( this.system.transType === "awakening" ) return this.toChat();
         return this.system.active ? actor.revert(this) : actor.transform(this);
+      case "racialTrait":
+        if ( this.system.tier === "villainous" ) return V.useVillainousTrait(actor, this);
+        return this.toChat();
       case "maneuver":
+        // Villainous Maneuvers (Adversaries)
+        if ( this.system.villainous ) return V.useVillainousManeuver(actor, this);
         // God Maneuvers spend Divine Ki Points; Empower sends Ki to an Ally
         if ( this.system.god ) {
           const { useGodManeuver } = await import("../combat/divine.mjs");

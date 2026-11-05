@@ -2,7 +2,7 @@
  * Dragon Ball Universe RPG — Foundry VTT system (rules 0.9.3, dbu-rpg.com).
  */
 import { DBU } from "./module/config.mjs";
-import { CharacterData, FusionData, NpcData } from "./module/data/actor.mjs";
+import { AdversaryData, CharacterData, FusionData, NpcData } from "./module/data/actor.mjs";
 import {
   ApparelData, GearItemData, ManeuverData, RaceData, RacialTraitData, SignatureData, TalentData, TransformationData,
   UniqueAbilityData, WeaponData
@@ -17,6 +17,7 @@ import { DBUItemSheet } from "./module/sheets/item-sheet.mjs";
 import { onRenderChatMessage } from "./module/chat.mjs";
 import { registerSocket } from "./module/socket.mjs";
 import { refreshAllAuras, registerTokenAuras } from "./module/canvas/token-auras.mjs";
+import { registerAttackFx } from "./module/canvas/attack-fx.mjs";
 import { registerTokenForms } from "./module/canvas/token-forms.mjs";
 import { refreshAllHeightMarkers, registerHeight } from "./module/canvas/height.mjs";
 import { SIGNATURE_SUMMARIES } from "./module/rules/signature.mjs";
@@ -54,7 +55,7 @@ Hooks.once("init", () => {
   CONFIG.Item.documentClass = DBUItem;
   CONFIG.Combat.documentClass = DBUCombat;
 
-  CONFIG.Actor.dataModels = { character: CharacterData, npc: NpcData, fusion: FusionData };
+  CONFIG.Actor.dataModels = { character: CharacterData, npc: NpcData, adversary: AdversaryData, fusion: FusionData };
   CONFIG.Item.dataModels = {
     race: RaceData, racialTrait: RacialTraitData, talent: TalentData, transformation: TransformationData,
     signature: SignatureData, uniqueAbility: UniqueAbilityData, maneuver: ManeuverData, weapon: WeaponData,
@@ -63,6 +64,7 @@ Hooks.once("init", () => {
   CONFIG.Actor.trackableAttributes = {
     character: { bar: ["life", "ki", "capacity", "dkp"], value: ["karma.value"] },
     npc: { bar: ["life", "ki", "capacity", "dkp"], value: ["karma.value"] },
+    adversary: { bar: ["life", "ki", "capacity", "dkp"], value: ["karma.value", "adversary.stamina", "combat.counters"] },
     fusion: { bar: ["life", "ki", "capacity", "dkp"], value: ["karma.value", "fusion.roundsLeft"] }
   };
 
@@ -86,7 +88,7 @@ Hooks.once("init", () => {
   CONFIG.specialStatusEffects.DEFEATED = "dead";
 
   const DSC = foundry.applications.apps.DocumentSheetConfig;
-  DSC.registerSheet(Actor, "dbu-rpg", DBUActorSheet, { types: ["character", "npc"], makeDefault: true, label: "DBU.Sheet.Actor" });
+  DSC.registerSheet(Actor, "dbu-rpg", DBUActorSheet, { types: ["character", "npc", "adversary"], makeDefault: true, label: "DBU.Sheet.Actor" });
   DSC.registerSheet(Actor, "dbu-rpg", DBUFusionSheet, { types: ["fusion"], makeDefault: true, label: "DBU.Sheet.Fusion" });
   DSC.registerSheet(Item, "dbu-rpg", DBUItemSheet, { makeDefault: true, label: "DBU.Sheet.Item" });
 
@@ -95,6 +97,8 @@ Hooks.once("init", () => {
   registerMobile();
   registerHelpers();
   registerTokenAuras();
+  // Attack effects drawn from the attacker's token to its targets
+  registerAttackFx();
   registerTokenForms();
   registerHeight();
   foundry.applications.handlebars.loadTemplates(TEMPLATES);
@@ -174,6 +178,15 @@ Hooks.once("ready", async () => {
 Hooks.on("renderChatMessageHTML", onRenderChatMessage);
 Hooks.on("deleteCombat", onCombatDeleted);
 Hooks.on("combatStart", onCombatStart);
+// Adversaries count the Player Characters of their Combat Encounter (PCC): their sheets follow who joins or leaves
+for ( const hook of ["createCombatant", "deleteCombatant"] ) {
+  Hooks.on(hook, combatant => import("./module/combat/adversary.mjs")
+    .then(m => m.refreshAdversaries(combatant.combat, [combatant.actor])));
+}
+Hooks.on("updateCombat", (combat, changes) => {
+  if ( ("round" in changes) || ("started" in changes) ) import("./module/combat/adversary.mjs").then(m => m.refreshAdversaries(combat));
+});
+Hooks.on("deleteCombat", combat => import("./module/combat/adversary.mjs").then(m => m.refreshAdversaries(combat)));
 
 /* Sheets show the current round/turn: refresh them when the combat advances */
 const refreshCombatSheets = (combat) => {

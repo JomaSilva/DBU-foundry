@@ -158,7 +158,13 @@ DBU.profiles = {
   elementalPlantlife: { label: "Elemental (Plantlife)", foundations: ["magic"], cat: 1, kp: 3, elemental: true, freeAdvantages: ["staggeringAttack"] },
   elementalPoison: { label: "Elemental (Poison)", foundations: ["magic"], cat: 2, kp: 8, elemental: true },
   elementalWater: { label: "Elemental (Water)", foundations: ["magic"], cat: 2, kp: 8, elemental: true },
-  elementalWind: { label: "Elemental (Wind)", foundations: ["magic"], cat: 2, kp: 4, elemental: true }
+  elementalWind: { label: "Elemental (Wind)", foundations: ["magic"], cat: 2, kp: 4, elemental: true },
+  // Profiles some Transformations and Races give access to (PROFILE_ACCESS in module/rules/profiles.mjs)
+  barrierBlow: { label: "Barrier Blow", foundations: ["physical", "energy", "magic"], cat: 1, kp: 4, barrierBlow: true },
+  gravityCage: { label: "Gravity Cage", foundations: ["physical", "energy", "magic"], cat: 2, kp: 8, gravityCage: true },
+  glass: { label: "Glass", foundations: ["physical", "energy", "magic"], cat: 1, kp: 2, glass: true },
+  time: { label: "Time", foundations: ["physical", "energy", "magic"], cat: 1, kp: 10, time: true },
+  destruction: { label: "Destruction", foundations: ["physical", "energy", "magic"], cat: 3, kp: 10, destruction: true, freeCharges: 1 }
 };
 
 /** Super Profiles: kp is added to the Profile cost (and to its minimum). */

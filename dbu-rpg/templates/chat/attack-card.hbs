@@ -5,6 +5,11 @@
       <div class="dbu-card-sub">{{category}}{{#if attack.charges}} · {{attack.charges}} Energy Charge(s){{/if}}{{#if attack.wager}} · Wager {{attack.wager}}{{#if attack.dkp.wager}} DKP{{/if}}{{/if}} · {{attack.kp}} {{#if attack.dkp.cost}}DKP{{else}}KP{{/if}}{{#if attack.knockback}} · Knockback{{/if}}</div>
     </div>
   </header>
+  {{#if attack.noStrike}}
+  <div class="dbu-card-total">
+    <span class="label">{{#if attack.fromDuel}}<i class="fa-solid fa-burst"></i> Duel{{else}}{{localize "DBU.Attack.NoStrike"}}{{/if}}</span>
+  </div>
+  {{else}}
   <div class="dbu-card-total {{#if attack.strike.crit}}crit{{/if}} {{#if attack.strike.botch}}botch{{/if}}">
     <span class="label">{{localize "DBU.Roll.Strike"}}</span>
     <span class="total">{{attack.strike.total}}</span>
@@ -12,7 +17,10 @@
     {{#if attack.strike.botch}}<span class="flag botch">{{localize "DBU.Roll.Botch"}}</span>{{/if}}
     {{#if attack.autoHit}}<span class="flag tn">{{localize "DBU.Attack.AutoHit"}}</span>{{/if}}
   </div>
+  {{/if}}
+  {{#if attack.nullified}}<p class="dbu-card-note"><strong>{{localize "DBU.Duel.Nullified"}}</strong></p>{{/if}}
   {{#each attack.notes as |n|}}<p class="dbu-card-note">{{n}}</p>{{/each}}
+  {{#unless attack.noStrike}}
   <details class="dbu-breakdown-wrap">
     <summary>{{localize "DBU.Roll.Breakdown"}}</summary>
     <ul class="dbu-breakdown">
@@ -22,6 +30,7 @@
       {{#if attack.strikeView.critTotal}}<li class="crit"><span>{{localize "DBU.Roll.CritDice"}}</span><strong>+{{attack.strikeView.critTotal}}</strong></li>{{/if}}
     </ul>
   </details>
+  {{/unless}}
 
   {{#if attack.wound}}
   <div class="dbu-card-total wound {{#if attack.wound.crit}}crit{{/if}}">
@@ -36,13 +45,15 @@
     <tr class="result-{{t.result}}">
       <td class="who">{{#if t.img}}<img src="{{t.img}}" alt="" width="24" height="24">{{/if}} {{t.name}}</td>
       <td class="state">
-        {{#if (eq t.result "hit")}}<span class="hit">{{localize "DBU.Defense.Hit"}}</span>{{else if (eq t.result "miss")}}<span class="miss">{{localize "DBU.Defense.Miss"}}</span>{{else}}<span class="pending">{{localize "DBU.Defense.Pending"}}</span>{{/if}}
+        {{#if (eq t.result "hit")}}<span class="hit">{{localize "DBU.Defense.Hit"}}</span>{{else if (eq t.result "miss")}}<span class="miss">{{localize "DBU.Defense.Miss"}}</span>{{else if (eq t.result "duel")}}<span class="pending"><i class="fa-solid fa-burst"></i> {{localize "DBU.Duel.Settled"}}</span>{{else if t.duel}}<span class="pending"><i class="fa-solid fa-burst"></i> {{localize "DBU.Duel.InProgress"}}</span>{{else}}<span class="pending">{{localize "DBU.Defense.Pending"}}</span>{{/if}}
         {{#if t.defense}}<small>{{t.defense.mode}}{{#if t.defense.total}} {{t.defense.total}}{{/if}}{{#if t.defense.cost}} ({{t.defense.cost}} {{#if t.defense.dkp}}DKP{{else}}KP{{/if}}){{/if}}</small>{{/if}}
         {{#if (or (eq t.damage 0) t.damage)}}<strong class="dmg">−{{t.damage}} LP</strong>{{/if}}
         {{#if t.knockback}}<small class="dbu-kb-done">Knockback {{#if t.knockback.won}}{{localize "DBU.Knockback.Moved" n=t.knockback.moved}}{{else}}{{localize "DBU.Knockback.Resisted"}}{{/if}}</small>{{/if}}
       </td>
       <td class="actions">
-        {{#unless t.result}}
+        {{#unless (or t.result t.duel @root.attack.nullified)}}
+        {{#if @root.duelable}}<button type="button" class="dbu-duel-btn" data-dbu-action="duel" data-index="{{i}}" data-tooltip="{{localize 'DBU.Duel.Tip'}}"><i class="fa-solid fa-burst"></i></button>{{/if}}
+        {{#unless @root.attack.duelOnly}}
         <button type="button" data-dbu-action="defense" data-mode="dodge" data-index="{{i}}" data-tooltip="{{localize 'DBU.Defense.Dodge'}}"><i class="fa-solid fa-person-running"></i></button>
         <button type="button" data-dbu-action="defense" data-mode="parry" data-index="{{i}}" data-tooltip="Defend: Parry"><i class="fa-solid fa-hand"></i></button>
         <button type="button" data-dbu-action="defense" data-mode="guard" data-index="{{i}}" data-tooltip="Defend: Guard"><i class="fa-solid fa-shield-halved"></i></button>
@@ -51,7 +62,8 @@
         <button type="button" class="dbu-divine" data-dbu-action="defense" data-mode="divineFlex" data-index="{{i}}" data-tooltip="{{localize 'DBU.God.FlexTip'}}"><i class="fa-solid fa-sun"></i></button>
         <button type="button" data-dbu-action="defense" data-mode="none" data-index="{{i}}" data-tooltip="{{localize 'DBU.Defense.None'}}"><i class="fa-solid fa-xmark"></i></button>
         {{/unless}}
-        {{#if @root.attack.wound}}{{#unless (eq t.result "miss")}}{{#unless (or (eq t.damage 0) t.damage)}}
+        {{/unless}}
+        {{#if @root.attack.wound}}{{#unless (or (and (eq t.result "miss") (not @root.attack.absolute)) (eq t.result "duel") t.duel)}}{{#unless (or (eq t.damage 0) t.damage)}}
         <button type="button" class="dbu-dmg-btn" data-dbu-action="damage" data-index="{{i}}" data-tooltip="{{localize 'DBU.Damage.Apply'}}"><i class="fa-solid fa-heart-crack"></i> {{localize "DBU.Damage.Apply"}}</button>
         {{/unless}}{{/unless}}{{/if}}
         {{#if (and @root.attack.knockback (gt t.damage 0))}}{{#unless t.knockback}}
@@ -65,8 +77,10 @@
   <p class="dbu-card-note">{{localize "DBU.Attack.NoTargetsCard"}}</p>
   {{/if}}
 
+  {{#unless attack.nullified}}
   <div class="dbu-card-buttons">
-    {{#unless attack.wound}}<button type="button" data-dbu-action="wound"><i class="fa-solid fa-burst"></i> {{localize "DBU.Wound.Roll"}}</button>{{/unless}}
+    {{#unless (or attack.wound attack.duelOnly)}}<button type="button" data-dbu-action="wound"><i class="fa-solid fa-burst"></i> {{localize "DBU.Wound.Roll"}}</button>{{/unless}}
     <button type="button" data-dbu-action="retarget"><i class="fa-solid fa-crosshairs"></i> {{localize "DBU.Attack.Retarget"}}</button>
   </div>
+  {{/unless}}
 </div>

@@ -47,7 +47,7 @@
       </div>
       <div class="dbu-stat">
         <span class="label">{{localize "DBU.Actions"}}</span>
-        <span class="value">{{system.combat.actions}} + {{system.combat.counters}}C</span>
+        <span class="value">{{system.combat.actions}} + {{system.combat.counters}}{{#if system.adversaryInfo.oneManArmy}} <span data-tooltip="{{localize 'DBU.Adversary.ActionsTip'}}">AA</span>{{else}}C{{/if}}</span>
       </div>
       {{/if}}
       <div class="dbu-stat" data-tooltip="Stress Bonus = PL + Determination">
@@ -57,7 +57,7 @@
         <span class="label">Karma</span>
         <span class="value dbu-pips">
           <a data-action="pool" data-field="system.karma.value" data-delta="-1"><i class="fa-solid fa-minus"></i></a>
-          {{system.karma.value}}{{#unless (eq actor.type "fusion")}}/4{{/unless}}
+          {{system.karma.value}}{{#unless (or (eq actor.type "fusion") (eq actor.type "adversary"))}}/4{{/unless}}
           <a data-action="pool" data-field="system.karma.value" data-delta="1"><i class="fa-solid fa-plus"></i></a>
         </span>
       </div>
@@ -82,6 +82,14 @@
         <a class="bar-btn" data-action="pool" data-pool="ki" data-delta="1"><i class="fa-solid fa-plus"></i></a>
         {{#if system.transformation.kiMultiplier}}<span class="bar-status mult" data-tooltip="Ki Multiplier">×2</span>{{/if}}
       </div>
+      {{#if system.adversaryInfo.staminaMax}}
+      <div class="dbu-bar stamina" data-tooltip="{{localize 'DBU.Adversary.StaminaTip'}}">
+        <div class="fill" style="width: {{adversary.staminaPct}}%"></div>
+        <span class="bar-label"><i class="fa-solid fa-shield-heart"></i> NS</span>
+        <input type="number" name="system.adversary.stamina" value="{{source.adversary.stamina}}" min="0" data-dtype="Number">
+        <span class="bar-max">/ {{system.adversaryInfo.staminaMax}}</span>
+      </div>
+      {{/if}}
       <div class="dbu-battle-power" data-tooltip="{{bpTip}}">
         <span class="bp-label"><i class="fa-solid fa-glasses"></i> {{localize "DBU.BP.Label"}}</span>
         <span class="bp-value">{{bpText}}</span>

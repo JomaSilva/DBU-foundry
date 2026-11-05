@@ -22,6 +22,19 @@ const { ActorSheetV2 } = foundry.applications.sheets;
 const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
 
 /** Tooltip of the Mastery control: the Mastery Traits and what each level changes. */
+/** The Adversary panel: Category, PCC and what they give (null for other actors). */
+function adversaryContext(sys) {
+  const info = sys.adversaryInfo;
+  if ( !info ) return null;
+  return {
+    info,
+    categoryOptions: ["standard", "elite", "villain"].map(k => ({ value: k, label: L(`DBU.Adversary.Cat.${k}`) })),
+    pccModeOptions: ["auto", "manual"].map(k => ({ value: k, label: L(`DBU.Adversary.Mode.${k}`) })),
+    fromLabel: L(`DBU.Adversary.From.${info.from}`),
+    staminaPct: Math.clamp(Math.round(((sys.adversary.stamina ?? 0) / Math.max(1, info.staminaMax)) * 100), 0, 100)
+  };
+}
+
 function masteryTooltip(s) {
   const traits = (s.allTraits ?? s.traits ?? []).filter(t => /\[mastery trait\]/.test(t)).map(t => t.replace(/\s*\[mastery trait\]/, ""));
   const lines = [L("DBU.Mastery.Tip", { n: s.mastery, max: s.masteryNeeded })];
@@ -190,6 +203,11 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         const { pickTargets } = await import("../targets.mjs");
         return pickTargets(this.actor);
       },
+      // One-Man Army: 2 Adversary Actions for a 1-Action Standard Maneuver used as an Instant Maneuver
+      adversaryInstant: async function() {
+        const { adversaryInstant } = await import("../combat/adversary.mjs");
+        return adversaryInstant(this.actor);
+      },
       // What the Stacks of an Awakening still have to pick
       chooseStack: async function(event, target) {
         const item = this.actor.items.get(target.closest("[data-item-id]")?.dataset.itemId);
@@ -244,7 +262,7 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
           content: `<p>${L("DBU.Adv.NewSessionAllText")}</p>`, rejectClose: false });
         if ( !ok ) return null;
         const { newAdventuringSession } = await import("../adventure.mjs");
-        return newAdventuringSession(game.actors.filter(a => ["character", "npc", "fusion"].includes(a.type)));
+        return newAdventuringSession(game.actors.filter(a => ["character", "npc", "adversary", "fusion"].includes(a.type)));
       },
       // Which pool pays the Ki Point costs in the God Ki State (attacks, Guard, Energy Charge)
       dkpPrefer: function() { return this.actor.update({ "system.dkp.prefer": !this.actor.system.dkp.prefer }); },
@@ -412,7 +430,7 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     // Items
     const race = byType("race")[0] ?? null;
     const signatures = byType("signature").map(i => ({
-      item: i, c: i.system.computed, profile: DBU.profiles[i.system.profile]?.label ?? "?",
+      item: i, c: i.system.computed, profile: i.system.computed?.profileLabel || (DBU.profiles[i.system.profile]?.label ?? "?"),
       kp: Math.max(0, Math.ceil(((i.system.computed?.kpUnits ?? 0) + (i.system.computed?.kpAdjust ?? 0)) * sys.top.kp) + sys.costs.attack),
       level: L(`DBU.Sig.Level.${i.system.level}`), problems: (i.system.computed?.errors?.length ?? 0)
     }));
@@ -503,6 +521,7 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       hordeLabel: horde,
       actor, system: sys, source: sys._source, config: DBU, editable: this.isEditable, owner: actor.isOwner,
       isGM: game.user.isGM, isNPC: actor.type === "npc",
+      isAdversary: actor.type === "adversary", adversary: adversaryContext(sys),
       attributes, saves, skills, combatRolls, conditions, states,
       race, racialTraits: byType("racialTrait"), talents, uas, signatures,
       maneuvers: byType("maneuver"),

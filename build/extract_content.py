@@ -1791,6 +1791,55 @@ def build_maneuvers():
                   "dkpCost": f.get("dkp cost", ""), "god": True, "frequency": freq, "requirement": "God Ki",
                   "summary": f"God Maneuver · {f.get('maneuver type', 'Standard')} · {f.get('action cost', '')} · DKP {f.get('dkp cost', '')}"}
         add_item("maneuvers", name, "maneuver", system, "god-ki", name, [], fold, key=f"god:{name}")
+    # Villainous Maneuvers (Adversaries page): every Adversary has them; Adversary Actions may pay their Action Cost
+    lines = read("adversaries")
+    fold = folder("maneuvers", "Villainous Maneuvers")
+    for name, freq, f in entry_blocks(lines):
+        if "maneuver type" not in f:
+            continue
+        name = name.replace("“", "").replace("”", "").strip()
+        system = {"maneuverType": f.get("maneuver type", ""), "actionCost": f.get("action cost", ""),
+                  "kpCost": f.get("kp cost", ""), "frequency": freq, "villainous": True, "requirement": "Adversary",
+                  "summary": f"Villainous Maneuver · {f.get('maneuver type', '')} · {f.get('action cost', '')}"}
+        add_item("maneuvers", name, "maneuver", system, "adversaries", name, [], fold, key=f"villain:{name}")
+
+
+# Villainous Traits whose numbers the compiler misses: (target, value, condition), replacing what it found
+VILLAIN_MODS = {
+    # Dauntless (2): +1/4 Maximum Life Points
+    "Dauntless": [("life.mult", "1.25", "")],
+    # Desperate Adversary (1): +1(T) Combat Rolls and −1(T) Soak per Health Threshold below
+    "Desperate Adversary": [("combat", "(1(T))*@below", ""), ("soak", "-(1(T))*@below", "")],
+    # Wild Swings (1): −2(bT) Strike Rolls, +3(T) Wound Rolls
+    "Wild Swings": [("strike", "-2(bT)", ""), ("wound", "3(T)", "")],
+}
+
+
+def build_villainous_traits():
+    """The example Villainous Traits of the Adversaries page, as Racial Traits of the 'villainous' tier."""
+    lines = read("adversaries")
+    fold = folder("racial-traits", "Villainous Traits")
+    start = next((i for i, l in enumerate(lines) if l.strip() == "Villainous Traits"), None)
+    end = next((i for i, l in enumerate(lines) if l.strip() == "Villainous Maneuvers"), len(lines))
+    if start is None:
+        return
+    i = start + 1
+    while i < end:
+        m = re.match(r"^\*\*([^*]+?)\*\*:", lines[i].strip())
+        if m:
+            name = m.group(1).strip()
+            effects, j = parse_effects(lines, i + 1)
+            mods, trigs, structure = compile_effects(effects, name)
+            if name in VILLAIN_MODS:
+                mods = [{"target": t, "value": v, "condition": c, "label": name, "active": True, "always": False}
+                        for t, v, c in VILLAIN_MODS[name]]
+            system = {"race": "Adversary", "category": "villainous", "tier": "villainous", "active": True,
+                      "modifiers": mods, "triggers": trigs,
+                      "summary": f"Villainous Trait · {len(effects)} efeito(s), {sum(1 for s in structure if s.endswith('auto'))} automatizado(s)"}
+            add_item("racial-traits", name, "racialTrait", system, "adversaries", name, structure, fold, key=f"villain:{name}")
+            i = max(j, i + 1)
+            continue
+        i += 1
 
 
 def build_items():
@@ -1957,6 +2006,7 @@ build_talents()
 build_transformations()
 build_unique_abilities()
 build_maneuvers()
+build_villainous_traits()
 build_items()
 build_signatures()
 

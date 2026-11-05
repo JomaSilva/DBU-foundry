@@ -47,6 +47,13 @@
           "zsoul.description"
         ]
       },
+      "adversary": {
+        "htmlFields": [
+          "details.biography",
+          "details.notes",
+          "zsoul.description"
+        ]
+      },
       "fusion": {
         "htmlFields": [
           "details.biography",

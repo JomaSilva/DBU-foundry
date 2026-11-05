@@ -2,6 +2,7 @@ import { DBU } from "../config.mjs";
 import { SIGNATURE_OPTIONS, signatureOptionGroups } from "../rules/signature.mjs";
 import { autoOfficialText, fetchOfficialText, isStubDescription, officialTextOf, withOfficialText } from "../rules/official-text.mjs";
 import { defaultAuraKey } from "../canvas/token-auras.mjs";
+import { FX_EXTRAS, FX_SHAPES, FX_SIZES, previewSignatureFx, profileLook } from "../canvas/attack-fx.mjs";
 import { aspectLabel } from "../rules/aspects.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
@@ -9,6 +10,19 @@ const { ItemSheetV2 } = foundry.applications.sheets;
 const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
 
 /** Token aura choices of a Transformation ("auto" names the preset its name gets, if any). */
+/** The "Efeito visual" box of a Signature Technique: shape, size, colours (blank = the Profile's) and extras. */
+function signatureFxContext(sys) {
+  const look = profileLook(sys.computed?.profiles ?? [sys.profile], sys.foundation);
+  const v = sys.vfx ?? {};
+  const shapeName = s => L(`DBU.Fx.Shapes.${s}`);
+  return {
+    autoShape: shapeName(look.shape), autoColor: look.color, autoColor2: look.color2,
+    shapeOptions: FX_SHAPES.map(s => ({ value: s, label: (s === "auto") ? L("DBU.Fx.Auto", { shape: shapeName(look.shape) }) : shapeName(s) })),
+    sizeOptions: Object.keys(FX_SIZES).map(k => ({ value: k, label: L(`DBU.Fx.Sizes.${k}`) })),
+    extras: FX_EXTRAS.map(k => ({ key: k, on: !!v[k], label: L(`DBU.Fx.Extra.${k}`), tip: L(`DBU.Fx.ExtraTip.${k}`) }))
+  };
+}
+
 function auraContext(item) {
   if ( item.type !== "transformation" ) return {};
   const key = defaultAuraKey(item.name);
@@ -73,7 +87,13 @@ export class DBUItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
       fetchText: DBUItemSheet.#onFetchText,
       openSource: DBUItemSheet.#onOpenSource,
       use: DBUItemSheet.#onUse,
-      chooseOptions: DBUItemSheet.#onChooseOptions
+      chooseOptions: DBUItemSheet.#onChooseOptions,
+      // A Signature Technique's look on the canvas: try it from the owner's token, or go back to the Profile's
+      previewFx: function() { previewSignatureFx(this.item); },
+      resetFx: function() {
+        return this.item.update({ "system.vfx": { shape: "auto", color: "", color2: "", size: "normal", lightning: false,
+          spiral: false, sparks: true, shockwave: false, charge: false, shake: false } });
+      }
     }
   };
 
@@ -169,7 +189,8 @@ export class DBUItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
       levelOptions: ["super", "ultimate", "finisher"].map(v => ({ value: v, label: L(`DBU.Sig.Level.${v}`) })),
       kpNow: actor ? Math.ceil((comp.kpUnits + comp.kpAdjust) * T) + (actor.system.costs?.attack ?? 0) : null,
       cap: actor ? (DBU.SIGNATURE_TP_CAP[actor.system.top.base] ?? 50) : null,
-      chargeDice: `d${[0, 4, 6, 8, 10][Math.min(4, 1 + comp.chargeCategory)] ?? 10}`
+      chargeDice: `d${[0, 4, 6, 8, 10][Math.min(4, 1 + comp.chargeCategory)] ?? 10}`,
+      fx: signatureFxContext(sys)
     };
   }
 

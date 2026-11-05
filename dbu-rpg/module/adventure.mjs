@@ -29,7 +29,7 @@ export function targetCandidates(actor) {
   };
   for ( const t of game.user.targets ) add(t.actor, t.name);
   for ( const t of game.scenes.viewed?.tokens ?? [] ) add(t.actor, t.name);
-  for ( const a of game.actors ) if ( ["character", "npc", "fusion"].includes(a.type) ) add(a);
+  for ( const a of game.actors ) if ( ["character", "npc", "adversary", "fusion"].includes(a.type) ) add(a);
   return out;
 }
 

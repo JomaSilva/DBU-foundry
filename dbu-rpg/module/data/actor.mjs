@@ -250,3 +250,43 @@ export class NpcData extends CharacterData {
     return schema;
   }
 }
+
+/* -------------------------------------------- */
+
+/**
+ * An Adversary (dbu-rpg.com/adversaries): a Standard, Elite or Villain enemy whose benefits scale with the PCC, counted
+ * from the Player Characters of its Combat Encounter or set by hand (module/rules/adversary.mjs).
+ */
+export class AdversaryData extends CharacterData {
+  static defineSchema() {
+    const schema = super.defineSchema();
+    // Villainous Karma: none at Character Creation and no limit (it comes at the start of each Combat Encounter)
+    schema.karma = new SchemaField({ value: intField(0, { min: 0 }) });
+    schema.settings = new SchemaField({
+      validate: new BooleanField({ initial: false }),
+      creation: new BooleanField({ initial: false })
+    });
+    schema.adversary = new SchemaField({
+      category: new StringField({ initial: "villain", choices: ["standard", "elite", "villain"] }),
+      pccMode: new StringField({ initial: "auto", choices: ["auto", "manual"] }),
+      pcc: intField(1, { min: 1, max: 20 }),
+      // May enter Transformations above its Tier of Power (as the NPC "Boss")
+      aboveTop: new BooleanField({ initial: true }),
+      // Narrative Stamina left this Combat Round, spent before Ki Points and against Damage
+      stamina: intField(0, { min: 0 }),
+      staminaPays: new BooleanField({ initial: true }),
+      staminaAbsorbs: new BooleanField({ initial: true }),
+      // Without Capacity: Capacity is not spent nor checked (the Ki Wager stays within the Max Capacity)
+      ignoreCapacity: new BooleanField({ initial: true }),
+      // The PCC its current Life and Ki Points were last scaled for, and the encounter its Karma ran out in
+      pccApplied: intField(0, { min: 0 }),
+      karmaOut: new StringField({ blank: true, initial: "" })
+    });
+    return schema;
+  }
+
+  /** @override An Adversary has no limit on Karma Points. */
+  static migrateData(source) {
+    return foundry.abstract.TypeDataModel.migrateData.call(this, source);
+  }
+}

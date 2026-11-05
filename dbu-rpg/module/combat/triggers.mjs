@@ -93,6 +93,7 @@ function statusKey(kind, name) {
 }
 
 function statusLabel(kind, key) {
+  if ( kind === "flag" ) return game.i18n.localize(`DBU.Timed.${key}`);
   return game.i18n.localize(`DBU.${kind === "state" ? "State" : "Condition"}.${key}`);
 }
 
@@ -235,6 +236,12 @@ export async function addTimedModifier(actor, modifier, { rounds = 1, duration =
     label: modifier.label, rounds });
 }
 
+/** A system flag of the actor (dbu-rpg.<key> = true) that ends with a duration, like a timed Condition. */
+export async function addTimedFlag(actor, key, { duration = "startOfNextTurn", label = "" } = {}) {
+  await actor.setFlag("dbu-rpg", key, true);
+  await addTimed(actor, { kind: "flag", key, prev: 0, level: 1, duration, event: "", label });
+}
+
 async function removeTimedModifier(actor, label) {
   const list = actor.system._source.customModifiers ?? [];
   if ( !list.some(m => m.label === label) ) return false;
@@ -280,6 +287,12 @@ export function powerTimers(actor) {
 }
 
 async function revert(actor, entry) {
+  // A system flag that lasts a while (Arrogant and Unstoppable: treated as Healthy)
+  if ( entry.kind === "flag" ) {
+    if ( actor.getFlag("dbu-rpg", entry.key) === undefined ) return false;
+    await actor.unsetFlag("dbu-rpg", entry.key);
+    return true;
+  }
   const field = entry.kind === "state" ? "states" : "conditions";
   const current = actor.system._source[field]?.[entry.key] ?? 0;
   // Something else changed it in the meantime: leave it alone

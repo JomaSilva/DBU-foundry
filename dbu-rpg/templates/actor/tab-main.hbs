@@ -1,4 +1,51 @@
 <section class="tab {{tab.cssClass}}" data-tab="main" data-group="primary">
+  {{#if isAdversary}}
+  <div class="dbu-adversary">
+    <h3 class="dbu-section"><i class="fa-solid fa-skull"></i> {{localize "DBU.Adversary.Title"}}
+      <small>{{localize "DBU.Adversary.Hint"}}</small></h3>
+    <div class="dbu-adversary-grid">
+      <label>{{localize "DBU.Adversary.Category"}}
+        <select name="system.adversary.category">{{selectOptions adversary.categoryOptions selected=source.adversary.category valueAttr="value" labelAttr="label"}}</select>
+      </label>
+      <label data-tooltip="{{localize 'DBU.Adversary.PccTip'}}">PCC
+        <select name="system.adversary.pccMode">{{selectOptions adversary.pccModeOptions selected=source.adversary.pccMode valueAttr="value" labelAttr="label"}}</select>
+      </label>
+      <label data-tooltip="{{localize 'DBU.Adversary.PccNumberTip'}}">{{localize "DBU.Adversary.PccNumber"}}
+        <input type="number" name="system.adversary.pcc" value="{{source.adversary.pcc}}" min="1" max="20" data-dtype="Number">
+      </label>
+      <div class="dbu-stat">
+        <span class="label">{{localize "DBU.Adversary.PccNow"}}</span>
+        <span class="value">{{adversary.info.pcc}} <small>({{adversary.fromLabel}})</small></span>
+      </div>
+    </div>
+    <table class="dbu-table dbu-adversary-table">
+      <thead><tr>
+        <th>{{localize "DBU.Adversary.LifePerPL"}}</th><th>{{localize "DBU.Adversary.KiPerPL"}}</th>
+        <th>{{localize "DBU.Adversary.ApPerTop"}}</th><th>Narrative Stamina</th>
+        <th>{{localize "DBU.Adversary.Actions"}}</th><th>{{localize "DBU.Adversary.Karma"}}</th><th>Villainous Traits</th>
+      </tr></thead>
+      <tbody><tr>
+        <td class="center">+{{adversary.info.lifePerPL}}</td><td class="center">+{{adversary.info.kiPerPL}}</td>
+        <td class="center">+{{adversary.info.apPerTop}}</td>
+        <td class="center">{{#if adversary.info.staminaMax}}{{adversary.info.staminaMax}} {{localize "DBU.Adversary.PerRound"}}{{else}}—{{/if}}</td>
+        <td class="center">{{#if adversary.info.oneManArmy}}{{system.countersPerRound}} {{localize "DBU.Adversary.PerRound"}}{{else}}—{{/if}}</td>
+        <td class="center">{{#if adversary.info.karma}}{{adversary.info.karma}} {{localize "DBU.Adversary.PerEncounter"}}{{else}}—{{/if}}</td>
+        <td class="center">{{adversary.info.traits}}</td>
+      </tr></tbody>
+    </table>
+    <div class="dbu-checks">
+      <label data-tooltip="{{localize 'DBU.Adversary.StaminaPaysTip'}}"><input type="checkbox" name="system.adversary.staminaPays" {{checked source.adversary.staminaPays}}> {{localize "DBU.Adversary.StaminaPays"}}</label>
+      <label data-tooltip="{{localize 'DBU.Adversary.StaminaAbsorbsTip'}}"><input type="checkbox" name="system.adversary.staminaAbsorbs" {{checked source.adversary.staminaAbsorbs}}> {{localize "DBU.Adversary.StaminaAbsorbs"}}</label>
+      <label data-tooltip="{{localize 'DBU.Adversary.IgnoreCapacityTip'}}"><input type="checkbox" name="system.adversary.ignoreCapacity" {{checked source.adversary.ignoreCapacity}}> {{localize "DBU.Adversary.IgnoreCapacity"}}</label>
+      <label data-tooltip="{{localize 'DBU.Boss.Tip'}}"><input type="checkbox" name="system.adversary.aboveTop" {{checked source.adversary.aboveTop}}> {{localize "DBU.Adversary.AboveTop"}}</label>
+    </div>
+    {{#if adversary.info.oneManArmy}}
+    <div class="dbu-adversary-buttons">
+      <button type="button" data-action="adversaryInstant" data-tooltip="{{localize 'DBU.Adversary.InstantTip'}}"><i class="fa-solid fa-bolt"></i> {{localize "DBU.Adversary.InstantButton"}}</button>
+    </div>
+    {{/if}}
+  </div>
+  {{/if}}
   <div class="dbu-columns">
     <div class="dbu-col">
       <h3 class="dbu-section">{{localize "DBU.Attributes"}} <small>{{localize "DBU.ScoreLimit"}}: {{system.scoreLimit}}</small></h3>

@@ -49,9 +49,12 @@ export class RacialTraitData extends BaseItemData {
     return {
       ...super.defineSchema(),
       race: new StringField({ blank: true, initial: "" }),
-      category: new StringField({ initial: "body", choices: ["body", "mind"] }),
-      // "fusion": Method Traits and Fusion Modifiers generated for a Fusion
-      tier: new StringField({ initial: "primary", choices: ["primary", "secondary", "subrace", "factor", "benefit", "drawback", "role", "fusion"] }),
+      category: new StringField({ initial: "body", choices: ["body", "mind", "villainous"] }),
+      // "fusion": Method Traits and Fusion Modifiers generated for a Fusion; "villainous": an Adversary's Villainous Trait
+      tier: new StringField({ initial: "primary", choices: ["primary", "secondary", "subrace", "factor", "benefit", "drawback", "role", "fusion",
+        "villainous"] }),
+      // What the Trait made the Character pick (Narrative Transformation: a Form or Transformation Line)
+      choice: new StringField({ blank: true, initial: "" }),
       factor: new StringField({ blank: true, initial: "" }),
       replaces: new StringField({ blank: true, initial: "" }),
       maxFactor: intField(1, { min: 0 }),
@@ -323,7 +326,20 @@ export class SignatureData extends BaseItemData {
       usedThisEncounter: new BooleanField({ initial: false }),
       // Fused Technique of a Fusion: an Ultimate with a Super Profile that costs 4(T) Ki Points less
       fused: new BooleanField({ initial: false }),
-      fusedWoundT: intField(0, { min: 0 })
+      fusedWoundT: intField(0, { min: 0 }),
+      // How the attack looks on the canvas (module/canvas/attack-fx.mjs): shape "auto" and blank colours follow the Profile
+      vfx: new SchemaField({
+        shape: new StringField({ initial: "auto" }),
+        color: new StringField({ blank: true, initial: "" }),
+        color2: new StringField({ blank: true, initial: "" }),
+        size: new StringField({ initial: "normal", choices: ["small", "normal", "big", "huge"] }),
+        lightning: new BooleanField({ initial: false }),
+        spiral: new BooleanField({ initial: false }),
+        sparks: new BooleanField({ initial: true }),
+        shockwave: new BooleanField({ initial: false }),
+        charge: new BooleanField({ initial: false }),
+        shake: new BooleanField({ initial: false })
+      })
     };
   }
 
@@ -389,6 +405,8 @@ export class ManeuverData extends BaseItemData {
       // God Maneuvers (God Ki) are paid with Divine Ki Points
       dkpCost: new StringField({ blank: true, initial: "" }),
       god: new BooleanField({ initial: false }),
+      // Villainous Maneuvers (Adversaries): Adversary Actions may pay their Action Cost
+      villainous: new BooleanField({ initial: false }),
       frequency: new StringField({ blank: true, initial: "" }),
       requirement: new StringField({ blank: true, initial: "" }),
       minions: new StringField({ blank: true, initial: "" })

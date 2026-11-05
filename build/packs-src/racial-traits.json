@@ -10948,5 +10948,312 @@
     "slug": "minion-no-more"
    }
   }
+ },
+ {
+  "_type": "Folder",
+  "_id": "YnBuXMgSfPPw9sFo",
+  "name": "Villainous Traits",
+  "type": "Item",
+  "folder": null,
+  "sorting": "a",
+  "color": null,
+  "sort": 0,
+  "description": "",
+  "flags": {}
+ },
+ {
+  "_type": "Item",
+  "_id": "2shyIjYoSO4EZMqQ",
+  "name": "Arrogant and Unstoppable",
+  "type": "racialTrait",
+  "img": "icons/svg/pawprint.svg",
+  "system": {
+   "race": "Adversary",
+   "category": "villainous",
+   "tier": "villainous",
+   "active": true,
+   "modifiers": [
+    {
+     "target": "combat",
+     "value": "2(T)",
+     "condition": "@below == 0",
+     "label": "Arrogant and Unstoppable",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "soak",
+     "value": "2(T)",
+     "condition": "@below == 0",
+     "label": "Arrogant and Unstoppable",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "might",
+     "value": "2(T)",
+     "condition": "@below == 0",
+     "label": "Arrogant and Unstoppable",
+     "active": true,
+     "always": false
+    }
+   ],
+   "triggers": [],
+   "summary": "Villainous Trait · 2 efeito(s), 1 automatizado(s)",
+   "source": {
+    "slug": "adversaries",
+    "section": "Arrogant and Unstoppable",
+    "url": "https://dbu-rpg.com/adversaries/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/adversaries/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/adversaries</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Triggered/Power, 1/Encounter] — manual</li></ul>"
+  },
+  "effects": [],
+  "folder": "YnBuXMgSfPPw9sFo",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "adversaries"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "re2rQwM7DaVMlMZh",
+  "name": "Dauntless",
+  "type": "racialTrait",
+  "img": "icons/svg/pawprint.svg",
+  "system": {
+   "race": "Adversary",
+   "category": "villainous",
+   "tier": "villainous",
+   "active": true,
+   "modifiers": [
+    {
+     "target": "life.mult",
+     "value": "1.25",
+     "condition": "",
+     "label": "Dauntless",
+     "active": true,
+     "always": false
+    }
+   ],
+   "triggers": [],
+   "summary": "Villainous Trait · 3 efeito(s), 1 automatizado(s)",
+   "source": {
+    "slug": "adversaries",
+    "section": "Dauntless",
+    "url": "https://dbu-rpg.com/adversaries/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/adversaries/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/adversaries</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Passive] — auto</li><li>(3) [Automatic/Threshold] — manual</li></ul>"
+  },
+  "effects": [],
+  "folder": "YnBuXMgSfPPw9sFo",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "adversaries"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "tU0ivGKoDlameUks",
+  "name": "Desperate Adversary",
+  "type": "racialTrait",
+  "img": "icons/svg/pawprint.svg",
+  "system": {
+   "race": "Adversary",
+   "category": "villainous",
+   "tier": "villainous",
+   "active": true,
+   "modifiers": [
+    {
+     "target": "combat",
+     "value": "(1(T))*@below",
+     "condition": "",
+     "label": "Desperate Adversary",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "soak",
+     "value": "-(1(T))*@below",
+     "condition": "",
+     "label": "Desperate Adversary",
+     "active": true,
+     "always": false
+    }
+   ],
+   "triggers": [],
+   "summary": "Villainous Trait · 2 efeito(s), 0 automatizado(s)",
+   "source": {
+    "slug": "adversaries",
+    "section": "Desperate Adversary",
+    "url": "https://dbu-rpg.com/adversaries/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/adversaries/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/adversaries</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Triggered/Threshold] — manual</li></ul>"
+  },
+  "effects": [],
+  "folder": "YnBuXMgSfPPw9sFo",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "adversaries"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "gezbMX3GG4Akt8j0",
+  "name": "Narrative Transformation",
+  "type": "racialTrait",
+  "img": "icons/svg/pawprint.svg",
+  "system": {
+   "race": "Adversary",
+   "category": "villainous",
+   "tier": "villainous",
+   "active": true,
+   "modifiers": [],
+   "triggers": [],
+   "summary": "Villainous Trait · 2 efeito(s), 0 automatizado(s)",
+   "source": {
+    "slug": "adversaries",
+    "section": "Narrative Transformation",
+    "url": "https://dbu-rpg.com/adversaries/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/adversaries/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/adversaries</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Triggered, 1/Encounter] — manual</li></ul>"
+  },
+  "effects": [],
+  "folder": "YnBuXMgSfPPw9sFo",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "adversaries"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "lxQjAU7fSQnus8Bm",
+  "name": "Second Phase",
+  "type": "racialTrait",
+  "img": "icons/svg/pawprint.svg",
+  "system": {
+   "race": "Adversary",
+   "category": "villainous",
+   "tier": "villainous",
+   "active": true,
+   "modifiers": [],
+   "triggers": [],
+   "summary": "Villainous Trait · 2 efeito(s), 0 automatizado(s)",
+   "source": {
+    "slug": "adversaries",
+    "section": "Second Phase",
+    "url": "https://dbu-rpg.com/adversaries/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/adversaries/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/adversaries</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Triggered/Defeated] — manual</li></ul>"
+  },
+  "effects": [],
+  "folder": "YnBuXMgSfPPw9sFo",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "adversaries"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "ITvjDcshziDB0OcV",
+  "name": "Statstick",
+  "type": "racialTrait",
+  "img": "icons/svg/pawprint.svg",
+  "system": {
+   "race": "Adversary",
+   "category": "villainous",
+   "tier": "villainous",
+   "active": true,
+   "modifiers": [
+    {
+     "target": "combat",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Statstick",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "soak",
+     "value": "1(T)",
+     "condition": "",
+     "label": "Statstick",
+     "active": true,
+     "always": false
+    }
+   ],
+   "triggers": [],
+   "summary": "Villainous Trait · 3 efeito(s), 1 automatizado(s)",
+   "source": {
+    "slug": "adversaries",
+    "section": "Statstick",
+    "url": "https://dbu-rpg.com/adversaries/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/adversaries/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/adversaries</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — auto</li><li>(2) [Passive] — manual</li><li>(3) [Passive] — manual</li></ul>"
+  },
+  "effects": [],
+  "folder": "YnBuXMgSfPPw9sFo",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "adversaries"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "JWmxdN99w9gAmTJB",
+  "name": "Wild Swings",
+  "type": "racialTrait",
+  "img": "icons/svg/pawprint.svg",
+  "system": {
+   "race": "Adversary",
+   "category": "villainous",
+   "tier": "villainous",
+   "active": true,
+   "modifiers": [
+    {
+     "target": "strike",
+     "value": "-2(bT)",
+     "condition": "",
+     "label": "Wild Swings",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "wound",
+     "value": "3(T)",
+     "condition": "",
+     "label": "Wild Swings",
+     "active": true,
+     "always": false
+    }
+   ],
+   "triggers": [],
+   "summary": "Villainous Trait · 2 efeito(s), 0 automatizado(s)",
+   "source": {
+    "slug": "adversaries",
+    "section": "Wild Swings",
+    "url": "https://dbu-rpg.com/adversaries/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/adversaries/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/adversaries</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>(1) [Passive] — manual</li><li>(2) [Triggered, 2/Round] — manual</li></ul>"
+  },
+  "effects": [],
+  "folder": "YnBuXMgSfPPw9sFo",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "adversaries"
+   }
+  }
  }
 ]

@@ -2,6 +2,7 @@ import { DBU } from "../config.mjs";
 import { limitedPower, rules } from "../optional-rules.mjs";
 import { FUSION_AWAKENING_LIMITS, FUSION_METHODS, FUSION_TRAIT_LIMITS } from "../fusion/fusion-rules.mjs";
 import { awakeningCounts, stackTopReq } from "./awakening.mjs";
+import { favoredElements } from "./profiles.mjs";
 
 /**
  * Rule checks for a DBU character sheet. Returns a list of problems:
@@ -375,12 +376,9 @@ export function raceMatches(requirement, race) {
   return parts.some(p => name.includes(p) || p.includes(name));
 }
 
-/** An Elemental Profile is a Favored Element if a weapon/trait names it. */
+/** An Elemental Profile is a Favored Element if an Elemental Tool, a modifier or a chosen Element names it. */
 function isFavoredElement(profile, actor) {
-  if ( !String(profile).startsWith("elemental") ) return false;
-  const label = (DBU.profiles[profile]?.label ?? "").toLowerCase();
-  return actor.items.some(i => (i.type === "weapon") && i.system.isActive
-    && (i.system.category === "elementalTool") && label.includes(String(i.system.favoredElement).toLowerCase()) && i.system.favoredElement);
+  return !!DBU.profiles[profile]?.elemental && favoredElements(actor).includes(profile);
 }
 
 /**

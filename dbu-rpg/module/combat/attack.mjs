@@ -4,12 +4,17 @@ import { categoryToDice } from "../rules/dice.mjs";
 import { emitGM, safeUpdate } from "../socket.mjs";
 import { INJURY_TYPES, limitedPower, rules } from "../optional-rules.mjs";
 import { injuryCheck, requestInjury } from "./injuries.mjs";
-import { outOfAoeHeight, spaceLevel, targetDistances } from "../canvas/height.mjs";
+import { actorTokens, outOfAoeHeight, spaceLevel, targetDistances } from "../canvas/height.mjs";
+import { attackFxData } from "../canvas/attack-fx.mjs";
 import { LONG_RANGE, aoeMagnitude } from "../rules/height.mjs";
 import { forcedMove, runOps } from "./movement.mjs";
 import { throughGrapple } from "./grapple.mjs";
 import { mobileActive } from "../mobile.mjs";
 import { pickTargets } from "../targets.mjs";
+import { attackProfileEffects, favoredElements, profileAccess, profileAccessNames, profileEffects, profileKeys } from "../rules/profiles.mjs";
+import { hyperElementalField, multiProfileField, resolveHyperElemental, resolveMultiProfile, spendHyperElemental,
+  spendMultiProfile } from "./multi-profile.mjs";
+import { ignoresCapacity, staminaAbsorb, staminaPayment } from "./adversary.mjs";
 
 const { DialogV2 } = foundry.applications.api;
 const FDE = () => foundry.applications.ux.FormDataExtended;
@@ -53,7 +58,8 @@ export async function openAttackDialog(actor, { signature = null, profile = null
 
   // Profile Buyout: Basic Attacks only with Multi-Foundation Profiles plus the Profiles bought with TP
   const bought = new Set(sys.optional?.boughtProfiles ?? []);
-  const allowed = ([k, p]) => !rules().profileBuyout || (p.foundations.length > 1) || bought.has(k);
+  // Profiles of Transformations and Races (Barrier Blow, Glass...) only for who has access to them
+  const allowed = ([k, p]) => profileAccess(actor, k) && (!rules().profileBuyout || (p.foundations.length > 1) || bought.has(k));
   const profileOptions = Object.entries(DBU.profiles).filter(allowed).map(([k, p]) =>
     `<option value="${k}" ${k === profileKey ? "selected" : ""}>${p.label} — ${p.kp}(T) KP</option>`).join("");
   const foundationOptions = (prof?.foundations ?? ["physical"]).map(f =>
@@ -68,21 +74,34 @@ export async function openAttackDialog(actor, { signature = null, profile = null
       <label><input type="checkbox" name="dkpWager" ${sys.dkp.prefer ? "checked" : ""}> ${L("DBU.Dkp.Wager")}</label>
       <small>DKP ${sys.dkp.value}/${sys.dkp.max} · ${L("DBU.Dkp.HalfCapacity")}</small>
     </div>` : "";
+  // Wild Swings (Villainous Trait): an Absolute Attack, twice per Combat Round
+  const { wildSwingsLeft } = await import("./villainous.mjs");
+  const swings = wildSwingsLeft(actor);
+  const swingsBox = (swings !== null) ? `<div class="dbu-checks"><label><input type="checkbox" name="absolute" ${swings > 0 ? "" : "disabled"}>
+    ${L("DBU.Villain.WildSwingsBox", { n: swings })}</label></div>` : "";
+  // Adversaries: Narrative Stamina in the place of Ki Points
+  const staminaBox =((actor.type === "adversary") && (sys.adversary?.stamina > 0)) ? `<div class="dbu-checks">
+      <label><input type="checkbox" name="staminaPay" ${sys.adversary.staminaPays ? "checked" : ""}>
+        ${L("DBU.Adversary.PayWithStamina", { n: sys.adversary.stamina })}</label></div>` : "";
 
   const content = `
   <div class="dbu-dialog">
     ${divine ? `<p class="dbu-dialog-sig"><strong><i class="fa-solid fa-sun"></i> ${divine.name}</strong> — ${L(divine.costFactor < 1
       ? "DBU.God.StrikeNote" : "DBU.God.AttackNote")}</p>` : ""}
-    ${sig ? `<p class="dbu-dialog-sig"><strong>${signature.name}</strong> — ${L(`DBU.Sig.Level.${sig.level}`)} · ${prof?.label ?? ""} ·
+    ${sig ? `<p class="dbu-dialog-sig"><strong>${signature.name}</strong> — ${L(`DBU.Sig.Level.${sig.level}`)} · ${profileEffects(profileKeys(profileKey, sig)).label} ·
       ${comp.kpUnits + comp.kpAdjust}(T) KP · ${comp.tp} TP</p>`
       : `<div class="form-group"><label>${L("DBU.Attack.Profile")}</label><select name="profile" ${divine?.profile ? "disabled" : ""}>${profileOptions}</select></div>`}
     <div class="form-group"><label>${L("DBU.Attack.Foundation")}</label><select name="foundation">${foundationOptions}</select></div>
+    ${multiProfileField(actor, { profileKey: sig ? profileKey : "", sig })}
+    ${hyperElementalField(actor, { sig })}
     <div class="form-group"><label>${L("DBU.Attack.Weapon")}</label><select name="weaponId">${weaponOptions}</select></div>
     <div class="form-group"><label>${L("DBU.Attack.Wager")} (${L("DBU.Attack.WagerMax", { max: maxWager })})</label>
       <input type="number" name="wager" value="0" min="0" step="1"></div>
     ${(rules().desperation && !sys.optional.desperationUsed) ? `<div class="form-group"><label>${L("DBU.Attack.LifeWager", { max: Math.floor(sys.capacity.max / 2) })}</label>
       <input type="number" name="lifeWager" value="0" min="0" step="1"></div>` : ""}
     ${dkp}
+    ${staminaBox}
+    ${swingsBox}
     <div class="form-group"><label>${L("DBU.Attack.Charges")} (${L("DBU.Attack.Pending", { n: pending })})</label>
       <input type="number" name="extraCharges" value="0" min="0" step="1"></div>
     <div class="form-group"><label>${L("DBU.Attack.StrikeBonus")}</label><input type="number" name="strikeBonus" value="0" step="1"></div>
@@ -110,17 +129,41 @@ export async function openAttackDialog(actor, { signature = null, profile = null
         callback: (event, button) => new (FDE())(button.form).object },
       { action: "cancel", label: L("Cancel"), icon: "fa-solid fa-xmark" }
     ],
-    // The Foundation list follows the chosen Profile
+    // The Foundation list follows the chosen Profile; Multi-Profile options that do not fit the Foundation, repeat the
+    // Profile or are used up are disabled
     render: (event, dialog) => {
       const profileSelect = dialog.element.querySelector("select[name=profile]");
       const foundationSelect = dialog.element.querySelector("select[name=foundation]");
-      if ( !profileSelect || !foundationSelect ) return;
-      profileSelect.addEventListener("change", () => {
+      const multiSelect = dialog.element.querySelector("select[name=multi]");
+      const hyper = dialog.element.querySelector("[data-hyper]");
+      const filterMulti = () => {
+        if ( !multiSelect ) return;
+        const profile = profileSelect?.value ?? profileKey;
+        for ( const o of multiSelect.querySelectorAll("option[data-key]") ) {
+          o.disabled = o.hasAttribute("data-used") || (o.dataset.key === profile)
+            || !o.dataset.foundations.split(",").includes(foundationSelect?.value);
+          if ( o.disabled && o.selected ) multiSelect.value = "";
+        }
+        // Hyper Elemental only goes with Flash of the Elements
+        if ( hyper ) {
+          const on = multiSelect.value.startsWith("elementalForce|");
+          hyper.classList.toggle("dbu-off", !on);
+          for ( const s of hyper.querySelectorAll("select") ) {
+            if ( !on ) s.value = "";
+            s.toggleAttribute("data-inactive", !on);
+          }
+        }
+      };
+      foundationSelect?.addEventListener("change", filterMulti);
+      multiSelect?.addEventListener("change", filterMulti);
+      profileSelect?.addEventListener("change", () => {
         const list = DBU.profiles[profileSelect.value]?.foundations ?? ["physical"];
         const current = foundationSelect.value;
         foundationSelect.innerHTML = list.map(f =>
           `<option value="${f}" ${f === current ? "selected" : ""}>${L(DBU.foundations[f])}</option>`).join("");
+        filterMulti();
       });
+      filterMulti();
     },
     rejectClose: false
   });
@@ -141,12 +184,25 @@ export async function executeAttack(actor, opts) {
   const prof = DBU.profiles[profileKey];
   if ( !prof ) return ui.notifications.error(L("DBU.Sig.ErrNoProfile"));
   const foundation = opts.foundation ?? prof.foundations[0];
+  // The winner of a Duel Maneuver (module/combat/duel.mjs): its Initiating Attack, already paid, hits the other side
+  // with every Ki Wager of the Duel and no Strike Roll ({charges, wager, targets, extraProfiles, extraWoundT, name}).
+  // An attack a Maneuver makes (Planet Burst): already paid, no Strike Roll ({charges, powerShot, name, duelOnly, note}).
+  const duel = opts.duel ?? null;
+  const forced = opts.forced ?? null;
+  const preset = duel ?? forced;
+  // Multi-Profile applied by an effect as the attack is made (Flash of the Elements, Elemental Blade...)
+  const mp = preset ? null : resolveMultiProfile(actor, { value: opts.multi, profileKey, sig, foundation });
+  // Hyper Elemental: a Line or Cone AoE, and one more Favored Element (no Ki Point Cost)
+  const hyper = preset ? null : resolveHyperElemental(actor, { sig, mp, aoe: opts.hyperAoe, element: opts.hyperElement });
+  // Multi-Profile: the effects of both Profiles apply
+  const fx = profileEffects(profileKeys(profileKey, sig, preset?.extraProfiles
+    ?? [mp?.key, hyper?.extraKey].filter(Boolean)));
   const weapon = opts.weaponId ? actor.items.get(opts.weaponId) : null;
   const T = sys.top.current;
   const bT = sys.top.base;
   const kpT = sys.top.kp;
   const ignore = !!opts.ignoreLimits;
-  const problems = [];
+  const problems = [...(mp?.problems ?? []), ...(hyper?.problems ?? [])];
 
   // Foundation requirements
   if ( (foundation === "energy") && (sys.attributes.fo.score < 3) && !sys.flags.energyWithoutFO ) problems.push(L("DBU.Attack.ErrEnergyFO"));
@@ -154,6 +210,10 @@ export async function executeAttack(actor, opts) {
   if ( weapon && (weapon.system.weaponType !== foundation) ) problems.push(L("DBU.Attack.ErrWeaponFoundation"));
   if ( weapon && sig && !comp.weaponAssisted ) problems.push(L("DBU.Attack.ErrWeaponAssisted"));
   if ( sig && (comp.errors?.length) ) problems.push(L("DBU.Attack.ErrSignatureInvalid"));
+  // A Basic Attack of a Profile only some effects give access to (Barrier Blow, Glass...)
+  if ( !sig && !preset && !profileAccess(actor, profileKey) ) {
+    problems.push(L("DBU.Sig.ErrProfileAccess", { profile: DBU.profiles[profileKey]?.label ?? profileKey, from: profileAccessNames(profileKey) }));
+  }
   if ( sig && comp.ultimate && sig.usedThisEncounter ) problems.push(L("DBU.Attack.ErrUltimateUsed"));
   if ( sig && comp.ultimate && ((sys.combat.ultimatesUsed ?? 0) >= 3) ) problems.push(L("DBU.Attack.ErrUltimate3"));
   if ( sig && comp.climax && (sys.health.count < comp.climax) ) problems.push(L("DBU.Attack.ErrClimax"));
@@ -168,6 +228,11 @@ export async function executeAttack(actor, opts) {
   /* ----- Ki Point Cost ----- */
   let units = sig ? (comp.kpUnits + comp.kpAdjust) : prof.kp;
   let minUnits = sig ? comp.kpMinUnits : (prof.kp / 2);
+  // A Super Profile's Ki Point Cost adds to the cost and to the minimum one (Blitz on a Signature: −2(T))
+  if ( mp?.key ) {
+    units += mp.cost - (sig ? (DBU.profiles[mp.key].sigKpReduction ?? 0) : 0);
+    minUnits += mp.cost / 2;
+  }
   const weaponCat = weapon ? DBU.weaponCategories[weapon.system.category] : null;
   if ( weaponCat?.kp && ((weaponCat.type !== "magic") || (foundation === "magic")) ) units += weaponCat.kp;
   const R = rules();
@@ -176,6 +241,8 @@ export async function executeAttack(actor, opts) {
   let minKp = Math.ceil(minUnits * kpT);
   if ( sys.costs.perfectKiControl ) minKp = Math.min(minKp, 2 * kpT);
   kp = Math.max(minKp, kp);
+  // The Glass Tribe's Glass: a fixed Ki Point Cost
+  if ( mp?.flatKp ) kp += mp.flatKp;
   // God Strike: 1/4 (rounded up) of the Profile's Ki Point Cost
   const divine = opts.divine ?? null;
   if ( divine?.costFactor && (divine.costFactor !== 1) ) kp = Math.ceil(kp * divine.costFactor);
@@ -199,12 +266,15 @@ export async function executeAttack(actor, opts) {
   const capacityOf = (n, fromDkp) => (fromDkp ? Math.ceil(n / 2) : n);
 
   /* ----- Ki Wager ----- */
-  let wager = Math.max(0, Number(opts.wager) || 0);
-  const capacityLeft = sys.capacity.value - capacityOf(kp, costDkp);
+  let wager = preset ? (preset.wager ?? 0) : Math.max(0, Number(opts.wager) || 0);
+  // Without Capacity (Adversaries): no Capacity spent nor checked, and the Ki Wager stays within the Max Capacity
+  const noCapacity = ignoresCapacity(actor);
+  const capacityLeft = noCapacity ? sys.capacity.max : sys.capacity.value - capacityOf(kp, costDkp);
   // How much can still be wagered with the Capacity left (DKP only use half of it)
   const wagerRoom = Math.max(0, wagerDkp ? 2 * capacityLeft : capacityLeft);
-  let wagerLimit = Math.floor(sys.capacity.max / 2);
-  if ( comp?.fullWager ) wagerLimit = wagerRoom;
+  let wagerLimit = noCapacity ? sys.capacity.max : Math.floor(sys.capacity.max / 2);
+  // Full Wager: the Advantage, or free with a Profile (Elemental (Light)), Basic Attacks included
+  if ( comp?.fullWager || fx.freeAdvantages.includes("fullWager") ) wagerLimit = wagerRoom;
   const wired = weapon?.system.qualities?.some(q => /wired/i.test(q.name));
   if ( ballistic ) wagerLimit = wired ? Math.floor(sys.capacity.max / 4) : 0;
   // Desperation Rules: Life Points may join the Ki Wager (up to 1/2 of the Capacity)
@@ -217,11 +287,19 @@ export async function executeAttack(actor, opts) {
   const kiPaid = (costDkp ? 0 : kp) + (wagerDkp ? 0 : wager);
   const dkpPaid = (costDkp ? kp : 0) + (wagerDkp ? wager : 0);
   const capacityUsed = capacityOf(kp, costDkp) + capacityOf(wager, wagerDkp);
-  if ( kiPaid > sys.ki.value ) problems.push(L("DBU.Attack.ErrKi", { need: kiPaid, have: sys.ki.value }));
+  // Narrative Stamina (Elite and Villain Adversaries) is spent in the place of Ki Points
+  const stamina = staminaPayment(actor, kiPaid, opts.staminaPay !== false);
+  if ( stamina.fromKi > sys.ki.value ) problems.push(L("DBU.Attack.ErrKi", { need: stamina.fromKi, have: sys.ki.value }));
   if ( dkpPaid > (sys.dkp?.value ?? 0) ) problems.push(L("DBU.Dkp.ErrNotEnough", { need: dkpPaid, have: sys.dkp?.value ?? 0 }));
-  if ( (sig?.superProfile !== "allOut") && (capacityUsed > sys.capacity.value) ) {
+  if ( (sig?.superProfile !== "allOut") && !noCapacity && (capacityUsed > sys.capacity.value) ) {
     problems.push(L("DBU.Attack.ErrCapacity", { need: capacityUsed, have: sys.capacity.value }));
   }
+
+  /* ----- Villainous: Get Up! and the 1-on-1 Duel ----- */
+  const V = await import("./villainous.mjs");
+  const targetActors = (opts.targets ?? []).map(t => t.actor).filter(Boolean);
+  const getUp = preset ? null : V.getUpProblem(actor, targetActors);
+  if ( getUp ) problems.push(getUp);
 
   /* ----- Actions ----- */
   const actionCost = (opts.spendAction ? 1 : 0) + (opts.calledShot ? 1 : 0);
@@ -229,7 +307,7 @@ export async function executeAttack(actor, opts) {
     problems.push(L("DBU.Attack.ErrActions", { need: actionCost, have: sys.combat.actions }));
   }
 
-  if ( problems.length && !ignore ) {
+  if ( problems.length && !ignore && !preset ) {
     ui.notifications.error(problems.join(" "), { permanent: false });
     await postInfoCard({ actor, title: L("DBU.Attack.Blocked"), lines: problems, whisper: [game.user.id] });
     return null;
@@ -237,39 +315,46 @@ export async function executeAttack(actor, opts) {
 
   /* ----- Energy Charges ----- */
   const pending = sys.combat.energyCharges ?? 0;
-  let charges = (ballistic && !wired ? 0 : pending) + (Number(opts.extraCharges) || 0) + (prof.freeCharges ?? 0);
+  let charges = (ballistic && !wired ? 0 : pending) + (Number(opts.extraCharges) || 0) + fx.freeCharges;
   if ( sig && comp.ultimate ) charges += sys.health.count;
   if ( sig && comp.transformationBoost && sys.transformation.forms.length ) charges += 1;
-  let maxCharges = sig ? comp.maxCharges : (prof.maxCharges ?? 7);
+  // Mega Flare applied through an effect raises a Signature's maximum too
+  let maxCharges = sig ? Math.max(comp.maxCharges, fx.maxCharges + (comp.ultimate ? 1 : 0)) : fx.maxCharges;
   if ( ballistic ) maxCharges = Math.ceil(sys.attributes.sc.mod / 4);
   if ( limitedPower(sys) ) maxCharges = Math.min(maxCharges, 3);
   charges = Math.min(charges, maxCharges);
-  const bonusCharges = prof.bonusCharges ?? 0; // Beam: does not count toward the maximum
+  const bonusCharges = fx.bonusCharges; // Beam: does not count toward the maximum
+  if ( preset ) charges = Math.max(0, (preset.charges ?? 0) - bonusCharges);
   const totalCharges = charges + bonusCharges;
   const chargeCategory = sys.chargeCategory + (sig ? comp.chargeCategory : 0);
 
   /* ----- Damage Category ----- */
-  let category = prof.cat;
-  if ( (sig?.superProfile === "multiProfile") && DBU.profiles[sig.multiProfile] ) category = Math.max(category, DBU.profiles[sig.multiProfile].cat);
+  // Multi-Profile: the highest Damage Category of the two Profiles
+  let category = fx.cat;
   if ( opts.calledShot ) category += 1;
-  if ( (profileKey === "megaFlare") && (charges >= 7) ) category += 1;
+  if ( fx.has("megaFlare") && (charges >= 7) ) category += 1;
+  // Glass: +1 Damage Category for every 2 Energy Charges (max. +2)
+  if ( fx.glass ) category += Math.min(2, Math.floor((charges + bonusCharges) / 2));
   // Divine Attack: +1 Damage Category
   if ( divine?.category ) category += divine.category;
 
   /* ----- Pay ----- */
+  // Life Point Cost to attack (Kaioken, Super Kaioken...)
+  const lifeCost = preset ? 0 : Math.max(0, sys.buckets?.attackLifeCost?.total ?? 0);
+  // A Duel's Initiating Attack was paid when the Duel began (a Maneuver's attack, by the Maneuver)
+  if ( !preset ) {
   const update = {
-    "system.ki.value": Math.max(0, sys.ki.value - kiPaid),
+    "system.ki.value": Math.max(0, sys.ki.value - stamina.fromKi),
     "system.combat.attacksThisRound": (sys.combat.attacksThisRound ?? 0) + 1,
     "system.combat.energyCharges": 0
   };
+  if ( stamina.fromStamina ) update["system.adversary.stamina"] = sys.adversary.stamina - stamina.fromStamina;
   if ( dkpPaid ) update["system.dkp.value"] = Math.max(0, sys.dkp.value - dkpPaid);
-  if ( sig?.superProfile !== "allOut" ) update["system.capacity.value"] = Math.max(0, sys.capacity.value - capacityUsed);
-  if ( (sig?.superProfile === "allOut") || comp?.allOrNothing ) update["system.capacity.value"] = 0;
+  if ( !noCapacity && (sig?.superProfile !== "allOut") ) update["system.capacity.value"] = Math.max(0, sys.capacity.value - capacityUsed);
+  if ( !noCapacity && ((sig?.superProfile === "allOut") || comp?.allOrNothing) ) update["system.capacity.value"] = 0;
   if ( game.combat?.started && opts.spendAction ) update["system.combat.actions"] = Math.max(0, sys.combat.actions - actionCost);
   if ( pending && sys.conditions.guardDown ) update["system.conditions.guardDown"] = 0;
   if ( sig && comp.ultimate ) update["system.combat.ultimatesUsed"] = (sys.combat.ultimatesUsed ?? 0) + 1;
-  // Life Point Cost to attack (Kaioken, Super Kaioken...)
-  const lifeCost = Math.max(0, sys.buckets?.attackLifeCost?.total ?? 0);
   if ( lifeWager > 0 || lifeCost > 0 ) {
     update["system.life.value"] = sys.life.value - lifeWager - lifeCost;
     if ( lifeWager > 0 ) update["system.optional.desperationUsed"] = true;
@@ -278,6 +363,28 @@ export async function executeAttack(actor, opts) {
   if ( ballistic ) await weapon.update({ "system.ammo.value": Math.max(0, weapon.system.ammo.value - ammoCost) });
   if ( pending && sys.conditions.guardDown ) await actor.toggleStatusEffect("guardDown", { active: false }).catch(() => null);
   if ( sig && comp.ultimate ) await signature.update({ "system.usedThisEncounter": true });
+  }
+  // Multi-Profile from an effect: one more use this Round/Encounter, and its resource (Sunlight) spent
+  const multiNotes = (mp?.key && !preset) ? [mp.note, ...(await spendMultiProfile(actor, mp))] : [];
+  // Someone else targeting the two of a 1-on-1 Duel ends it
+  if ( !preset ) await V.oneOnOneTargeted(actor, targetActors);
+  // Absolute Attack (Wild Swings, Intense Blast): a missed target still takes 1/2 of the Wound against Soak and DR.
+  // No more than 2 Absolute Attacks in a Combat Round
+  const intense = !!sig?.advantages?.some(a => (a.key === "intenseBlast") && (a.rank ?? 1) > 0);
+  const swing = !!opts.absolute && ((V.wildSwingsLeft(actor) ?? 0) > 0);
+  let absolute = false;
+  if ( (swing || intense) && !preset ) {
+    if ( (actor.system.combat.absoluteAttacks ?? 0) < 2 ) {
+      absolute = true;
+      await actor.update({ "system.combat.absoluteAttacks": (actor.system.combat.absoluteAttacks ?? 0) + 1 });
+      multiNotes.push(L(swing ? "DBU.Villain.WildSwings" : "DBU.Attack.AbsoluteIntense"));
+    }
+    else multiNotes.push(L("DBU.Attack.AbsoluteLimit"));
+  }
+  if ( hyper?.uses.length ) {
+    await spendHyperElemental(actor, hyper);
+    multiNotes.push(...hyper.notes);
+  }
 
   /* ----- Strike Roll ----- */
   const fresh = actor.system; // re-prepared after the update (Diminishing Offense applied)
@@ -285,7 +392,7 @@ export async function executeAttack(actor, opts) {
   const parts = [...strikeData.parts];
   const add = (label, value) => { if ( value ) parts.push({ label, value }); };
   add(L(DBU.foundations[foundation]), fresh.rolls[`strike_${foundation}`] ?? 0);
-  if ( profileKey === "crushing" ) add("Crushing (½ Haste)", -Math.ceil(fresh.aptitudes.haste / 2));
+  if ( fx.has("crushing") ) add("Crushing (½ Haste)", -Math.ceil(fresh.aptitudes.haste / 2));
   if ( sig ) {
     add(L("DBU.Sig.Accurate"), comp.strikeT * T);
     add(signature.name, fresh.buckets["strike.signature"]?.total ?? 0);
@@ -303,20 +410,27 @@ export async function executeAttack(actor, opts) {
     if ( opts.calledShot && weaponCat?.calledStrike ) add(weaponCat.label, weaponCat.calledStrike * T);
   }
   else add(L("DBU.Attack.Unarmed"), fresh.buckets["strike.unarmed"]?.total ?? 0);
-  if ( prof.elemental && isFavored(actor, profileKey) ) add(L("DBU.Attack.Favored"), 1 * T);
+  if ( favoredElement(actor, fx) ) add(L("DBU.Attack.Favored"), 1 * T);
+  // Elemental (Light) with the Elemental (Dark) Profile applied to it (Multi-Profile)
+  if ( fx.has("elementalLight") && fx.has("elementalDark") ) add("Elemental (Light + Dark)", 1 * T);
   if ( opts.calledShot ) add("Called Shot", -2 * T);
   if ( opts.longRange && !(sig && comp.shortRange === 1) ) add("Long Range", -2 * bT);
   if ( opts.oblivious ) add("Hidden", 2 * bT);
   if ( opts.rapid ) add("Rapid Movement", 1 * T);
   add(L("DBU.Attack.Situational"), Number(opts.strikeBonus) || 0);
 
-  const targets = (opts.targets ?? []).map(t => ({
-    tokenUuid: t.document?.uuid ?? null, actorUuid: t.actor?.uuid ?? null, name: t.name, img: t.document?.texture?.src ?? t.actor?.img,
-    result: null, defense: null, damage: null, dimApplied: false
-  }));
+  const targets = duel
+    ? (duel.targets ?? []).map(t => ({ ...t, result: "hit", defense: { mode: "Duel" }, damage: null, dimApplied: true }))
+    : (opts.targets ?? []).map(t => ({
+      tokenUuid: t.document?.uuid ?? null, actorUuid: t.actor?.uuid ?? null, name: t.name, img: t.document?.texture?.src ?? t.actor?.img,
+      result: null, defense: null, damage: null, dimApplied: false
+    }));
 
   // Age: Mini stacks may make the attack miss automatically
-  const notesExtra = [];
+  const notesExtra = [...multiNotes];
+  if ( duel ) notesExtra.push(L("DBU.Duel.CounterNote", { wager: duel.wager }));
+  if ( forced?.note ) notesExtra.push(forced.note);
+  if ( stamina.fromStamina && !preset ) notesExtra.push(L("DBU.Adversary.StaminaPaid", { n: stamina.fromStamina, ki: stamina.fromKi }));
   if ( R.age && (fresh.optional.mini > 0) ) {
     const mini = await new Roll("1d10").evaluate();
     if ( mini.total <= 1 + fresh.optional.mini ) notesExtra.push(L("DBU.Attack.MiniMiss", { roll: mini.total }));
@@ -326,7 +440,15 @@ export async function executeAttack(actor, opts) {
   if ( lifeCost > 0 ) notesExtra.push(L("DBU.Attack.LifeCost", { n: lifeCost }));
   if ( dkpPaid ) notesExtra.push(L("DBU.Dkp.Paid", { cost: costDkp ? kp : 0, wager: wagerDkp ? wager : 0, cap: capacityUsed }));
   // AoEs only reach so far up and down (Flight: the Magnitude's number in Verticality; High Environments: ranks)
-  const aoe = sig ? comp.aoe : prof.aoe;
+  let aoe = sig ? comp.aoe : prof.aoe;
+  // A Profile applied through an effect brings its AoE when the attack has none
+  if ( !aoe && mp?.key ) aoe = DBU.profiles[mp.key].aoe ?? aoe;
+  // Hyper Elemental: a Line or Cone AoE, 1 Magnitude larger for every 2 Energy Charges
+  if ( hyper?.aoe ) {
+    aoe = hyper.aoe;
+    const more = Math.floor(totalCharges / 2);
+    if ( more ) notesExtra.push(L("DBU.MultiProfile.HyperMagnitude", { n: more }));
+  }
   if ( aoe ) {
     const options = sig ? [...sig.advantages, ...sig.disadvantages] : [];
     const magnitude = aoeMagnitude(aoe, k => options.find(o => o.key === k)?.rank ?? 0);
@@ -336,9 +458,10 @@ export async function executeAttack(actor, opts) {
 
   const attack = {
     attackerUuid: actor.uuid,
-    name: signature?.name ?? (divine ? `${divine.name}: ${prof.label}` : `${L("DBU.Attack.Basic")}: ${prof.label}`),
-    signatureId: signature?.id ?? null, profile: profileKey, foundation, weaponId: weapon?.id ?? null,
-    kp, wager: wager + lifeWager, charges: totalCharges, chargeCategory, category, ballistic: !!ballistic,
+    name: preset?.name ?? signature?.name ?? (divine ? `${divine.name}: ${prof.label}` : `${L("DBU.Attack.Basic")}: ${prof.label}`),
+    signatureId: signature?.id ?? null, profile: profileKey, profiles: fx.keys, foundation, weaponId: weapon?.id ?? null,
+    // A Maneuver's attack shows what it really cost (Planet Burst: the Narrative Stamina)
+    kp: forced?.kp ?? kp, wager: wager + lifeWager, charges: totalCharges, chargeCategory, category, ballistic: !!ballistic,
     dkp: { cost: costDkp, wager: wagerDkp, paid: dkpPaid },
     caliber: ballistic ? (weapon.system.caliber ?? 0) : 0,
     calledShot: !!opts.calledShot, injuryType: opts.calledShot ? (opts.injuryType || "") : "",
@@ -349,19 +472,26 @@ export async function executeAttack(actor, opts) {
       sustained: comp.sustained, backlash: comp.backlash, twinLinked: comp.twinLinked, deadLink: comp.deadLink,
       shortRange: comp.shortRange, powerBurst: comp.powerBurst, superProfile: sig.superProfile } : null,
     autoHit: fresh.flags.autoHit,
-    knockback: knockbackOf(actor, { comp, sig, profileKey, aoe }),
+    knockback: knockbackOf(actor, { comp, sig, fx, aoe }),
     notes: notesExtra,
+    // The attacker's base ToP (a Ki Wager of 10(bT)+ can be answered with a Duel Maneuver); the winner's attack of a Duel
+    bT, fromDuel: !!duel, fromToken: actorTokens(actor)[0]?.document?.uuid ?? null,
+    // What the Duel Escape Maneuver gives back; Power Shot stacks of a Maneuver's attack; answered only with a Duel
+    actionCost: (opts.spendAction && game.combat?.started) ? actionCost : 0, powerShot: forced?.powerShot ?? 0,
+    extraWoundT: duel?.extraWoundT ?? (2 * (forced?.powerShot ?? 0)), duelOnly: !!forced?.duelOnly, noStrike: !!preset, absolute,
     targets, wound: null
   };
 
-  const result = await dbuRoll({
+  // The winner of a Duel (or a Maneuver's attack) makes no Strike Roll
+  const result = preset ?{ total: 0, natural: 0, rawNatural: 0, crit: false, botch: false, extra: [], parts: [], critRoll: null, rolls: [] }
+    : await dbuRoll({
     actor, kind: "strike",
     title: `${L("DBU.Roll.Strike")} — ${attack.name}`,
-    subtitle: `${prof.label} · ${L(DBU.foundations[foundation])} · ${L(DBU.damageCategories[Math.clamp(category, 1, 3)])}`,
-    naturalMod: strikeData.natural, minNatural: prof.minNatural,
+    subtitle: `${fx.label} · ${L(DBU.foundations[foundation])} · ${L(DBU.damageCategories[Math.clamp(category, 1, 3)])}`,
+    naturalMod: strikeData.natural, minNatural: fx.minNatural,
     critTarget: strikeData.crit, botchRange: strikeData.botch,
     diceGroups: strikeData.dice, parts, critDice: strikeData.critDice, botchPenalty: strikeData.botchPenalty,
-    cutting: !!prof.cutting,
+    cutting: fx.cutting,
     twin: (attack.sig?.twinLinked === "strike") ? "high" : ((attack.sig?.deadLink === "strike") ? "low" : null),
     notes: [
       L("DBU.Attack.Paid", { kp, wager: wager + lifeWager, charges: totalCharges }),
@@ -371,6 +501,17 @@ export async function executeAttack(actor, opts) {
     toMessage: false
   });
   attack.strike = { total: result.total, natural: result.natural, crit: result.crit, botch: result.botch };
+  // Cutting: a Critical Result on the Strike Roll increases the Damage Category by 1 Category
+  if ( fx.cutting && result.crit ) {
+    attack.category += 1;
+    attack.notes.push(L("DBU.Attack.CuttingCrit", { cat: L(DBU.damageCategories[Math.clamp(attack.category, 1, 3)]) }));
+  }
+  // How every client draws the attack on the canvas (the Signature's own look, or the Profile's simple effect); a Duel
+  // draws its own ending
+  attack.fx = duel ? null : attackFxData({
+    from: actorTokens(actor)[0]?.document?.uuid ?? null, profiles: fx.keys, foundation, vfx: sig?.vfx ?? null, aoe,
+    category: attack.category, charges: totalCharges, crit: result.crit, botch: result.botch
+  });
 
   const message = await postAttackCard(actor, attack, result);
 
@@ -385,22 +526,21 @@ export async function executeAttack(actor, opts) {
  * Damage of that movement), and every Attacking Maneuver in Local Space or Deep Space, where an attack that already has
  * it adds 1(bT) or 2(bT) to the Might of its Might Clash and Squares. null when the attack has none.
  */
-function knockbackOf(actor, { comp, sig, profileKey, aoe }) {
-  const own = comp ? !!comp.knockback : (profileKey === "launching");
+function knockbackOf(actor, { comp, sig, fx, aoe }) {
+  const own = !!comp?.knockback || fx.has("launching");
   const space = spaceLevel(actor);
   if ( !own && !space ) return null;
   return {
     space: own ? space : 0, forceful: comp?.forcefulLaunch ?? 0, precise: !!comp?.preciseStrike,
-    superLaunch: sig?.superProfile === "superLaunch", double: profileKey === "launching", aoe: !!aoe
+    superLaunch: sig?.superProfile === "superLaunch", double: fx.has("launching"), aoe: !!aoe
   };
 }
 
-function isFavored(actor, profileKey) {
-  const label = (DBU.profiles[profileKey]?.label ?? "").toLowerCase();
-  return actor.items.some(i => (i.type === "weapon") && i.system.isActive && (i.system.category === "elementalTool")
-    && i.system.favoredElement && label.includes(i.system.favoredElement.toLowerCase()))
-    || actor.items.some(i => (i.system.modifiers ?? []).some(m => (m.target === "favoredElement")
-      && label.includes(String(m.value).toLowerCase())));
+/** Is one of the attack's Elemental Profiles a Favored Element? (its bonus counts once) */
+function favoredElement(actor, fx) {
+  if ( !fx.elemental.length ) return false;
+  const favored = favoredElements(actor);
+  return fx.elemental.some(k => favored.includes(k));
 }
 
 /* -------------------------------------------- */
@@ -412,8 +552,17 @@ async function renderAttackContent(attack, rollResult) {
     attack,
     roll: rollResult ?? attack.strikeView,
     category: L(DBU.damageCategories[Math.clamp(attack.category, 1, 3)]),
-    hasTargets: attack.targets.length > 0
+    hasTargets: attack.targets.length > 0,
+    // Duel Maneuver: 2+ Energy Charges or a Ki Wager of 10(bT)+
+    duelable: !attack.fromDuel && !attack.nullified && (attack.duelOnly || ((attack.charges ?? 0) >= 2)
+      || ((attack.wager ?? 0) >= (10 * (attack.bT ?? 1))))
   });
+}
+
+/** Store a changed attack on its card (through the GM when the card is someone else's). */
+export async function updateAttackCard(message, attack) {
+  const content = await renderAttackContent(attack);
+  return safeUpdate(message, { content, [`flags.${FLAG}.attack`]: attack });
 }
 
 async function postAttackCard(actor, attack, result) {
@@ -506,10 +655,14 @@ export async function rollDefense(message, index, mode = "dodge") {
     const cost = Math.ceil((sys.costs.guard + extra) * sys.costs.guardMultiplier);
     // Paid with Divine Ki Points when the defender prefers them (God Ki State): half the Capacity
     const divine = !!(sys.dkp?.usable && sys.dkp.prefer);
+    // Adversaries: Narrative Stamina in the place of Ki Points, and no Capacity (Without Capacity)
+    const stamina = divine ? { fromStamina: 0, fromKi: cost } : staminaPayment(actor, cost);
     const have = divine ? sys.dkp.value : sys.ki.value;
-    if ( cost > have ) ui.notifications.warn(L(divine ? "DBU.Dkp.ErrNotEnough" : "DBU.Attack.ErrKi", { need: cost, have }));
-    update[divine ? "system.dkp.value" : "system.ki.value"] = Math.max(0, have - cost);
-    update["system.capacity.value"] = Math.max(0, sys.capacity.value - (divine ? Math.ceil(cost / 2) : cost));
+    const need = divine ? cost : stamina.fromKi;
+    if ( need > have ) ui.notifications.warn(L(divine ? "DBU.Dkp.ErrNotEnough" : "DBU.Attack.ErrKi", { need, have }));
+    update[divine ? "system.dkp.value" : "system.ki.value"] = Math.max(0, have - need);
+    if ( stamina.fromStamina ) update["system.adversary.stamina"] = sys.adversary.stamina - stamina.fromStamina;
+    if ( !ignoresCapacity(actor) ) update["system.capacity.value"] = Math.max(0, sys.capacity.value - (divine ? Math.ceil(cost / 2) : cost));
     rec.cost = cost;
     rec.dkp = divine;
     hit = true;
@@ -571,7 +724,7 @@ export async function rollWound(message) {
   const bT = sys.top.base;
   const f = attack.foundation;
   const w = sys.rolls.wound[f];
-  const prof = DBU.profiles[attack.profile];
+  const fx = attackProfileEffects(attack);
   const weapon = attack.weaponId ? actor.items.get(attack.weaponId) : null;
   const weaponCat = weapon ? DBU.weaponCategories[weapon.system.category] : null;
   const parts = [...w.parts];
@@ -583,7 +736,9 @@ export async function rollWound(message) {
     add(L("DBU.Attack.BallisticNoAttr"), -dmgAttr);
     add("Caliber", attack.caliber);
   }
-  if ( prof.extraDamageAttribute ) add(`${prof.label} (+${L("DBU.Attack.DamageAttribute")})`, dmgAttr * prof.extraDamageAttribute);
+  for ( const p of fx.list ) {
+    if ( p.extraDamageAttribute ) add(`${p.label} (+${L("DBU.Attack.DamageAttribute")})`, dmgAttr * p.extraDamageAttribute);
+  }
   if ( attack.sig?.superProfile === "annihilation" ) add("Complete Annihilation", dmgAttr);
   if ( attack.sig?.lowPowerCrush ) add("Low-Power Crush", -Math.ceil(dmgAttr / 2));
   if ( attack.sig ) {
@@ -600,16 +755,20 @@ export async function rollWound(message) {
       if ( f !== "magic" ) add("Power Burst (Massive Power)", extraStacks * Math.floor(sys.attributes.fo.mod / 4));
     }
   }
-  if ( attack.profile === "megaFlare" ) add("Mega Flare", attack.charges * T);
+  if ( fx.has("megaFlare") ) add("Mega Flare", attack.charges * T);
+  // Power Shot stacks given by a Maneuver (Planet Burst), carried by the winner of its Duel
+  if ( attack.extraWoundT ) add("Power Shot", attack.extraWoundT * T);
   if ( weapon ) {
     add(L("DBU.WeaponSize.label"), (DBU.weaponSizes[weapon.system.size]?.wound ?? 0) * T);
     if ( weaponCat?.wound ) add(weaponCat.label, weaponCat.wound * T);
-    if ( weaponCat?.simpleWound && (attack.profile === "simple") ) add(weaponCat.label, weaponCat.simpleWound * T);
+    if ( weaponCat?.simpleWound && fx.has("simple") ) add(weaponCat.label, weaponCat.simpleWound * T);
     if ( attack.calledShot && weaponCat?.calledWound ) add(weaponCat.label, weaponCat.calledWound * T);
     add(L("DBU.Attack.Armed"), sys.buckets["wound.armed"]?.total ?? 0);
   }
   else add(L("DBU.Attack.Unarmed"), sys.buckets["wound.unarmed"]?.total ?? 0);
-  if ( prof.elemental && isFavored(actor, attack.profile) ) add(L("DBU.Attack.Favored"), 2 * T);
+  if ( favoredElement(actor, fx) ) add(L("DBU.Attack.Favored"), 2 * T);
+  // Elemental (Dark) with the Elemental (Light) Profile applied to it (Multi-Profile)
+  if ( fx.has("elementalDark") && fx.has("elementalLight") ) add("Elemental (Dark + Light)", 2 * T);
   add(L("DBU.Attack.Situational"), attack.woundBonus);
 
   // Energy Charges: 1d6(T) each, d8 for Signatures (Charged Up), plus any category increases
@@ -620,12 +779,16 @@ export async function rollWound(message) {
     diceGroups.push({ dice, label: L("DBU.Attack.Charges") });
   }
 
-  const critTarget = (prof.cutting) ? 5 : w.crit;
+  // Glass: +1(T) Wound for every 2 Energy Charges; Barrier Blow: 1/4 of the Might and the Base Die once more
+  if ( fx.glass ) add("Glass", Math.floor(attack.charges / 2) * T);
+  if ( fx.barrierBlow ) add("Barrier Blow (¼ Might)", Math.ceil(sys.aptitudes.might / 4));
+  const critTarget = fx.cutting ? 5 : w.crit;
   const result = await dbuRoll({
     actor, kind: "wound", title: `${L("DBU.Roll.Wound")} — ${attack.name}`,
     subtitle: `${L(DBU.damageCategories[Math.clamp(attack.category, 1, 3)])} · ${attack.charges} ${L("DBU.Attack.ChargesShort")}`,
     naturalMod: w.natural, critTarget, botchRange: w.botch, diceGroups, parts,
     critDice: w.critDice, botchPenalty: w.botchPenalty,
+    extraBaseDie: fx.barrierBlow, extraBaseDieLabel: "Barrier Blow (Base Die)",
     twin: (attack.sig?.twinLinked === "wound") ? "high" : ((attack.sig?.deadLink === "wound") ? "low" : null),
     toMessage: true,
     flags: { attackMessageId: message.id }
@@ -659,6 +822,7 @@ export function computeDamage(targetActor, attack, attacker = null, def = null) 
   const tsys = targetActor.system;
   let wound = attack.wound?.total ?? 0;
   const lines = [];
+  const fx = attackProfileEffects(attack);
   let category = attack.category + (tsys.damageCategoryTaken ?? 0);
   if ( def?.mode === "guard" ) {
     wound = Math.floor(wound / 2);
@@ -675,13 +839,13 @@ export function computeDamage(targetActor, attack, attacker = null, def = null) 
   // Damage Reduction
   let dr = tsys.aptitudes.dr;
   const weaponCat = attack.weaponId && attacker ? DBU.weaponCategories[attacker.items.get(attack.weaponId)?.system.category] : null;
-  if ( weaponCat?.ignoreHalfDR || DBU.profiles[attack.profile]?.ignoreHalfDR ) dr = Math.ceil(dr / 2);
+  if ( weaponCat?.ignoreHalfDR || fx.ignoreHalfDR ) dr = Math.ceil(dr / 2);
   if ( attack.sig?.armorPiercing && attacker ) dr = Math.max(0, dr - Math.floor(attacker.system.attributes.in.mod / 2));
 
   // Soak
   let soak = tsys.aptitudes.soak;
   if ( ["directHit", "divineFlex"].includes(def?.mode) ) soak = soak + Math.floor(soak / 2);
-  if ( (attack.profile === "pinpoint") && attacker ) {
+  if ( fx.has("pinpoint") && attacker ) {
     const ins = attacker.system.attributes.in.mod * (attack.strike?.crit ? 2 : 1);
     soak = Math.max(0, soak - ins);
   }
@@ -707,16 +871,27 @@ export async function applyAttackDamage(message, index) {
   const attack = foundry.utils.deepClone(message.getFlag(FLAG, "attack"));
   const t = attack?.targets?.[index];
   if ( !t || !attack.wound ) return;
-  if ( t.result === "miss" ) return ui.notifications.info(L("DBU.Damage.Missed"));
+  // An Absolute Attack that missed (not one cancelled by a Duel Escape) still deals 1/2 of its Wound against Soak and DR
+  const absolute = (t.result === "miss") && attack.absolute && !attack.nullified;
+  if ( (t.result === "miss") && !absolute ) return ui.notifications.info(L("DBU.Damage.Missed"));
   if ( t.damage !== null && t.damage !== undefined ) return ui.notifications.info(L("DBU.Damage.Already"));
   const target = await resolveActor(t);
   const attacker = await fromUuid(attack.attackerUuid);
   if ( !target ) return;
-  const res = computeDamage(target, attack, attacker, t.defense);
+  const half = absolute ? { ...attack, wound: { ...attack.wound, total: Math.floor((attack.wound.total ?? 0) / 2) } } : attack;
+  const res = computeDamage(target, half, attacker, t.defense);
+  if ( absolute ) res.lines.unshift(L("DBU.Damage.Absolute", { n: half.wound.total }));
   await applyDamageToActor(target, res.damage, { attacker, attack, lines: res.lines, category: res.category });
+  // Not a hit nor damage of the Attacking Maneuver for the attacker's effects
+  if ( absolute ) {
+    const damage = { amount: res.damage, category: res.category };
+    if ( message.isOwner ) await storeDamageOnMessage(message.id, index, damage);
+    else emitGM("attackDamage", { messageId: message.id, targetIndex: index, damage });
+    return;
+  }
   // Diminishing Defense when the target never rolled a defense
   if ( !t.dimApplied && !t.defense ) {
-    const stacks = target.system.dimDefensePerAttack * ((attack.profile === "sweeping" && res.damage > 0) ? 2 : 1);
+    const stacks = target.system.dimDefensePerAttack * ((attackProfileEffects(attack).has("sweeping") && res.damage > 0) ? 2 : 1);
     await safeUpdate(target, { "system.combat.dimDefense": (target.system.combat.dimDefense ?? 0) + stacks });
   }
   // On-damage Signature effects
@@ -726,9 +901,59 @@ export async function applyAttackDamage(message, index) {
     if ( attack.sig.sustained ) upd["system.combat.dot"] = (target.system.combat.dot ?? 0) + attack.sig.sustained;
     if ( Object.keys(upd).length ) await safeUpdate(target, upd);
   }
+  // On-damage effects of the Profiles of Transformations (Gravity Cage, Time, Destruction)
+  if ( (res.damage > 0) && attacker ) await profileDamageEffects(attacker, target, attack, res.damage);
   const damage = { amount: res.damage, category: res.category };
   if ( message.isOwner ) await storeDamageOnMessage(message.id, index, damage);
   else emitGM("attackDamage", { messageId: message.id, targetIndex: index, damage });
+}
+
+/**
+ * What some Profiles do to a Character they damage:
+ *  - Gravity Cage: −1/4 (rounded up) of the attacker's Might in Life Points, then a Might Clash: winning knocks Prone
+ *    (Gravity Controller: another 1/4 of the Might);
+ *  - Time: a stack of Slowed until the end of the attacker's next turn, Guard Down until the end of this turn;
+ *  - Destruction: the Damage also lowers the Maximum Life Points until the end of the Combat Encounter.
+ */
+async function profileDamageEffects(attacker, target, attack, damage) {
+  const fx = attackProfileEffects(attack);
+  if ( !(fx.gravityCage || fx.time || fx.destruction) ) return;
+  const lines = [];
+  const quarter = Math.ceil((attacker.system.aptitudes?.might ?? 0) / 4);
+  const ops = [];
+  if ( fx.gravityCage ) {
+    ops.push({ op: "life", uuid: target.uuid, amount: quarter });
+    lines.push(L("DBU.Profile.GravityLife", { name: target.name, n: quarter }));
+    const mine = await attacker.rollClash("might", { subtitle: "Gravity Cage" });
+    const theirs = await target.rollClash("might", { subtitle: "Gravity Cage" });
+    if ( (mine?.total ?? 0) > (theirs?.total ?? 0) ) {
+      ops.push({ op: "condition", uuid: target.uuid, key: "prone", value: 1 });
+      lines.push(L("DBU.Profile.GravityProne", { name: target.name, mine: mine.total, theirs: theirs.total }));
+      // Gravity Controller: winning that Might Clash costs another 1/4 of the Might
+      const controller = attacker.items.some(i => (i.type === "transformation") && /^gravity controller$/i.test(i.name) && i.system.isActive);
+      if ( controller ) {
+        ops.push({ op: "life", uuid: target.uuid, amount: quarter });
+        lines.push(L("DBU.Profile.GravityController", { name: target.name, n: quarter }));
+      }
+    }
+    else lines.push(L("DBU.Profile.GravityResisted", { name: target.name, mine: mine?.total ?? 0, theirs: theirs?.total ?? 0 }));
+  }
+  if ( fx.time ) {
+    // Until the end of the attacker's next turn (its current one, if it is attacking in it, does not count)
+    const { encounterOf } = await import("./triggers.mjs");
+    const myTurn = encounterOf(attacker)?.combatant?.actor?.uuid === attacker.uuid;
+    ops.push({ op: "timed", uuid: target.uuid, key: "slowed", add: 1, duration: "endOfSourceTurn", label: "Time", source: attacker.uuid, skip: myTurn ? 1 : 0 });
+    ops.push({ op: "timed", uuid: target.uuid, key: "guardDown", add: 1, duration: "endOfSourceTurn", label: "Time", source: attacker.uuid, skip: 0 });
+    lines.push(L("DBU.Profile.Time", { name: target.name }));
+  }
+  if ( fx.destruction ) {
+    const loss = (target.getFlag("dbu-rpg", "maxLifeLoss") ?? 0) + damage;
+    ops.push({ op: "flag", uuid: target.uuid, key: "maxLifeLoss", value: loss });
+    lines.push(L("DBU.Profile.Destruction", { name: target.name, n: damage }));
+    if ( (target.system.life.max - damage) <= 0 ) lines.push(L("DBU.Profile.Erased", { name: target.name }));
+  }
+  await runOps(ops);
+  if ( lines.length ) await postInfoCard({ actor: attacker, title: DBU.profiles[fx.keys.find(k => ["gravityCage", "time", "destruction"].includes(k))]?.label ?? attack.name, subtitle: attack.name, lines });
 }
 
 export async function storeDamageOnMessage(messageId, index, damage) {
@@ -820,11 +1045,17 @@ export async function storeKnockbackOnMessage(messageId, index, knockback) {
  */
 export async function applyDamageToActor(target, damage, { attacker = null, attack = null, lines = [], selfInflicted = false, category = null } = {}) {
   const tsys = target.system;
+  // Narrative Stamina (Adversaries): the Life Points lost go down by the Narrative Stamina spent
+  const stamina = selfInflicted ? { damage, absorbed: 0, stamina: null } : staminaAbsorb(target, damage);
+  damage = stamina.damage;
+  if ( stamina.absorbed ) lines = [...lines, L("DBU.Adversary.StaminaAbsorbed", { n: stamina.absorbed, left: stamina.stamina })];
   const before = tsys.life.value;
   const after = before - damage;
   const undying = (tsys._effectiveStates?.undying ?? 0) > 0;
   const value = undying ? after : Math.max(0, after);
-  await safeUpdate(target, { "system.life.value": value }, { dbuDamage: { attackerUuid: attacker?.uuid ?? null, selfInflicted } });
+  const lifeUpdate = { "system.life.value": value };
+  if ( stamina.absorbed ) lifeUpdate["system.adversary.stamina"] = stamina.stamina;
+  await safeUpdate(target, lifeUpdate, { dbuDamage: { attackerUuid: attacker?.uuid ?? null, selfInflicted } });
   const R = rules();
   const notes = [];
   const max = tsys.life.max;
@@ -845,8 +1076,11 @@ export async function applyDamageToActor(target, damage, { attacker = null, atta
       forcedType: injury.forcedType, attackName: attack?.name ?? "" });
   }
 
+  // Villainous: defeating the Player Character of a 1-on-1 Duel; Dauntless gives no Bonus Momentum
+  const V = await import("./villainous.mjs");
+  if ( attacker && (value <= 0) && !selfInflicted ) await V.oneOnOneDefeated(attacker, target);
   // Bonus Momentum: knocking an Opponent through a Health Threshold (once per Combat Round)
-  if ( attacker && game.combat?.started && !selfInflicted ) {
+  if ( attacker && game.combat?.started && !selfInflicted && !V.traitOf(target, "Dauntless") ) {
     const max = tsys.life.max;
     const crossed = DBU.thresholds.some(k => (before > max * DBU.THRESHOLD_FRACTIONS[k]) && (value <= max * DBU.THRESHOLD_FRACTIONS[k]));
     const minionDefeated = (target.type === "npc") && (target.system.npcType === "minion") && (value <= 0);

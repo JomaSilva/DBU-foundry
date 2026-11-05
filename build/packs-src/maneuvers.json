@@ -2495,5 +2495,305 @@
     "slug": "god-ki"
    }
   }
+ },
+ {
+  "_type": "Folder",
+  "_id": "cBISO0dX39aWXqxT",
+  "name": "Villainous Maneuvers",
+  "type": "Item",
+  "folder": null,
+  "sorting": "a",
+  "color": null,
+  "sort": 0,
+  "description": "",
+  "flags": {}
+ },
+ {
+  "_type": "Item",
+  "_id": "5tLlsk1xIr8nKveL",
+  "name": "1-on-1 Duel",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Instant Maneuver",
+   "actionCost": "N/A",
+   "kpCost": "N/A",
+   "frequency": "1/Encounter",
+   "villainous": true,
+   "requirement": "Adversary",
+   "summary": "Villainous Maneuver · Instant Maneuver · N/A",
+   "source": {
+    "slug": "adversaries",
+    "section": "1-on-1 Duel",
+    "url": "https://dbu-rpg.com/adversaries/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/adversaries/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/adversaries</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "cBISO0dX39aWXqxT",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "adversaries"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "5j0qN3UY47No3teB",
+  "name": "Insta-Kill",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "2 Actions",
+   "kpCost": "N/A",
+   "frequency": "1/Encounter",
+   "villainous": true,
+   "requirement": "Adversary",
+   "summary": "Villainous Maneuver · Standard Maneuver · 2 Actions",
+   "source": {
+    "slug": "adversaries",
+    "section": "Insta-Kill",
+    "url": "https://dbu-rpg.com/adversaries/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/adversaries/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/adversaries</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "cBISO0dX39aWXqxT",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "adversaries"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "wG2gDimLnVvs0NRv",
+  "name": "Area Wipe",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "2 Actions",
+   "kpCost": "N/A",
+   "frequency": "1/Encounter",
+   "villainous": true,
+   "requirement": "Adversary",
+   "summary": "Villainous Maneuver · Standard Maneuver · 2 Actions",
+   "source": {
+    "slug": "adversaries",
+    "section": "Area Wipe",
+    "url": "https://dbu-rpg.com/adversaries/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/adversaries/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/adversaries</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "cBISO0dX39aWXqxT",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "adversaries"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "M1pEv3vctG0ok4md",
+  "name": "Planet Burst",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard Maneuver",
+   "actionCost": "3 Actions",
+   "kpCost": "Equal to your Narrative Stamina",
+   "frequency": "1/Round, 2/Encounter",
+   "villainous": true,
+   "requirement": "Adversary",
+   "summary": "Villainous Maneuver · Standard Maneuver · 3 Actions",
+   "source": {
+    "slug": "adversaries",
+    "section": "Planet Burst",
+    "url": "https://dbu-rpg.com/adversaries/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/adversaries/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/adversaries</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "cBISO0dX39aWXqxT",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "adversaries"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "yCELH2Irx0Lojx4p",
+  "name": "Time to Get Serious",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Instant Maneuver",
+   "actionCost": "N/A",
+   "kpCost": "N/A",
+   "frequency": "1/Encounter",
+   "villainous": true,
+   "requirement": "Adversary",
+   "summary": "Villainous Maneuver · Instant Maneuver · N/A",
+   "source": {
+    "slug": "adversaries",
+    "section": "Time to Get Serious",
+    "url": "https://dbu-rpg.com/adversaries/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/adversaries/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/adversaries</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "cBISO0dX39aWXqxT",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "adversaries"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "SX4qrOobDw3STYzg",
+  "name": "Act Again",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Out-of-Sequence",
+   "actionCost": "N/A",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "villainous": true,
+   "requirement": "Adversary",
+   "summary": "Villainous Maneuver · Out-of-Sequence · N/A",
+   "source": {
+    "slug": "adversaries",
+    "section": "Act Again",
+    "url": "https://dbu-rpg.com/adversaries/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/adversaries/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/adversaries</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "cBISO0dX39aWXqxT",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "adversaries"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "aYd2IBEDrXAaOLPM",
+  "name": "Get Up!",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "kpCost": "N/A",
+   "frequency": "1/Round",
+   "villainous": true,
+   "requirement": "Adversary",
+   "summary": "Villainous Maneuver · Standard · 1 Action",
+   "source": {
+    "slug": "adversaries",
+    "section": "Get Up!",
+    "url": "https://dbu-rpg.com/adversaries/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/adversaries/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/adversaries</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "cBISO0dX39aWXqxT",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "adversaries"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "uxbJAHbeY2VdjLgR",
+  "name": "Face Me at Full Power",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Out-of-Sequence",
+   "actionCost": "N/A",
+   "kpCost": "N/A",
+   "frequency": "1/Encounter",
+   "villainous": true,
+   "requirement": "Adversary",
+   "summary": "Villainous Maneuver · Out-of-Sequence · N/A",
+   "source": {
+    "slug": "adversaries",
+    "section": "Face Me at Full Power",
+    "url": "https://dbu-rpg.com/adversaries/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/adversaries/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/adversaries</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "cBISO0dX39aWXqxT",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "adversaries"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "FcvFJCGK7MPIZQWz",
+  "name": "Stop Wasting My Time",
+  "type": "maneuver",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+   "maneuverType": "Out-of-Sequence",
+   "actionCost": "N/A",
+   "kpCost": "N/A",
+   "frequency": "1/Encounter",
+   "villainous": true,
+   "requirement": "Adversary",
+   "summary": "Villainous Maneuver · Out-of-Sequence · N/A",
+   "source": {
+    "slug": "adversaries",
+    "section": "Stop Wasting My Time",
+    "url": "https://dbu-rpg.com/adversaries/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/adversaries/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/adversaries</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
+   "modifiers": [],
+   "triggers": []
+  },
+  "effects": [],
+  "folder": "cBISO0dX39aWXqxT",
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "adversaries"
+   }
+  }
  }
 ]

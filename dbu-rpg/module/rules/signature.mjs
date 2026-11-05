@@ -1,5 +1,6 @@
 import { DBU } from "../config.mjs";
 import { SIGNATURE_OPTIONS } from "../data/signature-options.mjs";
+import { multiProfileCost, profileAccess, profileAccessNames, profileEffects, profileKeys } from "./profiles.mjs";
 
 /**
  * Short Portuguese summaries of every Advantage/Disadvantage (written for this system).
@@ -113,11 +114,6 @@ export const SIGNATURE_SUMMARIES = {
   unitedAttack: "Exige um aliado com a mesma técnica (United Attack)."
 };
 
-/** Advantages granted for free by a Profile. */
-const PROFILE_FREE = {
-  blitz: ["chargingAssault"], launching: ["knockback"], elementalLight: ["fullWager"], elementalPlantlife: ["staggeringAttack"]
-};
-
 /** Build a lookup of the technique's options: key → rank (and choice). */
 function optionMap(sig) {
   const map = new Map();
@@ -144,38 +140,39 @@ export function signatureAoe(sig, has) {
 
 /**
  * Requirement checks. Each returns true when the requirement is met.
- * ctx: { sig, profileKey, profile, foundation, has(key), rank(key), aoe, ultimate, actor }
+ * ctx: { sig, profileKey, profile, profiles, isProfile(key), foundation, has(key), rank(key), aoe, ultimate, actor }
+ * With Multi-Profile the technique is also of its second Profile: isProfile and profiles cover both.
  */
 const REQUIREMENTS = {
   controlledBlast: c => c.aoe === "cone",
-  hurricaneAssault: c => c.profileKey === "sweeping",
+  hurricaneAssault: c => c.isProfile("sweeping"),
   intenseBlast: c => !!c.aoe,
   pinpointPrecision: c => !!c.aoe && !c.has("concentratedStrike"),
   splitting: c => ["energy", "magic"].includes(c.foundation) && !c.aoe,
   terrainDestruction: c => !!c.aoe,
-  widespreadAssault: c => !DBU.profiles[c.profileKey]?.aoe,
+  widespreadAssault: c => !c.profiles.some(p => p.aoe),
   encompassingAttack: c => !!c.aoe,
   concentratedStrike: c => !!c.aoe && !c.has("pinpointPrecision"),
   maximumCharge: c => c.ultimate,
-  reinforcedPlantlife: c => c.profileKey === "elementalPlantlife",
-  weatherCalling: c => !!c.profile?.elemental,
-  backFlip: c => (c.has("hitAndRun") || ["energy", "magic"].includes(c.foundation) || (c.profileKey === "soaring")
+  reinforcedPlantlife: c => c.isProfile("elementalPlantlife"),
+  weatherCalling: c => c.profiles.some(p => p.elemental),
+  backFlip: c => (c.has("hitAndRun") || ["energy", "magic"].includes(c.foundation) || c.isProfile("soaring")
     || ((c.foundation === "physical") && c.has("chargingAssault"))) && (!c.aoe || (c.aoe === "line")),
   expressTicket: c => c.has("chargingAssault"),
   highSpeedDash: c => c.has("hitAndRun"),
-  twoStepStrike: c => (["energy", "magic"].includes(c.foundation) || (c.profileKey === "soaring")
+  twoStepStrike: c => (["energy", "magic"].includes(c.foundation) || c.isProfile("soaring")
     || ((c.foundation === "physical") && c.has("chargingAssault"))) && !c.has("concentration"),
   accurate: c => !c.has("inaccurate"),
-  armorPiercing: c => c.profileKey === "pinpoint",
-  brutalBlitz: c => c.profileKey === "blitz",
+  armorPiercing: c => c.isProfile("pinpoint"),
+  brutalBlitz: c => c.isProfile("blitz"),
   finalChance: c => c.ultimate,
   lastLegs: c => c.ultimate,
   overwhelmingTerror: c => !c.actor || ((c.actor.system.skills?.intimidation?.totalRanks ?? 0) >= 2)
     || c.actor.items.some(i => (i.type === "maneuver") && /terrify/i.test(i.name)),
-  pepperingBlows: c => c.profileKey === "combination",
+  pepperingBlows: c => c.isProfile("combination"),
   powerBurst: c => c.ultimate,
   powerShot: c => !c.has("lowPenetration"),
-  shatteringBlow: c => c.profileKey === "crushing",
+  shatteringBlow: c => c.isProfile("crushing"),
   skyAssault: c => ["energy", "magic"].includes(c.foundation),
   superAdvantage: c => c.ultimate,
   transformationBoost: c => c.ultimate,
@@ -185,28 +182,28 @@ const REQUIREMENTS = {
   personalBomb: c => c.has("delayed") && String(c.aoe).startsWith("sphere"),
   trickAttack: c => !c.actor || ((c.actor.system.skills?.bluff?.totalRanks ?? 0) >= 2)
     || ((c.actor.system.skills?.acrobatics?.totalRanks ?? 0) >= 2),
-  condition: c => !["elementalFire", "elementalIce", "elementalWater", "elementalLightning", "elementalPoison"].includes(c.profileKey),
+  condition: c => !["elementalFire", "elementalIce", "elementalWater", "elementalLightning", "elementalPoison"].some(k => c.isProfile(k)),
   deadlyDrop: c => (c.foundation === "physical") && c.has("grappling") && c.has("restrictedEnvironment"),
   heftyStagger: c => c.has("staggeringAttack"),
   homing: c => !c.aoe,
   penetration: c => !["sphere", "sphere0", "cone"].includes(c.aoe) && !c.has("lowPenetration"),
-  perfectStrike: c => (c.profileKey === "simple") && c.ultimate,
+  perfectStrike: c => c.isProfile("simple") && c.ultimate,
   powerbomb: c => (c.foundation === "physical") && c.has("grappling"),
   rebound: c => c.has("homing"),
-  suddenBlast: c => c.profileKey === "clearing",
+  suddenBlast: c => c.isProfile("clearing"),
   terrainSlam: c => c.has("powerbomb"),
-  alottaLottaAttacks: c => c.profileKey === "combination",
+  alottaLottaAttacks: c => c.isProfile("combination"),
   ascendedSignature: c => !c.ultimate,
   efficiency: c => !c.has("inefficiency"),
-  forcefulLaunch: c => c.profileKey === "launching",
-  preciseStrike: c => c.profileKey === "launching",
-  throwingTechnique: c => ["simple", "combination"].includes(c.profileKey) && (c.foundation === "physical"),
+  forcefulLaunch: c => c.isProfile("launching"),
+  preciseStrike: c => c.isProfile("launching"),
+  throwingTechnique: c => (c.isProfile("simple") || c.isProfile("combination")) && (c.foundation === "physical"),
   transformationFlare: c => c.has("restrictedUntransformed"),
   twinLinked: c => !c.has("deadLink") || (c.has("deadLink").choice !== c.has("twinLinked").choice),
   dropDown: c => c.has("chargingAssault") && c.has("restrictedEnvironment"),
   recoil: c => c.has("hitAndRun"),
   inefficiency: c => !c.has("efficiency"),
-  concentration: c => ["energy", "magic"].includes(c.foundation) || (c.profileKey === "soaring")
+  concentration: c => ["energy", "magic"].includes(c.foundation) || c.isProfile("soaring")
     || ((c.foundation === "physical") && (c.has("widespreadAssault") || c.has("chargingAssault"))),
   restrictedStance: c => !c.actor || c.actor.items.some(i => /martial skill/i.test(i.name)),
   restrictedTransformation: c => !c.has("restrictedUntransformed"),
@@ -214,7 +211,7 @@ const REQUIREMENTS = {
     && (!c.actor || c.actor.items.some(i => (i.type === "transformation") && (i.system.transType === "form"))),
   restrictedWeapon: c => c.has("weaponAssisted"),
   requiredCounter: c => c.has("counter"),
-  vehicleAttack: c => (c.profileKey === "blitz") || c.has("restrictedWeapon"),
+  vehicleAttack: c => c.isProfile("blitz") || c.has("restrictedWeapon"),
   consolidatedStrike: c => !c.aoe,
   leadUp: c => !c.has("mandatoryCharge"),
   specialSetUp: c => !c.has("mandatoryCharge") && !c.has("leadUp"),
@@ -227,13 +224,13 @@ const REQUIREMENTS = {
   smallScaleBlast: c => String(c.aoe).startsWith("sphere") && !c.has("terrainDestruction"),
   volatileExplosion: c => String(c.aoe).startsWith("sphere"),
   compressedElement: c => ["elementalFire", "elementalIce", "elementalLightning", "elementalPoison", "elementalWater",
-    "elementalDark", "elementalLight", "elementalPlantlife"].includes(c.profileKey),
+    "elementalDark", "elementalLight", "elementalPlantlife"].some(k => c.isProfile(k)),
   inaccurate: c => !c.has("accurate"),
   lowPenetration: c => !c.has("powerShot") && !c.has("penetration"),
-  lowPowerCrush: c => c.profileKey === "crushing",
+  lowPowerCrush: c => c.isProfile("crushing"),
   shortRange: c => ["energy", "magic"].includes(c.foundation) && !c.aoe,
   deadLink: c => !c.has("twinLinked") || (c.has("deadLink").choice !== c.has("twinLinked").choice),
-  shootAndPray: c => c.profileKey === "combination",
+  shootAndPray: c => c.isProfile("combination"),
   shortDelay: c => c.has("delayed")
 };
 
@@ -257,14 +254,26 @@ export function computeSignature(sig, actor = null) {
   else if ( !profile.foundations.includes(sig.foundation) ) {
     errors.push(game.i18n.format("DBU.Sig.ErrFoundation", { profile: profile.label }));
   }
+  // Profiles of Transformations and Races: only with access to them
+  for ( const k of [profileKey, (sig.superProfile === "multiProfile") ? sig.multiProfile : ""] ) {
+    if ( k && actor && DBU.profiles[k] && !profileAccess(actor, k) ) {
+      errors.push(game.i18n.format("DBU.Sig.ErrProfileAccess", { profile: DBU.profiles[k].label, from: profileAccessNames(k) }));
+    }
+  }
+  // Multi-Profile: the technique is also of a second, different Profile, whose effects apply (not its Ki Point Cost)
+  const keys = profileKeys(profileKey, sig);
+  const fx = profileEffects(keys);
+  if ( (sig.superProfile === "multiProfile") && (keys.length < 2) ) warnings.push(L("DBU.Sig.WarnMultiProfile"));
 
   // Duplicates (Double Dip) and rank limits
   const seen = new Set();
   let tpAdv = 0;
   let tpDis = 0;
   const breakdown = [];
-  const free = new Set(PROFILE_FREE[profileKey] ?? []);
-  const ctx = { sig, profileKey, profile, foundation: sig.foundation, has, rank, aoe, ultimate, actor };
+  // Advantages a Profile gives for free (Launching: Knockback, Blitz: Charging Assault...)
+  const free = new Set(fx.freeAdvantages);
+  const ctx = { sig, profileKey, profile, profiles: fx.list, isProfile: k => fx.has(k), foundation: sig.foundation,
+    has, rank, aoe, ultimate, actor };
   for ( const list of [sig.advantages, sig.disadvantages] ) {
     for ( const o of list ) {
       if ( !o.key ) continue;
@@ -304,7 +313,7 @@ export function computeSignature(sig, actor = null) {
   }
 
   // TP Cost: starts at 8 (Simple: 4), Ultimate +4 at the end, never below 8
-  const start = profile?.sigStart ?? 8;
+  const start = fx.sigStart;
   let tp = start + tpAdv - tpDis;
   if ( ultimate ) tp += 4;
   tp += sig.tpAdjust ?? 0;
@@ -313,16 +322,13 @@ export function computeSignature(sig, actor = null) {
 
   // KP Cost in units of (T)
   let profileKp = profile?.kp ?? 0;
-  if ( (sig.superProfile === "multiProfile") && DBU.profiles[sig.multiProfile] ) {
-    const mk = DBU.profiles[sig.multiProfile].kp;
-    profileKp += mk <= 4 ? 1 : (mk <= 7 ? 2 : 3);
-  }
+  if ( (sig.superProfile === "multiProfile") && DBU.profiles[sig.multiProfile] ) profileKp += multiProfileCost(sig.multiProfile);
   const superKp = sp?.kp ?? 0;
   const baseKp = profileKp + superKp;
   let kpUnits = baseKp + Math.ceil(tp / 5);
   kpUnits = Math.max(baseKp, kpUnits);
   const kpAdjust = (rank("inefficiency") * 4) - (rank("efficiency") * 4)
-    - (profileKey === "blitz" ? (profile.sigKpReduction ?? 0) : 0)
+    - fx.sigKpReduction
     - ((has("backFlip") && has("chargingAssault")) ? 1 : 0)
     - (sig.fused ? 4 : 0);
   const kpMinUnits = baseKp / 2;
@@ -335,13 +341,14 @@ export function computeSignature(sig, actor = null) {
     - rank("lowPenetration") + (sig.fusedWoundT ?? 0);
   const longShotT = rank("longShot") * dbl("longShot");
   const chargeCategory = 1 + (has("maximumCharge") ? 1 : 0) + (sp?.chargeCategory ?? 0);
-  const maxCharges = (profile?.maxCharges ?? 7) + (ultimate ? 1 : 0);
+  const maxCharges = fx.maxCharges + (ultimate ? 1 : 0);
 
   return {
     tp, tpRaw, tpStart: start, tpAdvantages: tpAdv, tpDisadvantages: tpDis, breakdown,
     kpUnits, kpAdjust, kpMinUnits, baseKp,
     strikeT, woundT, longShotT, chargeCategory, maxCharges,
-    aoe, ultimate, damageCategory: profile?.cat ?? 1,
+    // With different Damage Categories the highest one applies
+    aoe, ultimate, damageCategory: fx.cat, profiles: fx.keys, profileLabel: fx.label || (profile?.label ?? ""),
     twinLinked: has("twinLinked")?.choice?.toLowerCase() ?? "",
     deadLink: has("deadLink")?.choice?.toLowerCase() ?? "",
     fullWager: !!has("fullWager") || free.has("fullWager"),

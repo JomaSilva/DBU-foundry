@@ -93,6 +93,15 @@
 .dbu-bar .bar-status.dkp-pay { cursor: pointer; }
 .dbu-bar .bar-status.dkp-pay.on { background: #d4a017; color: #2a1f00; }
 .dbu-dkp-checks { border: 1px dashed #d4a017; border-radius: 6px; padding: 4px 6px; }
+/* Adversaries: Narrative Stamina bar and the Adversary panel */
+.dbu-bar.stamina .fill { background: linear-gradient(90deg, #7b1fa2, #e040fb); }
+.dbu-adversary { border: 1px solid var(--dbu-accent, #c62828); border-radius: 8px; padding: 6px 8px; margin-bottom: 8px; background: #c6282810; }
+.dbu-adversary .dbu-section { margin-top: 0; }
+.dbu-adversary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px; align-items: end; }
+.dbu-adversary-grid label { display: flex; flex-direction: column; gap: 2px; font-size: 0.85em; }
+.dbu-adversary-table { margin: 6px 0; }
+.dbu-adversary-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.dbu-multi-fixed { border-left: 3px solid #7b1fa2; padding-left: 6px; }
 .dbu-dkp-cost { color: #b8860b; font-weight: 700; }
 .dbu-card .dbu-divine { color: #d4a017; }
 .dbu-bar > *:not(.fill) { position: relative; }
@@ -515,3 +524,24 @@ label.wide input { width: 100%; }
 .dbu-hardness .dbu-checks label { cursor: help; }
 .dbu-targets .dbu-kb-done { display: block; color: var(--dbu-blue); font-weight: 700; }
 .theme-dark .dbu-targets .dbu-kb-done { color: #8fb0ff; }
+/* Attack effect choices of a Signature Technique */
+.dbu-fx { border: 1px solid #7b5cff66; border-radius: 8px; padding: 6px 8px; margin-top: 8px; }
+.dbu-fx legend { padding: 0 4px; font-weight: bold; }
+.dbu-fx color-picker { display: flex; gap: 4px; }
+.dbu-fx-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+/* Duel Maneuver card */
+.dbu-duel-sides { display: flex; flex-direction: column; gap: 4px; margin: 4px 0; }
+.dbu-duel-side { display: flex; align-items: center; gap: 6px; }
+.dbu-duel-side .who { flex: 1; display: flex; flex-direction: column; line-height: 1.15; }
+.dbu-duel-side .wins { font-size: 1.4em; font-weight: bold; min-width: 1.2em; text-align: center; }
+.dbu-duel-side button { flex: 0 0 auto; width: auto; }
+.dbu-duel-ready { color: #2e7d32; font-size: 0.85em; }
+.dbu-duel-clashes { margin: 4px 0; padding-left: 0; list-style: none; }
+.dbu-duel-clashes li { display: flex; gap: 6px; align-items: baseline; }
+.dbu-duel-clashes li.redo { opacity: 0.6; }
+.dbu-duel-clashes .n { font-weight: bold; }
+.dbu-duel-clashes .roll.won { font-weight: bold; color: #c62828; }
+.dbu-duel-btn { color: #c62828; }
+/* Hyper Elemental fields (only with Flash of the Elements) and United Duel allies */
+.dbu-hyper.dbu-off { opacity: 0.45; pointer-events: none; }
+.dbu-duel-side.ally { padding-left: 18px; font-size: 0.9em; }
