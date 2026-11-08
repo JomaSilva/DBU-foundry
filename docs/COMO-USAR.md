@@ -232,6 +232,22 @@ sistema liga o **modo celular** sozinho:
     ele cai Prone (com Gravity Controller, perde outro 1/4 do Might).
   - **Time:** ao causar dano, o alvo fica Slowed até o fim do seu próximo turno e Guard Down até o fim deste.
   - **Destruction:** o dano também baixa o LP máximo do alvo até o fim do encontro; em 0, ele é apagado.
+- **Opções de ataque dos traços:** modificadores com alvo **Ataque: Energy Charges / Acerto / Wound / custo de KP /
+  Categoria de Dano** valem na hora do ataque, com a condição usando o ataque (`@signature`, `@ultimate`,
+  `@physical`, `@aoe`, `@charges`, `@profile_beam`...). Os automáticos entram sozinhos e aparecem nas notas do
+  cartão. Os de escolha ("you may", ou com limite 1/Round) viram uma caixa **Opções dos seus traços** no diálogo de
+  ataque, que fica bloqueada quando o limite acaba. Há também os alvos fixos **Custo de KP (Signatures)** e **(Ataques
+  Básicos)**.
+  - Também mudam só aquele ataque: Critical Target e Natural Result do Acerto e do Wound, categoria das Energy
+    Charges, dano **Letal** (categoria 3 que não pode ser reduzida), ignorar a Damage Reduction do alvo e ataque sem
+    custo de KP. As condições podem olhar o Ki Wager (`@wager`), se o custo ou o Wager foi pago com Divine Ki, o
+    atributo de dano, Favored Element, Called Shot, se o ataque é fora de sequência e se está armado.
+  - **Feito através de:** o diálogo de ataque tem a escolha Exploit / Defend (Counter) / Feint, para os traços que dão
+    bônus "em ataques feitos pelo Exploit/Feint".
+  - **Atributo de dano:** quando um traço permite usar outro atributo (Personality, Agility, Surgency...), o diálogo
+    mostra a escolha e o Wound usa o atributo escolhido.
+- **Defend sem Counter Action:** traços que dizem "o Direct Hit/Guard não gasta Counter Action" (ou "o Guard não custa
+  KP") fazem a defesa sair de graça, perguntando antes quando é opcional, com o limite do traço.
 - **Absolute Attack** (Wild Swings, Intense Blast): se o ataque errar um alvo, o botão **Aplicar dano** continua e
   aplica metade do Wound contra Soak e RD, sem os efeitos de "ao causar dano" do atacante. No máximo 2 por rodada.
 - **Duel Maneuver:** contra um ataque com 2+ Energy Charges ou Ki Wager de 10(bT) ou mais, o cartão mostra ao alvo
@@ -423,10 +439,25 @@ sistema liga o **modo celular** sozinho:
   imagem; ao sair, voltam à imagem de sempre. Uma Form vale mais que uma Enhancement quando as duas têm imagem.
   Quem não tem permissão de navegar nos arquivos cola o caminho ou a URL da imagem. Se alguém trocar a imagem do
   token à mão no meio da forma, ela fica.
-- **Fichas antigas:** quando uma correção do compêndio muda os traços das transformações (como a herança acima), o
-  GM recebe no chat o cartão **Atualizar as transformações das fichas**, com a lista do que muda. Ficam como estão
-  as escolhas feitas, a maestria, o Grade, o estado e os modificadores adicionados à mão. **Agora não** esconde o
-  cartão até a próxima mudança do compêndio.
+- **Fichas antigas:** quando o compêndio muda (uma correção, ou uma atualização do site como a das formas de vilão,
+  que viraram Awakenings), o GM recebe no chat o cartão **Atualizar as transformações das fichas**, com a lista do que
+  muda. Vêm do compêndio os traços com seus modificadores, gatilhos e escolhas, o tipo, os bônus de atributo, os
+  Aspects, o máximo de stacks e os requisitos. Ficam como estão as escolhas feitas, a maestria, o Grade, o estado e
+  os modificadores adicionados à mão. **Agora não** esconde o cartão até a próxima mudança do compêndio.
+- **Quanto é automático:** o resumo de cada transformação mostra "x/y efeitos automáticos", e a descrição (estrutura
+  dos efeitos) marca cada efeito como **auto** (o sistema faz), **em parte** / **parcial** (faz uma parte, o resto é
+  com o mestre), **lembrete** (o cartão avisa no momento certo: início do turno, ao acertar, ao ser alvo...),
+  **manual** (o mestre aplica), **narrativo** (não há o que automatizar) ou **minion** (vale para os Minions, não
+  para quem tem a Awakening). As Awakenings, Forms, Enhancements e Evolved Forms foram revisadas efeito por efeito
+  (e as automações conferidas de novo por revisores).
+- **Grupos de traços escolhidos uma vez:** Master Class (Greater Class), Team Dynamic (Team Role), Super Mutation,
+  Improved Core, Commander (Leadership), Initial Class (Class) e Advanced Vocation (High Vocation) pedem a escolha
+  do traço do grupo; só o escolhido vale. Nas Forms e Enhancements a escolha é pedida ao entrar na transformação:
+  Sparking Aura (2 Aura Traits), Super Form (2 Form Traits), Divinity Unleashed (Domain Trait), Brilliant
+  Evolution, Elemental Supremacy, Super Demon, Formation (Form of Love), Full Power Super Saiyan (Style Trait), Genetic
+  Power (1 Genetic Trait, mais 1 por ToP base acima de 2, até 3) e Super Perfect Form. Os Godly Super Saiyan Traits da
+  Beyond Divine Saiyan valem a partir do Grade de cada um. Os Minion Class Traits do Commander ficam desligados no item
+  (são para os Minions) e continuam desligados ao atualizar as fichas; o resto que o jogador ligar à mão fica ligado.
 - **Escolhas obrigatórias:** traços com efeito *Option* (ex.: **S-Cells** do Super Saiyan 1: Super Surger, Super
   Speed, Super Sturdy ou Super Specialist) pedem a escolha na primeira vez que o personagem entra na transformação
   (pelo botão de transformar ou pelo interruptor): sem escolher, ele não entra. A escolha vale para todos os
@@ -667,10 +698,10 @@ sistema faz o resto. Cada ficha sabe em que rodada está e se é o seu turno.
   do seu turno" (também os que você causou nos outros, como o Guard Down do Thrust) e gatilhos "End of Turn".
 - **Fim do encontro:** Instant Recovery (+1/10 de LP e KP), recursos e contadores zerados.
 
-## Gatilhos de turno e rodada
+## Gatilhos
 
 Todo traço, talento, transformação, Unique Ability ou item pode ter **gatilhos** (aba
-Modificadores do item). O compêndio já vem com os efeitos de turno/rodada ligados:
+Modificadores do item). O compêndio já vem com os efeitos de turno, de rodada e do combate ligados:
 
 - **Automático:** aplicado sozinho (ex.: *Namekian Biology* +3(bT) LP no início de cada rodada;
   *Born for Battle* +1 Battle Born nas rodadas pares; *Divine Physique* LP/KP por limiar acima).
@@ -683,10 +714,234 @@ Modificadores do item). O compêndio já vem com os efeitos de turno/rodada liga
 - Efeitos de **Opções** (ex.: *Tailed/Tailless* de Saiyan Heritage, *Infinite Energy* de Energy
   Core) vêm desligados: ligue a opção escolhida na aba Modificadores do item.
 
-Campos de um gatilho: Quando (início/fim da rodada, início/fim do seu turno, início do encontro),
-Efeito (LP, KP, Capacidade, Counter Actions, Ações, stacks de recurso, State, Combat Condition,
-lembrete), Valor (fórmula), Recurso (nome do recurso, State ou Condition), Condição (fórmula),
-Modo e Duração.
+Campos de um gatilho:
+- **Quando:** início/fim da rodada, início/fim do seu turno, início do encontro, ao ganhar um stack (Awakening) e os
+  momentos do combate:
+  - **Ao fazer um ataque**, **Ao causar dano com um ataque**, **Ao levar dano de um ataque**, **Ao errar um ataque**,
+    **Ao evitar um ataque**, **Ao cruzar um limiar de vida**, **Ao entrar numa transformação**, **Ao ativar o Grand
+    Awakening** (Full Awakening Maneuver), **Ao usar o Power Up**, **Ao usar um Surge**, **Ao usar o Energy Charge**,
+    **Ao entrar num State**, **Ao sair desta transformação** e **Ao ativar o Burst Limit** (só os efeitos do Burst
+    Limit escolhido no botão).
+  - Esses rodam no computador do mestre, que pode mexer nos dois personagens. Na condição valem variáveis do momento:
+    `@physical`, `@energy`, `@magic`, `@signature`, `@aoe`, `@charges`, `@crit` (Acerto crítico), `@damage`
+    (LP perdidos), `@knocked` (limiares que o alvo cruzou), `@defeated`; no limiar, `@crossed`, `@bruised`,
+    `@injured`, `@critical`; na transformação, `@form`, `@enhancement` e `@this` (1 quando a transformação em que
+    você entrou ou de que saiu é a do próprio gatilho: os efeitos [Triggered/Transform] usam `@this == 1`).
+  - Nas fórmulas de uma transformação: `@M` (Masteries), `@FM` (1 quando Fully Mastered), `@MX` (Masteries além
+    de Fully Mastered), `@TR` (Transcended), `@G` (Grade) e `@S` (Stage).
+- **Efeito:** LP, KP, Capacidade, Counter Actions, Ações, stacks de **Power**, **Energy Charges**, stacks de **DOT**,
+  stacks de recurso, State, Combat Condition, **bônus temporário**, lembrete ou **usar uma manobra fora de sequência**.
+  O bônus temporário põe um modificador na ficha (no Recurso vai o alvo: `strike`, `soak`, `mod.fo`...) e o tira
+  quando acaba a duração, que pode ser também **até sair desta transformação**. A manobra fora de sequência é sempre um botão
+  no chat: Power Up, Energy Charge, Combat Recovery, Healing Surge, Ki Surge, Ataque Básico, Signature ou Transformation
+  Maneuver, sem gastar Ação (Movement só lembra de mover no mapa).
+- **Outras variáveis:** `@myTurn` (1 no seu turno), `@counters`, `@actions`, `@heldCharges` (Energy Charges
+  guardadas), `@grappled`, `@grappling` e `@active.<transformação>` (1 enquanto nela, ex.: `@active.supersaiyan`).
+- **Aliados no combate:** nas fórmulas, `@allies` (aliados não derrotados no seu combate, pelo lado do token),
+  `@opponents` e `@allyAwk.<awakening>` (quantos aliados têm aquela Awakening, ex.: `@allyAwk.teamdynamic`).
+- **Valor** (fórmula), **Recurso** (nome do recurso, State ou Condition), **Condição** (fórmula), **Modo** e **Duração**.
+- **Em quem:** você ou **o outro personagem** do momento (quem você acertou, quem acertou você, quem você evitou...).
+  "Até o fim do seu próximo turno" num outro personagem conta os SEUS turnos.
+- **Limite:** `1/Round`, `2/Encounter` ou `1/Turn`. Só conta em combate; no modo botão, conta quando o botão é usado.
+  Pode ser uma fórmula (`M/Encounter`: uma vez por Mastery) ou um par (`1/Round, 3/Encounter`). Gatilhos com a mesma
+  **chave de limite** dividem os usos ("use X ou Y, uma vez por encontro").
+- **Custo** e **quantidade:** um gatilho pode custar KP, LP, DKP, Capacidade, Counter Actions, Ações, Power, Energy
+  Charges ou stacks de um recurso (`res:Love:2`). O custo é pago quando o efeito acontece (ou quando o botão é usado),
+  e o efeito não acontece se não der para pagar. Com **quantidade**, o jogador escolhe quantos usar (`@n`).
+- **Usos de traços:** o evento **Uso do traço** vira um botão na aba Combate da ficha (**Usos de traços**), para os
+  efeitos "1/Round, gaste X para..." e "use a manobra X como Instant Maneuver". O botão mostra o custo e o limite, fica
+  apagado (com o motivo) quando não pode ser usado, e a manobra usada por ele não gasta Ação.
+- **Outros efeitos:** Divine Ki Points; a manobra fora de sequência pode oferecer várias (Power Up, Energy Charge ou
+  Empower, à escolha). Recursos e Power podem ter máximo aumentado por traços (o sistema não deixa passar dele).
+
+## Traços raciais
+
+Os efeitos dos traços raciais de todas as raças, fatores, Custom Species e Villainous Traits foram revisados um a um, como
+os das transformações. Um traço racial vale sempre (não depende de forma), então os modificadores e gatilhos dele estão
+ligados desde que o item entra na ficha. A estrutura de cada item mostra quais efeitos são **auto**, **parcial** ou
+ficam com o mestre.
+
+- **Acesso a itens:** o traço que dá acesso a uma manobra, Unique Ability, talento, Signature ou transformação
+  ("ganha acesso à Analysis Maneuver") traz o item junto quando é arrastado para a ficha, e o leva embora quando o
+  traço sai. Uma transformação com Mastery ou Grade fica na ficha.
+- **Twinned (Custom Species):** a caixa **Twinned** do traço liga as partes "(Twinned)" dos efeitos. A checagem de
+  regras avisa com mais de 2 traços Twinned.
+- **Grupos de traços** (Pseudo-Bestial Traits, Konatsian Vocations...): os traços ganhos por outro traço vêm como itens
+  próprios, ligados ao traço de origem.
+- **Atualização do compêndio:** o cartão do mestre que atualiza as transformações das fichas também atualiza os traços
+  raciais (modificadores, gatilhos e o que o traço concede), sem perder o que foi acrescentado à mão.
+
+## Contra o oponente, marcas, testes e reações
+
+O sistema também sabe aplicar efeitos que dependem do outro personagem, de um teste ou de uma rolagem:
+
+- **Contra o oponente:** bônus que valem só contra certos alvos (marcados, com uma Condition, abaixo de um limiar, maiores
+  que você, Minions...) entram sozinhos no Strike, no Wound, no Dodge, no Soak e na Redução de Dano quando o alvo serve.
+  Os que dependem de escolha aparecem antes de rolar a defesa ou depois de ser atingido. O cartão **Contra este
+  oponente** mostra o que entrou.
+- **Opções de ataque com custo:** opções do diálogo de ataque podem custar KP, LP, stacks ou Counter Actions, ter
+  quantidade ("até 3 vezes") e grupos (uma opção ou outra). As **Opções do Wound Roll** aparecem depois do acerto. Uma
+  opção pode dar AoE a um ataque sem AoE ou pôr você num State ao atacar.
+- **Marcas:** traços que "marcam" um personagem põem a marca nele (cartão **Marcas**). A marca dura o tempo do efeito,
+  some quando acaba e serve de condição para os bônus contra o alvo marcado.
+- **Novos momentos dos gatilhos:** ao ganhar ou gastar LP, KP, Power ou um recurso; ao sair de um State; quando um
+  aliado é derrotado; ao causar uma Condition; ao ganhar o Legend Realized; ao dar ou receber Empower; ao marcar alguém;
+  e ao vencer ou perder um Clash. Efeitos novos: tirar uma Condition (à escolha, todas, ou todas menos uma), sair de um
+  State, DOT com duração e "até o fim da próxima rodada".
+- **Testes dentro de gatilhos:** o campo **Teste** faz um Steadfast, um Saving Throw, uma perícia ou um Clash antes do
+  efeito, que vale no sucesso ou na falha (**Aplica**). O campo **Rolagem** rola dados (ex.: 1d10) e escolhe o
+  resultado pela condição.
+- **Healing Surge, Combat Recovery e Energy Charge** mostram as **Opções** que os traços dão (mais cura, LP viram KP,
+  menos Ações, mais KP por carga). O Legend Realized e o Empower também leem os traços.
+- **Reações de rolagem:** quando um traço deixa rerrolar o Base Die, trocar o resultado natural, somar ao Dice Score,
+  virar Critical ou contar como sucesso, a janela **Reações** abre depois da rolagem para o dono escolher. As
+  automáticas entram sozinhas e aparecem no cartão.
+- **Clash:** o botão **Clash** da aba Combate (e dos cartões de manobras e Unique Abilities que falam em Clash) faz o
+  Clash contra o personagem mirado. Você escolhe a sua rolagem, a dele e a manobra usada. Os bônus de Clash dos traços
+  entram sozinhos, o empate vai para o Defender e há vitória automática quando um traço diz isso. Gravity Cage e
+  Knockback usam o mesmo Clash.
+- **Ficha:** proficiência em Saving Throws, ranks raciais de perícias (com a checagem do orçamento), talentos e pontos
+  de perícia extras, custos de TP e KP de Unique Abilities e Signatures, Size usado no Defense Value ou no Soak,
+  Break Value de Apparel e bônus de Apparel vindos dos traços.
+
+## Efeitos que mexem em outros efeitos, Aspects e distância
+
+Mais uma rodada de automação. Agora o sistema também entende:
+
+- **Efeitos que mudam outros efeitos:** um traço pode desligar um efeito de outro traço ("ignore o 3º efeito de..."),
+  dobrar ou somar aos números dele ("dobra a redução de KP do 3º efeito de Divine Training"), trocar o limite de uso
+  ("passa a ser 1/Round") ou manter um efeito ligado fora da transformação. Também dá para reagir quando outro efeito é
+  usado ("quando o 3º efeito de Golden Power acontecer, você pode...").
+- **Aspects por traço:** traços que dão ou tiram Aspects ("ganha o Aspect Armored enquanto estiver Furious", "Draining
+  igual às suas stacks de Power", "Wrathful ganha 2 níveis de Scaling") mudam os Aspects da transformação na hora, e
+  tudo o que o Aspect faz (Armored, Enhanced Save, Perfect Ki Control, Innate State, God Ki, Draining...) acompanha. A
+  ficha mostra os Aspects atuais.
+- **Surging State automatizado:** ao entrar, o cartão pede para marcar o **Focus** (mire o oponente e clique). Os ataques
+  que incluem o Focus ganham 1 Energy Charge. Ao sair, você fica Fatigued até o fim do próximo turno. Enquanto está
+  Surging, não fica Compelled. Traços que mandam ignorar o 2º efeito do Surging ("quando entrou por este efeito")
+  funcionam sozinhos.
+- **Manobras das transformações:** as Special Maneuvers, Modifier Maneuvers e God Maneuvers escritas nas páginas das
+  transformações (Coral Rain, Stance Maneuver, War Cry, Divine Blessing...) agora estão no compêndio de manobras, na
+  pasta **Manobras de Transformações**, e vêm junto com o traço que dá acesso a elas.
+- **"Enquanto estiver nesta transformação":** um item dado só durante a transformação fica na ficha, mas só funciona
+  enquanto a transformação está ativa.
+- **"Escolha N":** quando uma transformação deixa escolher God Maneuvers, Bestial Traits e afins, a escolha aparece ao
+  ganhar a transformação e os itens escolhidos entram na ficha.
+- **Distância no mapa:** em combate, os traços sabem quantos aliados e oponentes estão a até N quadrados de você
+  ("enquanto nenhum oponente estiver no seu Melee Range", "enquanto um aliado estiver adjacente"). Mover um token
+  recalcula. O sistema conta o Melee Range como os quadrados adjacentes.
+- **Manobras, Unique Abilities e itens usados:** as manobras, Unique Abilities e itens da ficha ganharam o botão **Usar**,
+  e o cartão deles no chat também. Usar avisa os traços que reagem ("quando usar a Hype Maneuver", "depois da Analysis",
+  "ao comer um Snack") e conta quantas vezes cada um foi usado na rodada e no encontro. Um item consumível (Basic Item)
+  gasta 1 da quantidade ao ser usado e não deixa usar sem nenhum.
+- **Mais momentos dos gatilhos:** ao deixar de estar Defeated, quando um aliado acerta um oponente, quando um aliado é
+  atingido, quando um Awakening ganha uma stack e ao tirar ou perder uma Apparel.
+- **Manobras Fora de Sequência:** um traço pode oferecer uma manobra específica da ficha (a Stance Maneuver, uma Unique
+  Ability, uma Signature, uma transformação) ou "uma Standard Maneuver de 1 Ação" Fora de Sequência.
+- **Regras das transformações:** traços que impedem entrar numa transformação ("só com 5+ Tension", "não com outra
+  Kaioken", "não combina com outra"), que impedem sair, ou que fazem sair dela ("quando o Critical Eye acabar") agora
+  valem sozinhos, com o motivo na notificação. O botão do **Full Awakening** avisa se o Grand Trigger foi cumprido; quando
+  não foi, só o mestre pode ativar mesmo assim.
+- **Ataques dados por um efeito:** um ataque Fora de Sequência dado por um traço já vem com os bônus dele (+1 Damage
+  Category, Strike, Energy Charges), só deixa o tipo de ataque que o traço pede (só físico, só Signature copiada...) e já
+  marca o "Feito através de".
+- **Advantages e Super Profiles num ataque:** traços que dão uma Advantage ou um Super Profile a um ataque (Power Shot,
+  Accurate, All Out, Complete Annihilation...) acrescentam ao ataque daquela vez, sem mudar o custo de KP.
+- **Punching Down e Punching Up agora são automáticos:** contra um alvo 2+ Size Categories menor entram os dados extras
+  do Punching Down; contra um 2+ maior, +1(T) de Wound por categoria (e sem a penalidade de Called Shot quando todos os alvos servem). Isso muda o dano
+  dos ataques entre personagens de tamanhos diferentes.
+- **Defesa:** traços que transformam um acerto em erro, que evitam o Diminishing Defense, que ignoram dano pequeno ou
+  limitam o dano máximo entram sozinhos. O All Out agora aposta todo o KP até a Capacity máxima (antes era recusado).
+- **Rolagens dos traços:** "role 1d8(T)" rola T dados de 8 lados (antes rolava um dado e multiplicava). O Enhanced
+  Save (All) vale para os quatro Saves, e os traços que mudam o teste de Steadfast do alvo enxergam as tags do ataque.
+
+## Aliados, encontro, Counter Actions e Holding Back
+
+A quarta rodada de automação ensinou o sistema a olhar para os outros personagens do encontro:
+
+- **Bônus para aliados:** traços que dão bônus aos aliados ("aliados adjacentes ganham +1(T) nas Combat Rolls",
+  "aliados a até 8 quadrados ganham DR", "seus aliados Studied ganham...") entram sozinhos na ficha de cada aliado do
+  encontro, com o nome do traço e de quem deu. Mover os tokens recalcula. Bônus que não acumulam ficam só com o maior.
+- **Efeitos em todos os aliados:** um gatilho pode curar, dar KP, um buff ou uma Condição a todos os aliados, a você e
+  a eles juntos, ou ao aliado que acabou de agir. Quando é um botão, um clique aplica em todos.
+- **Novos momentos:** quando um aliado ataca um oponente, usa o Power Up ou um Surge; quando você gasta uma Counter
+  Action (por qualquer motivo); quando ganha ou perde stacks de Holding Back (inclusive na ficha). Os traços também
+  podem tirar ou zerar o Holding Back sozinhos ("ao entrar, perde todo o Holding Back").
+- **O que os oponentes sofrem:** traços que valem "enquanto algum oponente estiver Impaired" ou "para cada aliado
+  Raging" contam sozinhos quem do encontro está com cada Condição ou State.
+- **States das transformações:** Radiant God, Berserk, Flow, United Power, Unleashed, Unlimited, Exceed, Clock Up e
+  outros States citados pelas transformações agora existem no sistema. Na aba de combate eles só aparecem para quem
+  tem um item que os cita.
+- **Recursos que continuam:** um recurso da ficha marcado pelo traço como permanente não zera no fim do encontro.
+- **Quando um aliado vira alvo:** traços que reagem quando um ataque mira um aliado ("dê +2(T) de Dodge ao aliado
+  atacado") disparam ao declarar o ataque, antes da defesa dele.
+- **Duração no turno do aliado:** um bônus dado a um aliado "até o fim do próximo turno dele" acaba no turno do aliado,
+  não no seu.
+- **Ignorar o Holding Back:** traços que mandam ignorar os stacks de Holding Back por um tempo devolvem o Tier of Power
+  e tiram as penalidades sem apagar os stacks.
+- **States das próprias transformações:** as caixas de State das páginas (Radiant God, Blazing God, Flow, Unlimited,
+  Exposed) viraram traços da transformação, e os efeitos delas valem enquanto você está naquele State.
+- **Hype e Analysis:** usar a **Hype Maneuver** (botão Usar) deixa você Hyped até o fim do seu próximo turno, com o
+  bônus nas Combat Rolls, e todos os traços que valem "enquanto Hyped" passam a valer sozinhos. A **Analysis Maneuver**
+  oferece o botão que marca o alvo como Analyzed até o fim do seu próximo turno, com o bônus contra ele. Fichas antigas
+  recebem essas manobras novas pelo cartão de atualização do compêndio.
+- **Forma Original dos Evolved Stages:** na aba de detalhes de um Evolved Stage há o campo **Forma Original**. Nos
+  Unique ele já vem preenchido; nos Generic escolha a transformação que ele evolui. Os traços que dependem da Forma
+  Original (Maestria, Fully Mastered, se está ativa) passam a valer sozinhos.
+- **Grades:** cada transformação com Grades sobe só até o número de Grades que tem (Kaioken começa com 3). Os traços
+  que liberam Grades a mais ("acesso ao 4º Grade") aumentam esse limite sozinhos.
+- **Auras nos oponentes:** traços que enfraquecem os oponentes por perto ("oponentes a até 3 quadrados têm −1(T) no
+  Strike") entram direto na ficha de cada oponente do encontro. Um traço que faz todos os oponentes da área fazerem um
+  Clash faz um Clash contra cada um, e o efeito vale só para quem perdeu.
+- **Rolagens dos outros:** traços que reagem quando um oponente tira um Botch contra você, ou quando um aliado falha num
+  teste, disparam sozinhos depois da rolagem.
+- **Ações de Adversário:** custos pagos com Adversary Actions só podem ser pagos por um Adversário com One-Man Army.
+- **Stance Maneuver:** usar a manobra (botão Usar) abre a escolha da postura: as quatro dela (Flame, Wind, Wave, Stone)
+  e as que os seus traços citam (Counter, Crane, Dragon, Void...). Só uma fica ativa, os bônus das quatro entram
+  sozinhos e os traços "enquanto na Dragon Stance" passam a valer.
+- **Order Maneuver:** a manobra do Tactician está no compêndio e vem junto com o traço que a dá.
+- **Ajudar o ataque de um aliado:** efeitos como o United Attack oferecem um botão quando um aliado ataca; o bônus entra
+  no Wound Roll daquele ataque.
+- **Custo de manobras e Unique Abilities:** a configuração do mundo **Custo ao usar manobras e Unique Abilities**
+  decide o que o botão Usar faz com o custo de KP e de Ações delas: nada (o padrão, o jogador paga à mão), mostrar o custo
+  no cartão já com as reduções dos traços, ou cobrar sozinho (e não deixar usar sem ter como pagar).
+- **Movement Maneuver:** o botão Usar pergunta se é Normal Speed ou Boosted Speed (3(T) KP) e se quer Rapid Movement
+  (+2(T) KP, +1(T) no Strike até o fim do turno), cobra o KP e a Ação e avisa os traços que reagem ao movimento. O token
+  continua sendo movido à mão no mapa. As God Maneuvers também descontam o DKP dos traços que o reduzem.
+- **Movimento no mapa:** em combate, mover um token avisa os traços que reagem ao movimento (andou N quadrados, entrou ou
+  saiu do Melee Range de um oponente, terminou adjacente). Quem sai do Melee Range de um oponente que tem Counter Action
+  gera um cartão com o botão **Exploit** para esse oponente (já mira quem saiu); dá para desligar o cartão na
+  configuração do mundo **Lembrete de Exploit no movimento**. Traços que dizem que o movimento não provoca Exploit
+  tiram o cartão.
+  Também viram momentos: um oponente **entrar** no seu Melee Range e alguém **terminar o movimento adjacente** a você.
+  O botão de Exploit (ou de outro ataque) de um traço que reage a isso já mira quem se moveu.
+- **Maestria e Derrota:** o botão de Maestria para no limite que os efeitos da Transformação dão (por exemplo, a 3ª
+  Maestria só com Tier of Power base 4+). Concessões “depois da Maestria” só funcionam quando a Transformação que as dá
+  chega nessa Maestria (antes disso não dá para entrar na Forma concedida nem usar a manobra). Os gatilhos de Derrota de
+  uma Forma rodam mesmo com a Derrota tirando o personagem dela. Traços que reduzem à metade o Collision Damage ou o
+  Draining (ou trocam o Draining por PV) também já valem sozinhos.
+- **Vantagem à escolha:** traços que deixam pôr “uma Vantagem de até N TP” num ataque mostram no diálogo de ataque uma
+  lista **Vantagem à escolha**; a escolhida entra só naquele ataque (com o limite e o custo do traço). Escolhas feitas
+  uma vez (um Atributo, um Elemento, uma entre duas opções) agora ficam guardadas na Transformação, como as outras
+  escolhas, e só a opção escolhida funciona.
+- **Vantagem Condition das Signatures:** escreva na ficha da técnica, no campo de escolha da Vantagem, a Condição
+  (Guard Down, Drained, Shaken ou Poisoned). Ao causar dano num oponente o sistema aplica a Condição com a duração da
+  regra; se o alvo já estiver com ela, soma +3(T) no Wound contra ele.
+- **Exploit provocado:** em combate, Combat Recovery (oponentes fora de Long Range), Energy Charge, Empower e as outras
+  manobras que a regra marca como “Exploitable” (oponentes adjacentes), sair do Melee Range e perder um Grapple Check
+  geram um cartão com um botão **Exploit** para cada oponente que pode usá-lo (já mira quem provocou). Traços que dizem
+  que algo não provoca o Exploit tiram o cartão; traços que reagem a “quando seu Exploit é provocado” aparecem sozinhos.
+- **Condição Branded:** a Condição de Combate das Transformações Demon God agora existe na ficha (−1(bT) nas Rolagens de
+  Combate e no Soak). Ela só aparece na lista de Condições quando algum item a usa ou quando está ativa.
+- **Alvo do Compelled:** quando um traço aplica Compelled em alguém, quem aplicou vira o alvo do Compelled; o cartão de
+  ataque avisa se um personagem Compelled atacar sem incluir esse alvo, e os traços que dependem disso já sabem quem é.
+- **Perda de PV “segura”:** custos e efeitos de traços que dizem que a perda de PV não causa Reduced Momentum e passa
+  automaticamente nos Steadfast agora fazem isso sozinhos.
+- **Pressure Check e Clash de Unique Ability:** os efeitos que mudam o Pressure Check dos Demônios (bônus, sucesso
+  automático) já entram na rolagem, e um Clash feito pelo botão de uma Unique Ability sabe que veio dela (para os
+  bônus que só valem nesses Clashes).
+- **Legend Realized fora da manobra:** traços que deixam aplicar o Legend Realized da Forma em outro momento têm um botão
+  que faz isso (uma vez por encontro por Forma, como na regra).
 
 ## Battle Born, Progress e Power
 

@@ -68,11 +68,18 @@ export class DBUCombat extends Combat {
         "system.combat.powerUps": 0,
         "system.combat.momentumUsed": false,
         "system.combat.reducedMomentum": false,
-        "system.combat.absoluteAttacks": 0
-      });
+        "system.combat.absoluteAttacks": 0,
+        // B5 @chargesRound / @surgesRound
+        "system.combat.chargesRound": 0,
+        "system.combat.surgesRound": 0
+      }, { dbuSource: "regen" });
       if ( advantage ) lines.push(L("DBU.Combat.PowerAdvantage", { name: p.actor.name }));
       // Adversaries: Narrative Stamina for the round, Life and Ki Points following a new PCC
       const adv = adversaryRoundStart(p.actor);
+      // "flag.noLifeRegain": a higher PCC raises the Maximum Life Points but not the current ones
+      if ( p.actor.system.flags?.noLifeRegain && (adv.updates["system.life.value"] > p.actor.system.life.value) ) {
+        delete adv.updates["system.life.value"];
+      }
       if ( Object.keys(adv.updates).length ) await p.actor.update(adv.updates);
       lines.push(...adv.lines);
     }
@@ -116,6 +123,8 @@ export class DBUCombat extends Combat {
     if ( await fusionSkipTurn(this, combatant) ) return;
     // Timed States/Conditions "until the start of your next turn" end before anything else happens
     await expireTimed(actor, "startOfTurn");
+    // ...and so does what this character's effects caused on others "until the start of your next turn" (B3)
+    for ( const p of this._participants() ) await expireTimed(p.actor, "startOfTurn", { source: actor.uuid });
     const lines = [];
     // Divine Ki Points come full when the access to them comes during the Combat Encounter
     if ( await fillDkp(actor, this) ) lines.push(L("DBU.Dkp.Filled", { n: actor.system.dkp.max }));
@@ -133,11 +142,15 @@ export class DBUCombat extends Combat {
     // Draining [LV]: 3(T) Ki per level, T = highest ToP Requirement among active Transformations
     if ( sys.costs.draining > 0 ) {
       const T = Math.max(1, sys.transformation.highestTopReq);
-      const cost = 3 * T * sys.costs.draining;
-      ki -= cost;
-      lines.push(L("DBU.Turn.Draining", { cost }));
+      // Q "draining.halve": half of it; "draining.life": Life Points instead of Ki Points (and no Divine Ki)
+      const bk = k => (sys.buckets?.[k]?.total ?? 0) > 0;
+      const cost = Math.floor(3 * T * sys.costs.draining / (bk("draining.halve") ? 2 : 1));
+      const toLife = bk("draining.life");
+      if ( toLife ) life -= cost;
+      else ki -= cost;
+      lines.push(L(toLife ? "DBU.Turn.DrainingLife" : "DBU.Turn.Draining", { cost }));
       // In the God Ki State it also takes Divine Ki Points: 1/2 of the Ki Points lost
-      const divine = sys.dkp?.usable ? Math.floor(cost / 2) : 0;
+      const divine = (sys.dkp?.usable && !toLife) ? Math.floor(cost / 2) : 0;
       if ( divine > 0 ) {
         updates["system.dkp.value"] = Math.max(0, sys.dkp.value - divine);
         lines.push(L("DBU.Turn.DrainingDkp", { n: divine }));
@@ -145,7 +158,7 @@ export class DBUCombat extends Combat {
     }
     if ( life !== sys.life.value ) updates["system.life.value"] = (sys._effectiveStates?.undying > 0) ? life : Math.max(0, life);
     if ( ki !== sys.ki.value ) updates["system.ki.value"] = Math.max(0, ki);
-    if ( Object.keys(updates).length ) await actor.update(updates, { dbuSelfInflicted: true });
+    if ( Object.keys(updates).length ) await actor.update(updates, { dbuSelfInflicted: true, dbuSource: "dot" });
     // No Energy: Ki at 0 ends every Form/Enhancement with Stress Exhaustion (Divine Ki at 0, for God Ki ones)
     const empty = noEnergy(actor.system);
     if ( empty ) {
@@ -165,6 +178,8 @@ export class DBUCombat extends Combat {
     // Absorption: a Defeated character loses every stack of it (6th effect of Assimilated Power)
     await defeatedLosesStacks(actor);
     await runTriggers(actor, "startOfTurn", { round: context.round, turn: context.turn });
+    // B5 @damagedSinceTurn counts again from the start of this turn (its Start of Turn triggers saw the old count)
+    if ( actor.system.combat?.damagedSinceTurn ) await actor.update({ "system.combat.damagedSinceTurn": 0 });
   }
 
   /** @override */

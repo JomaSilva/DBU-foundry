@@ -114,7 +114,9 @@ function initiatingSide(actor, pick, chosenFoundation, tokenUuid) {
   // Energy Charges: the ones gathered with the Energy Charge Maneuver, the Profile's, and an Ultimate's
   let charges = (sys.combat.energyCharges ?? 0) + fx.freeCharges;
   if ( s?.computed?.ultimate ) charges += sys.health.count;
-  charges = Math.min(charges, s ? s.computed.maxCharges : fx.maxCharges) + fx.bonusCharges;
+  // The maximum, raised by the effects that raise it for every attack (charges.max)
+  const maxCharges = (s ? s.computed.maxCharges : fx.maxCharges) + (sys.buckets?.["charges.max"]?.total ?? 0);
+  charges = Math.min(charges, maxCharges) + fx.bonusCharges;
   // Ki Point Cost of the attack (with its minimum)
   const kpT = sys.top.kp;
   const units = s ? (s.computed.kpUnits + s.computed.kpAdjust) : prof.kp;
@@ -396,8 +398,8 @@ async function recordWager(messageId, side, wager, helperUuid) {
 }
 
 /**
- * A Duel Clash roll: the higher of Force and Magic, the Initiating Attack's Wound dice and bonuses, the Ki Wager, and
- * a United Duel's allies (+1(T) each and their Ki Wagers).
+ * A Duel Clash roll: the higher of Force and Magic, the Initiating Attack's Wound dice and bonuses, the Ki Wager, a
+ * United Duel's allies (+1(T) each and their Ki Wagers) and the effects on the Dice Score of Duel Clashes (clash.duel).
  */
 async function rollDuelClash(actor, side, wager, n, { allies = 0, allyWager = 0 } = {}) {
   const sys = actor.system;
@@ -417,7 +419,9 @@ async function rollDuelClash(actor, side, wager, n, { allies = 0, allyWager = 0 
     { label: L("DBU.Duel.Stacks"), value: T * stacks },
     { label: L("DBU.Duel.Allies", { n: allies }), value: T * allies },
     { label: "Ki Wager", value: wager },
-    { label: L("DBU.Duel.AllyWager"), value: allyWager }
+    { label: L("DBU.Duel.AllyWager"), value: allyWager },
+    // Effects that add to the Dice Score of your Duel Clashes (clash.duel)
+    ...(sys.buckets?.["clash.duel"]?.parts ?? []).map(p => ({ label: p.label, value: Number(p.value) || 0 }))
   ].filter(p => p.value);
   const r = await dbuRoll({
     actor, kind: "clash", title: L("DBU.Duel.ClashTitle", { n }), subtitle: side.name, diceGroups: w.dice, parts,

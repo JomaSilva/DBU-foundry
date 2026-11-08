@@ -1,0 +1,40 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Target": {
+        "collisionHalve": "Collision Damage recebido pela metade (1)",
+        "drainingHalve": "Draining tira metade (1)",
+        "drainingLife": "Draining tira PV em vez de KP (1)",
+        "collisionIgnore": "Não recebe Collision Damage (1)"
+      },
+      "Mastery": {
+        "Capped": "{name}: no momento só chega a {n} Maestria(s) (requisito de um efeito)."
+      },
+      "Grants": {
+        "NeedsMastery": "{name} só funciona com {n} Maestria(s) de {by}."
+      },
+      "Turn": {
+        "DrainingLife": "Draining: −{cost} PV"
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Target": {
+        "collisionHalve": "Collision Damage you take halved (1)",
+        "drainingHalve": "Draining takes half (1)",
+        "drainingLife": "Draining takes Life Points instead of Ki (1)",
+        "collisionIgnore": "You take no Collision Damage (1)"
+      },
+      "Mastery": {
+        "Capped": "{name}: it can only reach {n} Mastery(ies) now (an effect's requirement)."
+      },
+      "Grants": {
+        "NeedsMastery": "{name} works only with {n} Mastery(ies) of {by}."
+      },
+      "Turn": {
+        "DrainingLife": "Draining: −{cost} LP"
+      }
+    }
+  }
+}

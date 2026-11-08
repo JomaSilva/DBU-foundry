@@ -54,7 +54,7 @@
         <td>{{localize (concat "DBU.Gear.ItemType." g.system.itemType)}}</td>
         <td class="center">×{{g.system.quantity}}</td>
         <td class="center">{{#if (eq g.system.itemType "accessory")}}<a data-action="itemToggle" data-field="system.equipped"><i class="fa-solid fa-toggle-{{#if g.system.equipped}}on{{else}}off{{/if}}"></i></a>{{/if}}</td>
-        <td class="dbu-controls"><a data-action="itemChat"><i class="fa-solid fa-comment"></i></a> <a data-action="itemDelete"><i class="fa-solid fa-trash"></i></a></td>
+        <td class="dbu-controls"><a data-action="itemUse" data-tooltip="{{localize 'DBU.Item.Use'}}"><i class="fa-solid fa-hand-sparkles"></i></a> <a data-action="itemChat"><i class="fa-solid fa-comment"></i></a> <a data-action="itemDelete"><i class="fa-solid fa-trash"></i></a></td>
       </tr>
       {{else}}<tr><td class="dbu-empty">—</td></tr>{{/each}}
     </tbody>

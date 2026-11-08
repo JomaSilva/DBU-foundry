@@ -1,0 +1,236 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Target": {
+        "chargeKp": "Energy Charge: ± KP fixo do custo (depois do multiplicador)",
+        "kpCostManeuver": "Manobras: ± KP das manobras que o sistema cobra (Energy Charge; Guard)",
+        "surgeHealBonus": "Healing Surge: + LP (aceita dados)",
+        "surgeHealMult": "Healing Surge: multiplicador dos dados de LP (antes da Surgency)",
+        "surgeToKi": "Healing Surge: os LP viram KP e Capacidade (a Capacidade pode passar do máximo)",
+        "recoveryLifeMult": "Combat Recovery: multiplicador dos LP recuperados",
+        "recoveryMinActions": "Combat Recovery: mínimo de Ações (padrão 2, no mínimo 1)",
+        "recoveryActions": "Combat Recovery: ± Ações gastas",
+        "flagRecoveryNoDvPenalty": "Combat Recovery sem a penalidade de Defense Value",
+        "legendLifeMult": "Legend Realized: multiplicador só dos LP",
+        "empowerActions": "Empower: + Ações contadas",
+        "flagEmpowerMelee": "Empower: o aliado conta como no alcance corpo a corpo (dobro)",
+        "flagEmpowerMax": "Empower: sem limite por Ação"
+      },
+      "Trigger": {
+        "Event": {
+          "markPlaced": "Marca colocada — {name}",
+          "resourceGain": "Recurso ganho — {name}",
+          "resourceSpend": "Recurso gasto — {name}",
+          "stateLeave": "Saiu de um State — {name}",
+          "allyDefeated": "Aliado derrotado — {name}",
+          "inflict": "Condição causada — {name}",
+          "legendRealized": "Legend Realized — {name}",
+          "empower": "Empower — {name}",
+          "empowered": "Recebeu Empower — {name}"
+        },
+        "EventLabel": {
+          "markPlaced": "Ao marcar outro personagem",
+          "resourceGain": "Ao ganhar stacks de recurso, Power, LP ou KP",
+          "resourceSpend": "Ao gastar ou perder stacks de recurso, Power, LP ou KP",
+          "stateLeave": "Ao sair de um State",
+          "allyDefeated": "Quando um aliado é derrotado",
+          "inflict": "Ao dar uma Combat Condition a outro personagem (por um gatilho)",
+          "legendRealized": "Ao ativar o Legend Realized",
+          "empower": "Ao usar o Empower num aliado",
+          "empowered": "Ao receber o Empower de um aliado"
+        },
+        "Effect": {
+          "mark": "Marcar o outro personagem",
+          "unmark": "Tirar uma marca",
+          "removeCondition": "Remover Combat Condition",
+          "leaveState": "Sair de um State"
+        },
+        "Duration": {
+          "endOfNextRound": "até o fim da próxima rodada"
+        },
+        "Target": {
+          "targeted": "Seu alvo (ao clicar)"
+        },
+        "OnCheck": {
+          "success": "No sucesso",
+          "fail": "Na falha"
+        },
+        "Field": {
+          "group": "Grupo",
+          "groupTip": "Gatilhos do mesmo grupo formam uma única escolha (letras minúsculas e números).",
+          "roll": "Rolagem",
+          "rollTip": "Fórmula de dados rolada quando o gatilho roda ou o botão é clicado (1d10, 2d10kh). Use @roll (total) e @rollNatural (primeiro dado) na Condição e no Valor.",
+          "rollKey": "Chave da rolagem",
+          "rollKeyTip": "Gatilhos do mesmo evento com a mesma chave usam UMA rolagem (e um só teste); as condições com @roll escolhem o resultado.",
+          "check": "Teste",
+          "checkTip": "Teste feito antes do efeito: steadfast, steadfast:-2, save.morale:15, skill.perception:12, clash:might, clash:might vs corporeal. Depois: @checkTotal, @checkSuccess, @margin. Um Clash é sempre um botão.",
+          "onCheck": "Aplica",
+          "onCheckTip": "Quando o efeito vale depois do teste: no sucesso (padrão) ou na falha.",
+          "with": "Com",
+          "withTip": "Só para “Usar uma manobra”: bônus desta vez, lista com ; de alvo=fórmula (surge.healMult=2; actions=3)."
+        },
+        "Condition": {
+          "any": "uma à escolha",
+          "all": "todas"
+        },
+        "Except": "exceto",
+        "AllStacks": "todos os stacks",
+        "RemoveConditionShort": "remove {what} ({n})",
+        "LeaveStateShort": "sai de {what}",
+        "ConditionPick": "Qual Combat Condition remover?",
+        "ConditionHeld": "{what} não sai: mantida por {by}",
+        "ConditionRemoved": "{what} −{n}",
+        "UndyingDefeated": "sai do estado Derrotado (as transformações deixadas na derrota não voltam)",
+        "RollLine": "{label}: {formula} = {total}",
+        "CheckPassed": "{label}: {check} = {total} — sucesso",
+        "CheckFailed": "{label}: {check} = {total} — falhou",
+        "CheckNone": "o teste {check} não pôde ser feito (sem o outro personagem?)"
+      },
+      "Marks": {
+        "Title": "Marcas — {name}",
+        "Effect": "marca {mark}",
+        "Unmark": "tira a marca {mark}",
+        "Placed": "{marker} marcou {target}: {mark}.",
+        "Moved": "(a marca saiu de {from})",
+        "Removed": "Marca {mark} tirada de {target}.",
+        "Expired": "marca em {target}"
+      },
+      "Surge": {
+        "ToKi": "Os {n} LP do Healing Surge viraram {n} KP e {n} de Capacidade.",
+        "Options": "Opções do Healing Surge"
+      },
+      "Recovery": {
+        "Options": "Opções do Combat Recovery",
+        "ResultNoDv": "Recuperou {n} LP e KP (sem penalidade de Defense Value).",
+        "LifeResult": "LP recuperados: {n}.",
+        "ActionsSpent": "Ações gastas: {n}."
+      },
+      "Charge": {
+        "Options": "Opções do Energy Charge"
+      },
+      "Legend": {
+        "LifeOnly": "LP do Legend Realized: {n}."
+      },
+      "Grants": {
+        "KeptTransformation": "{items} fica na ficha (tem progresso de Mastery ou Grade), sem o traço que deu acesso."
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Target": {
+        "chargeKp": "Energy Charge: ± flat KP of the cost (after the multiplier)",
+        "kpCostManeuver": "Maneuvers: ± KP of the Maneuvers the system charges (Energy Charge; Guard)",
+        "surgeHealBonus": "Healing Surge: + LP (dice allowed)",
+        "surgeHealMult": "Healing Surge: multiplier of the LP dice (before Surgency)",
+        "surgeToKi": "Healing Surge: its LP come as KP and Capacity (Capacity may go over its maximum)",
+        "recoveryLifeMult": "Combat Recovery: multiplier of the LP regained",
+        "recoveryMinActions": "Combat Recovery: fewest Actions (2 by default, at least 1)",
+        "recoveryActions": "Combat Recovery: ± Actions spent",
+        "flagRecoveryNoDvPenalty": "Combat Recovery without the Defense Value penalty",
+        "legendLifeMult": "Legend Realized: multiplier of its LP only",
+        "empowerActions": "Empower: + Actions counted",
+        "flagEmpowerMelee": "Empower: the Ally counts as within your Melee Range (double)",
+        "flagEmpowerMax": "Empower: no limit per Action"
+      },
+      "Trigger": {
+        "Event": {
+          "markPlaced": "Mark placed — {name}",
+          "resourceGain": "Resource gained — {name}",
+          "resourceSpend": "Resource spent — {name}",
+          "stateLeave": "Left a State — {name}",
+          "allyDefeated": "Ally Defeated — {name}",
+          "inflict": "Condition inflicted — {name}",
+          "legendRealized": "Legend Realized — {name}",
+          "empower": "Empower — {name}",
+          "empowered": "Empowered — {name}"
+        },
+        "EventLabel": {
+          "markPlaced": "When you mark another Character",
+          "resourceGain": "When you gain stacks of a resource, Power, LP or KP",
+          "resourceSpend": "When you spend or lose stacks of a resource, Power, LP or KP",
+          "stateLeave": "When you leave a State",
+          "allyDefeated": "When an Ally is Defeated",
+          "inflict": "When one of your triggers gives another Character a Combat Condition",
+          "legendRealized": "When you trigger Legend Realized",
+          "empower": "When you Empower an Ally",
+          "empowered": "When an Ally Empowers you"
+        },
+        "Effect": {
+          "mark": "Mark the other Character",
+          "unmark": "Remove a mark",
+          "removeCondition": "Remove a Combat Condition",
+          "leaveState": "Leave a State"
+        },
+        "Duration": {
+          "endOfNextRound": "until the end of the next round"
+        },
+        "Target": {
+          "targeted": "Your target (when clicked)"
+        },
+        "OnCheck": {
+          "success": "On a success",
+          "fail": "On a failure"
+        },
+        "Field": {
+          "group": "Group",
+          "groupTip": "Triggers of the same group form one choice (lowercase letters and digits).",
+          "roll": "Roll",
+          "rollTip": "A dice formula rolled when the trigger runs or its button is clicked (1d10, 2d10kh). Use @roll (total) and @rollNatural (first die) in the Condition and the Value.",
+          "rollKey": "Roll key",
+          "rollKeyTip": "Triggers of the same event with the same key share ONE roll (and one check); their conditions on @roll pick the outcome.",
+          "check": "Check",
+          "checkTip": "A check made before the effect: steadfast, steadfast:-2, save.morale:15, skill.perception:12, clash:might, clash:might vs corporeal. Then: @checkTotal, @checkSuccess, @margin. A Clash is always a button.",
+          "onCheck": "Applies",
+          "onCheckTip": "When the effect applies after the check: on a success (default) or on a failure.",
+          "with": "With",
+          "withTip": "Only for “Use a Maneuver”: bonuses for that use, a ; list of target=formula (surge.healMult=2; actions=3)."
+        },
+        "Condition": {
+          "any": "one you pick",
+          "all": "all"
+        },
+        "Except": "except",
+        "AllStacks": "every stack",
+        "RemoveConditionShort": "removes {what} ({n})",
+        "LeaveStateShort": "leaves {what}",
+        "ConditionPick": "Which Combat Condition to remove?",
+        "ConditionHeld": "{what} stays: held by {by}",
+        "ConditionRemoved": "{what} −{n}",
+        "UndyingDefeated": "no longer Defeated (the Transformations left at the Defeat do not come back)",
+        "RollLine": "{label}: {formula} = {total}",
+        "CheckPassed": "{label}: {check} = {total} — success",
+        "CheckFailed": "{label}: {check} = {total} — failed",
+        "CheckNone": "the check {check} could not be made (no other Character?)"
+      },
+      "Marks": {
+        "Title": "Marks — {name}",
+        "Effect": "mark {mark}",
+        "Unmark": "removes the mark {mark}",
+        "Placed": "{marker} marked {target}: {mark}.",
+        "Moved": "(the mark left {from})",
+        "Removed": "Mark {mark} removed from {target}.",
+        "Expired": "mark on {target}"
+      },
+      "Surge": {
+        "ToKi": "The Healing Surge's {n} LP became {n} KP and {n} Capacity.",
+        "Options": "Healing Surge options"
+      },
+      "Recovery": {
+        "Options": "Combat Recovery options",
+        "ResultNoDv": "Regained {n} LP and KP (no Defense Value penalty).",
+        "LifeResult": "LP regained: {n}.",
+        "ActionsSpent": "Actions spent: {n}."
+      },
+      "Charge": {
+        "Options": "Energy Charge options"
+      },
+      "Legend": {
+        "LifeOnly": "Legend Realized LP: {n}."
+      },
+      "Grants": {
+        "KeptTransformation": "{items} stays on the sheet (it has Mastery or Grade progress), without the Trait that gave access to it."
+      }
+    }
+  }
+}

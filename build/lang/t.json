@@ -1,0 +1,32 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Condition": {
+        "branded": "Marcado (Branded)"
+      },
+      "ConditionHint": {
+        "branded": "−1(bT) nas Rolagens de Combate e no Soak."
+      },
+      "Target": {
+        "immune": {
+          "branded": "Imune: Marcado (Branded)"
+        }
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Condition": {
+        "branded": "Branded"
+      },
+      "ConditionHint": {
+        "branded": "−1(bT) to Combat Rolls and Soak."
+      },
+      "Target": {
+        "immune": {
+          "branded": "Immune: Branded"
+        }
+      }
+    }
+  }
+}

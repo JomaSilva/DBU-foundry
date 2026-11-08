@@ -26,6 +26,10 @@ import * as formula from "./module/rules/formula.mjs";
 import { openAttackDialog } from "./module/combat/attack.mjs";
 import { inCombat } from "./module/combat/triggers.mjs";
 import { autoOfficialText } from "./module/rules/official-text.mjs";
+import { registerGrantHooks } from "./module/rules/grants.mjs";
+import { registerProximityHooks } from "./module/rules/proximity.mjs";
+import { registerAllyHooks } from "./module/rules/allies.mjs";
+import { registerMovementWatch } from "./module/rules/movement-watch.mjs";
 import { DEFAULT_BATTLE_POWER_FORMULA, LEGACY_BATTLE_POWER_FORMULAS } from "./module/rules/battle-power.mjs";
 import { registerMobile } from "./module/mobile.mjs";
 
@@ -142,6 +146,13 @@ async function refreshTransformationData() {
   const loose = updatesOf(game.items);
   if ( loose.length ) await Item.updateDocuments(loose);
 }
+
+// @allies, @opponents and @allyAwk follow who is in the Combat Encounter
+const refreshParty = combat => { for ( const c of combat?.combatants ?? [] ) c.actor?.prepareData(); };
+Hooks.on("combatTurnChange", combat => refreshParty(combat));
+Hooks.on("createCombatant", c => refreshParty(c.parent));
+Hooks.on("deleteCombatant", c => refreshParty(c.parent));
+Hooks.on("updateCombat", (combat, changes) => { if ( "round" in changes ) refreshParty(combat); });
 
 Hooks.once("ready", async () => {
   registerSocket();
@@ -272,6 +283,15 @@ for ( const hook of ["createItem", "updateItem", "deleteItem"] ) {
   });
 }
 
+// A Trait added to a Character brings the Maneuvers, Talents and Unique Abilities it grants (and takes them away with it)
+registerGrantHooks();
+// D: a token that moves refreshes the distances (@alliesWithin.<n>...) of its encounter
+registerProximityHooks();
+// G: the Allies of a Character with "ally.<target>" pieces, and those that read the encounter, follow its changes
+registerAllyHooks();
+// P: a token moved in combat: "moved", and "opponentLeftMelee" (the Exploit it provokes)
+registerMovementWatch();
+
 // Items dragged onto a sheet (or into the world) come with the official text from dbu-rpg.com
 Hooks.on("createItem", (item, options, userId) => {
   if ( (userId === game.user.id) && !options.dbuFusionSync ) autoOfficialText(item);
@@ -334,6 +354,17 @@ function registerSettings() {
   });
   S("combatAutomation", {
     name: "DBU.Settings.CombatAutomation.Name", hint: "DBU.Settings.CombatAutomation.Hint",
+    scope: "world", config: true, type: Boolean, default: true
+  });
+  // N: the KP / Action Cost of the Special Maneuvers and Unique Abilities used from their Use button
+  S("useCosts", {
+    name: "DBU.Settings.UseCosts.Name", hint: "DBU.Settings.UseCosts.Hint",
+    scope: "world", config: true, type: String, default: "off",
+    choices: { off: "DBU.Settings.UseCosts.off", show: "DBU.Settings.UseCosts.show", pay: "DBU.Settings.UseCosts.pay" }
+  });
+  // P: the "Exploit provoked" card when a token leaves an Opponent's Melee Range in combat
+  S("exploitReminder", {
+    name: "DBU.Settings.ExploitReminder.Name", hint: "DBU.Settings.ExploitReminder.Hint",
     scope: "world", config: true, type: Boolean, default: true
   });
   S("strictValidation", {

@@ -136,6 +136,33 @@ async function onCardButton(event, message) {
         else ui.notifications.warn(game.i18n.localize("DBU.Notify.NotOwner"));
         break;
       }
+      // P: an Opponent left your Melee Range: an attack made through the Exploit Maneuver, that one targeted
+      case "exploitMove": {
+        const actor = await fromUuid(actorUuid);
+        if ( !actor?.isOwner ) { ui.notifications.warn(game.i18n.localize("DBU.Notify.NotOwner")); break; }
+        const doc = await fromUuid(JSON.parse(button.dataset.payload || "{}").tokenUuid ?? "").catch(() => null);
+        if ( doc?.object ) doc.object.setTarget(true, { releaseOthers: true, groupSelection: false });
+        await actor.attack({ via: "exploit" });
+        break;
+      }
+      // E1: the "Use" button of a Maneuver / Unique Ability / item card
+      case "useItem": {
+        const actor = await fromUuid(actorUuid);
+        if ( !actor?.isOwner ) { ui.notifications.warn(game.i18n.localize("DBU.Notify.NotOwner")); break; }
+        const item = actor.items.get(JSON.parse(button.dataset.payload || "{}").itemId);
+        if ( item ) await item.use();
+        break;
+      }
+      // E3: an Awakening's Grand Trigger is met: its Full Awakening Maneuver
+      case "fullAwakening": {
+        const actor = await fromUuid(actorUuid);
+        if ( !actor?.isOwner ) { ui.notifications.warn(game.i18n.localize("DBU.Notify.NotOwner")); break; }
+        const item = actor.items.get(JSON.parse(button.dataset.payload || "{}").itemId);
+        if ( !item ) break;
+        const { fullAwakening } = await import("./combat/trait-actions.mjs");
+        if ( await fullAwakening(actor, item) ) button.remove();
+        break;
+      }
       case "burstLimit": {
         const actor = await fromUuid(actorUuid);
         if ( !actor?.isOwner ) { ui.notifications.warn(game.i18n.localize("DBU.Notify.NotOwner")); break; }
@@ -150,9 +177,100 @@ async function onCardButton(event, message) {
         const actor = await fromUuid(actorUuid);
         if ( !actor?.isOwner ) { ui.notifications.warn(game.i18n.localize("DBU.Notify.NotOwner")); break; }
         const p = JSON.parse(button.dataset.payload || "{}");
-        const text = await applyTriggerEffect(actor, p.effect, Number(p.value) || 0, p.resource,
-          { duration: p.duration, event: p.event, label: p.label });
-        if ( text ) ui.notifications.info(`${actor.name}: ${text}`);
+        const T = await import("./combat/triggers.mjs");
+        // On the other Character of the event (whom you hit...): through the GM when it is not yours. Checked before the
+        // use is counted and its cost paid. "targeted" (B3): the clicking user's target. A mark (B1) lives on the button's
+        // actor (the marker), so it never needs the marked Character's owner
+        let who = p.targeted ? T.currentTarget(actor) : (p.targetUuid ? await fromUuid(p.targetUuid) : actor);
+        if ( who?.documentName === "Token" ) who = who.actor;
+        // A mark without the event's other Character goes to the clicking user's target
+        if ( (p.effect === "mark") && (who === actor) ) who = T.currentTarget(actor);
+        const local = ["mark", "unmark"].includes(p.effect) || !!p.rolled;
+        if ( !who ) { ui.notifications.warn(`${p.label}: ${game.i18n.localize("DBU.TraitUse.NoTarget")}`); return; }
+        if ( !local && !who.isOwner && !game.users.activeGM ) { ui.notifications.warn(game.i18n.localize("DBU.Notify.NoGM")); return; }
+        // A limited trigger ("1/Round") counts when it is used (a limit that is a formula: with the Transformation's
+        // variables)
+        const limited = { limit: p.limit, ctx: p.ctx ?? {} };
+        const usedUp = () => {
+          ui.notifications.warn(game.i18n.format("DBU.Trigger.LimitUsed", { label: p.label, limit: p.limit }));
+          button.remove();
+        };
+        // B4: the other Character of a rolled button's Clash check (your target for "targeted", else the event's other one,
+        // else your target), known before the use is counted and paid
+        let other = null;
+        if ( p.rolled ) {
+          other = p.targeted ? who : null;
+          if ( !other && p.otherUuid ) other = await fromUuid(p.otherUuid).catch(() => null);
+          if ( other?.documentName === "Token" ) other = other.actor;
+          other ??= (who !== actor) ? who : T.currentTarget(actor);
+          const clash = [p.rolled.check, ...(p.rolled.items ?? []).map(i => i.check)].some(c => /^\s*clash:/i.test(String(c ?? "")));
+          if ( clash && !other ) { ui.notifications.warn(`${p.label}: ${game.i18n.localize("DBU.TraitUse.NoTarget")}`); return; }
+        }
+        // Y: a grouped button none of whose effects applies now spends nothing (no limit, no cost)
+        if ( p.rolled && !(await T.rolledItemsHold(actor, p, other)) ) {
+          ui.notifications.warn(`${p.label}: ${game.i18n.localize("DBU.Trigger.NothingApplies")}`);
+          return;
+        }
+        // A cost ("ki:2(bT)") is paid now and an amount ("up to M stacks") asked now: refused when it cannot be paid
+        // M2: a Wound bonus for an attack whose Wound Roll is already made does nothing: nothing is paid for it
+        if ( (p.effect === "attackWound") && p.messageId && game.messages.get(p.messageId)?.getFlag("dbu-rpg", "attack")?.wound ) {
+          return ui.notifications.warn(game.i18n.localize("DBU.Wound.Already"));
+        }
+        let value = Number(p.value) || 0;
+        let plan = null;
+        let n = Number(p.scope?.n ?? 1) || 1;
+        if ( p.cost || p.amount ) {
+          if ( p.limitKey && !T.triggerUsesLeft(actor, limited, p.limitKey) ) return usedUp();
+          const use = await T.prepareTriggerUse(actor, p);
+          if ( !use ) return;
+          if ( use.plan?.problems?.length ) {
+            ui.notifications.warn(`${p.label}: ${game.i18n.format("DBU.Trigger.CantPay", { why: use.plan.problems.join(" ") })}`);
+            return;
+          }
+          value = use.value;
+          plan = use.plan;
+          n = use.n ?? 1;
+        }
+        // B3 removeCondition "any": the clicking user picks the Condition now, before the use is counted and paid (a
+        // cancel costs nothing, and the GM is not asked when the effect goes through the GM)
+        let resource = p.resource;
+        if ( (p.effect === "removeCondition") && !p.rolled ) {
+          if ( p.limitKey && !T.triggerUsesLeft(actor, limited, p.limitKey) ) return usedUp();
+          const pick = await T.pickRemovedCondition(who, p.resource, p.label);
+          if ( !pick ) return;
+          resource = pick.resource;
+        }
+        if ( p.limitKey && !(await T.useTriggerLimit(actor, limited, p.limitKey)) ) return usedUp();
+        const paid = plan ? await T.payTriggerCost(actor, plan, p.resEvent ? { resEvent: true } : {}) : "";
+        // B4: a roll or a check made now, then only the triggers it lets apply
+        if ( p.rolled ) {
+          const lines = await T.applyRolledTrigger(actor, p, { other, n });
+          if ( paid ) lines.unshift(game.i18n.format("DBU.Trigger.Paid", { cost: paid }));
+          const { postInfoCard } = await import("./dice/roller.mjs");
+          if ( lines.length ) await postInfoCard({ actor, title: p.label, lines });
+          button.remove();
+          return;
+        }
+        const opts = { duration: p.duration, event: p.event, label: p.label, timedDuration: p.timedDuration, source: p.source, skip: p.skip,
+          itemId: p.itemId ?? null };
+        // Options only some effects carry (B1 marker, B3 inflictor / State loop guard, B5 `with`, B2 resource loop guard, the
+        // mark a markPlaced effect ends with)
+        // (D1: the effect the piece comes from, for @viaFx and "fxUsed")
+        for ( const k of ["markerUuid", "inflictor", "with", "resEvent", "noLeave", "withMark", "quietMark", "fx", "fxOwner", "messageId"] ) if ( p[k] ) opts[k] = p[k];
+        if ( ["mark", "unmark"].includes(p.effect) ) opts.markerUuid = actor.uuid;
+        // P: an attack Maneuver of the button targets the event's other Character
+        if ( (p.effect === "maneuver") && p.otherUuid ) opts.otherUuid = p.otherUuid;
+        if ( (p.effect === "condition") && (who !== actor) && (p.event !== "inflict") ) opts.inflictor = actor.uuid;
+        // "targeted": the durations "until your (next) turn" count on your turns
+        if ( p.targeted ) Object.assign(opts, T.timedOptionsFor(actor, who, p.rawDuration ?? p.duration));
+        let text = "";
+        if ( who.isOwner || local ) text = await applyTriggerEffect(who, p.effect, value, resource, opts);
+        else {
+          const { emitGM } = await import("./socket.mjs");
+          if ( emitGM("applyTrigger", { uuid: who.uuid, effect: p.effect, value, resource, options: opts }) ) text = p.label;
+        }
+        if ( paid ) text = [text, game.i18n.format("DBU.Trigger.Paid", { cost: paid })].filter(Boolean).join(" · ");
+        if ( text ) ui.notifications.info(`${who.name}: ${text}`);
         button.remove();
         return;
       }

@@ -1,0 +1,66 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "MoveWatch": {
+        "Title": "Exploit provocado",
+        "Provoked": "{name} saiu do Melee Range de {who}: {who} pode usar o Exploit Maneuver.",
+        "Exploit": "Exploit"
+      },
+      "Trigger": {
+        "EventLabel": {
+          "moved": "Quando você se move no mapa (em combate)",
+          "opponentLeftMelee": "Quando um oponente sai do seu Melee Range",
+          "opponentEnteredMelee": "Quando um oponente entra no seu Melee Range",
+          "endedAdjacent": "Quando alguém termina o movimento adjacente a você"
+        },
+        "Event": {
+          "moved": "Movimento — {name}",
+          "opponentLeftMelee": "Oponente saiu do Melee Range — {name}",
+          "opponentEnteredMelee": "Oponente entrou no Melee Range — {name}",
+          "endedAdjacent": "Terminou adjacente — {name}"
+        }
+      },
+      "Target": {
+        "flagNoProvokeExploit": "Seu movimento não provoca Exploit (1)"
+      },
+      "Settings": {
+        "ExploitReminder": {
+          "Name": "Lembrete de Exploit no movimento",
+          "Hint": "Em combate, quando um token sai do Melee Range de um oponente que tem Counter Action, posta um cartão com o botão Exploit para esse oponente."
+        }
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "MoveWatch": {
+        "Title": "Exploit provoked",
+        "Provoked": "{name} left the Melee Range of {who}: {who} may use the Exploit Maneuver.",
+        "Exploit": "Exploit"
+      },
+      "Trigger": {
+        "EventLabel": {
+          "moved": "When you move on the map (in combat)",
+          "opponentLeftMelee": "When an Opponent leaves your Melee Range",
+          "opponentEnteredMelee": "When an Opponent enters your Melee Range",
+          "endedAdjacent": "When someone ends their movement adjacent to you"
+        },
+        "Event": {
+          "moved": "Movement — {name}",
+          "opponentLeftMelee": "Opponent left your Melee Range — {name}",
+          "opponentEnteredMelee": "Opponent entered your Melee Range — {name}",
+          "endedAdjacent": "Ended adjacent — {name}"
+        }
+      },
+      "Target": {
+        "flagNoProvokeExploit": "Your movement provokes no Exploit (1)"
+      },
+      "Settings": {
+        "ExploitReminder": {
+          "Name": "Exploit reminder on movement",
+          "Hint": "In combat, when a token leaves the Melee Range of an Opponent that has a Counter Action, posts a card with an Exploit button for that Opponent."
+        }
+      }
+    }
+  }
+}

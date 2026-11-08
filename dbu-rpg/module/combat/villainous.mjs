@@ -44,6 +44,11 @@ function frequencyProblem(item) {
 }
 
 async function recordUse(item, delta = 1) {
+  // E1: a use (not the refund of one) is counted and fires "maneuverUsed" (@villainous = 1)
+  if ( delta > 0 ) {
+    const { noteItemUse } = await import("./triggers.mjs");
+    await noteItemUse(item.actor, item);
+  }
   const { combat, inRound, inEncounter } = usesOf(item);
   if ( !combat ) return;
   await item.setFlag(FLAG, "uses", { combat: combat.id, round: combat.round, inRound: Math.max(0, inRound + delta),
@@ -93,17 +98,25 @@ async function pickToken(actor, title, filter = () => true) {
 /** Player Characters of the scene: non-Minion Characters controlled by a player. */
 const playerTokens = actor => otherTokens(actor).filter(t => t.actor.hasPlayerOwner && !isMinion(t.actor) && (t.actor.type !== "adversary"));
 
-/** Legend Realized: 2(T)d10 + Power Level back in Life and Ki Points (twice with Narrative Transformation). */
+/**
+ * Legend Realized: 2(T)d10 + Power Level back in Life and Ki Points (twice with Narrative Transformation), with the
+ * "legend.bonus" / "legend.mult" modifiers; no Life Points with "flag.noLifeRegain".
+ */
 export async function applyLegendRealized(actor, label) {
   const T = actor.system.top.current;
-  const r = await new Roll(`${2 * T}d10 + ${actor.system.pl}`).evaluate();
+  const formula = actor.legendRealizedFormula?.() ?? `${2 * T}d10 + ${actor.system.pl}`;
+  const r = await new Roll(formula).evaluate();
   let amount = r.total;
   const doubled = await narrativeDouble(actor);
   if ( doubled ) amount *= 2;
+  amount = Math.floor(amount * (actor.legendRealizedMult?.() ?? 1));
   await r.toMessage({ speaker: ChatMessage.getSpeaker({ actor }), flavor: `Legend Realized — ${label}` });
   const sys = actor.system;
-  await actor.update({ "system.life.value": Math.min(sys.life.max, sys.life.value + amount), "system.ki.value": Math.min(sys.ki.max, sys.ki.value + amount) });
-  return L(doubled ? "DBU.Villain.LegendDouble" : "DBU.Trans.LegendRealized", { n: amount });
+  const noLife = !!sys.flags?.noLifeRegain;
+  await actor.update({ ...(noLife ? {} : { "system.life.value": Math.min(sys.life.max, sys.life.value + amount) }),
+    "system.ki.value": Math.min(sys.ki.max, sys.ki.value + amount) });
+  const text = L(doubled ? "DBU.Villain.LegendDouble" : "DBU.Trans.LegendRealized", { n: amount });
+  return noLife ? `${text} ${L("DBU.Life.NoRegain")}` : text;
 }
 
 /** Remove every Combat Condition except some. */
@@ -117,9 +130,11 @@ async function clearConditions(actor, keep = []) {
   return keys.length;
 }
 
-/** Enter one of the actor's Forms or Enhancements as an Out-of-Sequence Maneuver. */
-async function transformOutOfSequence(actor, title) {
-  const list = actor.items.filter(i => (i.type === "transformation") && ["form", "enhancement"].includes(i.system.transType) && !i.system.active);
+/** Enter one of the actor's Forms or Enhancements as an Out-of-Sequence Maneuver (E3: not one its rules keep you out of). */
+export async function transformOutOfSequence(actor, title) {
+  const { enterProblems } = await import("../rules/transform-rules.mjs");
+  const list = actor.items.filter(i => (i.type === "transformation") && ["form", "enhancement"].includes(i.system.transType) && !i.system.active
+    && !enterProblems(actor, i).length);
   if ( !list.length ) return null;
   const id = await DialogV2.wait({
     window: { title },
@@ -242,8 +257,12 @@ export async function useVillainousManeuver(actor, item) {
         { action: "villainLegend", label: L("DBU.Villain.ApplyLegend"), icon: "fa-solid fa-star", actorUuid: actor.uuid, payload: JSON.stringify({ name: item.name }) }
       ] });
     }
-    default:
-      return item.toChat();
+    default: {
+      // A Villainous Maneuver the system has no flow for: its card, and the use counted
+      const done = await item.toChat({ used: true });
+      await recordUse(item);
+      return done;
+    }
   }
 }
 
@@ -282,13 +301,15 @@ export async function oneOnOneDefeated(attacker, target) {
   }
   const t = target.system;
   const sys = attacker.system;
-  await attacker.update({ "system.life.value": Math.min(sys.life.max, sys.life.value + Math.ceil(t.life.max / 4)),
+  // "flag.noLifeRegain": only the Ki Points
+  const noLife = !!sys.flags?.noLifeRegain;
+  await attacker.update({ ...(noLife ? {} : { "system.life.value": Math.min(sys.life.max, sys.life.value + Math.ceil(t.life.max / 4)) }),
     "system.ki.value": Math.min(sys.ki.max, sys.ki.value + Math.ceil(t.ki.max / 4)) });
   await attacker.unsetFlag(FLAG, "oneOnOne");
   const item = attacker.items.get(d.itemId);
   if ( item ) await recordUse(item, -1);
   await postInfoCard({ actor: attacker, title: "1-on-1 Duel", lines: [L("DBU.Villain.DuelWon", { name: attacker.name, other: target.name,
-    life: Math.ceil(t.life.max / 4), ki: Math.ceil(t.ki.max / 4) })] });
+    life: Math.ceil(t.life.max / 4), ki: Math.ceil(t.ki.max / 4) }), ...(noLife ? [L("DBU.Life.NoRegain")] : [])] });
 }
 
 /** Get Up!: that Opponent cannot be targeted by the Adversary's attacks until the end of their next turn. */
@@ -341,7 +362,8 @@ export async function actAgainTurnStart(combatant) {
   if ( !actor ) return;
   const c = actor.system.combat;
   await combatant.setFlag(FLAG, "saved", { actions: c.actions ?? 0 });
-  await actor.update({ "system.combat.actions": c.counters ?? 0, "system.combat.counters": 0 });
+  // (Act Again: the Adversary Actions become this turn's Actions; no Counter Action is spent)
+  await actor.update({ "system.combat.actions": c.counters ?? 0, "system.combat.counters": 0 }, { dbuNoSpend: true });
 }
 
 /** End of an Act Again turn: the Adversary Actions left go back, and the extra combatant leaves. */

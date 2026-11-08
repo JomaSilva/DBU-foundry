@@ -1,0 +1,52 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Exploit": {
+        "ProvokeEffect": "Provoca o Exploit dos oponentes",
+        "ProvokedShort": "Exploit provocado ({n})",
+        "NoneProvoked": "Nenhum oponente no alcance para o Exploit."
+      },
+      "Trigger": {
+        "EventLabel": {
+          "opponentManeuver": "Quando um oponente usa uma manobra",
+          "allyManeuver": "Quando um aliado usa uma manobra",
+          "combatRecovery": "Quando você usa Combat Recovery"
+        },
+        "Event": {
+          "opponentManeuver": "Manobra de oponente — {name}",
+          "allyManeuver": "Manobra de aliado — {name}",
+          "combatRecovery": "Combat Recovery — {name}"
+        },
+        "Effect": {
+          "provoke": "Provocar o Exploit"
+        },
+        "NothingApplies": "nenhum efeito vale agora (nada foi gasto)."
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Exploit": {
+        "ProvokeEffect": "Provokes the Opponents' Exploit",
+        "ProvokedShort": "Exploit provoked ({n})",
+        "NoneProvoked": "No Opponent in range for the Exploit."
+      },
+      "Trigger": {
+        "EventLabel": {
+          "opponentManeuver": "When an Opponent uses a Maneuver",
+          "allyManeuver": "When an Ally uses a Maneuver",
+          "combatRecovery": "When you use Combat Recovery"
+        },
+        "Event": {
+          "opponentManeuver": "Opponent's Maneuver — {name}",
+          "allyManeuver": "Ally's Maneuver — {name}",
+          "combatRecovery": "Combat Recovery — {name}"
+        },
+        "Effect": {
+          "provoke": "Provoke the Exploit"
+        },
+        "NothingApplies": "none of its effects applies now (nothing was spent)."
+      }
+    }
+  }
+}

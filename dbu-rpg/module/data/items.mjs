@@ -1,8 +1,35 @@
 import { baseItemSchema, intField, usesField } from "./fields.mjs";
 import { computeSignature } from "../rules/signature.mjs";
 import { currentAspects } from "../rules/aspects.mjs";
+import { evaluate } from "../rules/formula.mjs";
 
 const { ArrayField, BooleanField, NumberField, SchemaField, StringField } = foundry.data.fields;
+
+/**
+ * D3: an item granted "while in" another one (a grant marked "+active", or the pick of a choice with grantActive: "gain a
+ * God Maneuver of your choice while in this Transformation") works only while the item that granted it does.
+ * flags.dbu-rpg.grantedBy is that item's id (grants) or { item, choice, option } (picks of a choice).
+ */
+export function grantWorks(data) {
+  const f = data?.parent?.flags?.["dbu-rpg"];
+  if ( !(f?.grantActive || f?.grantMastery) || !f.grantedBy ) return true;
+  const id = (typeof f.grantedBy === "object") ? f.grantedBy.item : f.grantedBy;
+  const by = data.parent?.actor?.items?.get?.(id);
+  if ( !by ) return true;
+  // Q "+mastery:N": only once the granting item has N Masteries
+  if ( f.grantMastery && ((by.system?.mastery ?? 0) < f.grantMastery) ) return false;
+  return !f.grantActive || !!(by.system?.isActive ?? true);
+}
+
+/** Q: why a granted item does not work yet ("+mastery:N" not reached): { by, n } or null. */
+export function grantMasteryMissing(item) {
+  const f = item?.flags?.["dbu-rpg"];
+  if ( !f?.grantMastery || !f.grantedBy ) return null;
+  const id = (typeof f.grantedBy === "object") ? f.grantedBy.item : f.grantedBy;
+  const by = item.actor?.items?.get?.(id);
+  if ( !by || ((by.system?.mastery ?? 0) >= f.grantMastery) ) return null;
+  return { by, n: f.grantMastery };
+}
 
 class BaseItemData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
@@ -11,7 +38,7 @@ class BaseItemData extends foundry.abstract.TypeDataModel {
 
   /** Is this item currently contributing its modifiers to its owner? */
   get isActive() {
-    return true;
+    return grantWorks(this);
   }
 }
 
@@ -49,10 +76,17 @@ export class RacialTraitData extends BaseItemData {
     return {
       ...super.defineSchema(),
       race: new StringField({ blank: true, initial: "" }),
-      category: new StringField({ initial: "body", choices: ["body", "mind", "villainous"] }),
-      // "fusion": Method Traits and Fusion Modifiers generated for a Fusion; "villainous": an Adversary's Villainous Trait
+      // "none": a Trait of a group (Bestial, Monstrous, Evolution Traits, Vocations...) that has no Body/Mind Category
+      category: new StringField({ initial: "body", choices: ["body", "mind", "villainous", "none"] }),
+      // "fusion": Method Traits and Fusion Modifiers generated for a Fusion; "villainous": an Adversary's Villainous Trait;
+      // "granted": a Trait of a group gained through another Trait (Bestial Traits, Evolution Traits, Vocations...);
+      // "custom": a Custom Species Racial Trait; "flaw": a Custom Species Flaw
       tier: new StringField({ initial: "primary", choices: ["primary", "secondary", "subrace", "factor", "benefit", "drawback", "role", "fusion",
-        "villainous"] }),
+        "villainous", "granted", "custom", "flaw"] }),
+      // The group of a granted Trait ("Bestial Traits", "Evolution Traits", "Vocations")
+      group: new StringField({ blank: true, initial: "" }),
+      // Custom Species: this Trait is one of the two picked for their Twinned effects (pieces labelled "<Trait> (Twinned)")
+      twinned: new BooleanField({ initial: false }),
       // What the Trait made the Character pick (Narrative Transformation: a Form or Transformation Line)
       choice: new StringField({ blank: true, initial: "" }),
       factor: new StringField({ blank: true, initial: "" }),
@@ -64,7 +98,7 @@ export class RacialTraitData extends BaseItemData {
   }
 
   get isActive() {
-    return this.active;
+    return this.active && grantWorks(this);
   }
 }
 
@@ -151,6 +185,8 @@ export class TransformationData extends BaseItemData {
       stackTop: new StringField({ blank: true, initial: "" }),
       grade: intField(1, { min: 0 }),
       maxGrade: intField(0, { min: 0 }),
+      // I2: an Evolved Stage's Original Form (the name of a Transformation of the same character; picked on the item sheet)
+      original: new StringField({ blank: true, initial: "" }),
       graded: new BooleanField({ initial: false }),
       /** Stress Test Requirement per Grade: "13,18" (absolute) or "+2,+5,+8" (added). Empty = +2 per Grade after the first. */
       gradeStress: new StringField({ blank: true, initial: "" }),
@@ -213,7 +249,16 @@ export class TransformationData extends BaseItemData {
         repeat: new BooleanField({ initial: false }),
         noRepeatLast: new BooleanField({ initial: false }),
         // The options are items of this compendium: choosing one adds that item while the Stack lasts
-        pack: new StringField({ blank: true, initial: "" })
+        pack: new StringField({ blank: true, initial: "" }),
+        // How many to pick when it depends on the character ("one more Genetic Trait for each base Tier of Power after
+        // the 2nd, max. +2" → "1 + min(2, max(0, @bT - 2))"); `pick` otherwise
+        pickFormula: new StringField({ blank: true, initial: "" }),
+        // D3: the items of the picks (pack) work only while this Transformation does ("while in this Transformation")
+        grantActive: new BooleanField({ initial: false }),
+        // Q: ... and only once it has this many Masteries (0: at once)
+        grantMastery: new NumberField({ integer: true, min: 0, initial: 0 }),
+        // R: a choice an automation entry declared (its picks are not Favored Elements by themselves)
+        entry: new BooleanField({ initial: false })
       })),
       // Aura drawn around the token while the Transformation is active ("auto": by name, e.g. Super Saiyan → gold)
       aura: new SchemaField({
@@ -251,9 +296,28 @@ export class TransformationData extends BaseItemData {
   get formulaContext() {
     return {
       G: this.grade, S: this.stage, Z: this.stacks, ZB: this.bonusStacks, ZP: this.stacks - this.tempCount,
-      M: this.mastery, MX: Math.max(0, this.mastery - this.masteryNeeded),
-      TR: this.transcended ? 1 : 0, GA: this.grandAwakening ? 1 : 0
+      M: this.mastery, MX: Math.max(0, this.mastery - this.masteryNeeded), FM: (this.mastery >= this.masteryNeeded) ? 1 : 0,
+      TR: this.transcended ? 1 : 0, GA: this.grandAwakening ? 1 : 0, ...this.originalContext
     };
+  }
+
+  /**
+   * I2: an Evolved Stage's Original Form (`original`, a Transformation of the same character): its Mastery (@OM), Fully
+   * Mastered (@OFM), active (@OA), Grade (@OG) and Tier of Power Requirement (@OT); zeros without one.
+   */
+  get originalForm() {
+    // (by the letters and digits of the name: 'Ultra Instinct "Sign"' finds 'Ultra Instinct “Sign”')
+    const slug = v => String(v ?? "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "");
+    const name = slug(this.original);
+    if ( !name ) return null;
+    return this.parent?.actor?.items?.find?.(i => (i.type === "transformation") && (i.id !== this.parent.id)
+      && (slug(i.name) === name)) ?? null;
+  }
+  get originalContext() {
+    const o = this.originalForm?.system;
+    if ( !o ) return { OM: 0, OFM: 0, OA: 0, OG: 0, OT: 0 };
+    return { OM: o.mastery ?? 0, OFM: ((o.mastery ?? 0) >= (o.masteryNeeded ?? 1)) ? 1 : 0, OA: o.active ? 1 : 0,
+      OG: o.grade ?? 0, OT: o.topReq ?? 0 };
   }
 
   /** Stacks that are Temporary Awakenings (the newest ones). */
@@ -274,14 +338,29 @@ export class TransformationData extends BaseItemData {
 
   /** Choices that still have to be made (a per-Stack choice needs `pick` options for every Stack). */
   get pendingChoices() {
-    return (this.choices ?? []).filter(c => (c.selected?.length ?? 0) < (c.perStack ? c.pick * this.stacks : c.pick));
+    return (this.choices ?? []).filter(c => (c.selected?.length ?? 0) < (c.perStack ? c.pick * this.stacks : this.picksOf(c)));
+  }
+
+  /** How many options a choice made once needs (its pickFormula, worked out for the owner, or its pick). */
+  picksOf(choice) {
+    const pick = Math.max(1, choice?.pick ?? 1);
+    const actor = this.parent?.actor;
+    if ( !choice?.pickFormula || !actor?.system?.rollData ) return pick;
+    const n = evaluate(choice.pickFormula, { ...actor.system.rollData, ...this.formulaContext });
+    return Math.clamp(Number.isFinite(n) ? n : pick, 1, Math.max(1, choice.options?.length ?? 1));
   }
 
   /** The Grade (its Aspects and "(LVG)" levels) and the Mastery Traits reached change the Aspects. */
   prepareDerivedData() {
     super.prepareDerivedData?.();
+    // prepareData may run again without a reset, and the owner's aspect.* modifiers replace this list (rules/fx.mjs
+    // aspectPass): start from the stored Aspects every time
+    const stored = this.parent?._source?.system?.aspects;
+    if ( Array.isArray(stored) ) this.aspects = stored.map(a => ({ key: a.key ?? "", name: a.name ?? "", level: a.level ?? 0, param: a.param ?? "" }));
     this.baseAspects = this.aspects;
     this.aspects = currentAspects(this);
+    // What the item itself gives (Grades, Mastery Traits), before the owner's aspect.* modifiers
+    this.itemAspects = this.aspects;
   }
 
   get isMastered() {
@@ -327,6 +406,9 @@ export class SignatureData extends BaseItemData {
       // Fused Technique of a Fusion: an Ultimate with a Super Profile that costs 4(T) Ki Points less
       fused: new BooleanField({ initial: false }),
       fusedWoundT: intField(0, { min: 0 }),
+      // Where the Signature comes from, for the effects that care (a comma list: copied, crafted, racial, fullPower,
+      // quickLearner): @tag_<tag> in the attack's formulas; a "fullPower" Signature counts as a Basic Attack (@basic)
+      tags: new StringField({ blank: true, initial: "" }),
       // How the attack looks on the canvas (module/canvas/attack-fx.mjs): shape "auto" and blank colours follow the Profile
       vfx: new SchemaField({
         shape: new StringField({ initial: "auto" }),

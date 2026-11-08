@@ -37,11 +37,12 @@
         <option value="body" {{#if (eq source.category "body")}}selected{{/if}}>{{localize "DBU.TraitCat.body"}}</option>
         <option value="mind" {{#if (eq source.category "mind")}}selected{{/if}}>{{localize "DBU.TraitCat.mind"}}</option>
         <option value="villainous" {{#if (eq source.category "villainous")}}selected{{/if}}>{{localize "DBU.TraitCat.villainous"}}</option>
+        <option value="none" {{#if (eq source.category "none")}}selected{{/if}}>{{localize "DBU.TraitCat.none"}}</option>
       </select>
     </label>
     <label>{{localize "DBU.TraitTier.label"}}
       <select name="system.tier">
-        {{#each (object primary="DBU.TraitTier.primary" secondary="DBU.TraitTier.secondary" subrace="DBU.TraitTier.subrace" factor="DBU.TraitTier.factor" benefit="DBU.TraitTier.benefit" drawback="DBU.TraitTier.drawback" role="DBU.TraitTier.role" fusion="DBU.TraitTier.fusion" villainous="DBU.TraitTier.villainous") as |label key|}}
+        {{#each (object primary="DBU.TraitTier.primary" secondary="DBU.TraitTier.secondary" subrace="DBU.TraitTier.subrace" factor="DBU.TraitTier.factor" benefit="DBU.TraitTier.benefit" drawback="DBU.TraitTier.drawback" role="DBU.TraitTier.role" fusion="DBU.TraitTier.fusion" villainous="DBU.TraitTier.villainous" granted="DBU.TraitTier.granted" custom="DBU.TraitTier.custom" flaw="DBU.TraitTier.flaw") as |label key|}}
         <option value="{{key}}" {{#if (eq ../source.tier key)}}selected{{/if}}>{{localize label}}</option>
         {{/each}}
       </select>
@@ -49,7 +50,10 @@
     {{#if (eq source.tier "villainous")}}<label data-tooltip="{{localize 'DBU.Trait.ChoiceTip'}}">{{localize "DBU.Trait.Choice"}} <input type="text" name="system.choice" value="{{source.choice}}"></label>{{/if}}
     <label>Factor <input type="text" name="system.factor" value="{{source.factor}}"></label>
     <label>{{localize "DBU.Trait.Replaces"}} <input type="text" name="system.replaces" value="{{source.replaces}}"></label>
+    <label data-tooltip="{{localize 'DBU.Trait.GroupTip'}}">{{localize "DBU.Trait.Group"}} <input type="text" name="system.group" value="{{source.group}}"></label>
     <label class="check"><input type="checkbox" name="system.active" {{checked source.active}}> {{localize "DBU.Active"}}</label>
+    {{#if (eq source.tier "custom")}}<label class="check" data-tooltip="{{localize 'DBU.Trait.TwinnedTip'}}"><input type="checkbox" name="system.twinned" {{checked source.twinned}}> {{localize "DBU.Trait.Twinned"}}</label>{{/if}}
+    {{#if grants}}<p class="hint wide" data-tooltip="{{localize 'DBU.Grants.Tip'}}"><strong>{{localize "DBU.Grants.Label"}}:</strong> {{grants}}</p>{{/if}}
   </div>
 {{/if}}
 
@@ -141,6 +145,7 @@
     <label>Grade <input type="number" name="system.grade" value="{{source.grade}}" min="0" data-dtype="Number"></label>
     {{#if source.graded}}<label>{{localize "DBU.Trans.GradeStress"}} <input type="text" name="system.gradeStress" value="{{source.gradeStress}}" placeholder="+2 por Grade"></label>{{/if}}
     <label>Mastery <input type="number" name="system.mastery" value="{{source.mastery}}" min="0" data-dtype="Number"> <small>/ {{system.masteryNeeded}}</small></label>
+    {{#if (eq source.transType "evolved")}}<label data-tooltip="{{localize 'DBU.Trans.OriginalTip'}}">{{localize "DBU.Trans.Original"}} <select name="system.original">{{selectOptions originalChoices selected=source.original blank=""}}</select></label>{{/if}}
     <label class="check"><input type="checkbox" name="system.active" {{checked source.active}}> {{localize "DBU.Active"}}</label>
     <label class="check"><input type="checkbox" name="system.transcended" {{checked source.transcended}}> Transcended</label>
     <label class="check"><input type="checkbox" name="system.prelude" {{checked source.prelude}}> Prelude</label>
@@ -237,6 +242,7 @@
     <label class="check"><input type="checkbox" name="system.free" {{checked source.free}}> {{localize "DBU.Sig.FreeHint"}}</label>
     <label class="check"><input type="checkbox" name="system.granted" {{checked source.granted}}> {{localize "DBU.Sig.GrantedHint"}}</label>
     <label>{{localize "DBU.Sig.TPAdjust"}} <input type="number" name="system.tpAdjust" value="{{source.tpAdjust}}" data-dtype="Number"></label>
+    <label data-tooltip="{{localize 'DBU.Sig.TagsHint'}}">{{localize "DBU.Sig.Tags"}} <input type="text" name="system.tags" value="{{source.tags}}" placeholder="copied, fullPower"></label>
   </div>
 
   <div class="dbu-sig-summary">

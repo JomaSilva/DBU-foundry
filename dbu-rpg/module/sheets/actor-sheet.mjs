@@ -1,10 +1,10 @@
 import { DBU } from "../config.mjs";
 import { categoryLabel } from "../rules/dice.mjs";
-import { checkPrerequisites, raceMatches } from "../rules/validation.mjs";
+import { checkPrerequisites, raceMatches, uaTpCost } from "../rules/validation.mjs";
 import { AGE_CATEGORIES, INJURY_TYPES, OPTIONAL_RULES, OptionalRulesConfig, STANCES, rules } from "../optional-rules.mjs";
 import { triggerOptions } from "./item-sheet.mjs";
-import { encounterOf, powerTimers } from "../combat/triggers.mjs";
-import { changeStacks, openAllocationDialog } from "../combat/stacks.mjs";
+import { encounterOf, powerTimers, traitUseRows, useTrait } from "../combat/triggers.mjs";
+import { changeStacks, openAllocationDialog, resourceMaxOf } from "../combat/stacks.mjs";
 import { newResource } from "../rules/resources.mjs";
 import { activeTraits, traitStructure } from "../rules/traits.mjs";
 import { stackGroups } from "../rules/awakening.mjs";
@@ -16,6 +16,7 @@ import { actorTokens, heightMode, heightText, stepHeight, tokenHeight } from "..
 import { hasFlightAbility, hasSoar, soar } from "../combat/movement.mjs";
 import { escape, grapple, grappleOf, launch, moveTarget, pin, release, thrust } from "../combat/grapple.mjs";
 import { scan, scanButton } from "../combat/scan.mjs";
+import { clashDialog } from "../combat/clash.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -235,6 +236,8 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       gag: function() { return this.actor.gag(); },
       alert: function(event, target) { return this.actor.resolveAlert(target.dataset.alert); },
       dismissPending: function(event, target) { return this.actor.removePending(target.dataset.key); },
+      // An Activated Trait (a "use" trigger): condition, limit, amount and cost are checked when it is clicked
+      traitUse: function(event, target) { return useTrait(this.actor, target.dataset.key); },
       addTrigger: DBUActorSheet.#onAddTrigger,
       removeTrigger: DBUActorSheet.#onRemoveTrigger,
       powerBox: DBUActorSheet.#onPowerBox,
@@ -414,13 +417,33 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       wound: Object.fromEntries(Object.keys(DBU.foundations).map(f => [f, rollInfo(sys.rolls.wound[f])]))
     };
 
-    const conditions = Object.entries(DBU.conditions).map(([key, def]) => ({
+    // T: a Combat Condition of Transformations (Branded) shows only when an item names it or it is on
+    const condNamed = new Set();
+    for ( const i of this.actor.items ) {
+      for ( const p of [...(i.system?.modifiers ?? []), ...(i.system?.triggers ?? [])] ) {
+        for ( const m of `${p.condition ?? ""} ${p.value ?? ""} ${p.target ?? ""}`.matchAll(/(?:@cond\.|immune\.|opponentsCond\.|alliesCond\.|vs\.cond\.|to\.cond\.)(\w+)/g) ) condNamed.add(m[1].toLowerCase());
+        if ( ["condition", "removeCondition"].includes(p.effect) ) condNamed.add(String(p.resource ?? "").replace(/\s+/g, "").toLowerCase());
+      }
+    }
+    const condShown = ([key, def]) => (def.origin !== "transformation") || (sys.effectiveConditions[key] > 0) || condNamed.has(key.toLowerCase());
+    const conditions = Object.entries(DBU.conditions).filter(condShown).map(([key, def]) => ({
       key, label: L(`DBU.Condition.${key}`), hint: L(`DBU.ConditionHint.${key}`), img: def.img, max: def.max,
       value: sys.effectiveConditions[key], active: sys.effectiveConditions[key] > 0,
       held: (sys.conditionHolds?.[key] ?? []).join(", "),
       pips: def.max > 1 ? Array.from({ length: def.max }, (_, i) => ({ n: i + 1, on: i < sys.effectiveConditions[key] })) : null
     }));
-    const states = Object.entries(DBU.states).map(([key, def]) => ({
+    // G: the States of Transformations show only when an item of the character names them, or when they are on
+    const named = new Set();
+    for ( const i of this.actor.items ) {
+      for ( const p of [...(i.system?.modifiers ?? []), ...(i.system?.triggers ?? [])] ) {
+        for ( const m of `${p.condition ?? ""} ${p.value ?? ""}`.matchAll(/@states\.(\w+)/g) ) named.add(m[1]);
+        if ( ["state", "leaveState"].includes(p.effect) ) named.add(String(p.resource ?? "").replace(/\s+/g, "").toLowerCase());
+      }
+      for ( const a of i.system?.aspects ?? [] ) if ( a.key === "innateState" ) named.add(String(a.param ?? "").replace(/\s+/g, "").toLowerCase());
+    }
+    const shown = ([key, def]) => (def.origin !== "transformation") || ((sys._effectiveStates?.[key] ?? sys.states[key]) > 0)
+      || named.has(key) || named.has(key.toLowerCase());
+    const states = Object.entries(DBU.states).filter(shown).map(([key, def]) => ({
       key, label: L(`DBU.State.${key}`), hint: L(`DBU.StateHint.${key}`), img: def.img, max: def.levels,
       value: sys.states[key], effective: sys._effectiveStates?.[key] ?? sys.states[key],
       active: (sys._effectiveStates?.[key] ?? sys.states[key]) > 0, special: !!def.special,
@@ -458,7 +481,13 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     const groupTrans = type => transformations.filter(t => t.s.transType === type);
 
     const talents = byType("talent").map(i => ({ item: i, problems: checkPrerequisites(i, sys, actor) }));
-    const uas = byType("uniqueAbility").map(i => ({ item: i, tp: i.system.tpSpent, problems: checkPrerequisites(i, sys, actor) }));
+    // The TP each Unique Ability costs on this sheet (tpCost.ua / tpCost.ua.magical) and the KP its effects change
+    // (kpCost.ua / kpCost.ua.magical: shown, nothing pays it)
+    const uaKp = i => (sys.costs?.ua ?? 0) + (/magic/i.test(String(i.system.abilityType ?? "")) ? (sys.costs?.uaMagical ?? 0) : 0);
+    const uas = byType("uniqueAbility").map(i => {
+      const kp = uaKp(i);
+      return { item: i, tp: uaTpCost(i, sys), problems: checkPrerequisites(i, sys, actor), kpNote: kp ? `${kp > 0 ? "+" : ""}${kp}` : "" };
+    });
 
     const validation = sys.validation ?? [];
     const valBy = level => validation.filter(v => v.level === level);
@@ -480,16 +509,19 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       isTurn: combat.combatant?.actor?.uuid === actor.uuid,
       current: combat.combatant?.name ?? ""
     } : null;
-    // Power: one checkbox per stack (2, or more when an effect lets you exceed it); each stack shows when it ends
+    // Power: one checkbox per stack (the maximum Power stacks, 2 unless an effect raises it, or more when an effect
+    // lets you exceed it); each stack shows when it ends
     const power = sys.combat.power ?? 0;
+    const powerMax = sys.combat.powerMax ?? 2;
     const timers = powerTimers(actor);
-    const powerBoxes = Array.fromRange(Math.max(2, power), 1).map(n => ({
+    const powerBoxes = Array.fromRange(Math.max(powerMax, power), 1).map(n => ({
       n, on: n <= power,
       tip: (n <= power) ? (timers[n - 1] ? L("DBU.Power.Lasts", { round: timers[n - 1].round }) : L("DBU.Power.Stack")) : L("DBU.Power.Add")
     }));
-    // Resources: split ones (Battle Born...) show their stacks on each Combat Roll with its limit
+    // Resources: split ones (Battle Born...) show their stacks on each Combat Roll with its limit; the maximum shown is
+    // the one modifiers give
     const resourceRows = (sys.resources ?? []).map((r, i) => ({
-      i, r: sys._source.resources[i], split: r.split, total: r.value, unassigned: r.unassigned,
+      i, r: sys._source.resources[i], split: r.split, total: r.value, unassigned: r.unassigned, max: resourceMaxOf(actor, r),
       rolls: r.split ? DBU.splitRolls.map(k => {
         const cap = r.caps?.[k] ?? Infinity;
         return { k, label: L(`DBU.Split.${k}`), n: r.alloc[k], name: `system.resources.${i}.alloc.${k}`,
@@ -506,8 +538,10 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       scan: scanButton(actor),
       advInCombat: !!encounterOf(actor),
       advStretch: (sys.adventure?.stretchAt ?? null) !== null,
-      powerBoxes, powerNext: power + 1, powerCanExceed: power >= 2,
+      powerBoxes, powerNext: power + 1, powerCanExceed: power >= powerMax,
       resourceRows,
+      // Activated Traits: the "use" triggers that apply now, one button each
+      traitUses: traitUseRows(actor),
       rules: R,
       optionalEnabled: Object.entries(OPTIONAL_RULES).filter(([k]) => R[k])
         .map(([k, d]) => ({ key: k, label: L(`DBU.Opt.${k}`), url: `${DBU.SITE}${d.slug}/` })),
@@ -697,7 +731,19 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       return A.gainStack(this.actor, item, { temp });
     }
     const cur = Number(foundry.utils.getProperty(item, field)) || 0;
-    await item.update({ [field]: Math.max(0, cur + delta) });
+    let next = Math.max(0, cur + delta);
+    // I3: a Graded Transformation's highest Grade: its maxGrade, ± the "gradeMax.<slug of its name>" modifiers (Grades a
+    // Mastery or a State unlocks); no limit without a maxGrade
+    if ( (field === "system.grade") && (delta > 0) && ((item.system.maxGrade ?? 0) > 0) ) {
+      const slug = String(item.name ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const max = Math.max(1, item.system.maxGrade + (this.actor.system.buckets?.[`gradeMax.${slug}`]?.total ?? 0));
+      if ( next > max ) {
+        ui.notifications.warn(game.i18n.format("DBU.Trans.GradeMax", { name: item.name, n: max }));
+        next = Math.max(cur, Math.min(next, max));
+        if ( next === cur ) return;
+      }
+    }
+    await item.update({ [field]: next });
   }
 
   /** Mastery level of a Transformation (0 … needed); reaching a level applies its Mastery Traits. */
@@ -706,7 +752,13 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     if ( !item ) return;
     const s = item.system;
     // One Mastery more than Fully Mastered unlocks a Transcendent Trait
-    const next = Math.clamp((s.mastery ?? 0) + (Number(target.dataset.delta) || 0), 0, s.masteryMax);
+    let next = Math.clamp((s.mastery ?? 0) + (Number(target.dataset.delta) || 0), 0, s.masteryMax);
+    // Q "masteryCap.<slug of its name>": a requirement its effects give (the lowest one; a Mastery it has stays)
+    const cap = this.actor.system.buckets?.[`masteryCap.${String(item.name ?? "").toLowerCase().replace(/[^a-z0-9]/g, "")}`];
+    if ( cap?.parts?.length && (next > (s.mastery ?? 0)) && (next > cap.total) ) {
+      ui.notifications.warn(game.i18n.format("DBU.Mastery.Capped", { name: item.name, n: cap.total }));
+      next = Math.max(s.mastery ?? 0, cap.total);
+    }
     if ( next === s.mastery ) return;
     const { announceMastery } = await import("../combat/mastery.mjs");
     const before = s.mastery ?? 0;
@@ -754,7 +806,7 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     let value = cur + Number(delta);
     if ( pool && this.actor.system[pool]?.max !== undefined && (pool !== "life") ) value = Math.clamp(value, 0, this.actor.system[pool].max);
     if ( pool === "life" ) value = Math.min(value, this.actor.system.life.max);
-    if ( field === "system.combat.power" ) value = Math.clamp(value, 0, 2);
+    if ( field === "system.combat.power" ) value = Math.clamp(value, 0, this.actor.system.combat.powerMax ?? 2);
     // A Fusion holds the Karma Points of all of its Fused Characters
     if ( field === "system.karma.value" ) value = Math.clamp(value, 0, this.actor.type === "fusion" ? 99 : 4);
     return this.actor.update({ [path]: Math.max(pool === "life" ? -9999 : 0, value) });
@@ -779,6 +831,7 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       case "release": return release(actor);
       case "thrust": return thrust(actor);
       case "moveTarget": return moveTarget(actor);
+      case "clash": return clashDialog(actor);
       case "resetRound": {
         const sys = actor.system;
         return actor.update({

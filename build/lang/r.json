@@ -1,0 +1,24 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Target": {
+        "attackAdvantagePick": "Uma Vantagem à escolha no ataque (até N TP)"
+      },
+      "Attack": {
+        "AdvantagePick": "Vantagem à escolha (até {n} TP)",
+        "ConditionWound": "Vantagem Condition: +{n} Wound (o alvo já está {condition})"
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Target": {
+        "attackAdvantagePick": "An Advantage of your choice for the attack (up to N TP)"
+      },
+      "Attack": {
+        "AdvantagePick": "Advantage of your choice (up to {n} TP)",
+        "ConditionWound": "Condition Advantage: +{n} Wound (the target already suffers from {condition})"
+      }
+    }
+  }
+}

@@ -7,7 +7,7 @@ Passive effects and turn/round effects written in recognisable patterns are comp
 
 usage: python extract_content.py <site_text_dir> <out_dir>
 """
-import hashlib, json, os, re, sys
+import hashlib, json, os, re, sys, unicodedata
 
 TEXT, OUT = sys.argv[1], sys.argv[2]
 SITE = "https://dbu-rpg.com/"
@@ -29,6 +29,11 @@ REMIND_LOG = []
 def read(slug):
     p = os.path.join(TEXT, slug + ".md")
     return open(p, encoding="utf-8").read().splitlines() if os.path.exists(p) else []
+
+
+def racial_lines(slug):
+    """A race/factor page, with its non-breaking spaces as plain ones ("Secondary Racial\xa0Traits" hid a Trait)."""
+    return [l.replace("\xa0", " ") for l in read(slug)]
 
 
 def fid(key):
@@ -652,7 +657,7 @@ OPTION_OVERRIDES = {
 }
 # Options that ask for something more when chosen
 OPTION_SUBS = {"Super Specialist": "foundation"}
-OPTION_RE = re.compile(r"- ([^\[:]+?)\s*(?:\[([^\]]+)\])?:\s*(.*?)(?=\s+- [A-Z][^:]{1,60}:|$)")
+OPTION_RE = re.compile(r"- ((?:(?!\)\.)[^\[:])+?)\s*(?:\[([^\]]+)\])?:\s*(.*?)(?=\s+- [A-Z](?:(?!\)\.)[^:]){1,60}:|$)")
 
 
 def compile_options(text, label):
@@ -736,16 +741,27 @@ def description(slug, section, structure):
             f"<p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>{struct}")
 
 
-def add_item(pack, name, type_, system, slug, section="", structure=None, fold=None, img=None, key=None):
+def add_item(pack, name, type_, system, slug, section="", structure=None, fold=None, img=None, key=None, grants=None):
     system = dict(system)
     system.setdefault("summary", "")
     system["source"] = {"slug": slug, "section": section or name, "url": f"{SITE}{slug}/"}
     system["description"] = description(slug, section or name, structure or [])
     system.setdefault("modifiers", [])
     system.setdefault("triggers", [])
+    # I1 / M: a Special Maneuver that runs its own effect (Hype, Analysis, Stance)
+    if pack == "maneuvers" and name in MANEUVER_PIECES and not system["modifiers"] and not system["triggers"]:
+        system["modifiers"] = [dict(m) for m in MANEUVER_PIECES[name]["modifiers"]]
+        system["triggers"] = [dict(t) for t in MANEUVER_PIECES[name]["triggers"]]
     doc = {"_type": "Item", "_id": fid(f"{pack}:{key or (slug + ':' + name)}"), "name": name, "type": type_,
            "img": img or ICONS[type_], "system": system, "effects": [], "folder": fold, "sort": 0,
-           "flags": {"dbu-rpg": {"slug": slug}}}
+           "flags": {"dbu-rpg": {"slug": slug, **({"grants": grants} if grants else {})}}}
+    # D1: the rules effects of the item ({ref: condition of its Trait}) and the Permanent ones (module/rules/fx.mjs)
+    if pack in ("racial-traits", "transformations") and LAST_FX:
+        doc["flags"]["dbu-rpg"]["fx"] = dict(LAST_FX)
+        if LAST_FX_PERMANENT:
+            doc["flags"]["dbu-rpg"]["fxPermanent"] = sorted(LAST_FX_PERMANENT)
+    LAST_FX.clear()
+    LAST_FX_PERMANENT.clear()
     PACKS.setdefault(pack, []).append(doc)
     STATS["items"] += 1
     return doc
@@ -787,6 +803,174 @@ RACES = [
 ]
 SECTION_RE = re.compile(r"^#+ \*\*(Primary Racial Traits|Secondary Racial Traits|(.+?) Subrace)(.+?) \((Body|Mind)\)\*\*:")
 TRAIT_RE = re.compile(r"^\*\*([^*]+?) \((Body|Mind)\)(?: \[([^\]]+)\])?\*\*:")
+# Groups of Traits gained through another Trait, listed under a title ("Evolution Traits", "Pseudo-Bestial Traits") or
+# on the first heading ("## **VocationsWarrior**:"), and the lists of their own pages ("# **Bestial TraitsAlternate
+# Sight**:", Custom Species Traits, Flaws). Inside a group a Trait is "**Name**:" (with or without its Body/Mind).
+GROUP_TITLE_RE = re.compile(r"^(?:#+ )?(?:\*\*)?([A-Z][\w' -]*? Traits)(?:\*\*)?\s*$")
+GROUP_PREFIX_RE = re.compile(r"^#+ \*\*((?:[A-Z][\w' -]*?)?(?:Traits|Vocations|Flaws))(?=[A-Z])([^*]+?)(?: \((Body|Mind)\))?"
+                             r"(?: \[([^\]]+)\])?\*\*:")
+GROUP_TRAIT_RE = re.compile(r"^\*\*([^*]+?)(?: \((Body|Mind)\))?(?: \[([^\]]+)\])?\*\*:")
+# The tier of a group's Traits: Custom Species Racial Traits and Flaws; the others are gained through another Trait
+GROUP_TIERS = {"Custom Species Traits": "custom", "Flaws": "flaw"}
+# Effects compiled by hand: (page slug, Trait, effect) → modifiers that replace what the text patterns made of it
+RACIAL_OVERRIDES = {
+    # Dauntless (2): +1/4 Maximum Life Points
+    ("adversaries", "Dauntless", 2): [("life.mult", "1.25", "")],
+    # Desperate Adversary (1): +1(T) Combat Rolls and −1(T) Soak per Health Threshold below
+    ("adversaries", "Desperate Adversary", 1): [("combat", "(1(T))*@below", ""), ("soak", "-(1(T))*@below", "")],
+    # Wild Swings (1): −2(bT) Strike Rolls, +3(T) Wound Rolls
+    ("adversaries", "Wild Swings", 1): [("strike", "-2(bT)", ""), ("wound", "3(T)", "")],
+}
+TWINNED = " (Twinned)"
+
+
+def number_effects(effects):
+    """A repeated effect number on the site ('(1) Prerequisite', '(1) Passive') gets the key '1b'."""
+    seen = {}
+    for e in effects:
+        seen[e["n"]] = seen.get(e["n"], 0) + 1
+        e["kn"] = str(e["n"]) if seen[e["n"]] == 1 else f"{e['n']}{'abcdefgh'[seen[e['n']] - 1]}"
+
+
+def compile_racial(slug, name, effects, label, tier, group="", race=""):
+    """A Racial Trait, one effect at a time: the text patterns, then its hand-written automation (build/automation/
+    racial.json, keyed "slug|Trait|n"). A Twinned effect of a Custom Species Trait only works when the Trait is Twinned
+    (its pieces are labelled "<Trait> (Twinned)")."""
+    number_effects(effects)
+    mods, trigs, structure = [], [], []
+    LAST_GRANTS.clear()
+    LAST_FX.clear()
+    LAST_FX_PERMANENT.clear()
+    for e in effects:
+        em, et, es = compile_effects([e], name)
+        over = RACIAL_OVERRIDES.get((slug, name, e["n"]))
+        if over:
+            em = [{"target": t, "value": v, "condition": c, "label": name, "active": True, "always": False} for t, v, c in over]
+            es = [x.rsplit("— ", 1)[0] + "— auto" for x in es]
+        compiled = {"modifiers": [dict(m) for m in em], "triggers": [dict(t) for t in et], "status": es[0].rsplit("— ", 1)[-1] if es else ""}
+        RACIAL_BUILD[0] = True
+        try:
+            em, et, es = apply_automation(slug, name, e, em, et, es, "")
+        finally:
+            RACIAL_BUILD[0] = False
+        if re.search(r"\bTwinned\b", e["keywords"]):
+            for x in em + et:
+                x["label"] = name + TWINNED
+        if DUMP is not None:
+            DUMP.append({"key": f"{slug}|{name}|{e.get('kn', e['n'])}", "item": label, "slug": slug, "trait": name, "kind": tier,
+                         "transType": "racial", "subtype": tier, "group": group, "race": race, "n": e["n"],
+                         "keywords": e["keywords"], "text": clean(e["text"]), "condition": "", "maxStacks": 1, **compiled})
+        mods += em
+        trigs += et
+        structure += es
+    return mods, trigs, structure
+
+
+def group_trait_item(slug, name, cat, group, race, effects, fold, label_race, key=None):
+    tier = GROUP_TIERS.get(group, "granted")
+    mods, trigs, structure = compile_racial(slug, name, effects, f"{label_race} › {name}", tier, group, race)
+    n_auto = sum(1 for x in structure if x.endswith("auto"))
+    system = {"race": race, "category": (cat or "none").lower(), "tier": tier, "group": group, "active": True,
+              "modifiers": mods, "triggers": trigs,
+              "summary": f"{race or label_race} · {group} · {len(effects)} efeito(s), {n_auto} automatizado(s)"}
+    add_item("racial-traits", name, "racialTrait", system, slug, name, structure, fold, key=key, grants=list(LAST_GRANTS))
+
+
+def race_traits(slug, race_name, fold):
+    """The Racial Traits of a race page (the race's own ones are returned: a group's Traits are picked through another
+    Trait)."""
+    lines = racial_lines(slug)
+    names = []
+    tier = None
+    group = None
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        # A section title on its own line ("# **Secondary Racial Traits**", Majins) changes the tier of what follows
+        lone = re.match(r"^#+ \*\*(Primary|Secondary) Racial Traits\*\*\s*$", line)
+        if lone:
+            tier, group = lone.group(1).lower(), None
+            i += 1
+            continue
+        m = SECTION_RE.match(line)
+        name = cat = None
+        if m:
+            sec = m.group(1)
+            tier = "primary" if sec.startswith("Primary") else ("secondary" if sec.startswith("Secondary") else "subrace")
+            group = None
+            sub = m.group(2) if tier == "subrace" else ""
+            name, cat = m.group(3).strip(), m.group(4)
+            if tier == "subrace":
+                name_sub = sub
+        else:
+            gp = GROUP_PREFIX_RE.match(line)
+            gt = GROUP_TITLE_RE.match(line) if not gp else None
+            if gt and not re.search(r"Racial|Factor", gt.group(1)):
+                group = gt.group(1).strip()
+                i += 1
+                continue
+            if gp:
+                group = gp.group(1).strip()
+                name, cat = gp.group(2).strip(), gp.group(3)
+            elif group:
+                g2 = GROUP_TRAIT_RE.match(line)
+                if g2:
+                    name, cat = g2.group(1).strip(), g2.group(2)
+            else:
+                m2 = TRAIT_RE.match(line)
+                if m2 and tier:
+                    name, cat = m2.group(1).strip(), m2.group(2)
+        if name and group:
+            effects, j = parse_effects(lines, i + 1)
+            if effects:
+                parent = f"racial-traits//{race_name}"
+                gfold = fold if GROUP_TIERS.get(group) == "custom" else folder("racial-traits", group, parent)
+                group_trait_item(slug, name, cat, group, race_name, effects, gfold, race_name)
+            i = max(j, i + 1)
+            continue
+        if name:
+            effects, j = parse_effects(lines, i + 1)
+            mods, trigs, structure = compile_racial(slug, name, effects, f"{race_name} › {name}", tier, "", race_name)
+            n_auto = sum(1 for s in structure if s.endswith("auto"))
+            system = {"race": race_name, "category": cat.lower(), "tier": tier, "active": True,
+                      "modifiers": mods, "triggers": trigs,
+                      "summary": f"{race_name} · {tier} · {cat} · {len(effects)} efeito(s), {n_auto} automatizado(s)"}
+            if tier == "subrace":
+                system["factor"] = name_sub
+            if name == "Saiyan Heritage":
+                mods.append({"target": "flag.autoPassBruised", "value": "1", "condition": "", "label": name, "active": True, "always": False})
+            add_item("racial-traits", name, "racialTrait", system, slug, name, structure, fold, grants=list(LAST_GRANTS))
+            names.append(name)
+            i = max(j, i + 1)
+            continue
+        i += 1
+    return names
+
+
+def group_pages():
+    """Pages that are a list of Traits gained through other Traits: Bestial Traits (Animals, Beast-Man...) and Monstrous
+    Traits (Monster Factor, Creatures...)."""
+    for slug, title in [("bestial-traits", "Bestial Traits"), ("monstrous-traits", "Monstrous Traits")]:
+        lines = racial_lines(slug)
+        fold = folder("racial-traits", title)
+        group = None
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
+            gp = GROUP_PREFIX_RE.match(line)
+            g2 = GROUP_TRAIT_RE.match(line) if (group and not gp) else None
+            if gp:
+                group = gp.group(1).strip()
+                name, cat = gp.group(2).strip(), gp.group(3)
+            elif g2:
+                name, cat = g2.group(1).strip(), g2.group(2)
+            else:
+                i += 1
+                continue
+            effects, j = parse_effects(lines, i + 1)
+            if effects:
+                group_trait_item(slug, name, cat, title, "", effects, fold, title)
+            i = max(j, i + 1)
 
 
 def default_increases(plus2, plus1):
@@ -800,57 +984,12 @@ def default_increases(plus2, plus1):
     return inc
 
 
-def race_traits(slug, race_name, fold):
-    lines = read(slug)
-    names = []
-    tier = None
-    i = 0
-    while i < len(lines):
-        line = lines[i].strip()
-        # A section title on its own line ("# **Secondary Racial Traits**", Majins) changes the tier of what follows
-        lone = re.match(r"^#+ \*\*(Primary|Secondary) Racial Traits\*\*\s*$", line)
-        if lone:
-            tier = lone.group(1).lower()
-            i += 1
-            continue
-        m = SECTION_RE.match(line)
-        name = cat = None
-        if m:
-            sec = m.group(1)
-            tier = "primary" if sec.startswith("Primary") else ("secondary" if sec.startswith("Secondary") else "subrace")
-            sub = m.group(2) if tier == "subrace" else ""
-            name, cat = m.group(3).strip(), m.group(4)
-            if tier == "subrace":
-                name_sub = sub
-        else:
-            m2 = TRAIT_RE.match(line)
-            if m2 and tier:
-                name, cat = m2.group(1).strip(), m2.group(2)
-        if name:
-            effects, j = parse_effects(lines, i + 1)
-            mods, trigs, structure = compile_effects(effects, name)
-            n_auto = sum(1 for s in structure if s.endswith("auto"))
-            system = {"race": race_name, "category": cat.lower(), "tier": tier, "active": True,
-                      "modifiers": mods, "triggers": trigs,
-                      "summary": f"{race_name} · {tier} · {cat} · {len(effects)} efeito(s), {n_auto} automatizado(s)"}
-            if tier == "subrace":
-                system["factor"] = name_sub
-            if name == "Saiyan Heritage":
-                mods.append({"target": "flag.autoPassBruised", "value": "1", "condition": "", "label": name, "active": True, "always": False})
-            add_item("racial-traits", name, "racialTrait", system, slug, name, structure, fold)
-            names.append(name)
-            i = max(j, i + 1)
-            continue
-        i += 1
-    return names
-
-
 def factor_pages(parent_fold):
     """Racial Factor pages (menu children of race pages / Racial Factors)."""
     for r in MENU:
         if r["slug"] in HOMEBREW or not r["slug"] or r["slug"].startswith("http"):
             continue
-        lines = read(r["slug"])
+        lines = racial_lines(r["slug"])
         text = "\n".join(lines)
         if "**Maximum Factor" not in text:
             continue
@@ -858,26 +997,48 @@ def factor_pages(parent_fold):
         maxf = re.search(r"Maximum Factor: \*\*(\d+)", text)
         prereq = re.search(r"Prerequisite\(s\): \*\*(.+)", text)
         fold = folder("racial-traits", f"Fator: {r['title']}", None)
+        group = None
         for i, line in enumerate(lines):
+            t = line.strip()
+            # "Pseudo-Bestial Traits": the Traits a Factor Trait lets the character pick
+            gt = GROUP_TITLE_RE.match(t)
+            if gt and (i > 5) and not re.search(r"Racial|Factor", gt.group(1)):
+                group = gt.group(1).strip()
+                continue
+            # A Factor Trait heading (with its Body/Mind) after the group ends it
+            if group and re.match(r"^\*\*([^*]+?) \((Body|Mind)\)", t):
+                group = None
+            if group:
+                g2 = GROUP_TRAIT_RE.match(t)
+                if g2:
+                    effects, _ = parse_effects(lines, i + 1)
+                    if effects:
+                        gfold = folder("racial-traits", group, f"racial-traits//Fator: {r['title']}")
+                        group_trait_item(r["slug"], g2.group(1).strip(), g2.group(2), group,
+                                         clean(req.group(1)) if req else "", effects, gfold, f"Fator: {r['title']}",
+                                         key=f"{r['slug']}:{group}:{g2.group(1).strip()}")
+                continue
             # "Factor Trait<Name> (Body)", and race-specific ones such as "Arcosian Factor TraitEmperor (Body)"
-            m = re.match(r"^#+ \*\*(?:([A-Z][\w-]+) )?Factor Traits?(.+?) \((Body|Mind)\)(?: \[([^\]]+)\])?\*\*:", line.strip())
+            m = re.match(r"^#+ \*\*(?:([A-Z][\w-]+) )?Factor Traits?(.+?) \((Body|Mind)\)(?: \[([^\]]+)\])?\*\*:", t)
             if m:
                 race_only, name, cat, replaces = m.groups()
             else:
-                m = re.match(r"^\*\*([^*]+?) \((Body|Mind)\)(?: \[([^\]]+)\])?\*\*:", line.strip()) if i > 5 else None
+                m = re.match(r"^\*\*([^*]+?) \((Body|Mind)\)(?: \[([^\]]+)\])?\*\*:", t) if i > 5 else None
                 if not m:
                     continue
                 race_only = None
                 name, cat, replaces = m.groups()
             name = name.strip()
             effects, _ = parse_effects(lines, i + 1)
-            mods, trigs, structure = compile_effects(effects, name)
-            system = {"race": race_only or (clean(req.group(1)) if req else ""), "category": cat.lower(), "tier": "factor",
+            race = race_only or (clean(req.group(1)) if req else "")
+            mods, trigs, structure = compile_racial(r["slug"], name, effects, f"Fator: {r['title']} › {name}", "factor", "", race)
+            system = {"race": race, "category": cat.lower(), "tier": "factor",
                       "factor": r["title"], "replaces": replaces or "", "maxFactor": int(maxf.group(1)) if maxf else 1,
                       "active": True, "modifiers": mods, "triggers": trigs,
                       "summary": f"Fator {r['title']}{' (' + race_only + ')' if race_only else ''} · substitui {replaces or 'um traço Secundário'}"
                                  + (f" · pré-req.: {clean(prereq.group(1))}" if prereq and 'N/A' not in prereq.group(1) else "")}
-            add_item("racial-traits", name, "racialTrait", system, r["slug"], name, structure, fold, key=f"{r['slug']}:{name}")
+            add_item("racial-traits", name, "racialTrait", system, r["slug"], name, structure, fold, key=f"{r['slug']}:{name}",
+                     grants=list(LAST_GRANTS))
 
 
 def build_races():
@@ -895,6 +1056,7 @@ def build_races():
         }
         add_item("races", name, "race", system, slug, name, [f"Traço: {t}" for t in traits], mf if minion else rf)
     factor_pages(None)
+    group_pages()
 
 
 # ---------------------------------------------------------------------------
@@ -1053,14 +1215,15 @@ FIELD_RE = re.compile(r"^- \*\*(.+?)[:.]\s*\*\*\s*(.*)$")
 
 # Transformations whose Attribute Modifier Bonuses or extras are set by their Grade table ("*" on the site)
 GRADED = {
-    "Kaioken": {"bonuses": {a: "(@G>=5?3:(@G>=3?2:1))(T)" for a in ("ag", "fo", "ma")}, "maxGrade": 5,
-                "mods": [("dice.combat", "(@G>=5?3:(@G>=4?2:(@G>=2?1:0)))", "Kaioken Dice"),
+    # Grades 4-5 come with Mastery and the 6th with the Entrusted State (Mastered Kaioken Grades table)
+    "Kaioken": {"bonuses": {a: "(@G>=6?4:(@G>=5?3:(@G>=3?2:1)))(T)" for a in ("ag", "fo", "ma")}, "maxGrade": 3,
+                "mods": [("dice.combat", "(@G>=6?4:(@G>=5?3:(@G>=4?2:(@G>=2?1:0))))", "Kaioken Dice"),
                          ("wound", "(ceil(@G/2))*@T", "Exponential Power"), ("attackLifeCost", "(@G+1)(bT)", "Kaioken: custo de LP")]},
     "Super Kaioken": {"bonuses": {a: "(@G>=3?3:(@G>=2?2:1))(T)" for a in ("ag", "fo", "ma")}, "maxGrade": 3,
                       "mods": [("topDice.category", "(@G>=3?2:(@G>=2?1:0))", "S-Kaioken Grade"),
                                ("attackLifeCost", "(2*@G)(bT)", "Super Kaioken: custo de LP")]},
     "Evil Aura": {"bonuses": {"fo": "(@G>=2?3:1)(T)", "ma": "(@G>=2?3:1)(T)"}, "gradeStress": "13,18", "maxGrade": 2},
-    "Lightspeed Mode": {"bonuses": {"ag": "(@G>=4?6:(@G>=3?4:(@G>=2?3:1)))(T)"}, "gradeStress": "6,10,14,22", "maxGrade": 4},
+    "Lightspeed Mode": {"bonuses": {"ag": "(@G>=4?6:(@G>=3?4:(@G>=2?3:1)))(T)"}, "gradeStress": "6,10,14,22", "maxGrade": 2},
     "Powerhouse": {"bonuses": {"fo": "@G(T)"}, "maxGrade": 3, "mods": [("superStacks", "@G", "Powerhouse Grade")]},
     # Variant (Powerhouse): its Grades table (Muscular Proportions) has no copy on the Mighty Namekian page
     "Mighty Namekian": {"bonuses": {"fo": "@G(T)"}, "maxGrade": 3, "mods": [("superStacks", "@G", "Powerhouse Grade")],
@@ -1069,6 +1232,8 @@ GRADED = {
     "Ascended Super Saiyan": {"maxGrade": 2, "mods": [("superStacks", "(@G>=2?3:1)", "Ascended Super Saiyan Grade")]},
     "Wrathful": {"bonuses": {a: "(@G>=2?3:2)(T)" for a in ("ag", "fo", "te")}, "gradeStress": "14,18", "maxGrade": 2},
     "Beyond Divine Saiyan": {"gradeStress": "+2,+5,+8", "maxGrade": 3},
+    # Variant (Giant Form): its 3 Grades are written on the Giant Form page (Dragon-Sized gives the 4th)
+    "Great Namekian": {"maxGrade": 3},
 }
 
 
@@ -1206,13 +1371,15 @@ TT_RE = re.compile(r"Transformation Type:\s*\*\*")
 # '#### **Burst LimitScarlet Multiplier**:', '#### **Mastery TraitsSharpened Instinct (1)**:', '#### **MasteryControlled
 # Darkness**:', '#### **Legendary Trait**Undying Namekian:', '#### **Mastery TraitCold as Ice:**' are all used on the site
 TRAIT_HEAD_RE = re.compile(r"^#{2,4} \*\*(Mastery Traits?|Mastery|Burst Limit|Legendary Trait|Grand Awakening|Transcendent Trait)(.*)$")
+# The same kinds written as a plain bold line ('**Legendary TraitPerfection of Saiyan Power**: ...', Super Perfect Form)
+TRAIT_PLAIN_HEAD_RE = re.compile(r"^\*\*(Legendary Trait|Grand Awakening|Transcendent Trait)\s*(?=[A-Z])(.*)$")
 # An effect written on the same line as its trait's heading ('...your fury.(**1**)-[**Triggered/Transform**]: ...')
 INLINE_EFFECT_RE = re.compile(r"\((?:\*\*)?\d+(?:\*\*)?\)-\[|(?<![\w*])-\[\*\*")
 GLUED_EFFECT_RE = re.compile(r"(?<=\S)(?=\((?:\*\*)?\d+(?:\*\*)?\)-\[)")
 
 
 # '# **Wizarding TraitsBaneful Black Magic**: ...' opens a group of Traits (Technical Traits, Perfect Traits...)
-GROUP_HEAD_RE = re.compile(r"^#{1,4} \*\*([A-Z][A-Za-z' -]+?) Traits([A-Z][^*]*?)\*\*\s*:\s*(.*)$")
+GROUP_HEAD_RE = re.compile(r"^#{1,4} \*\*([A-Z][A-Za-z' -]+?) (?:Traits|Classes)([A-Z][^*]*?)\*\*\s*:\s*(.*)$")
 
 
 def trait_group(line):
@@ -1223,9 +1390,29 @@ def trait_group(line):
     return m.group(1).strip()
 
 
+# The box of a State a Transformation page defines ('#### **Radiant God**', '#### **Flow State**' followed by its numbered
+# effects): the State's key in the system (dbu-rpg/module/config.mjs DBU.states, the States of Transformations)
+STATE_BOX_RE = re.compile(r"^#{3,4} \*\*([A-Z][A-Za-z' -]+?)\*\*\s*$")
+STATE_BOXES = {"radiant god": "radiantGod", "blazing god": "blazingGod", "flow": "flow", "unlimited": "unlimited",
+               "exposed": "exposed", "incorporeal": "incorporeal"}
+
+
+def state_box(line):
+    """(name without 'State', State key) of a State box heading, or None."""
+    m = STATE_BOX_RE.match(line)
+    if not m:
+        return None
+    base = re.sub(r"\s+State$", "", m.group(1).strip())
+    key = STATE_BOXES.get(base.lower())
+    return (base, key) if key else None
+
+
 def trait_heading(line):
     """(kind, name, effect written on the heading line or '') of a Transformation Trait heading, or None."""
-    m = TRAIT_HEAD_RE.match(line)
+    sb = state_box(line)
+    if sb:
+        return "state", f"{sb[0]} State", ""
+    m = TRAIT_HEAD_RE.match(line) or TRAIT_PLAIN_HEAD_RE.match(line)
     if m:
         kind = m.group(1).lower()
         if kind.startswith("mastery"):
@@ -1264,6 +1451,9 @@ def tidy_trait_lines(seg):
             continue
         if s.startswith("**(") and out and out[-1].endswith("**:"):
             s = s[2:]
+        plain = re.match(r"^([A-Z][\w'’ ()-]{2,60}?):\s+(\S.*)$", s)
+        if plain and nxt.startswith("(**1**)") and not trait_heading(s):
+            s = f"**{plain.group(1).strip()}**: {plain.group(2)}"
         head = trait_heading(s)
         if head and head[2]:
             out.append(s[:len(s) - len(head[2])].rstrip())
@@ -1276,6 +1466,9 @@ def tidy_trait_lines(seg):
 
 
 # "Each time you gain a stack of Warlock, gain access to a Wizarding Trait of your choice"
+# 'Upon gaining (access to) this Awakening, select and gain access to a Greater Class / a Team Role Trait': one Trait of
+# the group, picked once (these Awakenings have a single Stack, so it is the per-Stack choice of that Stack)
+ONCE_GROUP_RE = re.compile(r"(?:select and )?gain access to an? [‘'’]?([A-Z][\w' -]+?) (?:Trait|Class)\b(?![\w' -]*\bof (?:an?|the) )")
 STACK_GROUP_RE = re.compile(r"(?:(?:Each time|When) you gain|Upon gaining) (?:access to )?a stack of (?:this Awakening|[A-Z][\w' -]+?), "
                             r"gain access to an? ([A-Z][\w' -]+?) Trait\b")
 def stack_gain_effect(text, own):
@@ -1352,7 +1545,7 @@ def stack_overrides(name):
         return ([stack_choice(t, 1, [f"Elemental ({e})" for e in ELEMENTS])], [], {(t, 1)})
     if name == "Bestial Transfiguration":
         t = "Reawakened Beast"
-        return ([stack_choice(t, 1, page_trait_names("bestial-traits"))], [], {(t, 1)})
+        return ([stack_choice(t, 1, page_trait_names("bestial-traits"), pack="dbu-rpg.racial-traits")], [], {(t, 1)})
     if name == "Diverse Leader":
         t = "Leadership Training"
         return ([stack_choice(t, 3, page_trait_names("commander", after="Leadership Traits"))], [], {(t, 3)})
@@ -1380,11 +1573,271 @@ EFFECT_OVERRIDES = {
 }
 
 
+# Hand-written automation of single effects (build/automation/*.json, mechanical data only), keyed "slug|Trait|n":
+#   {"replace": bool, "modifiers": [{target, value, condition}], "triggers": [{event, effect, value, resource, condition,
+#    mode, duration}], "code": "<key of an effect run by the system's code>", "status": "auto|lembrete|manual"}
+# "replace" drops what the text patterns compiled for that effect. "code" effects are listed in the item's
+# flags.dbu-rpg.code ("slug|Trait|n" → key) for module/combat/awakening-effects.mjs.
+AUTOMATION = {}
+AUTOMATION_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "automation")
+if os.path.isdir(AUTOMATION_DIR):
+    for _f in sorted(os.listdir(AUTOMATION_DIR)):
+        if _f.endswith(".json"):
+            AUTOMATION.update(json.load(open(os.path.join(AUTOMATION_DIR, _f), encoding="utf-8")))
+AUTOMATION_USED = set()
+# Labels switched off for good on a Transformation (slug → Trait names): the Minion Class Traits of Commander
+LOCKED_OFF = {}
+CODE_EFFECTS = {}
+# Code effects the system implements (module/combat/awakening-effects.mjs); the others stay with the GM
+IMPLEMENTED_CODE = set()
+# DBU_DUMP_EFFECTS=<file>: write every Transformation and Racial Trait effect (text + what was compiled) for the
+# automation work
+DUMP = [] if os.environ.get("DBU_DUMP_EFFECTS") else None
+DUMP_GROUPS = []
+
+
+# Items a Trait gives ("Gain access to the Analysis Maneuver"): the automation entry's code {category "grant", spec
+# "grant maneuver: Analysis; talent: Snack Fiend"} names them; the importer finds them in the compendiums and the system
+# adds them with the Trait (module/rules/grants.mjs). LAST_GRANTS collects them for the Trait being built.
+GRANT_PACKS = {"maneuver": "maneuvers", "talent": "talents", "uniqueAbility": "unique-abilities", "racialTrait": "racial-traits",
+               "signature": "signature-examples", "transformation": "transformations"}
+GRANT_RE = re.compile(r"\b(maneuver|talent|uniqueAbility|racialTrait|signature|transformationLine|transformation)\s*:\s*([^;]+)")
+# B5 "grant transformation: Pure Form +aspect:prelude" / "transformationLine: Super Saiyan +aspect:natural:1": an Aspect
+# patch applied when the Transformation is added (module/rules/grants.mjs patchAspects)
+ASPECT_PATCH_RE = re.compile(r"\s*\+aspect:\s*([A-Za-z0-9]+)(?::\s*(\d+))?")
+
+
+# D3 "grant maneuver: Divine Flame +active": the granted item works only while the granting item does
+ACTIVE_RE = re.compile(r"\s*\+active\b", re.I)
+# Q "grant maneuver: Divine Flame +mastery:1": the granted item works only once the granting item has that many Masteries
+MASTERY_RE = re.compile(r"\s*\+mastery\s*:\s*(\d+)", re.I)
+# D3 "grant pick: 2 maneuver from God Maneuvers +active": a choice of the Transformation (its picks bring their items)
+PICK_RE = re.compile(r"\bpick\s*:\s*(\d+)\s+(maneuver|talent|uniqueAbility|racialTrait)s?\s+from\s+([^;+]+?)\s*(\+active)?\s*(\+mastery\s*:\s*\d+)?\s*(?:;|$)", re.I)
+# The choices those picks make, collected for the Transformation being built
+LAST_PICKS = []
+
+
+def pick_options(kind, where):
+    """Names of the compendium items of a pick: the items of that folder (by name), or the Racial Traits of that group,
+    Factor or Race ("God Maneuvers", "Bestial Traits", "Super Genetic")."""
+    pack = GRANT_PACKS[kind]
+    docs = PACKS.get(pack, [])
+    w = re.sub(r"[^a-z0-9]", "", where.lower())
+    folders = {d["_id"] for d in docs if d.get("_type") == "Folder" and re.sub(r"[^a-z0-9]", "", d["name"].lower()) in (w, w + "s", w.rstrip("s"))}
+    out = []
+    for d in docs:
+        if d.get("_type") != "Item":
+            continue
+        sysd = d["system"]
+        keys = [sysd.get("group", ""), sysd.get("factor", ""), sysd.get("race", "")] if kind == "racialTrait" else []
+        if d.get("folder") in folders or any(re.sub(r"[^a-z0-9]", "", str(k).lower()) in (w, w + "s", w.rstrip("s")) for k in keys if k):
+            out.append(d["name"])
+    return sorted(dict.fromkeys(out))
+
+
+def split_aspects(name):
+    """("Pure Form", [{"key": "prelude", "level": 0}]) from "Pure Form +aspect:prelude"."""
+    aspects = [{"key": k, "level": int(n or 0)} for k, n in ASPECT_PATCH_RE.findall(name)]
+    return ASPECT_PATCH_RE.sub("", name).strip(), aspects
+LAST_GRANTS = []
+UNRESOLVED_GRANTS = []
+
+
+def find_grant(kind, name):
+    """The compendium item a grant names ("Analysis", "Boom Maneuver", "the Terrify Maneuver"), or None."""
+    pack = GRANT_PACKS.get(kind)
+    # Both names without "the", the type word ("Tail Attack" = "Tail Attack Maneuver") and punctuation
+    def norm(x):
+        x = re.sub(r"^(the|a|an)\s+", "", x.strip().strip("."), flags=re.I)
+        x = re.sub(r"\s+(Special\s+)?(Maneuver|Talent|Unique Ability|Racial Trait|Trait)s?$", "", x, flags=re.I)
+        return re.sub(r"[^a-z0-9]", "", x.lower())
+    for d in PACKS.get(pack, []):
+        if d.get("_type") == "Item" and (norm(d["name"]) == norm(name)):
+            return d
+    return None
+
+
+def grant_list(a, key):
+    """[{type, name, uuid}] of an entry's grants (all resolved), or None when one of them is not in the compendiums."""
+    code = a.get("code") or {}
+    if code.get("category") != "grant":
+        return []
+    out = []
+    spec = code.get("spec", "")
+    # D3: "pick: <n> <kind> from <folder or group>" makes a choice of the Transformation (resolved now: the packs it
+    # names are built before the Transformations)
+    for n, kind, where, active, mastery in PICK_RE.findall(spec):
+        kind = {"uniqueability": "uniqueAbility", "racialtrait": "racialTrait"}.get(kind.lower(), kind.lower())
+        options = pick_options(kind, where.strip())
+        if not options:
+            UNRESOLVED_GRANTS.append(f"{key}: pick {n} {kind} from {where.strip()} (no such folder or group)")
+            return None
+        trait = key.split("|")[1]
+        LAST_PICKS.append({"id": f"{trait}#pick{len(LAST_PICKS) + 1}", "trait": trait, "options": options, "pick": int(n),
+                           "selected": [], "detail": "", "subs": [], "perStack": False, "repeat": False, "noRepeatLast": False,
+                           "pack": f"dbu-rpg.{GRANT_PACKS[kind]}", "pickFormula": "", "grantActive": bool(active),
+                           "grantMastery": int(MASTERY_RE.search(mastery).group(1)) if mastery else 0})
+    spec = PICK_RE.sub(";", spec)
+    for kind, name in GRANT_RE.findall(spec):
+        active = bool(ACTIVE_RE.search(name))
+        name = ACTIVE_RE.sub("", name)
+        mm = MASTERY_RE.search(name)
+        mastery = {"mastery": int(mm.group(1))} if mm else {}
+        name = MASTERY_RE.sub("", name)
+        # Transformations are built after the Racial Traits: found at the end (a Line: every Stage of it)
+        if kind in ("transformation", "transformationLine"):
+            name, aspects = split_aspects(name)
+            out.append({"type": kind, "name": name, "uuid": "", "pending": key, **({"aspects": aspects} if aspects else {}),
+                        **({"active": True} if active else {}), **mastery})
+            continue
+        d = find_grant(kind, name)
+        if not d and kind == "racialTrait":
+            # A Racial Trait built later (a Monstrous Trait, a Custom Species Trait further down the page): found at the end
+            out.append({"type": "racialTrait", "name": name.strip(), "uuid": "", "pending": key, **({"active": True} if active else {}), **mastery})
+            continue
+        if not d:
+            UNRESOLVED_GRANTS.append(f"{key}: {kind} {name.strip()}")
+            return None
+        out.append({"type": d["type"], "name": d["name"], "uuid": f"Compendium.dbu-rpg.{GRANT_PACKS[kind]}.Item.{d['_id']}",
+                    **({"active": True} if active else {}), **mastery})
+    return out or None
+
+
+def fx_slug(x):
+    """Lowercase letters and digits, accents dropped (module/rules/awakening.mjs awakeningSlug)."""
+    x = unicodedata.normalize("NFD", str(x or "").lower())
+    return re.sub(r"[^a-z0-9]", "", "".join(c for c in x if not unicodedata.combining(c)))
+
+
+def fx_ref(slug, trait, n):
+    """The reference of an effect: fx_ref("super-saiyan", "Golden Power", 3) = "supersaiyan_goldenpower_3"."""
+    return f"{fx_slug(slug)}_{fx_slug(trait)}_{re.sub(r'[^a-z0-9]', '', str(n).lower())}"
+
+
+# R: True while a Racial Trait's effects are applied (an entry's own choice is for Transformations only)
+RACIAL_BUILD = [False]
+# D1: the effects of the item being built ({ref: condition of its Trait}), read by add_item
+LAST_FX = {}
+LAST_FX_PERMANENT = set()
+
+
+def apply_automation(slug, trait, e, mods, trigs, structure, cond):
+    key = f"{slug}|{trait}|{e.get('kn', e['n'])}"
+    ref = fx_ref(slug, trait, e.get("kn", e["n"]))
+    LAST_FX[ref] = cond or ""
+    if "Permanent" in e["keywords"]:
+        LAST_FX_PERMANENT.add(ref)
+    mods, trigs, structure = apply_automation_entry(slug, trait, e, key, mods, trigs, structure, cond)
+    for x in mods + trigs:
+        x.setdefault("fx", ref)
+    return mods, trigs, structure
+
+
+def apply_automation_entry(slug, trait, e, key, mods, trigs, structure, cond):
+    a = AUTOMATION.get(key)
+    if not a:
+        return mods, trigs, structure
+    AUTOMATION_USED.add(key)
+    picks_before = len(LAST_PICKS)
+    # R: the entry's own choice ({"options": [...], "pick": n}): a choice of the Transformation; its "option" pieces are
+    # switched on when picked (Racial Traits have no choices: reported)
+    if a.get("choice"):
+        if RACIAL_BUILD[0]:
+            UNRESOLVED_GRANTS.append(f"{key}: a choice on a Racial Trait (Transformations only)")
+        else:
+            LAST_PICKS.append({"id": f"{trait}#{e.get('kn', e['n'])}c", "trait": trait, "options": list(a["choice"]["options"]),
+                               "pick": int(a["choice"].get("pick", 1)), "selected": [], "detail": "", "subs": [], "perStack": False,
+                               "repeat": False, "noRepeatLast": False, "pack": "", "pickFormula": "", "grantActive": False, "grantMastery": 0,
+                               "entry": True})
+    grants = grant_list(a, key)
+    if grants:
+        LAST_GRANTS.extend(grants)
+    # D3: a "pick:" grant made a choice of the Transformation
+    picked = len(LAST_PICKS) > picks_before
+    permanent = "Permanent" in e["keywords"]
+    if a.get("replace"):
+        mods, trigs = [], []
+    opt = lambda x: f"{trait} — opção: {x['option']}" if x.get("option") else ""
+    for m in a.get("modifiers", []):
+        mods.append({"target": m["target"], "value": str(m.get("value", "")),
+                     "condition": " && ".join(x for x in [m.get("condition", ""), cond] if x),
+                     "label": opt(m) or trait, "active": False if m.get("option") else m.get("active", True),
+                     "always": bool(m.get("always", permanent)),
+                     "mode": m.get("mode", ""), "limit": m.get("limit", ""),
+                     # Option pieces (attack.*, vs.*, defense.*, clash.*...): only written when set
+                     **{k: str(m[k]) for k in ("cost", "amount", "group", "limitKey", "at", "range") if m.get(k)}})
+    for t in a.get("triggers", []):
+        trigs.append({"event": t["event"], "effect": t["effect"], "value": str(t.get("value", "")), "resource": t.get("resource", ""),
+                      "condition": " && ".join(x for x in [t.get("condition", ""), cond] if x), "mode": t.get("mode", "auto"),
+                      "duration": t.get("duration", "none"), "label": opt(t) or t.get("label") or trait,
+                      "active": False if t.get("option") else t.get("active", True),
+                      "target": t.get("target", "self"), "limit": t.get("limit", ""),
+                      **{k: str(t[k]) for k in ("cost", "amount", "limitKey", "group", "roll", "rollKey", "check", "onCheck", "with", "range")
+                         if t.get(k)},
+                      "always": bool(t.get("always", permanent))})
+    code = a.get("code") or {}
+    implemented = (code.get("category") and code.get("key") in IMPLEMENTED_CODE) or bool(grants) or picked
+    if implemented and code.get("key"):
+        CODE_EFFECTS.setdefault(slug, {})[key] = code["key"]
+    data = bool(a.get("modifiers")) or any(t["effect"] != "message" for t in a.get("triggers", []))
+    if a.get("status"):
+        status = a["status"]
+    elif a.get("verdict") == "covered" and not code:
+        # Already done by what the system does anyway (the Aspects a Mastery Trait gives or takes, another effect's pieces)
+        status = "auto"
+    elif code and not implemented:
+        # Part of it still needs the GM (what the data cannot do)
+        status = "parcial" if (data or mods or any(t["effect"] != "message" for t in trigs)) else ("lembrete" if trigs else None)
+    else:
+        status = "auto" if (data or implemented) else ("lembrete" if a.get("triggers") else None)
+    if status:
+        structure = [s.rsplit("— ", 1)[0] + "— " + status for s in structure]
+    return mods, trigs, structure
+
+
+# Traits picked once out of a group ("Upon gaining access to this Transformation, select and gain access to an 'Aura
+# Trait'"): Transformation → [(Trait that asks, group name or list of Trait names, how many, pickFormula)]. Only the
+# picked Traits work (module/rules/awakening.mjs); before this, every Trait of the group applied at once.
+GROUP_CHOICES = {
+    "Divinity Unleashed": [("Ascended Divine Magic", "Domain", 1, "")],
+    "Brilliant Evolution": [("Brilliant Plating", "Brilliant Evolution", 1, "")],
+    "Elemental Supremacy": [("Elemental Aptitude", "Elemental", 1, "")],
+    "Full Power Super Saiyan": [("Style of Super Saiyan", "Super Saiyan Style", 1, "")],
+    # One more Genetic Trait for each base Tier of Power gained after the 2nd (max. +2)
+    "Genetic Power": [("Genetic Transformation", "Genetic", 1, "1 + min(2, max(0, @bT - 2))")],
+    # Strong Aura and Powerful Aura each give one
+    "Sparking Aura": [("Strong Aura", "Aura", 2, "")],
+    "Super Demon": [("Fiendish Power", "Demonic", 1, "")],
+    "Super Form": [("Your Transformation", "Form", 2, "")],
+    # One more with the Far Beyond Perfection Mastery Trait
+    "Super Perfect Form": [("Super Genetic Transformation", "Super Genetic", 1, "1 + min(1, @M)")],
+    "Formation": [("Power of Love", ["Powerful Love", "Wild Love", "Striking Love"], 1, "")],
+    "Initial Class": [("Starting Class", ["Spiritualist", "Warrior", "Cleric", "Mighty", "Wonder"], 1, "")],
+    "Advanced Vocation": [("Vocation Training II", ["Gladiator", "Paladin", "Sage", "Pirate", "Monster Master", "Luminary"], 1, "")],
+}
+# Groups whose n-th Trait comes with the n-th Grade ("Each Grade gives you access to a Godly Super Saiyan Trait")
+GRADE_GROUPS = {"Beyond Divine Saiyan": "Godly Super Saiyan"}
+
+
+# Published Transformation pages the site menu does not list yet (2026-11-04 update: new Adversary Transformations,
+# Black Janemba, Heart Reader, Strong Closer). Other Transformation pages missing from the menu are only reported.
+EXTRA_TRANSFORMATION_PAGES = ["archetypal-speedster", "archetypal-trickster", "raid-boss", "sadistic-villain", "tireless",
+                              "black-janemba", "heart-reader", "strong-closer"]
+
+
 def build_transformations():
     pages = set()
     for r in MENU:
         if r["slug"] and not r["slug"].startswith("http") and r["slug"] not in HOMEBREW:
             pages.add(r["slug"])
+    for slug in EXTRA_TRANSFORMATION_PAGES:
+        if read(slug):
+            pages.add(slug)
+    listed = {r["slug"] for r in MENU}
+    for f in sorted(os.listdir(TEXT)):
+        slug = f[:-3]
+        if f.endswith(".md") and slug not in pages and slug not in listed and any(TT_RE.search(l) for l in read(slug)):
+            print(f"note: Transformation page not in the site menu, skipped: {slug}")
     for slug in pages:
         lines = read(slug)
         if lines and any("Awakening Type" in l for l in lines):
@@ -1435,6 +1888,11 @@ def build_transformations():
             # Traits
             traits, own_mods, own_trigs, structure = [], [], [], []
             own_choices, mastery_aspects, legendary = [], [], set()
+            # What this Transformation's effects grant ("Gain access to the X Unique Ability"): collected by apply_automation
+            LAST_GRANTS.clear()
+            LAST_PICKS.clear()
+            LAST_FX.clear()
+            LAST_FX_PERMANENT.clear()
             ignore_top = False
             in_mastery = False
             # Groups of Traits (Technical Traits...) and the effects that pick one of them for every Stack
@@ -1451,6 +1909,10 @@ def build_transformations():
                     continue
                 kind, name, _ = head
                 effects, j = parse_effects(seg, i + 1)
+                seen_n = {}
+                for e in effects:
+                    seen_n[e["n"]] = seen_n.get(e["n"], 0) + 1
+                    e["kn"] = str(e["n"]) if seen_n[e["n"]] == 1 else f"{e['n']}{'abcdefgh'[seen_n[e['n']] - 1]}"
                 if not effects:
                     i += 1
                     continue
@@ -1464,8 +1926,11 @@ def build_transformations():
                 if trans_type == "awakening":
                     for e in effects:
                         gm = STACK_GROUP_RE.search(clean(e["text"]))
+                        om = None if gm else ONCE_GROUP_RE.search(clean(e["text"]))
                         if gm:
                             group_picks.append((name, e["n"], gm.group(1).strip()))
+                        elif om and (int(max_stacks.group(1)) if max_stacks else 1) == 1 and re.search(r"\b(select|choose|gain access)\b", clean(e["text"]), re.I):
+                            group_picks.append((name, e["n"], om.group(1).strip()))
                         elif stack_gain_effect(e["text"], b["name"]) and not stack_gain_mods(e["text"], name):
                             stack_gains.append((name, e["n"]))
                 req = re.search(r"\((\d)\)\s*$", name)
@@ -1489,6 +1954,9 @@ def build_transformations():
                     cond = " && ".join(c for c in [cond, "@GA >= 1"] if c)
                 if kind == "transcendent trait":
                     cond = "@MX >= 1"
+                # A State box: its effects work while in that State
+                if kind == "state":
+                    cond = f"@states.{STATE_BOXES[name[:-len(' State')].lower()]} >= 1"
                 if mastery_level:
                     for e in effects:
                         # A Passive effect changes the Aspects too while in the Transformation (Evil Aura's 'Reduce the
@@ -1506,13 +1974,34 @@ def build_transformations():
                 # (Technical Traits...) is a per-Stack choice, which switches its Traits on as they are picked.
                 stack_group = trans_type == "awakening" and any(g == group for (_, _, g) in group_picks)
                 LEGACY["on"] = bool(group and kind == "trait" and not stack_group)
-                mods, trigs, st = compile_effects(effects, name, cond)
-                LEGACY["on"] = False
+                # One effect at a time, so that the hand-written automation of an effect can add to (or replace) what the
+                # patterns compiled for it
+                mods, trigs, st = [], [], []
                 for e in effects:
+                    em, et, es = compile_effects([e], name, cond)
                     for tgt, val, c in EFFECT_OVERRIDES.get((slug, name, e["n"]), []):
-                        mods.append({"target": tgt, "value": val, "condition": " && ".join(x for x in [c, cond] if x), "label": name,
-                                     "active": True, "always": False})
-                        st[effects.index(e)] = st[effects.index(e)].replace("— manual", "— auto").replace("— lembrete", "— auto")
+                        em.append({"target": tgt, "value": val, "condition": " && ".join(x for x in [c, cond] if x), "label": name,
+                                   "active": True, "always": False})
+                        es = [s.replace("— manual", "— auto").replace("— lembrete", "— auto") for s in es]
+                    compiled = {"modifiers": [dict(m) for m in em], "triggers": [dict(t) for t in et], "status": es[0].rsplit("— ", 1)[-1] if es else ""}
+                    em, et, es = apply_automation(slug, name, e, em, et, es, cond)
+                    if DUMP is not None:
+                        DUMP.append({"key": f"{slug}|{name}|{e.get('kn', e['n'])}", "item": b["name"], "slug": slug, "trait": name, "kind": kind,
+                                     "transType": trans_type, "subtype": subtype, "group": group if kind == "trait" else "",
+                                     "n": e["n"], "keywords": e["keywords"], "text": clean(e["text"]), "condition": cond,
+                                     "maxStacks": int(max_stacks.group(1)) if max_stacks else 1,
+                                     # J: an Evolved Stage typed as a Form ("Evolved Stage Type: Unique (...)") may read @O*
+                                     "evolvedStage": bool(fields.get("evolved stage type")), **compiled})
+                    mods += em
+                    trigs += et
+                    st += es
+                LEGACY["on"] = False
+                # Minion Class Traits (Commander) are given to the Minions, not to whoever has the Awakening
+                if group == "Minion Class":
+                    LOCKED_OFF.setdefault(slug, set()).add(name)
+                    for mm in mods + trigs:
+                        mm["active"] = False
+                    st = [x.rsplit("— ", 1)[0] + "— minion" for x in st]
                 if kind == "transcendent trait":
                     for mm in mods + trigs:
                         if not mm.get("always"):
@@ -1521,11 +2010,34 @@ def build_transformations():
                     legendary.add(name)
                     for mm in mods + trigs:
                         mm["always"] = True
+                # ...even when the Transformation that defines it is not the one you are in (Blue Saiyan enters Radiant God)
+                if kind == "state":
+                    for mm in mods + trigs:
+                        mm["always"] = True
                 own_mods += mods
                 own_trigs += trigs
                 traits.append(f"{name}{' [' + kind + ']' if kind != 'trait' else ''}")
                 structure.append(f"<strong>{name}</strong>{' (' + kind + ')' if kind != 'trait' else ''}: " + "; ".join(st))
                 i = j
+            if DUMP is not None and groups:
+                DUMP_GROUPS.append({"item": b["name"], "slug": slug, "transType": trans_type, "groups": groups,
+                                    "picks": [list(x) for x in group_picks]})
+            own_names = {re.sub(r"\s*\[[^\]]*\]$", "", t) for t in traits}
+            for tname, opts, pick, formula in GROUP_CHOICES.get(b["name"], []):
+                options = groups.get(opts, []) if isinstance(opts, str) else [o for o in opts if o in own_names]
+                if tname not in own_names or not options:
+                    continue
+                if trans_type == "awakening":
+                    own_choices.append(stack_choice(tname, "group", options, pick=pick))
+                else:
+                    own_choices.append({"id": f"{tname}#group", "trait": tname, "options": options, "pick": pick, "selected": [],
+                                        "detail": "", "subs": [], "perStack": False, "repeat": False, "noRepeatLast": False,
+                                        "pack": "", "pickFormula": formula})
+            gg = GRADE_GROUPS.get(b["name"])
+            for k, gname in enumerate(groups.get(gg, []) if gg else []):
+                for mm in own_mods + own_trigs:
+                    if mm.get("label") == gname:
+                        mm["condition"] = " && ".join(x for x in [mm.get("condition", ""), f"@G >= {k + 1}"] if x)
             # Awakening Stacks: a choice for every Stack (a Trait of a group, or one of the hand-written ones), and a
             # reminder for the other "upon gaining a stack" effects
             stack_top, stack_note = "", ""
@@ -1565,7 +2077,11 @@ def build_transformations():
                 "aspects": aspects, "traits": traits, "graded": graded, "grade": 1,
                 "stacks": 1, "maxStacks": int(max_stacks.group(1)) if max_stacks else 1, "stackTop": stack_top,
                 "stackNote": stack_note,
-                "modifiers": own_mods, "triggers": own_trigs, "choices": own_choices, "masteryAspects": mastery_aspects,
+                # I2: a Unique Evolved Stage names its Original Form ("Evolved Stage Type: Unique (Super Saiyan 4)"); a
+                # Generic one gets it from the item sheet
+                "original": ORIGINAL_ALIASES.get(_orig := (re.match(r"^Unique\s*\((.+)\)\s*$", fields.get("evolved stage type", "")) or [None, ""])[1].strip(), _orig),
+                "modifiers": own_mods, "triggers": own_trigs, "choices": own_choices + [dict(p) for p in LAST_PICKS],
+                "masteryAspects": mastery_aspects,
                 "gradeAspects": grade_aspects(seg), "ignoreTop": ignore_top, "inherited": [],
                 "homebrew": False,
                 "summary": " · ".join(x for x in [
@@ -1573,11 +2089,21 @@ def build_transformations():
                     f"Stress {stress.group(1)}" if stress else "", race,
                     "bônus por Grade (ver tabela)" if any(v == "*" for v in bonuses.values()) else ""] if x)
             }
+            # How much of it the system does by itself ("narrativo": nothing mechanical to automate)
+            counts = {k: sum(s.count(f"— {k}") for s in structure) for k in ("auto", "parcial", "manual", "lembrete", "narrativo")}
+            mech = sum(counts.values()) - counts["narrativo"]
+            if mech:
+                system["summary"] += f" · {counts['auto']}/{mech} efeitos automáticos" + (f", {counts['parcial']} em parte" if counts["parcial"] else "")
+            # I3: the Grades a Graded Transformation has to begin with ("Kaioken has 3 Grades"); Traits that give access to
+            # more add "gradeMax.<slug>" pieces (the sheet stops at maxGrade + those)
+            base_grades = re.search(r"\bhas (\d+) Grades\b", " ".join(seg))
+            if base_grades and not system.get("maxGrade"):
+                system["maxGrade"] = int(base_grades.group(1))
             ov = GRADED.get(b["name"]) or GRADED.get(title)
             if ov:
                 system["bonuses"].update(ov.get("bonuses", {}))
                 system["gradeStress"] = ov.get("gradeStress", "")
-                system["maxGrade"] = ov.get("maxGrade", 0)
+                system["maxGrade"] = ov.get("maxGrade", system.get("maxGrade", 0))
                 system["graded"] = True
                 if ov.get("gradeAspects"):
                     system["gradeAspects"] = ov["gradeAspects"]
@@ -1589,7 +2115,7 @@ def build_transformations():
                      "form": f"Forms ({subtype or '—'})", "evolved": "Evolved Stages"}[trans_type]
             fold = folder("transformations", group.title() if False else group)
             doc = add_item("transformations", b["name"], "transformation", system, slug, b["name"], structure, fold,
-                           key=f"{slug}:{b['name']}")
+                           key=f"{slug}:{b['name']}", grants=list(LAST_GRANTS))
             variant = next((a["param"] for a in aspects if a["key"] == "variant" and a["param"]), "")
             TRANSFORMATIONS.append({"doc": doc, "name": b["name"], "slug": slug, "type": trans_type,
                                     "line": system["line"], "stage": system["stage"], "variant": variant,
@@ -1644,8 +2170,10 @@ def inherit_traits():
             return memo[t["name"]]
         memo[t["name"]] = None  # a loop in the data gives nothing more
         s = t["doc"]["system"]
+        flags = t["doc"]["flags"]["dbu-rpg"]
         own = {"mods": list(s["modifiers"]), "trigs": list(s["triggers"]), "choices": list(s["choices"]),
-               "mastery": list(s["masteryAspects"]), "ignoreTop": s.get("ignoreTop", False), "from": [], "traits": []}
+               "mastery": list(s["masteryAspects"]), "ignoreTop": s.get("ignoreTop", False), "from": [], "traits": [],
+               "fx": dict(flags.get("fx", {})), "fxPermanent": set(flags.get("fxPermanent", []))}
         parent, variant = None, False
         if t["variant"] and t["variant"] in by_name:
             parent, variant = by_name[t["variant"]], True
@@ -1670,6 +2198,15 @@ def inherit_traits():
                                       for n in parent["doc"]["system"]["traits"]]
             own["traits"] = [x for x in gained if keeps(base_trait(x["trait"]), replaced)
                              and (base_trait(x["trait"]) not in legendary)]
+            # D1: the effects of the Traits inherited (their pieces keep the reference of the lower Stage's effect)
+            kept = {fx_slug(x["trait"]) for x in own["traits"]} | {fx_slug(base_trait(x["trait"])) for x in own["traits"]}
+            kept |= {x.get("fx") for x in own["mods"] + own["trigs"] if x.get("fx")}
+            for ref, c in got["fx"].items():
+                parts = ref.split("_")
+                if (len(parts) == 3 and parts[1] in kept) or ref in kept:
+                    own["fx"].setdefault(ref, c)
+                    if ref in got["fxPermanent"]:
+                        own["fxPermanent"].add(ref)
         own["legendary"] = (got["legendary"] if got else set()) | {base_trait(n) for n in t["legendary"]}
         memo[t["name"]] = own
         return own
@@ -1681,6 +2218,10 @@ def inherit_traits():
         s = t["doc"]["system"]
         s["modifiers"], s["triggers"], s["choices"] = e["mods"], e["trigs"], e["choices"]
         s["masteryAspects"], s["ignoreTop"], s["inherited"] = e["mastery"], e["ignoreTop"], e["traits"]
+        if e["fx"]:
+            t["doc"]["flags"]["dbu-rpg"]["fx"] = e["fx"]
+        if e["fxPermanent"]:
+            t["doc"]["flags"]["dbu-rpg"]["fxPermanent"] = sorted(e["fxPermanent"])
         s["description"] = description(t["slug"], t["name"], t["structure"] + [f"Herda os traços de: {', '.join(e['from'])}"])
 
 
@@ -1746,7 +2287,7 @@ def entry_blocks(lines):
     for i, l in enumerate(lines):
         s = l.strip()
         s = re.sub(r"^#+ \*\*[A-Za-z ]+?(?=[A-Z][a-z]+ [A-Z]?)", "**", s) if s.startswith("#") else s
-        m = re.match(r"^\*\*([^*\[]+?)(?: \[([^\]]+)\])?\*\*:", s)
+        m = re.match(r"^\*\*([^*\[]+?)(?:\s*\[([^\]]+)\])?\*\*:", s)
         if not m:
             continue
         fields = {}
@@ -1757,7 +2298,51 @@ def entry_blocks(lines):
                 fields[clean(fm.group(1)).rstrip(":").lower()] = clean(fm.group(2))
             k += 1
         if fields:
-            yield m.group(1).strip(), (m.group(2) or ""), fields
+            yield re.sub(r"^(?:[A-Z][a-z]+ )*[A-Z][a-z]+s(?=[A-Z][a-z])", "", m.group(1).strip()), (m.group(2) or ""), fields
+
+
+# I2: the Original Form an Evolved Stage page names, when the Transformation has another name in the compendium
+ORIGINAL_ALIASES = {"Super Janemba": "Janemba"}
+
+
+# I1: Special Maneuvers whose effect the system runs when they are used (the "Usar" button fires maneuverUsed with
+# @via_<name without "Maneuver">). Mechanical data only.
+def _m(target, value, condition="", label=""):
+    return {"target": target, "value": value, "condition": condition, "label": label, "active": True, "always": False,
+            "mode": "", "limit": ""}
+
+
+def _t(event, effect, value="", resource="", condition="", label="", target="self", duration="none", mode="auto"):
+    return {"event": event, "effect": effect, "value": value, "resource": resource, "condition": condition, "label": label,
+            "target": target, "duration": duration, "mode": mode, "limit": "", "active": True, "always": False}
+
+
+MANEUVER_PIECES = {
+    # Hyped until the end of your next turn (the resource counts your turn ends: 2 when used in your turn, else 1), with
+    # +1(T) + 1/4 (rounded up) of your Personality Modifier to your Combat Rolls while Hyped
+    "Hype Maneuver": {
+        "modifiers": [_m("combat", "1(T)+ceil(@pe/4)", "@res.hyped >= 1", "Hyped")],
+        "triggers": [_t("maneuverUsed", "resourceSet", "2", "Hyped", "@via_hype == 1 && @myTurn == 1", "Hyped"),
+                     _t("maneuverUsed", "resourceSet", "1", "Hyped", "@via_hype == 1 && @myTurn == 0", "Hyped"),
+                     _t("endOfTurn", "resource", "-1", "Hyped", "@res.hyped >= 1", "Hyped")]},
+    # The Opponent you target is Analyzed until the end of your next turn (the mark Analyzed+), and your Combat Rolls
+    # against Analyzed Opponents gain +1(T) + 1/4 (rounded up) of your Scholarship Modifier
+    "Stance Maneuver": {
+        "modifiers": [_m("wound", "1(T)", "@res.flamestance >= 1", "Flame Stance"), _m("might", "1(T)", "@res.flamestance >= 1", "Flame Stance"),
+                      _m("awareness", "-1(T)", "@res.flamestance >= 1", "Flame Stance"),
+                      _m("defenseValue", "1(T)", "@res.windstance >= 1", "Wind Stance"), _m("speed", "1(T)", "@res.windstance >= 1", "Wind Stance"),
+                      _m("soak", "-1(T)", "@res.windstance >= 1", "Wind Stance"),
+                      _m("awareness", "1(T)", "@res.wavestance >= 1", "Wave Stance"), _m("save.impulsive", "1(T)", "@res.wavestance >= 1", "Wave Stance"),
+                      _m("save.corporeal", "1(T)", "@res.wavestance >= 1", "Wave Stance"), _m("wound", "-2(T)", "@res.wavestance >= 1", "Wave Stance"),
+                      _m("soak", "1(T)", "@res.stonestance >= 1", "Stone Stance"), _m("surgency", "1(T)", "@res.stonestance >= 1", "Stone Stance"),
+                      _m("defenseValue", "-1(T)", "@res.stonestance >= 1", "Stone Stance")],
+        "triggers": [_t("maneuverUsed", "resourcePick", "1", "Flame Stance|Wind Stance|Wave Stance|Stone Stance|* Stance",
+                        "@via_stance == 1", "Stance", mode="ask")]},
+    "Analysis Maneuver": {
+        "modifiers": [_m("vs.combat", "1(T)+ceil(@sc/4)", "@vs.mark.analyzed >= 1", "Analyzed")],
+        "triggers": [_t("maneuverUsed", "mark", "1", "Analyzed+", "@via_analysis == 1", "Analyzed", target="targeted",
+                        duration="endOfNextTurn")]},
+}
 
 
 def build_maneuvers():
@@ -1771,6 +2356,48 @@ def build_maneuvers():
                   "kpCost": f.get("kp cost", ""), "frequency": freq, "minions": f.get("minions", ""),
                   "summary": f"{f.get('maneuver type', '')} · {f.get('action cost', '')} · KP {f.get('kp cost', '')}"}
         add_item("maneuvers", name, "maneuver", system, "special-maneuvers", name, [])
+    # Special Maneuvers written on race and Racial Factor pages (Konatsian Vocations, Glass Tribe), gained through Racial
+    # Traits ("Gain access to the Goof and the Hocus Pocus Special Maneuvers")
+    fold = folder("maneuvers", "Manobras raciais")
+    known = {d["name"] for d in PACKS.get("maneuvers", []) if d.get("_type") == "Item"}
+    racial_pages = [r[0] for r in RACES] + ["bestial-traits", "monstrous-traits"] + [
+        r["slug"] for r in MENU if r["slug"] and not r["slug"].startswith("http") and r["slug"] not in HOMEBREW
+        and "**Maximum Factor" in "\n".join(read(r["slug"]))]
+    for slug in dict.fromkeys(racial_pages):
+        for name, freq, f in entry_blocks(racial_lines(slug)):
+            name = name.replace("“", "").replace("”", "").strip()
+            if (("maneuver type" not in f) and ("base maneuver" not in f)) or name in known:
+                continue
+            known.add(name)
+            system = {"maneuverType": f.get("maneuver type", "Modifier"), "actionCost": f.get("action cost", ""),
+                      "kpCost": f.get("kp cost", ""), "frequency": freq, "minions": f.get("minions", ""),
+                      "requirement": f.get("base maneuver", ""),
+                      "summary": f"{f.get('maneuver type', '')} · {f.get('action cost', '')} · KP {f.get('kp cost', '')}"}
+            add_item("maneuvers", name, "maneuver", system, slug, name, [], fold, key=f"race:{slug}:{name}")
+    # D3: Special / Modifier / God Maneuvers written on Transformation pages ("Coral Rain Special Maneuver"), gained through
+    # their Traits ("Gain access to the Coral Rain Special Maneuver")
+    fold = folder("maneuvers", "Manobras de Transformações")
+    skip = {"special-maneuvers", "actions-maneuvers", "god-ki", "adversaries"} | set(racial_pages)
+    pages = [r["slug"] for r in MENU if r["slug"] and not r["slug"].startswith("http") and r["slug"] not in HOMEBREW]
+    for slug in dict.fromkeys(pages + EXTRA_TRANSFORMATION_PAGES):
+        if slug in skip or not read(slug):
+            continue
+        for name, freq, f in entry_blocks(read(slug)):
+            name = name.replace("“", "").replace("”", "").strip()
+            # (M: a block with no Maneuver Type whose Action Cost names the kind: "Action Cost: Instant Maneuver")
+            if ("maneuver type" not in f) and re.match(r"^(Instant|Standard|Counter|Modifier) Maneuver$", f.get("action cost", "")):
+                f = {**f, "maneuver type": f["action cost"], "action cost": ""}
+            if ("maneuver type" not in f) or name in known:
+                continue
+            known.add(name)
+            god = "dkp cost" in f
+            system = {"maneuverType": f.get("maneuver type", ""), "actionCost": f.get("action cost", ""),
+                      "kpCost": f.get("kp cost", ""), "frequency": freq, "minions": f.get("minions", ""),
+                      "requirement": f.get("base maneuver", "") or ("God Ki" if god else ""),
+                      **({"god": True, "dkpCost": f.get("dkp cost", "")} if god else {}),
+                      "summary": f"{f.get('maneuver type', '')} · {f.get('action cost', '')} · "
+                                 + (f"DKP {f.get('dkp cost', '')}" if god else f"KP {f.get('kp cost', '')}")}
+            add_item("maneuvers", name, "maneuver", system, slug, name, [], fold, key=f"trans:{slug}:{name}")
     # Core maneuvers from Actions & Maneuvers
     lines = read("actions-maneuvers")
     fold = folder("maneuvers", "Manobras básicas")
@@ -1805,19 +2432,9 @@ def build_maneuvers():
 
 
 # Villainous Traits whose numbers the compiler misses: (target, value, condition), replacing what it found
-VILLAIN_MODS = {
-    # Dauntless (2): +1/4 Maximum Life Points
-    "Dauntless": [("life.mult", "1.25", "")],
-    # Desperate Adversary (1): +1(T) Combat Rolls and −1(T) Soak per Health Threshold below
-    "Desperate Adversary": [("combat", "(1(T))*@below", ""), ("soak", "-(1(T))*@below", "")],
-    # Wild Swings (1): −2(bT) Strike Rolls, +3(T) Wound Rolls
-    "Wild Swings": [("strike", "-2(bT)", ""), ("wound", "3(T)", "")],
-}
-
-
 def build_villainous_traits():
     """The example Villainous Traits of the Adversaries page, as Racial Traits of the 'villainous' tier."""
-    lines = read("adversaries")
+    lines = racial_lines("adversaries")
     fold = folder("racial-traits", "Villainous Traits")
     start = next((i for i, l in enumerate(lines) if l.strip() == "Villainous Traits"), None)
     end = next((i for i, l in enumerate(lines) if l.strip() == "Villainous Maneuvers"), len(lines))
@@ -1829,14 +2446,12 @@ def build_villainous_traits():
         if m:
             name = m.group(1).strip()
             effects, j = parse_effects(lines, i + 1)
-            mods, trigs, structure = compile_effects(effects, name)
-            if name in VILLAIN_MODS:
-                mods = [{"target": t, "value": v, "condition": c, "label": name, "active": True, "always": False}
-                        for t, v, c in VILLAIN_MODS[name]]
+            mods, trigs, structure = compile_racial("adversaries", name, effects, f"Villainous › {name}", "villainous", "", "Adversary")
             system = {"race": "Adversary", "category": "villainous", "tier": "villainous", "active": True,
                       "modifiers": mods, "triggers": trigs,
                       "summary": f"Villainous Trait · {len(effects)} efeito(s), {sum(1 for s in structure if s.endswith('auto'))} automatizado(s)"}
-            add_item("racial-traits", name, "racialTrait", system, "adversaries", name, structure, fold, key=f"villain:{name}")
+            add_item("racial-traits", name, "racialTrait", system, "adversaries", name, structure, fold, key=f"villain:{name}",
+                     grants=list(LAST_GRANTS))
             i = max(j, i + 1)
             continue
         i += 1
@@ -2001,14 +2616,60 @@ def build_signatures():
 
 
 # ---------------------------------------------------------------------------
-build_races()
 build_talents()
-build_transformations()
 build_unique_abilities()
 build_maneuvers()
+build_signatures()
+build_races()
+build_transformations()
 build_villainous_traits()
 build_items()
-build_signatures()
+
+# Effects run by the system's code: each Transformation lists its own ("slug|Trait|n" → key)
+for doc in PACKS.get("transformations", []):
+    if doc["_type"] != "Item":
+        continue
+    slug = doc["flags"]["dbu-rpg"]["slug"]
+    own = {t.split(" [")[0] for t in doc["system"].get("traits", [])}
+    code = {k: v for k, v in CODE_EFFECTS.get(slug, {}).items() if k.split("|")[1] in own}
+    if code:
+        doc["flags"]["dbu-rpg"]["code"] = code
+    locked = sorted(LOCKED_OFF.get(slug, set()) & own)
+    if locked:
+        doc["flags"]["dbu-rpg"]["lockedOff"] = locked
+
+# Grants of Racial Traits and Transformations built after the item that grants them
+for doc in PACKS.get("racial-traits", []) + PACKS.get("transformations", []):
+    grants = doc.get("flags", {}).get("dbu-rpg", {}).get("grants")
+    if not grants:
+        continue
+    for g in [g for g in grants if g.get("pending")]:
+        # B5: a Transformation, or every Stage of a Transformation Line (in Stage order), with its Aspect patch
+        if g["type"] in ("transformation", "transformationLine"):
+            norm_line = lambda x: re.sub(r"[^a-z0-9]", "", str(x or "").lower())
+            if g["type"] == "transformation":
+                found = [d for d in [find_grant("transformation", g["name"])] if d]
+            else:
+                found = sorted([d for d in PACKS.get("transformations", []) if d.get("_type") == "Item"
+                                and norm_line(d["system"].get("line")) == norm_line(g["name"])],
+                               key=lambda d: d["system"].get("stage", 0))
+            at = grants.index(g)
+            grants.remove(g)
+            if not found:
+                UNRESOLVED_GRANTS.append(f"{g['pending']}: {g['type']} {g['name']} (the item lists it, without effect)")
+                continue
+            for k, d in enumerate(found):
+                grants.insert(at + k, {"type": "transformation", "name": d["name"],
+                                       "uuid": f"Compendium.dbu-rpg.transformations.Item.{d['_id']}",
+                                       **({"aspects": g["aspects"]} if g.get("aspects") else {})})
+            continue
+        d = find_grant("racialTrait", g["name"])
+        if d:
+            g.update({"name": d["name"], "uuid": f"Compendium.dbu-rpg.racial-traits.Item.{d['_id']}"})
+            del g["pending"]
+        else:
+            UNRESOLVED_GRANTS.append(f"{g['pending']}: racialTrait {g['name']} (the item lists it, without effect)")
+            grants.remove(g)
 
 os.makedirs(OUT, exist_ok=True)
 for pack, docs in PACKS.items():
@@ -2018,3 +2679,16 @@ for pack, docs in PACKS.items():
 print(STATS)
 with open(os.path.join(OUT, "_remind.txt"), "w", encoding="utf-8") as f:
     f.write("\n".join(REMIND_LOG))
+if UNRESOLVED_GRANTS:
+    print(f"note: {len(UNRESOLVED_GRANTS)} grant(s) name no compendium item (the effect stays with the GM):")
+    for g in UNRESOLVED_GRANTS[:40]:
+        print("  " + g)
+unused = sorted(set(AUTOMATION) - AUTOMATION_USED)
+if unused:
+    print(f"automation entries that matched no effect ({len(unused)}):", ", ".join(unused[:20]))
+if DUMP is not None:
+    with open(os.environ["DBU_DUMP_EFFECTS"], "w", encoding="utf-8") as f:
+        json.dump(DUMP, f, ensure_ascii=False, indent=1)
+    with open(os.environ["DBU_DUMP_EFFECTS"] + ".groups.json", "w", encoding="utf-8") as f:
+        json.dump(DUMP_GROUPS, f, ensure_ascii=False, indent=1)
+    print(f"dumped {len(DUMP)} effects ({sum(1 for d in DUMP if d['transType'] == 'racial')} of Racial Traits)")

@@ -1,0 +1,94 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Target": {
+        "attackDamageAttrTimes": "Ataque: Atributo de Dano aplicado mais n vezes no Wound Roll",
+        "attackPunchDownSize": "Ataque: + Categorias de Tamanho do seu Tamanho para o seu Punching Down",
+        "attackPunchDownSizeSet": "Ataque: seu Tamanho conta como este índice para o seu Punching Down (6 Gigantic, 7 Colossal; o maior vale)",
+        "attackPunchDownReach": "Ataque: Punching Down vale contra alvos n Categorias mais próximos (1 = 1 menor, 2 = seu Tamanho ou menor, 9 = qualquer)",
+        "attackPunchDownCategory": "Ataque: + Dice Category dos Extra Dice do Punching Down",
+        "attackPunchDownTimes": "Ataque: Extra Dice do Punching Down aplicados mais n vezes",
+        "attackPunchUpSize": "Ataque: ± Categorias do seu Tamanho para o seu Punching Up (−1 = 1 menor)",
+        "attackPunchUpSizeSet": "Ataque: seu Tamanho conta como este índice para o seu Punching Up (4 Large; o menor vale)",
+        "punchedDownSize": "Os outros contam seu Tamanho n Categorias maior para o Punching Down deles",
+        "punchedDownSizeSet": "Os outros contam seu Tamanho como este índice para o Punching Down deles (o maior vale)",
+        "punchedUpSize": "Os outros contam seu Tamanho ± n Categorias para o Punching Up deles",
+        "punchedUpSizeSet": "Os outros contam seu Tamanho como este índice para o Punching Up deles (o menor vale)",
+        "vsAutoDodge": "Contra o atacante: o acerto vira erro (1; 2 = sem a metade do Wound do Absolute Attack)",
+        "vsNoDimDefense": "Contra o atacante: este ataque não lhe dá Diminishing Defense (1)",
+        "vsIgnoreDamageBelow": "Contra o atacante: Damage menor que este valor vira 0 (conta o uso só quando zera)",
+        "vsDamageMax": "Contra o atacante: no máximo este Damage (o menor vale; conta o uso só quando reduz)"
+      },
+      "Attack": {
+        "WithLabel": "Ataque do efeito",
+        "WithOnly": "Este ataque precisa ser: {only}",
+        "WithRefused": "O efeito pede um ataque {only}: este não é.",
+        "Granted": "Dado por efeitos para este ataque: {list}.",
+        "GrantRefused": "Não aplicado (a técnica já tem outro Super Profile, ou chave desconhecida): {keys}.",
+        "GrantAdvantage": "Advantage {name}",
+        "GrantSuperProfile": "Super Profile {name}",
+        "DamageAttrTimes": "Atributo de Dano ×{n} a mais",
+        "AoeShapes": {
+          "sphere": "Sphere"
+        }
+      },
+      "Punch": {
+        "Down": "Punching Down: +{n} (Extra Dice).",
+        "DownOff": "Punching Down não vale contra este alvo: −{n} (Extra Dice).",
+        "Up": "Punching Up: +{n} Wound ({size} Categoria(s) maior).",
+        "DownCard": "Punching Down",
+        "UpCard": "Punching Up +{n}"
+      },
+      "Versus": {
+        "AutoDodgeCard": "Esquiva automática: {label}",
+        "NoDimCard": "Sem Diminishing Defense: {label}"
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Target": {
+        "attackDamageAttrTimes": "Attack: the Damage Attribute applied n more times to the Wound Roll",
+        "attackPunchDownSize": "Attack: + Size Categories of your Size for your Punching Down",
+        "attackPunchDownSizeSet": "Attack: your Size counts as this index for your Punching Down (6 Gigantic, 7 Colossal; the highest wins)",
+        "attackPunchDownReach": "Attack: Punching Down applies against targets n Categories closer (1 = 1 smaller, 2 = your Size or smaller, 9 = any)",
+        "attackPunchDownCategory": "Attack: + Dice Category of the Punching Down Extra Dice",
+        "attackPunchDownTimes": "Attack: the Punching Down Extra Dice apply n more times",
+        "attackPunchUpSize": "Attack: ± Categories of your Size for your Punching Up (−1 = 1 smaller)",
+        "attackPunchUpSizeSet": "Attack: your Size counts as this index for your Punching Up (4 Large; the lowest wins)",
+        "punchedDownSize": "Other Characters count your Size n Categories larger for their Punching Down",
+        "punchedDownSizeSet": "Other Characters count your Size as this index for their Punching Down (the highest wins)",
+        "punchedUpSize": "Other Characters count your Size ± n Categories for their Punching Up",
+        "punchedUpSizeSet": "Other Characters count your Size as this index for their Punching Up (the lowest wins)",
+        "vsAutoDodge": "Against the attacker: the hit becomes a miss (1; 2 = no Absolute Attack half Wound either)",
+        "vsNoDimDefense": "Against the attacker: this attack gives you no Diminishing Defense (1)",
+        "vsIgnoreDamageBelow": "Against the attacker: Damage lower than this value is 0 (its use counts only when it does)",
+        "vsDamageMax": "Against the attacker: at most this Damage (the lowest wins; its use counts only when it lowers it)"
+      },
+      "Attack": {
+        "WithLabel": "Effect's attack",
+        "WithOnly": "This attack must be: {only}",
+        "WithRefused": "The effect asks for an attack that is {only}: this one is not.",
+        "Granted": "Given by effects for this attack: {list}.",
+        "GrantRefused": "Not applied (the technique already has another Super Profile, or an unknown key): {keys}.",
+        "GrantAdvantage": "Advantage {name}",
+        "GrantSuperProfile": "Super Profile {name}",
+        "DamageAttrTimes": "Damage Attribute ×{n} more",
+        "AoeShapes": {
+          "sphere": "Sphere"
+        }
+      },
+      "Punch": {
+        "Down": "Punching Down: +{n} (Extra Dice).",
+        "DownOff": "Punching Down does not apply to this target: −{n} (Extra Dice).",
+        "Up": "Punching Up: +{n} Wound ({size} Size Category(ies) larger).",
+        "DownCard": "Punching Down",
+        "UpCard": "Punching Up +{n}"
+      },
+      "Versus": {
+        "AutoDodgeCard": "Automatic dodge: {label}",
+        "NoDimCard": "No Diminishing Defense: {label}"
+      }
+    }
+  }
+}

@@ -2,6 +2,7 @@ import { postInfoCard } from "../dice/roller.mjs";
 import { actorTokens, tokenDistance } from "../canvas/height.mjs";
 import { forcedMove, roundUse, runOps } from "./movement.mjs";
 import { encounterOf } from "./triggers.mjs";
+import { resolveClash } from "./clash.mjs";
 
 const { DialogV2 } = foundry.applications.api;
 const FDE = () => foundry.applications.ux.FormDataExtended;
@@ -41,35 +42,20 @@ async function meleeTarget(actor, name) {
   return target;
 }
 
-/** Strike or Dodge, whichever is higher: the Defender's roll of a "Strike vs Strike/Dodge" Clash. */
-function bestDefense(actor) {
-  const r = actor.system.rolls;
-  return (r.dodge.bonus >= (r.strike.bonus + (r.strike_physical ?? 0))) ? "dodge" : "strike";
-}
-
 /**
- * Clash (Strike vs Strike/Dodge). Ties go to the Defender. The Grappler stays the Initiator of every Grapple Check of
- * its Grapple, whoever makes it.
+ * Clash (Strike vs Strike/Dodge, the Defender's higher one: Dodge on a tie), through combat/clash.mjs. Ties go to the
+ * Defender. The Grappler stays the Initiator of every Grapple Check of its Grapple, whoever makes it. grapple: a Grapple
+ * Check (clash.grapple); via: the Maneuver (@via_grapple, @via_launch...).
  */
-async function strikeClash(initiator, defender, { label, extra = [], defenderExtra = [] } = {}) {
-  const mine = await initiator.rollCombat("strike", { extra, subtitle: label });
-  const defense = bestDefense(defender);
-  const theirs = await defender.rollCombat(defense, { extra: defenderExtra, subtitle: label });
-  const a = mine?.total ?? 0, b = theirs?.total ?? 0;
-  return { win: a > b, mine: a, theirs: b, defense };
+async function strikeClash(initiator, defender, { label, extra = [], defenderExtra = [], via = "", grapple = false } = {}) {
+  const r = await resolveClash(initiator, defender, { mine: "strike", theirs: "dodge|strike", via, grapple, label, extra, defenderExtra,
+    subtitle: label, defenderSubtitle: label, card: false });
+  return { win: !!r?.won, mine: r?.mine ?? 0, theirs: r?.theirs ?? 0, defense: r?.theirsKey ?? "dodge" };
 }
 
-async function mightClash(initiator, defender) {
-  const mine = await initiator.rollClash("might");
-  const theirs = await defender.rollClash("might");
-  const a = mine?.total ?? 0, b = theirs?.total ?? 0;
-  return { win: a > b, mine: a, theirs: b };
-}
-
-/** The better of two Saving Throws (a Clash "Impulsive/Corporeal"). */
-async function rollBetterSave(actor, keys) {
-  const key = keys.reduce((best, k) => ((actor.system.saves[k]?.value ?? 0) > (actor.system.saves[best]?.value ?? 0) ? k : best), keys[0]);
-  return actor.rollSave(key);
+async function mightClash(initiator, defender, { via = "" } = {}) {
+  const r = await resolveClash(initiator, defender, { mine: "might", via, card: false });
+  return { win: !!r?.won, mine: r?.mine ?? 0, theirs: r?.theirs ?? 0 };
 }
 
 function clashLine(win, r, who, other) {
@@ -104,7 +90,7 @@ export async function throughGrapple(actor, targetActor, label) {
   if ( !g || (g.with === actor.uuid) ) return true;
   const grappler = (g.role === "grappler") ? targetActor : await fromUuid(g.with);
   if ( !grappler || (grappler.uuid === actor.uuid) ) return true;
-  const r = await mightClash(actor, grappler);
+  const r = await mightClash(actor, grappler, { via: "grapple" });
   const lines = [clashLine(r.win, r, actor.name, grappler.name)];
   if ( r.win ) {
     await endGrapple(targetActor);
@@ -143,7 +129,7 @@ export async function grapple(actor) {
   const theirs = grappleOf(other);
   if ( theirs ) {
     const grappler = theirs.role === "grappler" ? other : await fromUuid(theirs.with);
-    const r = await mightClash(actor, grappler);
+    const r = await mightClash(actor, grappler, { via: "grapple" });
     lines.push(clashLine(r.win, r, actor.name, grappler?.name ?? ""));
     if ( !r.win ) {
       await spend(actor, 1);
@@ -155,12 +141,15 @@ export async function grapple(actor) {
   }
   await spend(actor, 1);
   const T = actor.system.top.current;
-  const r = await strikeClash(actor, other, { label: "Grapple Check",
+  const r = await strikeClash(actor, other, { label: "Grapple Check", via: "grapple", grapple: true,
     extra: tailGrab ? [{ label: "Tail Restraint", value: -2 * T }] : [] });
   lines.push(clashLine(r.win, r, actor.name, other.name));
   if ( !r.win ) {
     lines.push(L("DBU.Grapple.Exploit", { name: other.name }));
-    return postInfoCard({ actor, title: "Grapple", lines });
+    await postInfoCard({ actor, title: "Grapple", lines });
+    // S: a lost Grapple Check provokes the Exploit of its target
+    await (await import("../rules/exploit.mjs")).provokeExploit(actor, "grapple", { opponents: [other], name: "Grapple" });
+    return;
   }
   const mine = actorTokens(actor)[0]?.document;
   await runOps([
@@ -178,7 +167,7 @@ export async function launch(actor) {
   if ( g?.role !== "grappler" || !other ) return ui.notifications.warn(L("DBU.Grapple.NotGrappler"));
   if ( !(await roundUse(actor, "launch", "Launch")) ) return null;
   await spend(actor, 1);
-  const r = await strikeClash(actor, other, { label: "Grapple Check (Launch)" });
+  const r = await strikeClash(actor, other, { label: "Grapple Check (Launch)", via: "launch", grapple: true });
   const lines = [clashLine(r.win, r, actor.name, other.name)];
   await endGrapple(actor);
   if ( !r.win ) {
@@ -196,12 +185,12 @@ export async function pin(actor) {
   if ( g?.role !== "grappler" || !other ) return ui.notifications.warn(L("DBU.Grapple.NotGrappler"));
   if ( !(await roundUse(actor, "pin", "Pin")) ) return null;
   await spend(actor, 2);
-  const r = await strikeClash(actor, other, { label: "Grapple Check (Pin)",
+  const r = await strikeClash(actor, other, { label: "Grapple Check (Pin)", via: "pin", grapple: true,
     extra: [{ label: "Pin", value: -actor.system.top.base }] });
   const lines = [clashLine(r.win, r, actor.name, other.name)];
   let pinned = false;
   if ( r.win ) {
-    const m = await mightClash(actor, other);
+    const m = await mightClash(actor, other, { via: "pin" });
     lines.push(clashLine(m.win, m, actor.name, other.name));
     pinned = m.win;
   }
@@ -235,7 +224,7 @@ export async function escape(actor) {
   await spend(actor, actions);
   const bonus = (actions - 1) * actor.system.top.current;
   // The Grappler is the Initiator: the Grappled wins ties
-  const r = await strikeClash(other, actor, { label: L("DBU.Grapple.Escape"),
+  const r = await strikeClash(other, actor, { label: L("DBU.Grapple.Escape"), via: "escape", grapple: true,
     defenderExtra: bonus ? [{ label: L("DBU.Grapple.ExtraActions"), value: bonus }] : [] });
   const lines = [clashLine(!r.win, { mine: r.theirs, theirs: r.mine }, actor.name, other.name)];
   if ( !r.win ) {
@@ -266,7 +255,7 @@ export async function thrust(actor) {
   const other = target.actor;
   if ( !(await roundUse(actor, "thrust", "Thrust")) ) return null;
   await spend(actor, 1);
-  const r = await strikeClash(actor, other, { label: "Thrust" });
+  const r = await strikeClash(actor, other, { label: "Thrust", via: "thrust" });
   const lines = [clashLine(r.win, r, actor.name, other.name)];
   if ( !r.win ) return postInfoCard({ actor, title: "Thrust", lines });
   const half = Math.floor(actor.system.aptitudes.might / 2);
@@ -280,10 +269,10 @@ export async function thrust(actor) {
     rejectClose: false
   });
   if ( choice === "prone" ) {
-    const mine = await rollBetterSave(actor, ["impulsive", "corporeal"]);
-    const theirs = await rollBetterSave(other, ["impulsive", "corporeal"]);
-    const s = { mine: mine?.total ?? 0, theirs: theirs?.total ?? 0 };
-    const win = s.mine > s.theirs;
+    // A Clash of the better of Impulsive / Corporeal on each side (the first one on a tie)
+    const c = await resolveClash(actor, other, { mine: "impulsive|corporeal", via: "thrust", card: false });
+    const s = { mine: c?.mine ?? 0, theirs: c?.theirs ?? 0 };
+    const win = !!c?.won;
     lines.push(clashLine(win, s, actor.name, other.name));
     if ( win ) {
       await runOps([{ op: "condition", uuid: other.uuid, key: "prone", value: 1 }]);

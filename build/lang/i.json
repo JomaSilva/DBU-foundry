@@ -1,0 +1,38 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Trans": {
+        "Original": "Forma Original",
+        "OriginalTip": "A transformação deste personagem que este Evolved Stage evolui (os traços dele leem @OM, @OFM, @OA, @OG, @OT).",
+        "GradeMax": "{name} vai até o Grade {n}."
+      },
+      "Update": {
+        "Title": "Atualizar as transformações, traços raciais e manobras das fichas",
+        "Text": "Os compêndios de transformações, traços raciais e manobras mudaram (automação nova, traços herdados, correções). {n} item(ns) nas fichas podem ser atualizados:"
+      },
+      "Trigger": {
+        "Target": {
+          "opponents": "Seus oponentes"
+        }
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Trans": {
+        "Original": "Original Form",
+        "OriginalTip": "The Transformation of this character this Evolved Stage evolves (its Traits read @OM, @OFM, @OA, @OG, @OT).",
+        "GradeMax": "{name} goes up to Grade {n}."
+      },
+      "Update": {
+        "Title": "Update the Transformations, Racial Traits and Maneuvers on the sheets",
+        "Text": "The Transformation, Racial Trait and Maneuver compendiums changed (new automation, inherited Traits, fixes). {n} item(s) on the sheets can be updated:"
+      },
+      "Trigger": {
+        "Target": {
+          "opponents": "Your Opponents"
+        }
+      }
+    }
+  }
+}

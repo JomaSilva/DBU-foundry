@@ -13,9 +13,26 @@
     </div>
     <div class="dbu-trigger-line">
       <label>{{localize "DBU.Mod.Value"}} <input type="text" name="{{../path}}.{{i}}.value" value="{{t.value}}" placeholder="3(bT)"></label>
-      <label>{{localize "DBU.Trigger.Resource"}} <input type="text" name="{{../path}}.{{i}}.resource" value="{{t.resource}}" placeholder="Battle Born / surging / guardDown"></label>
+      <label>{{localize "DBU.Trigger.Resource"}} <input type="text" name="{{../path}}.{{i}}.resource" value="{{t.resource}}" placeholder="Battle Born / surging / guardDown / item:Hype Maneuver"></label>
       <label>{{localize "DBU.Mod.Condition"}} <input type="text" name="{{../path}}.{{i}}.condition" value="{{t.condition}}" placeholder="@round % 2 == 0"></label>
       <label>{{localize "DBU.Trigger.DurationLabel"}} <select name="{{../path}}.{{i}}.duration">{{selectOptions @root.triggerDurations selected=t.duration valueAttr="value" labelAttr="label"}}</select></label>
+    </div>
+    <div class="dbu-trigger-line">
+      <label data-tooltip="{{localize 'DBU.Trigger.TargetTip'}}">{{localize "DBU.Trigger.TargetLabel"}} <select name="{{../path}}.{{i}}.target">{{selectOptions @root.triggerTargets selected=t.target valueAttr="value" labelAttr="label"}}</select></label>
+      <label data-tooltip="{{localize 'DBU.Trigger.LimitTip'}}">{{localize "DBU.Trigger.LimitLabel"}} <input type="text" name="{{../path}}.{{i}}.limit" value="{{t.limit}}" placeholder="1/Round"></label>
+      <label data-tooltip="{{localize 'DBU.Trigger.LimitKeyTip'}}">{{localize "DBU.Trigger.LimitKeyLabel"}} <input type="text" name="{{../path}}.{{i}}.limitKey" value="{{t.limitKey}}" placeholder="burst"></label>
+    </div>
+    <div class="dbu-trigger-line">
+      <label data-tooltip="{{localize 'DBU.Trigger.CostTip'}}">{{localize "DBU.Trigger.CostLabel"}} <input type="text" name="{{../path}}.{{i}}.cost" value="{{t.cost}}" placeholder="ki:2(bT); counters:1"></label>
+      <label data-tooltip="{{localize 'DBU.Trigger.AmountTip'}}">{{localize "DBU.Trigger.AmountLabel"}} <input type="text" name="{{../path}}.{{i}}.amount" value="{{t.amount}}" placeholder="@res.battleborn"></label>
+      <label data-tooltip="{{localize 'DBU.Trigger.Field.groupTip'}}">{{localize "DBU.Trigger.Field.group"}} <input type="text" name="{{../path}}.{{i}}.group" value="{{t.group}}" placeholder="aw2"></label>
+    </div>
+    <div class="dbu-trigger-line">
+      <label data-tooltip="{{localize 'DBU.Trigger.Field.rollTip'}}">{{localize "DBU.Trigger.Field.roll"}} <input type="text" name="{{../path}}.{{i}}.roll" value="{{t.roll}}" placeholder="1d10"></label>
+      <label data-tooltip="{{localize 'DBU.Trigger.Field.rollKeyTip'}}">{{localize "DBU.Trigger.Field.rollKey"}} <input type="text" name="{{../path}}.{{i}}.rollKey" value="{{t.rollKey}}" placeholder="pressure"></label>
+      <label data-tooltip="{{localize 'DBU.Trigger.Field.checkTip'}}">{{localize "DBU.Trigger.Field.check"}} <input type="text" name="{{../path}}.{{i}}.check" value="{{t.check}}" placeholder="steadfast:-2 / clash:might"></label>
+      <label data-tooltip="{{localize 'DBU.Trigger.Field.onCheckTip'}}">{{localize "DBU.Trigger.Field.onCheck"}} <select name="{{../path}}.{{i}}.onCheck">{{selectOptions @root.triggerOnCheck selected=t.onCheck valueAttr="value" labelAttr="label"}}</select></label>
+      <label data-tooltip="{{localize 'DBU.Trigger.Field.withTip'}}">{{localize "DBU.Trigger.Field.with"}} <input type="text" name="{{../path}}.{{i}}.with" value="{{t.with}}" placeholder="surge.healMult=2"></label>
     </div>
   </div>
   {{else}}

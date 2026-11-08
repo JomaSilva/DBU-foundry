@@ -2,6 +2,8 @@
  * Rule constants for the Dragon Ball Universe RPG (rules 0.9.3, dbu-rpg.com).
  * Every table here mirrors docs/REGRAS.md; keep both in sync.
  */
+import * as VOCAB from "./vocab/index.mjs";
+
 export const DBU = {};
 
 DBU.ATTRIBUTES = ["ag", "fo", "te", "sc", "in", "ma", "pe"];
@@ -205,7 +207,10 @@ DBU.conditions = {
   staggered: { max: 1, img: "icons/svg/paralysis.svg" },
   stressExhaustion: { max: 1, img: "icons/svg/unconscious.svg" },
   suffocating: { max: 1, img: "icons/svg/silenced.svg" },
-  transfigured: { max: 1, img: "icons/svg/statue.svg" }
+  transfigured: { max: 1, img: "icons/svg/statue.svg" },
+  // T (round 14): the Combat Condition the Demon God Transformations inflict (−1(bT) Combat Rolls and Soak); shown on the
+  // sheet only when an item names it or it is on
+  branded: { max: 1, img: "icons/svg/skull.svg", origin: "transformation" }
 };
 
 /** States (and Special States). levels = number of Levels (1 = no levels). */
@@ -225,51 +230,118 @@ DBU.states = {
   spectator: { levels: 1, img: "icons/svg/eye.svg", special: true },
   drunk: { levels: 2, img: "icons/svg/tankard.svg", special: true },
   feral: { levels: 2, img: "icons/svg/pawprint.svg", special: true },
-  fusionOfKi: { levels: 1, img: "icons/svg/portal.svg", special: true }
+  fusionOfKi: { levels: 1, img: "icons/svg/portal.svg", special: true },
+  // G: States named by Transformations and Racial Traits (their pages say what they do; the Traits that read
+  // @states.<key> do it). The sheet shows them only when an item of the character names them or they are on.
+  radiantGod: { levels: 1, img: "icons/svg/sun.svg", origin: "transformation" },
+  blazingGod: { levels: 1, img: "icons/svg/fire.svg", origin: "transformation" },
+  flow: { levels: 1, img: "icons/svg/wing.svg", origin: "transformation" },
+  unitedPower: { levels: 1, img: "icons/svg/circle.svg", origin: "transformation" },
+  berserk: { levels: 1, img: "icons/svg/blood.svg", origin: "transformation" },
+  unleashed: { levels: 1, img: "icons/svg/explosion.svg", origin: "transformation" },
+  unlimited: { levels: 1, img: "icons/svg/upgrade.svg", origin: "transformation" },
+  exceed: { levels: 1, img: "icons/svg/lightning.svg", origin: "transformation" },
+  overwhelmingFocus: { levels: 1, img: "icons/svg/target.svg", origin: "transformation" },
+  combatRealization: { levels: 1, img: "icons/svg/light.svg", origin: "transformation" },
+  desperateHero: { levels: 1, img: "icons/svg/shield.svg", origin: "transformation" },
+  heroicMindset: { levels: 1, img: "icons/svg/angel.svg", origin: "transformation" },
+  powerStressed: { levels: 1, img: "icons/svg/daze.svg", origin: "transformation" },
+  exposed: { levels: 1, img: "icons/svg/eye.svg", origin: "transformation" },
+  incorporeal: { levels: 1, img: "icons/svg/mystery-man.svg", origin: "transformation" },
+  egotistical: { levels: 2, img: "icons/svg/ice-aura.svg", origin: "transformation" },
+  instinctual: { levels: 2, img: "icons/svg/pawprint.svg", origin: "transformation" },
+  clockUp: { levels: 1, img: "icons/svg/clockwork.svg", origin: "transformation" },
+  fullPower: { levels: 1, img: "icons/svg/aura.svg", origin: "transformation" },
+  soulSynergy: { levels: 1, img: "icons/svg/heal.svg", origin: "transformation" },
+  hollowfied: { levels: 1, img: "icons/svg/skull.svg", origin: "transformation" },
+  clad: { levels: 1, img: "icons/svg/statue.svg", origin: "transformation" },
+  farewell: { levels: 1, img: "icons/svg/door-exit.svg", origin: "transformation" }
+};
+
+/** Names of the Levels of the States with Levels (lower case, Level 1 first): "ignoreState.raging.angry.2". */
+DBU.STATE_LEVEL_NAMES = {
+  raging: ["angry", "furious", "apoplectic"],
+  mindful: ["calm", "zen", "tranquil"],
+  drunk: ["tipsy", "plastered"],
+  feral: ["wild", "unhinged"]
 };
 
 /**
  * Built-in modifiers granted by States. Formulas use the DBU notation understood by
  * module/rules/formula.mjs: X(T), X(bT), @L (state level), etc.
+ * n = number of the State effect it automates (as numbered on dbu-rpg.com/states and /special-states), lv = the Level
+ * whose Trait it is (States with Levels): "ignoreState.<state>.<n>" or "ignoreState.<state>.<level name|lv>.<n>"
+ * modifiers (value 1) suppress it.
  */
 DBU.stateModifiers = {
+  // D1 Surging (1): an Energy Charge on every Attacking Maneuver that includes your Focus (the "Focus" mark) as a target
+  surging: [
+    { target: "attack.charges", value: "1", condition: "@vsAny.mark.focus >= 1", n: 1 }
+  ],
   raging: [
-    { target: "wound", value: "@L(T)" },
-    { target: "botch.strike", value: "@L" }, { target: "botch.dodge", value: "@L" },
-    { target: "botch.save", value: "@L" }, { target: "botch.skill", value: "@L" },
-    { target: "soak", value: "@L(T)", condition: "@L >= 2" },
-    { target: "flag.ignoreThresholds", value: "1", condition: "@L >= 3" }
+    // Angry (1): +L(T) Wound; (2): +L Botch Range
+    { target: "wound", value: "@L(T)", n: 1, lv: 1 },
+    { target: "botch.strike", value: "@L", n: 2, lv: 1 }, { target: "botch.dodge", value: "@L", n: 2, lv: 1 },
+    { target: "botch.save", value: "@L", n: 2, lv: 1 }, { target: "botch.skill", value: "@L", n: 2, lv: 1 },
+    // Furious (1): +L(T) Soak
+    { target: "soak", value: "@L(T)", condition: "@L >= 2", n: 1, lv: 2 },
+    // Apoplectic (2): ignore Health Threshold Penalties
+    { target: "flag.ignoreThresholds", value: "1", condition: "@L >= 3", n: 2, lv: 3 }
   ],
   mindful: [
-    { target: "crit.strike", value: "-@L" }, { target: "crit.dodge", value: "-@L" }, { target: "crit.wound", value: "-@L" },
-    { target: "crit.save", value: "-@L" }, { target: "crit.skill", value: "-@L" },
-    { target: "wound", value: "-@L(T)" },
-    { target: "counters", value: "1", condition: "@L >= 3" },
-    { target: "flag.ignoreThresholds", value: "1", condition: "@L >= 3" }
+    // Calm (1): −L Critical Target; (2): −L(T) Wound
+    { target: "crit.strike", value: "-@L", n: 1, lv: 1 }, { target: "crit.dodge", value: "-@L", n: 1, lv: 1 },
+    { target: "crit.wound", value: "-@L", n: 1, lv: 1 },
+    { target: "crit.save", value: "-@L", n: 1, lv: 1 }, { target: "crit.skill", value: "-@L", n: 1, lv: 1 },
+    { target: "wound", value: "-@L(T)", n: 2, lv: 1 },
+    // Tranquil (1): 1 Counter Action; (2): ignore Health Threshold Penalties
+    { target: "counters", value: "1", condition: "@L >= 3", n: 1, lv: 3 },
+    { target: "flag.ignoreThresholds", value: "1", condition: "@L >= 3", n: 2, lv: 3 }
   ],
   superior: [
-    { target: "flag.greaterDice", value: "1" },
-    { target: "damageTaken", value: "2(T)" }
+    { target: "flag.greaterDice", value: "1", n: 1 },
+    { target: "damageTaken", value: "2(T)", n: 2 }
   ],
-  undying: [{ target: "combat", value: "-1(T)" }],
-  determined: [{ target: "flag.ignoreThresholds", value: "1" }, { target: "flag.autoHit", value: "1" }],
-  entrusted: [{ target: "flag.greaterDice", value: "1" }, { target: "stress", value: "1" }],
-  godKi: [{ target: "wound", value: "3(T)" }, { target: "soak", value: "3(T)" }],
+  undying: [{ target: "combat", value: "-1(T)", n: 3 }],
+  determined: [{ target: "flag.ignoreThresholds", value: "1", n: 2 }, { target: "flag.autoHit", value: "1", n: 1 }],
+  entrusted: [{ target: "flag.greaterDice", value: "1", n: 1 }, { target: "stress", value: "1", n: 2 }],
+  godKi: [{ target: "wound", value: "3(T)", n: 3 }, { target: "soak", value: "3(T)", n: 3 }],
   deadState: [
-    { target: "stress", value: "2" }, { target: "steadfast", value: "1" },
-    { target: "combat", value: "-1(bT)" }, { target: "soak", value: "-1(bT)" }
+    { target: "stress", value: "2", n: 1 }, { target: "steadfast", value: "1", n: 1 },
+    { target: "combat", value: "-1(bT)", n: 4 }, { target: "soak", value: "-1(bT)", n: 4 }
   ],
-  liquid: [{ target: "size", value: "-1" }, { target: "skill.stealth", value: "2" }],
+  liquid: [{ target: "size", value: "-1", n: 1 }, { target: "skill.stealth", value: "2", n: 3 }],
   drunk: [
-    { target: "save.all", value: "-@L(T)" }, { target: "combat", value: "-@L(T)" },
-    { target: "natural.strike", value: "@L" }, { target: "natural.dodge", value: "@L" }
+    // Tipsy (1): −L(T) Saving Throws and Combat Rolls; (2): +L Natural Result of Strike and Dodge
+    { target: "save.all", value: "-@L(T)", n: 1, lv: 1 }, { target: "combat", value: "-@L(T)", n: 1, lv: 1 },
+    { target: "natural.strike", value: "@L", n: 2, lv: 1 }, { target: "natural.dodge", value: "@L", n: 2, lv: 1 }
   ],
   feral: [
-    { target: "kpCost.attack", value: "-@L(T)" },
-    { target: "natural.strike", value: "@L" }, { target: "natural.wound", value: "@L" },
-    { target: "skill.intimidation", value: "@L" }, { target: "skill.survival", value: "@L" }
+    // Wild (2): −L(T) Ki Point Cost; (3): +L Natural Result of Strike, Wound, Intimidation and Survival
+    { target: "kpCost.attack", value: "-@L(T)", n: 2, lv: 1 },
+    { target: "natural.strike", value: "@L", n: 3, lv: 1 }, { target: "natural.wound", value: "@L", n: 3, lv: 1 },
+    { target: "skill.intimidation", value: "@L", n: 3, lv: 1 }, { target: "skill.survival", value: "@L", n: 3, lv: 1 }
   ]
 };
+
+/**
+ * D1: the built-in effects of the States that happen at a moment (combat/triggers.mjs collectTriggers adds them to the
+ * event's triggers), numbered like DBU.stateModifiers: "ignoreState.<state>.<n>" switches them off too.
+ * Surging: (1) entering it, target an Opponent who becomes your Focus (the "Focus" mark, removed when you leave it);
+ * (2) leaving it, Fatigued until the end of your next turn; (4) entering it removes Compelled; (5) a reminder when you
+ * Defeat your Focus (you may leave the State then, ignoring its 2nd effect).
+ */
+DBU.stateTriggers = [
+  { state: "surging", n: 1, event: "stateEnter", condition: "@state_surging == 1 && @already == 0", effect: "mark", resource: "Focus",
+    target: "targeted", duration: "none", mode: "ask" },
+  { state: "surging", n: 1, event: "stateLeave", condition: "@state_surging == 1", effect: "unmark", resource: "Focus", target: "self" },
+  { state: "surging", n: 2, event: "stateLeave", condition: "@state_surging == 1", effect: "condition", resource: "fatigued", value: "1",
+    duration: "endOfNextTurn" },
+  { state: "surging", n: 4, event: "stateEnter", condition: "@state_surging == 1 && @cond.compelled >= 1", effect: "removeCondition",
+    resource: "compelled", value: "" },
+  { state: "surging", n: 5, event: "attackHit", condition: "@states.surging >= 1 && @defeated == 1 && @vs.mark.focus == 1",
+    effect: "message", value: "Focus Defeated: you may leave the Surging State, ignoring its 2nd effect", mode: "remind" }
+];
 
 /** Transformation Aspects. auto = automated by the system; levels = has [LV]. */
 DBU.aspects = {
@@ -441,8 +513,46 @@ DBU.modifierTargets = {
   "battleBorn.cap.strike": "DBU.Target.bbCapStrike", "battleBorn.cap.dodge": "DBU.Target.bbCapDodge",
   "battleBorn.cap.wound": "DBU.Target.bbCapWound", "flag.bbWoundUnlimited": "DBU.Target.flagBbWoundUnlimited",
   "flag.bbForceWound": "DBU.Target.flagBbForceWound",
-  "flag.noApparelPenalty": "DBU.Target.flagNoApparelPenalty", "flag.autoStress": "DBU.Target.flagAutoStress"
+  "flag.noApparelPenalty": "DBU.Target.flagNoApparelPenalty", "flag.autoStress": "DBU.Target.flagAutoStress",
+  // Attack options: evaluated when an attack is made, with its variables (@signature, @ultimate, @charges...)
+  "attack.charges": "DBU.Target.attackCharges", "attack.strike": "DBU.Target.attackStrike",
+  "attack.wound": "DBU.Target.attackWound", "attack.kp": "DBU.Target.attackKp", "attack.category": "DBU.Target.attackCategory",
+  "kpCost.signature": "DBU.Target.kpCostSignature", "kpCost.basic": "DBU.Target.kpCostBasic",
+  "attack.crit.strike": "DBU.Target.attackCritStrike", "attack.crit.wound": "DBU.Target.attackCritWound",
+  "attack.natural.strike": "DBU.Target.attackNaturalStrike", "attack.natural.wound": "DBU.Target.attackNaturalWound",
+  "attack.chargeCategory": "DBU.Target.attackChargeCategory", "attack.lethal": "DBU.Target.attackLethal",
+  "attack.ignoreDR": "DBU.Target.attackIgnoreDR", "attack.kpFree": "DBU.Target.attackKpFree",
+  // Its value is text: an Attribute key ("pe"), a list ("fo|ma"), "surgency" or "any"
+  "attack.damageAttribute": "DBU.Target.attackDamageAttribute",
+  "flag.fullWager": "DBU.Target.flagFullWager", "flag.weaponAssisted": "DBU.Target.flagWeaponAssisted",
+  "charges.max": "DBU.Target.chargesMax", "clash.duel": "DBU.Target.clashDuel",
+  // Defend without a Counter Action / without paying the Guard's KP (attack-option mode and limit)
+  "defense.freeCounter": "DBU.Target.defenseFreeCounter", "defense.freeKp": "DBU.Target.defenseFreeKp",
+  // Power stacks: maximum (base 2), "Power Spiked" (counts as at the maximum)
+  "power.max": "DBU.Target.powerMax", "flag.powerSpiked": "DBU.Target.flagPowerSpiked",
+  "greaterDice.category": "DBU.Target.greaterDiceCategory",
+  "topDice.category.strike": "DBU.Target.topDiceCategoryStrike", "topDice.category.dodge": "DBU.Target.topDiceCategoryDodge",
+  "topDice.category.wound": "DBU.Target.topDiceCategoryWound", "dimOffenseStart": "DBU.Target.dimOffenseStart",
+  "flag.noDimDefense": "DBU.Target.flagNoDimDefense", "dimDefense.mult": "DBU.Target.dimDefenseMult",
+  "surgency.mult": "DBU.Target.surgencyMult", "soak.mult": "DBU.Target.soakMult",
+  "flag.noReducedMomentum": "DBU.Target.flagNoReducedMomentum", "flag.autoPassSteadfast": "DBU.Target.flagAutoPassSteadfast",
+  "flag.autoFailSteadfast": "DBU.Target.flagAutoFailSteadfast", "flag.noLifeRegain": "DBU.Target.flagNoLifeRegain",
+  // Maneuvers: Combat Recovery, Surge, Legend Realized, Energy Charge
+  "recovery.bonus": "DBU.Target.recoveryBonus", "recovery.kiMult": "DBU.Target.recoveryKiMult",
+  "surge.kiMult": "DBU.Target.surgeKiMult", "surge.healSurgency": "DBU.Target.surgeHealSurgency",
+  "uses.surge": "DBU.Target.usesSurge", "legend.bonus": "DBU.Target.legendBonus", "legend.mult": "DBU.Target.legendMult",
+  "charge.kpMult": "DBU.Target.chargeKpMult", "flag.chargeNoGuardDown": "DBU.Target.flagChargeNoGuardDown",
+  // Divine Ki Points
+  "dkp.max": "DBU.Target.dkpMax", "dkp.mult": "DBU.Target.dkpMult", "flag.dkpUsable": "DBU.Target.flagDkpUsable",
+  // Attribute Modifier Bonus of the Transformation that has the modifier (its own modifiers only)
+  "amb.mult": "DBU.Target.ambMult"
 };
+/**
+ * Families of targets that cannot be listed (accepted by the rules engine by prefix):
+ * resMax.<resource slug> (+ maximum), resMaxSet.<resource slug> (sets the base maximum, highest wins),
+ * ignoreState.<state>.<n> / ignoreState.<state>.<level name or number>.<n> (suppresses that built-in State effect).
+ */
+DBU.MODIFIER_TARGET_PREFIXES = ["resMax.", "resMaxSet.", "ignoreState."];
 
 /**
  * Resources whose stacks are each applied to one Combat Roll (you decide which): +perStack to that roll per stack.
@@ -458,6 +568,18 @@ DBU.splitResources = {
 };
 // One skill.<key> target per skill
 for ( const k of Object.keys(DBU.skills) ) DBU.modifierTargets[`skill.${k}`] = DBU.skills[k].label;
+// "Immune to the X Combat Condition" (value 1): the Condition has no effect on the character
+for ( const k of Object.keys(DBU.conditions) ) DBU.modifierTargets[`immune.${k}`] = `DBU.Target.immune.${k}`;
+// Attribute Modifier Bonus of this Transformation for one Attribute: added (amb.fo) or multiplied (amb.fo.mult)
+for ( const a of DBU.ATTRIBUTES ) {
+  const A = a[0].toUpperCase() + a.slice(1);
+  DBU.modifierTargets[`amb.${a}`] = `DBU.Target.amb${A}`;
+  DBU.modifierTargets[`amb.${a}.mult`] = `DBU.Target.amb${A}Mult`;
+}
+// The feature packages' targets (module/vocab/a.mjs, b.mjs, c.mjs): listed ones, families accepted by prefix, generated ones
+Object.assign(DBU.modifierTargets, VOCAB.MODIFIER_TARGETS);
+DBU.MODIFIER_TARGET_PREFIXES.push(...VOCAB.MODIFIER_TARGET_PREFIXES);
+VOCAB.registerTargets(DBU);
 
 /** Icons for item types (used by the "create item" buttons and as default images). */
 DBU.itemIcons = {

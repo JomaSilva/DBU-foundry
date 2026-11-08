@@ -1,0 +1,30 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Trigger": {
+        "Effect": {
+          "resourcePick": "Escolher um dos recursos (o escolhido fica 1, os outros 0)",
+          "attackWound": "Wound do ataque do momento (±)"
+        },
+        "PickNone": "Nenhum",
+        "PickAsk": "Escolha",
+        "PickShort": "escolher: {what}",
+        "TheAttack": "o ataque"
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Trigger": {
+        "Effect": {
+          "resourcePick": "Pick one of the resources (the picked one becomes 1, the others 0)",
+          "attackWound": "Wound of the event's attack (±)"
+        },
+        "PickNone": "None",
+        "PickAsk": "Pick",
+        "PickShort": "pick: {what}",
+        "TheAttack": "the attack"
+      }
+    }
+  }
+}

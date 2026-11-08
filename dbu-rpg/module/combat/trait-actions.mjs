@@ -86,6 +86,8 @@ export async function triggerBurstLimit(actor, item, name) {
   }
   await actor.update(updates);
   if ( w ) await item.unsetFlag("dbu-rpg", "burstWindow");
+  // Triggers of that Burst Limit Trait
+  (await import("./triggers.mjs")).fireEvent(actor, "burstLimit", { scope: { itemId: item.id, burst: name } });
   const trait = findTrait(item, name) ?? { name, kind: "burst limit", from: "", slug: s.source?.slug ?? "" };
   return postInfoCard({ actor, img: item.img, title: name, subtitle: `Burst Limit · ${item.name}`, lines,
     extraHTML: await traitHTML(actor, item, trait) });
@@ -102,20 +104,30 @@ export async function fullAwakening(actor, item) {
   if ( s.grandAwakening ) return ui.notifications.info(L("DBU.Grand.Active", { name: grand.name }));
   if ( !((s.stacks ?? 0) > 0) ) return ui.notifications.warn(L("DBU.Grand.NoStacks", { name: item.name }));
   const trigger = await traitHTML(actor, item, { ...grand, from: "", slug: s.source?.slug ?? "" });
+  // E: a Grand Trigger written as data ("grandTrigger" pieces, rules/transform-rules.mjs): say whether it is met; when it
+  // is not, only the GM may go on
+  const { grandTriggerState } = await import("../rules/transform-rules.mjs");
+  const gt = grandTriggerState(actor, item);
+  if ( gt.pieces && !gt.met && !game.user.isGM ) return ui.notifications.warn(L("DBU.Grand.TriggerNotMet", { name: grand.name }));
+  const state = !gt.pieces ? "" : `<p class="${gt.met ? "" : "dbu-warn"}">${L(gt.met ? "DBU.Grand.TriggerMet" : "DBU.Grand.TriggerNotMetGM",
+    { name: grand.name, why: gt.why })}</p>`;
   const ok = await DialogV2.confirm({
     window: { title: `Full Awakening — ${grand.name}` },
-    content: `<p>${L("DBU.Grand.Confirm")}</p><div class="dbu-trait-text">${trigger}</div>`, rejectClose: false
+    content: `${state}<p>${L("DBU.Grand.Confirm")}</p><div class="dbu-trait-text">${trigger}</div>`, rejectClose: false
   });
   if ( !ok ) return null;
   const sys = actor.system;
   const life = Math.ceil(sys.life.max / 4);
   const ki = Math.ceil(sys.ki.max / 4);
   await actor.update({
-    "system.life.value": Math.min(sys.life.max, sys.life.value + life),
+    ...(sys.flags?.noLifeRegain ? {} : { "system.life.value": Math.min(sys.life.max, sys.life.value + life) }),
     "system.ki.value": Math.min(sys.ki.max, sys.ki.value + ki),
     ...actor._spendAction(1)
   });
   await item.update({ "system.grandAwakening": true, "flags.dbu-rpg.grandCombat": encounterOf(actor)?.id ?? null });
+  // Triggers of the Grand Awakening "when the Full Awakening Maneuver activates it"
+  const { fireEvent } = await import("./triggers.mjs");
+  fireEvent(actor, "grandAwakening", { scope: { [`awk_${String(s.source?.slug ?? "").replace(/[^a-z0-9]+/gi, "_")}`]: 1 } });
   return postInfoCard({ actor, img: item.img, title: `Full Awakening — ${grand.name}`, subtitle: item.name,
     lines: [L("DBU.Grand.Activated", { name: grand.name }), L("DBU.Grand.Regain", { life, ki })] });
 }

@@ -1,0 +1,30 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Trigger": {
+        "EventLabel": {
+          "opponentRolled": "Quando um oponente do encontro rola",
+          "allyRolled": "Quando um aliado do encontro rola"
+        },
+        "Event": {
+          "opponentRolled": "Rolagem de um oponente — {name}",
+          "allyRolled": "Rolagem de um aliado — {name}"
+        }
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Trigger": {
+        "EventLabel": {
+          "opponentRolled": "When an Opponent of the encounter rolls",
+          "allyRolled": "When an Ally of the encounter rolls"
+        },
+        "Event": {
+          "opponentRolled": "Opponent's roll — {name}",
+          "allyRolled": "Ally's roll — {name}"
+        }
+      }
+    }
+  }
+}

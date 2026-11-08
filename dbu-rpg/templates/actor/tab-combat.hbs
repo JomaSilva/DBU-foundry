@@ -13,9 +13,19 @@
         <button type="button" data-action="maneuver" data-maneuver="empower" data-tooltip="{{localize 'DBU.Empower.Tip'}}"><i class="fa-solid fa-hand-holding-heart"></i> Empower</button>
         {{#if scan}}<button type="button" data-action="maneuver" data-maneuver="scan" data-tooltip="{{scan.tip}}"><i class="fa-solid fa-crosshairs"></i> Scan <small>{{scan.cost}}</small></button>{{/if}}
         <button type="button" data-action="roll" data-type="clash" data-key="might"><i class="fa-solid fa-dumbbell"></i> Might Clash</button>
+        <button type="button" data-action="maneuver" data-maneuver="clash" data-tooltip="{{localize 'DBU.Clash.Tip'}}"><i class="fa-solid fa-people-pulling"></i> {{localize "DBU.Clash.Button"}}</button>
         <button type="button" data-action="roll" data-type="stress"><i class="fa-solid fa-bolt-lightning"></i> Stress Test</button>
         <button type="button" data-action="maneuver" data-maneuver="revertAll"><i class="fa-solid fa-rotate-left"></i> Revert</button>
       </div>
+
+      {{#if traitUses.length}}
+      <h3 class="dbu-section" data-tooltip="{{localize 'DBU.TraitUse.Hint'}}">{{localize "DBU.TraitUse.Title"}}</h3>
+      <div class="dbu-maneuver-grid dbu-trait-uses">
+        {{#each traitUses as |u|}}
+        <button type="button" data-action="traitUse" data-key="{{u.key}}" data-tooltip="{{u.tip}}" {{#if u.blocked}}aria-disabled="true" style="opacity: 0.5"{{/if}}><i class="fa-solid {{#if u.blocked}}fa-ban{{else}}fa-wand-sparkles{{/if}}"></i> {{u.label}}{{#if u.uses}} <small>{{u.uses}}</small>{{/if}}</button>
+        {{/each}}
+      </div>
+      {{/if}}
 
       <h3 class="dbu-section">{{localize "DBU.Altitude.Section"}}</h3>
       <div class="dbu-height-panel">
@@ -118,7 +128,7 @@
           <div class="dbu-trigger-line">
             <input type="text" class="label" name="system.resources.{{row.i}}.name" value="{{row.r.name}}">
             <label class="check" data-tooltip="{{localize 'DBU.Split.ToggleTip'}}"><input type="checkbox" name="system.resources.{{row.i}}.split" {{checked row.r.split}}> {{localize "DBU.Split.Toggle"}}</label>
-            <span class="dbu-res-total" data-tooltip="{{localize 'DBU.Stacks'}}">{{row.total}}{{#if row.r.max}}/{{row.r.max}}{{/if}}</span>
+            <span class="dbu-res-total" data-tooltip="{{localize 'DBU.Stacks'}}">{{row.total}}{{#if row.max}}/{{row.max}}{{/if}}</span>
             <a data-action="resourceStack" data-index="{{row.i}}" data-delta="1" data-tooltip="{{localize 'DBU.Split.Gain'}}"><i class="fa-solid fa-plus"></i></a>
             <a data-action="resourceStack" data-index="{{row.i}}" data-delta="-1" data-tooltip="{{localize 'DBU.Split.Lose'}}"><i class="fa-solid fa-minus"></i></a>
             <a data-action="removeResource" data-index="{{row.i}}"><i class="fa-solid fa-trash"></i></a>

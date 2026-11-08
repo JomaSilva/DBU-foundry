@@ -151,7 +151,11 @@ export function collisionDamage(actor, h, { bonus = 0, double = false, halve = 0
   let damage = hardnessValue(rank, bT) + bonus;
   if ( h?.dangerous ) damage *= 2;
   if ( double ) damage *= 2;
-  const halves = halve + ((h?.bouncy || h?.rubbery || h?.fragile) ? 1 : 0);
+  // Q "collision.ignore": no Collision Damage at all
+  if ( (actor?.system?.buckets?.["collision.ignore"]?.total ?? 0) > 0 ) return { damage: 0, rank };
+  // Q "collision.halve": the Collision Damage this actor takes is halved (once, however many pieces)
+  const own = ((actor?.system?.buckets?.["collision.halve"]?.total ?? 0) > 0) ? 1 : 0;
+  const halves = halve + own + ((h?.bouncy || h?.rubbery || h?.fragile) ? 1 : 0);
   for ( let i = 0; i < halves; i++ ) damage = Math.floor(damage / 2);
   return { damage, rank };
 }
@@ -263,10 +267,10 @@ async function askReaction(other, movedName, mover) {
   if ( choice !== "clash" ) return choice ?? "none";
   // Against an effect not caused by a character the Might Clash is won automatically
   if ( !mover ) return "stopped";
-  const theirs = await actor.rollClash("might");
-  const mine = await mover.rollClash("might");
-  // The character responsible for the movement is the Defender of that Clash
-  return ((theirs?.total ?? 0) > (mine?.total ?? 0)) ? "stopped" : "lost";
+  // The character responsible for the movement is the Defender of that Clash (combat/clash.mjs; ties go to it)
+  const { resolveClash } = await import("./clash.mjs");
+  const r = await resolveClash(actor, mover, { mine: "might", via: "collision", card: false });
+  return r?.won ? "stopped" : "lost";
 }
 
 /**

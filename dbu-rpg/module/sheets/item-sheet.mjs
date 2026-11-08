@@ -4,6 +4,7 @@ import { autoOfficialText, fetchOfficialText, isStubDescription, officialTextOf,
 import { defaultAuraKey } from "../canvas/token-auras.mjs";
 import { FX_EXTRAS, FX_SHAPES, FX_SIZES, previewSignatureFx, profileLook } from "../canvas/attack-fx.mjs";
 import { aspectLabel } from "../rules/aspects.mjs";
+import { TRIGGER_DURATIONS, TRIGGER_EFFECTS, TRIGGER_EVENTS, TRIGGER_MODES, TRIGGER_TARGETS } from "../vocab/index.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ItemSheetV2 } = foundry.applications.sheets;
@@ -57,7 +58,10 @@ function auraContext(item) {
       grade,
       text: (item.system.gradeAspects ?? []).filter(g => g.grade === grade).map(g => aspectLabel(g)).join(", "),
       reached: (item.system.grade ?? 1) >= grade
-    }))
+    })),
+    // I2: the Transformations of the same character an Evolved Stage may evolve (its Original Form)
+    originalChoices: Object.fromEntries((item.actor?.items ?? []).filter(i => (i.type === "transformation") && (i.id !== item.id)
+      && (i.system.transType !== "evolved")).map(i => [i.name, i.name]))
   };
 }
 
@@ -65,12 +69,20 @@ function auraContext(item) {
  * Stack). */
 export function triggerOptions({ stackGain = false } = {}) {
   const map = (keys, prefix) => keys.map(k => ({ value: k, label: L(`${prefix}.${k}`) }));
-  const events = ["startOfRound", "endOfRound", "startOfTurn", "endOfTurn", "startOfEncounter", ...(stackGain ? ["stackGain"] : [])];
+  // The vocabulary of module/vocab/index.mjs (the base lists, then what the feature packages add); "use" (an Activated
+  // Trait: a button of the actor sheet's Combat tab) stays last
+  const events = TRIGGER_EVENTS.filter(e => ((e !== "stackGain") || stackGain) && (e !== "use")).concat("use");
+  // An event label from a package that only gave the card title ("DBU.Trigger.Event.<event>")
+  const eventLabel = k => (game.i18n.has?.(`DBU.Trigger.EventLabel.${k}`) === false) && game.i18n.has?.(`DBU.Trigger.Event.${k}`)
+    ? L(`DBU.Trigger.Event.${k}`, { name: "", round: "" }).replace(/\s*[—-]\s*$/, "") : L(`DBU.Trigger.EventLabel.${k}`);
   return {
-    triggerEvents: map(events, "DBU.Trigger.EventLabel"),
-    triggerEffects: map(["life", "ki", "capacity", "counters", "actions", "resource", "resourceSet", "state", "condition", "message"], "DBU.Trigger.Effect"),
-    triggerModes: map(["auto", "ask", "remind"], "DBU.Trigger.Mode"),
-    triggerDurations: map(["none", "endOfTurn", "startOfNextTurn", "endOfNextTurn", "endOfRound", "encounter"], "DBU.Trigger.Duration")
+    triggerEvents: events.map(k => ({ value: k, label: eventLabel(k) })),
+    triggerEffects: map(TRIGGER_EFFECTS, "DBU.Trigger.Effect"),
+    triggerModes: map(TRIGGER_MODES, "DBU.Trigger.Mode"),
+    triggerTargets: map(TRIGGER_TARGETS, "DBU.Trigger.Target"),
+    triggerDurations: map(TRIGGER_DURATIONS, "DBU.Trigger.Duration"),
+    // B4: when the effect applies after the trigger's check
+    triggerOnCheck: [{ value: "", label: "—" }, ...map(["success", "fail"], "DBU.Trigger.OnCheck")]
   };
 }
 
@@ -148,7 +160,9 @@ export class DBUItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
       modifierTargets: Object.entries(DBU.modifierTargets).map(([k, v]) => ({ value: k, label: `${L(v)} [${k}]` })),
       talentCategories: DBU.talentCategories.map(c => ({ value: c, label: c })),
       ...triggerOptions({ stackGain: item.type === "transformation" }),
-      sizeOptions: DBU.SIZE_ORDER.map(k => ({ value: k, label: L(DBU.sizes[k].label) }))
+      sizeOptions: DBU.SIZE_ORDER.map(k => ({ value: k, label: L(DBU.sizes[k].label) })),
+      // What a Trait gives with it (Maneuvers, Unique Abilities...), added to the Character with the Trait
+      grants: (item.flags?.["dbu-rpg"]?.grants ?? []).map(g => `${g.name} (${L(`TYPES.Item.${g.type}`)})`).join(", ")
     });
     if ( item.type === "signature" ) this.#prepareSignature(context);
     if ( item.type === "apparel" ) {

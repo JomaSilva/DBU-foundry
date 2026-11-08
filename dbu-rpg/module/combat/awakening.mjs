@@ -13,7 +13,7 @@ import {
 import { evaluate, test } from "../rules/formula.mjs";
 import { parseTrait } from "../rules/traits.mjs";
 import { safeUpdate } from "../socket.mjs";
-import { applyTriggerEffect, encounterOf } from "./triggers.mjs";
+import { applyTriggerEffect, encounterOf, fireEvent } from "./triggers.mjs";
 
 const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
 const INFO_CARD = "systems/dbu-rpg/templates/chat/info-card.hbs";
@@ -73,7 +73,19 @@ export async function gainStack(actor, item, { temp = 0, free = false, note = ""
   }
   // A permanent Stack goes below the Temporary ones: those are the newest, the ones the end of the encounter takes away
   if ( !temp && tempsBefore ) await sinkNewStack(actor, item.id, tempsBefore);
+  stackEvents(actor, item, { stacks: before + 1, temp, free });
   return true;
+}
+
+/**
+ * E4: an Awakening gained a Stack: "stackGain" (the effects of that Awakening; its reminders are on the Stack card) and
+ * "awakeningGain" (every item of the character: @awk_<slug> = 1 for the Awakening, @temp, @tempLevel, @free, @stacksNow).
+ */
+function stackEvents(actor, item, { stacks = 1, temp = 0, free = false } = {}) {
+  const scope = { itemId: item.id, [`awk_${awakeningSlug(item.name)}`]: 1, temp: temp ? 1 : 0, tempLevel: temp || 0, free: free ? 1 : 0,
+    stacksNow: stacks };
+  fireEvent(actor, "stackGain", { scope });
+  fireEvent(actor, "awakeningGain", { scope });
 }
 
 /** Move the newest Stack's picks and note below the `temps` Temporary Stacks (once it has made all its picks). */
@@ -240,7 +252,9 @@ async function stackCard(actor, item, before, after, { temp = 0, free = false, s
     if ( points.length ) lines.push(L(gained ? "DBU.Stack.PointsGained" : "DBU.Stack.PointsLost", { list: points.join(" · ") }));
     // "Upon gaining a stack of this Awakening..." reminders
     if ( gained ) {
+      // (E4: the other "stackGain" triggers run as an event)
       const reminders = (s.triggers ?? []).filter(t => (t.event === "stackGain") && t.active !== false
+        && ((t.effect === "message") || (t.mode === "remind"))
         && (stackChoiceCount(s, t.label) !== 0)).map(t => t.value ? `${t.label}: ${t.value}` : t.label);
       for ( const r of new Set(reminders) ) lines.push(L("DBU.Stack.Reminder", { text: r }));
     }
@@ -402,7 +416,10 @@ export async function gainAwakening(actor, name, options = {}) {
   // Temporary Awakenings never give a New Level of Power
   if ( options.temp ) data.system.everEntered = true;
   const [item] = await actor.createEmbeddedDocuments("Item", [data]);
-  if ( item ) await stackCard(actor, item, 0, 1, options);
+  if ( item ) {
+    await stackCard(actor, item, 0, 1, options);
+    stackEvents(actor, item, { stacks: 1, temp: options.temp ?? 0, free: !!options.free });
+  }
   return item ?? null;
 }
 

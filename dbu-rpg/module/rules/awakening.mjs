@@ -61,7 +61,7 @@ export function blockedOptions(choice, current = []) {
  * - A Trait that is an option (the Technical Trait "Focused Blaster") applies once it was picked, otherwise not.
  */
 export function stackChoiceCount(s, label) {
-  const choices = (s?.choices ?? []).filter(c => c.perStack);
+  const choices = (s?.choices ?? []).filter(c => c.perStack || isTraitChoice(s, c));
   if ( !choices.length ) return null;
   const text = String(label ?? "");
   for ( const c of choices ) {
@@ -73,16 +73,24 @@ export function stackChoiceCount(s, label) {
     if ( !isTraitChoice(s, c) ) continue;
     // "Focused Blaster", or one of its own options ("Focused Blaster — opção: ...")
     const own = c.options.find(o => (text === o) || text.startsWith(`${o} — `));
-    if ( own ) return (c.selected ?? []).includes(own) ? 1 : 0;
+    if ( own ) {
+      if ( !(c.selected ?? []).includes(own) ) return 0;
+      // R: an option piece of the picked Trait ("<Trait> — opção: X") that one of its own choices lists: its "active"
+      // (switched by that choice) decides
+      const opt = text.startsWith(`${own}${OPTION_SEP}`) ? text.slice(own.length + OPTION_SEP.length) : null;
+      if ( (opt !== null) && (s?.choices ?? []).some(x => (x.trait === own) && (x.options ?? []).includes(opt)) ) return null;
+      return 1;
+    }
   }
   return null;
 }
 
-/** Traits of this Transformation that are per-Stack options nobody picked: they do not work. */
+/** Traits of this Transformation that are options (per Stack, or picked once out of a group) nobody picked: they do not
+ * work. */
 export function unchosenTraits(s) {
   const out = new Set();
   for ( const c of s?.choices ?? [] ) {
-    if ( !c.perStack || !isTraitChoice(s, c) ) continue;
+    if ( !isTraitChoice(s, c) ) continue;
     for ( const o of c.options ) if ( !(c.selected ?? []).includes(o) ) out.add(o);
   }
   return out;

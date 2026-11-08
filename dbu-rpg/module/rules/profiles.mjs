@@ -107,7 +107,7 @@ export function favoredElements(actor) {
     }
     if ( !inUse ) continue;
     for ( const c of s.choices ?? [] ) {
-      if ( c.options?.length && c.options.every(o => elementalKey(o)) ) for ( const o of c.selected ?? [] ) add(o);
+      if ( !c.entry && c.options?.length && c.options.every(o => elementalKey(o)) ) for ( const o of c.selected ?? [] ) add(o);
     }
   }
   return [...keys];

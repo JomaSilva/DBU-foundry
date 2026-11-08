@@ -1,0 +1,142 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Target": {
+        "enterBlock": "Transformação: não pode entrar nesta (com a condição; lida com as variáveis dela, mesmo fora dela)",
+        "combineBlock": "Transformação: usada sozinha (não combina com outra, nos dois sentidos)",
+        "leaveBlock": "Transformação: não pode sair desta por escolha (só para outro Stage da mesma Line)",
+        "leaveWhen": "Transformação: sai desta assim que a condição valer (2: sem a Stress Exhaustion do Exhausting; Awakening: o Grand Awakening acaba)",
+        "grandTrigger": "Awakening: o Grand Trigger foi cumprido (oferece o Full Awakening)"
+      },
+      "Trigger": {
+        "Event": {
+          "maneuverUsed": "Manobra usada — {name}",
+          "itemUsed": "Item usado — {name}",
+          "defeatEnd": "Deixou de estar derrotado — {name}",
+          "allyHit": "Aliado acertou um oponente — {name}",
+          "allyDamaged": "Aliado levou dano — {name}",
+          "awakeningGain": "Awakening ganhou um stack — {name}",
+          "apparelDoff": "Apparel tirado — {name}"
+        },
+        "EventLabel": {
+          "maneuverUsed": "Ao usar uma manobra ou Unique Ability (@via_<nome>)",
+          "itemUsed": "Ao usar um item (Basic Item, Accessory)",
+          "defeatEnd": "Ao deixar de estar derrotado",
+          "allyHit": "Quando o ataque de um aliado causa dano a um oponente",
+          "allyDamaged": "Quando um ataque causa dano a um aliado",
+          "awakeningGain": "Quando um Awakening seu ganha um stack (@awk_<nome>)",
+          "apparelDoff": "Quando um Apparel que você vestia é tirado (ou quebra: @broken)"
+        },
+        "Effect": {
+          "leave": "Sair de transformação(ões)"
+        },
+        "Maneuver": {
+          "standard": "Standard Maneuver de 1 Ação",
+          "exploit": "Exploit Maneuver",
+          "feint": "Feint Maneuver",
+          "standardReminder": "Use uma Standard Maneuver de 1 Ação como Out-of-Sequence (sem gastar Ação): escolha uma das que o sistema usa, ou faça a sua na ficha / no mapa.",
+          "itemMissing": "{actor} não tem \"{name}\" na ficha."
+        },
+        "Leave": {
+          "this": "esta transformação",
+          "all": "todas as transformações",
+          "enhancements": "os Enhancements",
+          "forms": "as Forms",
+          "grandAwakening": "o Grand Awakening"
+        },
+        "LeaveShort": "Sair de: {what}"
+      },
+      "TransRule": {
+        "EnterBlocked": "{name}: não pode entrar agora ({why}).",
+        "EnterBlockedOf": "{name}: {by} impede entrar numa transformação com \"{what}\" no nome.",
+        "EnterBlockedAspect": "{name}: {by} impede entrar numa transformação com o Aspect {what}.",
+        "EnterBlockedType": "{name}: {by} impede entrar em: {what}.",
+        "CombineBlocked": "{name} não pode ser usada junto com {by}.",
+        "LeaveBlocked": "{name}: não pode sair dela por escolha ({why}).",
+        "Because": "Motivo: {why}",
+        "GrandEnded": "O Grand Awakening de {name} acabou.",
+        "GrandTitle": "Grand Trigger — {name}",
+        "GrandMet": "O Grand Trigger de {name} foi cumprido ({why}): você pode usar o Full Awakening Maneuver.",
+        "GrandButton": "Full Awakening",
+        "Left": "Saiu de: {list}",
+        "AlreadyIn": "Você já está em {name}."
+      },
+      "ItemUse": {
+        "Button": "Usar",
+        "Subtitle": "{type} · usado",
+        "NoneLeft": "Não sobrou nenhum(a) {name}.",
+        "Consumed": "Consumido: restam {n}."
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Target": {
+        "enterBlock": "Transformation: you cannot enter this one (with the condition; read with its own variables, even outside it)",
+        "combineBlock": "Transformation: used alone (no other one together with it, both ways)",
+        "leaveBlock": "Transformation: you cannot leave this one by choice (only into another Stage of its Line)",
+        "leaveWhen": "Transformation: you leave this one as soon as the condition holds (2: without the Stress Exhaustion of Exhausting; Awakening: its Grand Awakening ends)",
+        "grandTrigger": "Awakening: its Grand Trigger is met (the Full Awakening is offered)"
+      },
+      "Trigger": {
+        "Event": {
+          "maneuverUsed": "Maneuver used — {name}",
+          "itemUsed": "Item used — {name}",
+          "defeatEnd": "No longer Defeated — {name}",
+          "allyHit": "Ally hit an Opponent — {name}",
+          "allyDamaged": "Ally damaged — {name}",
+          "awakeningGain": "Awakening gained a stack — {name}",
+          "apparelDoff": "Apparel doffed — {name}"
+        },
+        "EventLabel": {
+          "maneuverUsed": "When you use a Maneuver or Unique Ability (@via_<name>)",
+          "itemUsed": "When you use an item (Basic Item, Accessory)",
+          "defeatEnd": "When you stop being Defeated",
+          "allyHit": "When an Ally's attack damages an Opponent",
+          "allyDamaged": "When an attack damages an Ally",
+          "awakeningGain": "When one of your Awakenings gains a stack (@awk_<name>)",
+          "apparelDoff": "When an Apparel piece you wore is doffed (or breaks: @broken)"
+        },
+        "Effect": {
+          "leave": "Leave Transformation(s)"
+        },
+        "Maneuver": {
+          "standard": "1-Action Standard Maneuver",
+          "exploit": "Exploit Maneuver",
+          "feint": "Feint Maneuver",
+          "standardReminder": "Use a 1-Action Standard Maneuver as an Out-of-Sequence Maneuver (no Action spent): pick one the system uses, or make yours on the sheet / the map.",
+          "itemMissing": "{actor} has no \"{name}\" on the sheet."
+        },
+        "Leave": {
+          "this": "this Transformation",
+          "all": "every Transformation",
+          "enhancements": "the Enhancements",
+          "forms": "the Forms",
+          "grandAwakening": "the Grand Awakening"
+        },
+        "LeaveShort": "Leave: {what}"
+      },
+      "TransRule": {
+        "EnterBlocked": "{name}: you cannot enter it now ({why}).",
+        "EnterBlockedOf": "{name}: {by} forbids entering a Transformation with \"{what}\" in its name.",
+        "EnterBlockedAspect": "{name}: {by} forbids entering a Transformation with the {what} Aspect.",
+        "EnterBlockedType": "{name}: {by} forbids entering: {what}.",
+        "CombineBlocked": "{name} cannot be used together with {by}.",
+        "LeaveBlocked": "{name}: you cannot leave it by choice ({why}).",
+        "Because": "Because: {why}",
+        "GrandEnded": "The Grand Awakening of {name} ended.",
+        "GrandTitle": "Grand Trigger — {name}",
+        "GrandMet": "The Grand Trigger of {name} is met ({why}): you may use the Full Awakening Maneuver.",
+        "GrandButton": "Full Awakening",
+        "Left": "Left: {list}",
+        "AlreadyIn": "You are already in {name}."
+      },
+      "ItemUse": {
+        "Button": "Use",
+        "Subtitle": "{type} · used",
+        "NoneLeft": "No {name} left.",
+        "Consumed": "Consumed: {n} left."
+      }
+    }
+  }
+}

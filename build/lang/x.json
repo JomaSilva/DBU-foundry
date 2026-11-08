@@ -1,0 +1,36 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Legend": {
+        "Effect": "Legend Realized ({what})",
+        "CurrentForm": "Forma atual",
+        "NoForm": "Sem Forma para o Legend Realized.",
+        "NotIn": "Você não está em {name}.",
+        "NoneNow": "{name}: o Legend Realized já foi usado neste encontro.",
+        "AlreadyUsed": "{name}: o Legend Realized desta Forma já foi usado neste encontro."
+      },
+      "Trigger": {
+        "Effect": {
+          "legend": "Legend Realized (fora da Transformation Maneuver)"
+        }
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Legend": {
+        "Effect": "Legend Realized ({what})",
+        "CurrentForm": "current Form",
+        "NoForm": "No Form for the Legend Realized.",
+        "NotIn": "You are not in {name}.",
+        "NoneNow": "{name}: its Legend Realized was already used this encounter.",
+        "AlreadyUsed": "{name}: this Form's Legend Realized was already used this encounter."
+      },
+      "Trigger": {
+        "Effect": {
+          "legend": "Legend Realized (outside of the Transformation Maneuver)"
+        }
+      }
+    }
+  }
+}

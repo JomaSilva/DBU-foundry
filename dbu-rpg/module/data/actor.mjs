@@ -108,7 +108,12 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
         absoluteAttacks: intField(0, { min: 0 }),
         // A Burst Limit was triggered this Combat Encounter (1/Encounter)
         burstUsed: new BooleanField({ initial: false }),
-        legendRealized: new ArrayField(new StringField())
+        legendRealized: new ArrayField(new StringField()),
+        // Energy Charges and Surges used this Combat Round; times an attack damaged you since the start of your last turn
+        // (@chargesRound, @surgesRound, @damagedSinceTurn)
+        chargesRound: intField(0, { min: 0 }),
+        surgesRound: intField(0, { min: 0 }),
+        damagedSinceTurn: intField(0, { min: 0 })
       }),
       resources: new ArrayField(new SchemaField({
         name: new StringField({ blank: true, initial: "" }),

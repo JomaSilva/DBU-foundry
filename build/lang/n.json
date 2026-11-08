@@ -1,0 +1,48 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Settings": {
+        "UseCosts": {
+          "Name": "Custo ao usar manobras e Unique Abilities",
+          "Hint": "O que o botão Usar faz com o custo de KP e de Ações das Special Maneuvers e Unique Abilities (com as reduções dos traços).",
+          "off": "Nada (o jogador paga à mão)",
+          "show": "Mostrar o custo no cartão",
+          "pay": "Cobrar (e recusar se não puder pagar)"
+        }
+      },
+      "Use": {
+        "Cost": "Custo: {cost}",
+        "Paid": "Pago: {cost}",
+        "Free": "Sem custo de KP (efeito)",
+        "CantPay": "{name}: {why}"
+      },
+      "Target": {
+        "kpCostUse": "KP de usar esta manobra / Unique Ability (± KP)",
+        "kpCostUseFree": "Usar esta manobra / Unique Ability sem custo de KP (1)"
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Settings": {
+        "UseCosts": {
+          "Name": "Cost of using Maneuvers and Unique Abilities",
+          "Hint": "What the Use button does with the KP and Action Cost of Special Maneuvers and Unique Abilities (with the Traits' reductions).",
+          "off": "Nothing (the player pays by hand)",
+          "show": "Show the cost on the card",
+          "pay": "Pay it (and refuse when it cannot be paid)"
+        }
+      },
+      "Use": {
+        "Cost": "Cost: {cost}",
+        "Paid": "Paid: {cost}",
+        "Free": "No KP cost (an effect)",
+        "CantPay": "{name}: {why}"
+      },
+      "Target": {
+        "kpCostUse": "KP to use this Maneuver / Unique Ability (± KP)",
+        "kpCostUseFree": "Use this Maneuver / Unique Ability for no KP (1)"
+      }
+    }
+  }
+}

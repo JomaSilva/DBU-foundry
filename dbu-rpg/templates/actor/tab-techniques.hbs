@@ -53,9 +53,10 @@
           {{#each u.problems as |p|}}<div class="dbu-mini-error">{{p}}</div>{{/each}}</td>
         <td>{{u.item.system.abilityType}}</td>
         <td>{{u.item.system.maneuverType}} ({{u.item.system.actionCost}})</td>
-        <td>{{u.item.system.kpCost}}</td>
+        <td>{{u.item.system.kpCost}}{{#if u.kpNote}} <small data-tooltip="{{localize 'DBU.UA.KpEffects'}}">({{u.kpNote}} KP)</small>{{/if}}</td>
         <td class="center">{{u.tp}}</td>
         <td class="dbu-controls">
+          <a data-action="itemUse" data-tooltip="{{localize 'DBU.Item.Use'}}"><i class="fa-solid fa-hand-sparkles"></i></a>
           <a data-action="itemChat"><i class="fa-solid fa-comment"></i></a>
           <a data-action="itemDelete"><i class="fa-solid fa-trash"></i></a>
         </td>
@@ -79,7 +80,7 @@
         <td>{{m.system.maneuverType}}</td>
         <td>{{m.system.actionCost}}</td>
         <td>{{#if m.system.god}}<span class="dbu-dkp-cost"><i class="fa-solid fa-sun"></i> DKP {{m.system.dkpCost}}</span>{{else}}KP {{m.system.kpCost}}{{/if}}</td>
-        <td class="dbu-controls">{{#if m.system.god}}<a data-action="itemUse" data-tooltip="{{localize 'DBU.God.Use'}}"><i class="fa-solid fa-sun"></i></a> {{/if}}<a data-action="itemChat"><i class="fa-solid fa-comment"></i></a> <a data-action="itemDelete"><i class="fa-solid fa-trash"></i></a></td>
+        <td class="dbu-controls">{{#if m.system.god}}<a data-action="itemUse" data-tooltip="{{localize 'DBU.God.Use'}}"><i class="fa-solid fa-sun"></i></a> {{else}}<a data-action="itemUse" data-tooltip="{{localize 'DBU.Item.Use'}}"><i class="fa-solid fa-hand-sparkles"></i></a> {{/if}}<a data-action="itemChat"><i class="fa-solid fa-comment"></i></a> <a data-action="itemDelete"><i class="fa-solid fa-trash"></i></a></td>
       </tr>
       {{else}}
       <tr><td class="dbu-empty">{{localize "DBU.SpecialManeuversHint"}}</td></tr>

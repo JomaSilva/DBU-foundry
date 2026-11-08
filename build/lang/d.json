@@ -1,0 +1,36 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Trigger": {
+        "Event": {
+          "fxUsed": "Efeito usado — {name}"
+        },
+        "EventLabel": {
+          "fxUsed": "Quando um efeito (referência) é aplicado"
+        }
+      },
+      "Grand": {
+        "TriggerMet": "Grand Trigger de {name} cumprido ({why}).",
+        "TriggerNotMet": "O Grand Trigger de {name} ainda não foi cumprido.",
+        "TriggerNotMetGM": "O Grand Trigger de {name} ainda não foi cumprido: só o mestre pode ativar mesmo assim."
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Trigger": {
+        "Event": {
+          "fxUsed": "Effect used — {name}"
+        },
+        "EventLabel": {
+          "fxUsed": "When an effect (reference) is applied"
+        }
+      },
+      "Grand": {
+        "TriggerMet": "Grand Trigger of {name} met ({why}).",
+        "TriggerNotMet": "The Grand Trigger of {name} is not met yet.",
+        "TriggerNotMetGM": "The Grand Trigger of {name} is not met yet: only the GM may activate it anyway."
+      }
+    }
+  }
+}

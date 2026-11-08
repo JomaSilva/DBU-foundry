@@ -114,6 +114,17 @@ export const SIGNATURE_SUMMARIES = {
   unitedAttack: "Exige um aliado com a mesma técnica (United Attack)."
 };
 
+/** R: the Combat Condition key of the Condition Advantage's choice ("Guard Down" → guardDown), "" when none or unknown. */
+export function conditionChoiceKey(choice) {
+  const c = String(choice ?? "").toLowerCase().replace(/[^a-z]/g, "");
+  if ( !c ) return "";
+  if ( c.startsWith("guard") ) return "guardDown";
+  if ( c.startsWith("drain") ) return "drained";
+  if ( c.startsWith("shak") ) return "shaken";
+  if ( c.startsWith("poison") ) return "poisoned";
+  return "";
+}
+
 /** Build a lookup of the technique's options: key → rank (and choice). */
 function optionMap(sig) {
   const map = new Map();
@@ -237,8 +248,11 @@ const REQUIREMENTS = {
 /**
  * Compute TP Cost, KP Cost (in multiples of T), Strike/Wound adjustments and rule problems of a Signature Technique.
  * Pure: only depends on the technique, plus the owning actor for skill/item based requirements.
+ * `buckets`: the owner's modifier buckets for the Technique Point modifiers (rules/derived.mjs passes them once they
+ * exist): "tpStart.mult.<foundation>" multiplies the starting TP Cost before the 8 TP floor, "tpCost.signature" adds to
+ * the TP Cost after every other calculation (minimum 0; the KP Cost is worked out without it).
  */
-export function computeSignature(sig, actor = null) {
+export function computeSignature(sig, actor = null, { buckets = null } = {}) {
   const errors = [];
   const warnings = [];
   const profileKey = sig.profile;
@@ -313,7 +327,9 @@ export function computeSignature(sig, actor = null) {
   }
 
   // TP Cost: starts at 8 (Simple: 4), Ultimate +4 at the end, never below 8
-  const start = fx.sigStart;
+  let start = fx.sigStart;
+  const startMult = buckets?.[`tpStart.mult.${sig.foundation}`];
+  if ( startMult ) start = Math.max(0, Math.floor((start * startMult.total) + 1e-9));
   let tp = start + tpAdv - tpDis;
   if ( ultimate ) tp += 4;
   tp += sig.tpAdjust ?? 0;
@@ -332,6 +348,9 @@ export function computeSignature(sig, actor = null) {
     - ((has("backFlip") && has("chargingAssault")) ? 1 : 0)
     - (sig.fused ? 4 : 0);
   const kpMinUnits = baseKp / 2;
+  // "tpCost.signature": ± TP after every other calculation (minimum 0), the KP Cost unchanged
+  const tpBase = tp;
+  if ( buckets?.["tpCost.signature"] ) tp = Math.max(0, tp + buckets["tpCost.signature"].total);
 
   // Combat roll adjustments (multiples of T unless noted)
   const superAdv = has("superAdvantage")?.choice ?? "";
@@ -345,6 +364,7 @@ export function computeSignature(sig, actor = null) {
 
   return {
     tp, tpRaw, tpStart: start, tpAdvantages: tpAdv, tpDisadvantages: tpDis, breakdown,
+    ...((tp !== tpBase) ? { tpBase } : {}),
     kpUnits, kpAdjust, kpMinUnits, baseKp,
     strikeT, woundT, longShotT, chargeCategory, maxCharges,
     // With different Damage Categories the highest one applies
@@ -368,12 +388,103 @@ export function computeSignature(sig, actor = null) {
     shortRange: rank("shortRange"),
     climax: rank("climaxAttack"),
     mandatoryCharge: rank("mandatoryCharge"),
+    // R: the Condition Advantage's Combat Condition (its choice, as typed on the sheet: Guard Down, Drained, Shaken, Poisoned)
+    condition: conditionChoiceKey(has("condition")?.choice),
     // Knockback (free with the Launching Profile) and what pushes it further
     knockback: !!has("knockback") || free.has("knockback"),
     forcefulLaunch: rank("forcefulLaunch"),
     preciseStrike: !!has("preciseStrike"),
     errors, warnings
   };
+}
+
+/**
+ * Package F: the Advantages / Disadvantages and the Super Profile that effects add to ONE attack (attack.advantage.<key>,
+ * attack.superProfile.<key>). The technique is worked out again with them, but the effects give them for free: the Ki
+ * Point Cost keeps the technique's own units (only the Efficiency / Inefficiency ranks added change it), the TP Cost
+ * stays, and nothing added makes the technique invalid (its errors stay the original ones: requirements and rank limits
+ * of what an effect adds are the effect's business). A Basic Attack works the same on a stand-in technique of its
+ * Profile with no options (`basic`: true; the caller adds what changed).
+ * @param {object|null} sig      The Signature's system data (null: a Basic Attack)
+ * @param {object} grants        { options: { <key>: ranks (negative removes) }, superProfile: <key>|"" }
+ * @param {Actor} actor
+ * @param {object} [options]
+ * @param {object} [options.buckets]  The owner's modifier buckets (as derived.mjs gives computeSignature)
+ * @param {string} [options.profileKey] / [options.foundation]  A Basic Attack's Profile and Foundation
+ * @returns {{sig: object, comp: object, base: object, added: string[], refused: string[], basic: boolean}|null}  null
+ *   when nothing is added
+ */
+export function grantedSignature(sig, grants, actor = null, { buckets = null, profileKey = "simple", foundation = "physical" } = {}) {
+  const wanted = Object.entries(grants?.options ?? {}).filter(([k, n]) => k && Number(n));
+  const superKey = String(grants?.superProfile ?? "").trim();
+  if ( !wanted.length && !superKey ) return null;
+  const basic = !sig;
+  const base = sig ?? { profile: profileKey, foundation, level: "super", advantages: [], disadvantages: [], superProfile: "",
+    multiProfile: "", tpAdjust: 0, fused: false, fusedWoundT: 0 };
+  const baseComp = (!basic && base.computed) ? base.computed : computeSignature(base, actor, { buckets });
+  // (the fields the rules and the attack read, picked one by one: a data model's own fields may not spread)
+  const pick = ["profile", "foundation", "level", "superProfile", "multiProfile", "tpAdjust", "fused", "fusedWoundT", "vfx", "tags",
+    "usedThisEncounter"];
+  const next = { ...Object.fromEntries(pick.map(k => [k, base[k]])), advantages: (base.advantages ?? []).map(o => ({ ...o })),
+    disadvantages: (base.disadvantages ?? []).map(o => ({ ...o })) };
+  const added = [];
+  const refused = [];
+  for ( const [key, n] of wanted ) {
+    const def = SIGNATURE_OPTIONS[key];
+    if ( !def ) { refused.push(key); continue; }
+    const list = (def.kind === "advantage") ? next.advantages : next.disadvantages;
+    const i = list.findIndex(o => o.key === key);
+    const rank = Math.round(Number(n));
+    if ( i >= 0 ) {
+      list[i].rank = Math.max(1, list[i].rank || 1) + rank;
+      if ( list[i].rank <= 0 ) list.splice(i, 1);
+    }
+    else if ( rank > 0 ) list.push({ key, rank, choice: "" });
+    else continue;
+    added.push(`${def.name}${(rank > 0) ? ` +${rank}` : ` ${rank}`}`);
+  }
+  if ( superKey ) {
+    // A technique with a Super Profile cannot gain another one
+    if ( !DBU.superProfiles[superKey] || (base.superProfile && (base.superProfile !== superKey)) ) refused.push(superKey);
+    else if ( base.superProfile !== superKey ) {
+      next.superProfile = superKey;
+      added.push(DBU.superProfiles[superKey].label);
+    }
+  }
+  // Ascended Signature added to a Super Signature: it is used as an Ultimate for this attack
+  if ( !basic && next.advantages.some(o => o.key === "ascendedSignature") && (next.level === "super") ) next.level = "ultimate";
+  if ( !added.length ) return refused.length ? { sig: base, comp: baseComp, base: baseComp, added, refused, basic } : null;
+  let comp = computeSignature(next, actor, { buckets });
+  // R: an added option whose requirement or ranks the technique does not meet (an error it did not have) is refused
+  {
+    // (checked on the technique as it was, before Ascended Signature makes it an Ultimate for this attack)
+    const probe = (next.level !== base.level) ? computeSignature({ ...next, level: base.level }, actor, { buckets }) : comp;
+    const fresh = (probe.errors ?? []).filter(e => !(baseComp.errors ?? []).includes(e));
+    const bad = wanted.map(([k]) => k).filter(k => SIGNATURE_OPTIONS[k] && fresh.some(e => e.includes(SIGNATURE_OPTIONS[k].name)));
+    if ( bad.length ) {
+      for ( const k of bad ) {
+        const def = SIGNATURE_OPTIONS[k];
+        const list = (def.kind === "advantage") ? next.advantages : next.disadvantages;
+        const was = (def.kind === "advantage" ? base.advantages : base.disadvantages)?.find(o => o.key === k);
+        const i = list.findIndex(o => o.key === k);
+        if ( i >= 0 ) { if ( was ) list[i] = { ...was }; else list.splice(i, 1); }
+        refused.push(k);
+        const at = added.findIndex(a => a.startsWith(def.name));
+        if ( at >= 0 ) added.splice(at, 1);
+      }
+      if ( !added.length && !(superKey && (next.superProfile === superKey) && (base.superProfile !== superKey)) ) {
+        return { sig: base, comp: baseComp, base: baseComp, added, refused, basic };
+      }
+      comp = computeSignature(next, actor, { buckets });
+    }
+  }
+  // Free: the technique's own Ki Point Cost units and TP Cost stay; Efficiency / Inefficiency added still count
+  Object.assign(comp, { kpUnits: baseComp.kpUnits, kpMinUnits: baseComp.kpMinUnits, baseKp: baseComp.baseKp, tp: baseComp.tp,
+    tpRaw: baseComp.tpRaw, errors: [...(baseComp.errors ?? [])], warnings: [...(baseComp.warnings ?? [])] });
+  const kpRanks = k => ((next.advantages.find(o => o.key === k) ?? next.disadvantages.find(o => o.key === k))?.rank ?? 0)
+    - ((base.advantages.find(o => o.key === k) ?? base.disadvantages.find(o => o.key === k))?.rank ?? 0);
+  comp.kpAdjust = baseComp.kpAdjust + (4 * kpRanks("inefficiency")) - (4 * kpRanks("efficiency"));
+  return { sig: next, comp, base: baseComp, added, refused, basic };
 }
 
 /** Options grouped for the builder UI. */

@@ -5,6 +5,22 @@ import { awakeningCounts, stackTopReq } from "./awakening.mjs";
 import { favoredElements } from "./profiles.mjs";
 
 /**
+ * The Technique Points a Unique Ability costs on this sheet: what it costs by itself (listed cost, restrictions,
+ * advancements), plus the "tpCost.ua" modifiers and, for a Magical one (its type names Magical), the "tpCost.ua.magical"
+ * ones; never below half of its listed cost. A granted Unique Ability only pays its advancements.
+ */
+export function uaTpCost(item, sys) {
+  const s = item.system;
+  const own = s.tpSpent ?? 0;
+  if ( s.granted ) return own;
+  const b = sys?.buckets ?? {};
+  const magical = /magic/i.test(String(s.abilityType ?? ""));
+  const change = (b["tpCost.ua"]?.total ?? 0) + (magical ? (b["tpCost.ua.magical"]?.total ?? 0) : 0);
+  if ( !change ) return own;
+  return Math.max(Math.ceil((s.tpCost ?? 0) / 2), own + change);
+}
+
+/**
  * Rule checks for a DBU character sheet. Returns a list of problems:
  * { level: "error"|"warning"|"info", category, message }
  * error   = the sheet breaks a rule
@@ -86,6 +102,12 @@ export function validateActor(sys, actor) {
   else if ( race && (prog.racialRanksSpent < prog.racialRanks) ) {
     add("info", "skills", "DBU.Val.RacialRanksLeft", { n: prog.racialRanks - prog.racialRanksSpent });
   }
+  // Racial Skill Ranks given or taken by effects ("skillRanks.racial")
+  const racialFx = sys.buckets?.["skillRanks.racial"]?.total ?? 0;
+  if ( !isFusion && racialFx ) {
+    add("info", "skills", "DBU.Val.RacialRanksBudget", { race: prog.racialRanks - racialFx, fx: racialFx > 0 ? `+${racialFx}` : racialFx,
+      max: prog.racialRanks });
+  }
   if ( isFusion ) { /* idem */ }
   else if ( prog.skillRanksSpent > prog.skillRanksFromSI ) {
     add("error", "skills", "DBU.Val.SkillRanksOver", { spent: prog.skillRanksSpent, max: prog.skillRanksFromSI });
@@ -140,8 +162,10 @@ export function validateActor(sys, actor) {
     if ( !s.system.free && !s.system.granted ) tpSpent += c.tp;
     for ( const e of c.errors ) add("error", "signatures", "DBU.Val.SigProblem", { name: s.name, problem: e });
     for ( const w of c.warnings ) add("warning", "signatures", "DBU.Val.SigProblem", { name: s.name, problem: w });
-    if ( !s.system.granted && !s.system.free && (c.tp > sigCap) ) add("error", "signatures", "DBU.Val.SigCap", { name: s.name, tp: c.tp, cap: sigCap, top: bT });
-    if ( s.system.free && (c.tp > 20) ) add("error", "signatures", "DBU.Val.SigFree20", { name: s.name, tp: c.tp });
+    // (the caps are on the technique's own TP Cost, before a "tpCost.signature" discount)
+    const own = c.tpBase ?? c.tp;
+    if ( !s.system.granted && !s.system.free && (own > sigCap) ) add("error", "signatures", "DBU.Val.SigCap", { name: s.name, tp: own, cap: sigCap, top: bT });
+    if ( s.system.free && (own > 20) ) add("error", "signatures", "DBU.Val.SigFree20", { name: s.name, tp: own });
     if ( (s.system.foundation === "energy") && (sys.attributes.fo.score < 3) && !sys.flags.energyWithoutFO ) {
       add("error", "signatures", "DBU.Val.EnergyFO", { name: s.name });
     }
@@ -162,7 +186,7 @@ export function validateActor(sys, actor) {
 
   for ( const u of uas ) {
     // Unique Abilities a Fusion got from its Fused Characters are already paid for
-    if ( !(isFusion && u.flags?.["dbu-rpg"]?.fusion?.from) ) tpSpent += u.system.tpSpent;
+    if ( !(isFusion && u.flags?.["dbu-rpg"]?.fusion?.from) ) tpSpent += uaTpCost(u, sys);
     for ( const problem of checkPrerequisites(u, sys, actor) ) add("error", "abilities", "DBU.Val.Prereq", { name: u.name, problem });
     const restr = u.system.restrictions.filter(r => r.applied).reduce((t, r) => t + r.tp, 0);
     if ( !u.system.granted && ((u.system.tpCost - restr) < Math.ceil(u.system.tpCost / 2)) ) {
@@ -232,6 +256,13 @@ export function validateActor(sys, actor) {
     if ( greater > limits.greater ) add("error", "transformations", "DBU.Val.AwakGreater", { n: greater, max: limits.greater, top: bT });
   }
   if ( superA > 1 ) add("error", "transformations", "DBU.Val.AwakSuper");
+
+  /* ----- Bestial Limit: at most 4 Bestial Traits apply ----- */
+  const bestial = byType("racialTrait").filter(t => (t.system.group === "Bestial Traits") && (t.system.active !== false)).length;
+  if ( bestial > 4 ) add("warning", "traits", "DBU.Val.BestialLimit", { n: bestial });
+  // Custom Species: 2 Twinned Racial Traits
+  const twinned = byType("racialTrait").filter(t => (t.system.tier === "custom") && t.system.twinned).length;
+  if ( twinned > 2 ) add("warning", "traits", "DBU.Val.Twinned", { n: twinned });
 
   /* ----- Characteristics (Optional Rule) ----- */
   if ( R.characteristics ) {
@@ -349,7 +380,7 @@ function validateFusion(sys, actor, add) {
   }
   if ( !fs.syncedAt && comps.length ) add("warning", "fusion", "DBU.Fusion.NotSynced");
   // At most 7 Racial Traits: 2~4 Primary, the rest Secondary or Subrace (Method Traits and Modifiers do not count)
-  const traits = actor.items.filter(i => (i.type === "racialTrait") && ["primary", "secondary", "subrace", "factor"].includes(i.system.tier));
+  const traits = actor.items.filter(i => (i.type === "racialTrait") && ["primary", "secondary", "subrace", "factor", "custom"].includes(i.system.tier));
   const primaries = traits.filter(t => t.system.tier === "primary").length;
   if ( traits.length > FUSION_TRAIT_LIMITS.total ) add("error", "fusion", "DBU.Fusion.ErrTraits", { n: traits.length, max: FUSION_TRAIT_LIMITS.total });
   if ( traits.length && ((primaries < FUSION_TRAIT_LIMITS.primaryMin) || (primaries > FUSION_TRAIT_LIMITS.primaryMax)) ) {

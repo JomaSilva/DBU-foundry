@@ -73,12 +73,14 @@ export async function empower(actor) {
   const target = Array.from(game.user.targets ?? []).find(t => t.actor && (t.actor !== actor));
   const ally = target?.actor;
   if ( !ally?.system?.ki ) return ui.notifications.warn(L("DBU.Empower.NoTarget"));
-  const fighting = !!game.combat?.started;
-  const maxActions = fighting ? Math.max(0, sys.combat.actions ?? 0) : 3;
+  const fighting = !!game.combat?.started && !actor._dbuOutOfSequence;
+  // B5: a "maneuver" effect's `with: "actions=<n>"` counts that many Actions (an Out-of-Sequence use spends none)
+  const forced = Math.floor(Number(actor._dbuWith?.actions));
+  const maxActions = (forced > 0) ? forced : (fighting ? Math.max(0, sys.combat.actions ?? 0) : 3);
   if ( maxActions < 1 ) return ui.notifications.warn(L("DBU.Attack.ErrActions", { need: 1, have: 0 }));
   const might = sys.aptitudes?.might ?? 0;
   const divine = !!(sys.dkp?.usable && ally.system.dkp?.usable);
-  const actionOptions = Array.fromRange(maxActions, 1).map(n => `<option value="${n}">${n}</option>`).join("");
+  const actionOptions = ((forced > 0) ? [forced] : Array.fromRange(maxActions, 1)).map(n => `<option value="${n}">${n}</option>`).join("");
   const data = await DialogV2.wait({
     window: { title: `Empower → ${ally.name}`, icon: "fa-solid fa-hand-holding-heart" },
     content: `<div class="dbu-dialog">
@@ -97,16 +99,33 @@ export async function empower(actor) {
   if ( !data || (data === "cancel") ) return null;
   const actions = Math.clamp(Number(data.actions) || 1, 1, maxActions);
   const pool = (divine && (data.pool === "dkp")) ? "dkp" : "ki";
-  const limit = 2 * might * (data.melee ? 2 : 1) * actions;
+  // B5: "empower.actions" (+ Actions counted), "flag.empowerMelee" (always within your Melee Range), "flag.empowerMax"
+  // (no limit per Action), and the `with` of a "maneuver" effect
+  const bucket = k => ((typeof actor._bucket === "function") ? actor._bucket(k) : sys.buckets?.[k]?.total) ?? 0;
+  const counted = actions + Math.max(0, Math.floor(bucket("empower.actions")));
+  const melee = !!data.melee || (bucket("flag.empowerMelee") > 0);
+  const limit = (bucket("flag.empowerMax") > 0) ? Infinity : 2 * might * (melee ? 2 : 1) * counted;
   const have = sys[pool].value;
   const room = Math.max(0, (ally.system[pool].max ?? 0) - (ally.system[pool].value ?? 0));
   const asked = Number(data.amount) > 0 ? Number(data.amount) : limit;
   const amount = Math.max(0, Math.min(asked, limit, have, room));
-  await actor.update({ [`system.${pool}.value`]: have - amount, ...actor._spendAction(actions) });
-  await safeUpdate(ally, { [`system.${pool}.value`]: (ally.system[pool].value ?? 0) + amount });
+  const spend = actor._spendAction(actions);
+  await actor.update({ [`system.${pool}.value`]: have - amount, ...spend }, { dbuSource: "empower" });
+  await safeUpdate(ally, { [`system.${pool}.value`]: (ally.system[pool].value ?? 0) + amount }, { dbuSource: "empower" });
+  // B5 "empower" (other = the Ally) and "empowered" (other = the giver)
+  const { fireEvent } = await import("./triggers.mjs");
+  fireEvent(actor, "empower", { other: ally, scope: { actionsSpent: actions, kpGiven: (pool === "ki") ? amount : 0,
+    dkpGiven: (pool === "dkp") ? amount : 0, oos: actor._dbuOutOfSequence ? 1 : 0 } });
+  fireEvent(ally, "empowered", { other: actor, scope: { kpGained: amount, dkpGained: (pool === "dkp") ? amount : 0 } });
+  // S: Empower provokes the Exploit of the adjacent Opponents
+  await (await import("../rules/exploit.mjs")).provokeExploit(actor, "empower", { name: "Empower" });
+  // E1: the Empower Maneuver was used ("maneuverUsed", @via_empower)
+  const { noteItemUse } = await import("./triggers.mjs");
+  await noteItemUse(actor, actor.items?.find?.(i => (i.type === "maneuver") && /^empower$/i.test(i.name.trim()))
+    ?? { name: "Empower", type: "maneuver", system: { maneuverType: "Standard", actionCost: "Variable", source: { slug: "actions-maneuvers" } } });
   return postInfoCard({ actor, title: "Empower", lines: [
-    L("DBU.Empower.Done", { n: amount, pool: pool === "dkp" ? "DKP" : "KP", name: ally.name, limit, actions }),
-    ...(asked > amount ? [L("DBU.Empower.Capped")] : []),
+    L("DBU.Empower.Done", { n: amount, pool: pool === "dkp" ? "DKP" : "KP", name: ally.name, limit: Number.isFinite(limit) ? limit : "∞", actions: counted }),
+    ...((asked > amount) && Number.isFinite(asked) ? [L("DBU.Empower.Capped")] : []),
     L("DBU.Empower.Exploit")
   ] });
 }
@@ -144,6 +163,9 @@ function frequencyProblem(item) {
 }
 
 async function recordUse(item) {
+  // E1: the use is counted and fires "maneuverUsed" (@god = 1)
+  const { noteItemUse } = await import("./triggers.mjs");
+  await noteItemUse(item.actor, item);
   const combat = combatOf(item.actor);
   if ( !combat ) return;
   const used = item.getFlag(FLAG, "uses") ?? {};
@@ -158,8 +180,13 @@ async function recordUse(item) {
 /** Spend a God Maneuver's Divine Ki Points (and Actions / Counter Actions). False when it cannot be paid. */
 async function payGodManeuver(actor, item, amount, { actions = 0, counters = 0, extra = {} } = {}) {
   const sys = actor.system;
+  // O: ± "dkpCost.god" (every God Maneuver) and "dkpCost.use.<slug of its name>"; "kpCost.useFree.<slug>" pays nothing
+  const slug = String(item?.name ?? "").toLowerCase().replace(/\bmaneuver\b/g, "").replace(/[^a-z0-9]/g, "");
+  const bucket = k => Number(sys.buckets?.[k]?.total ?? 0) || 0;
+  amount = (bucket(`kpCost.useFree.${slug}`) > 0) ? 0 : Math.max(0, Math.floor(amount + bucket("dkpCost.god") + bucket(`dkpCost.use.${slug}`)));
   const pay = kiPayment(sys, amount, { divine: true });
-  if ( game.combat?.started && (actions > (sys.combat.actions ?? 0)) ) {
+  // (an Out-of-Sequence God Maneuver spends no Action: _spendAction skips it, so it needs none either)
+  if ( game.combat?.started && !actor._dbuOutOfSequence && (actions > (sys.combat.actions ?? 0)) ) {
     pay.problems.push(L("DBU.Attack.ErrActions", { need: actions, have: sys.combat.actions }));
   }
   if ( game.combat?.started && (counters > (sys.combat.counters ?? 0)) ) pay.problems.push(L("DBU.Defense.NoCounter"));
@@ -176,8 +203,10 @@ async function payGodManeuver(actor, item, amount, { actions = 0, counters = 0, 
 
 /** Pick one of the character's Transformations with the God Ki Aspect they are not in. */
 async function chooseGodKiTransformation(actor, title) {
+  // E3: not one its rules keep you out of (the Divine Ki Points would be paid for nothing)
+  const { enterProblems } = await import("../rules/transform-rules.mjs");
   const list = actor.items.filter(i => (i.type === "transformation") && (i.system.transType !== "awakening")
-    && isGodKi(i) && !i.system.active);
+    && isGodKi(i) && !i.system.active && !enterProblems(actor, i).length);
   if ( !list.length ) {
     ui.notifications.warn(L("DBU.God.NoGodKiForm"));
     return null;
@@ -246,14 +275,17 @@ export async function useGodManeuver(actor, item) {
       const surgency = sys.aptitudes.surgency;
       const r = await new Roll(`${5 * bT}d10 + ${surgency}`).evaluate();
       await r.toMessage({ speaker: ChatMessage.getSpeaker({ actor }), flavor: `${item.name} (Healing Surge, Surgency ${surgency})` });
-      await actor.update({ "system.life.value": Math.min(actor.system.life.max, actor.system.life.value + r.total) });
-      return card([L("DBU.God.Breathing", { n: r.total, dkp: fixed ?? (5 * bT) })]);
+      if ( !actor.system.flags?.noLifeRegain ) {
+        await actor.update({ "system.life.value": Math.min(actor.system.life.max, actor.system.life.value + r.total) });
+      }
+      return card([L("DBU.God.Breathing", { n: r.total, dkp: fixed ?? (5 * bT) }),
+        ...(actor.system.flags?.noLifeRegain ? [L("DBU.Life.NoRegain")] : [])]);
     }
     case "divine flame": {
       const cost = fixed ?? (2 * bT);
       if ( !(await payGodManeuver(actor, item, cost, { actions: actionsOf || 1 })) ) return null;
-      await actor.gainPower(2);
-      await actor.update({ "system.ki.value": Math.min(actor.system.ki.max, actor.system.ki.value + cost) });
+      await actor.gainPower(2, { via: "maneuver" });
+      await actor.update({ "system.ki.value": Math.min(actor.system.ki.max, actor.system.ki.value + cost) }, { dbuSource: "maneuver" });
       return card([L("DBU.God.Flame", { dkp: cost })]);
     }
     case "divine counter": {
@@ -298,7 +330,12 @@ export async function useGodManeuver(actor, item) {
       // Divine Movement, Divine Roar, God Bind, God Finisher...: pay and remind what the maneuver does
       const hint = `DBU.God.Hint.${key.replace(/\s+/g, "_")}`;
       const reminder = game.i18n.has(hint) ? [L(hint)] : [];
-      if ( fixed === null ) return card([L("DBU.God.Variable", { cost: item.system.dkpCost || "—" }), ...reminder]);
+      if ( fixed === null ) {
+        // A variable cost is paid by hand: the use still counts
+        const done = await card([L("DBU.God.Variable", { cost: item.system.dkpCost || "—" }), ...reminder]);
+        await recordUse(item);
+        return done;
+      }
       if ( !(await payGodManeuver(actor, item, fixed, { actions: counter ? 0 : actionsOf, counters: counter ? 1 : 0 })) ) return null;
       return card([L("DBU.God.Paid", { dkp: fixed }), ...reminder]);
     }

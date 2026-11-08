@@ -1,0 +1,184 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Trigger": {
+        "EventLabel": {
+          "allyAttack": "Quando um aliado faz um ataque contra um oponente",
+          "allyPowerUp": "Quando um aliado usa o Power Up",
+          "allySurge": "Quando um aliado usa um Surge",
+          "counterSpent": "Ao gastar Counter Actions",
+          "holdingBackGain": "Ao ganhar stacks de Holding Back",
+          "holdingBackLoss": "Ao perder stacks de Holding Back",
+          "allyTargeted": "Quando um ataque mira um aliado"
+        },
+        "Event": {
+          "allyAttack": "Aliado atacou — {name}",
+          "allyPowerUp": "Power Up de um aliado — {name}",
+          "allySurge": "Surge de um aliado — {name}",
+          "counterSpent": "Counter Action gasta — {name}",
+          "holdingBackGain": "Holding Back ganho — {name}",
+          "holdingBackLoss": "Holding Back perdido — {name}",
+          "allyTargeted": "Aliado é alvo de um ataque — {name}"
+        },
+        "Effect": {
+          "holdingBack": "Stacks de Holding Back (±)",
+          "holdingBackSet": "Stacks de Holding Back (definir)"
+        },
+        "Target": {
+          "ally": "O aliado do evento",
+          "allies": "Seus aliados",
+          "team": "Você e seus aliados"
+        },
+        "Duration": {
+          "endOfTheirTurn": "até o fim do turno dele",
+          "endOfTheirNextTurn": "até o fim do próximo turno dele",
+          "startOfTheirNextTurn": "até o início do próximo turno dele"
+        }
+      },
+      "State": {
+        "radiantGod": "Radiant God",
+        "blazingGod": "Blazing God",
+        "flow": "Flow",
+        "unitedPower": "United Power",
+        "berserk": "Berserk",
+        "unleashed": "Unleashed",
+        "unlimited": "Unlimited",
+        "exceed": "Exceed",
+        "overwhelmingFocus": "Overwhelming Focus",
+        "combatRealization": "Combat Realization",
+        "desperateHero": "Desperate Hero",
+        "heroicMindset": "Heroic Mindset",
+        "powerStressed": "Power Stressed",
+        "exposed": "Exposed",
+        "incorporeal": "Incorporeal",
+        "egotistical": "Egotistical",
+        "instinctual": "Instinctual",
+        "clockUp": "Clock Up",
+        "fullPower": "Full Power",
+        "soulSynergy": "Soul Synergy",
+        "hollowfied": "Hollowfied",
+        "clad": "Clad",
+        "farewell": "Farewell"
+      },
+      "StateHint": {
+        "radiantGod": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "blazingGod": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "flow": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "unitedPower": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "berserk": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "unleashed": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "unlimited": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "exceed": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "overwhelmingFocus": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "combatRealization": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "desperateHero": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "heroicMindset": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "powerStressed": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "exposed": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "incorporeal": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "egotistical": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "instinctual": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "clockUp": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "fullPower": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "soulSynergy": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "hollowfied": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "clad": "State de transformação: o que ele faz vem dos traços que o citam.",
+        "farewell": "State de transformação: o que ele faz vem dos traços que o citam."
+      },
+      "Target": {
+        "holdingBackIgnore": "Ignora os stacks de Holding Back (eles continuam)"
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Trigger": {
+        "EventLabel": {
+          "allyAttack": "When an Ally makes an attack against an Opponent",
+          "allyPowerUp": "When an Ally uses Power Up",
+          "allySurge": "When an Ally uses a Surge",
+          "counterSpent": "When you spend Counter Actions",
+          "holdingBackGain": "When you gain Holding Back stacks",
+          "holdingBackLoss": "When you lose Holding Back stacks",
+          "allyTargeted": "When an attack targets an Ally"
+        },
+        "Event": {
+          "allyAttack": "Ally attacked — {name}",
+          "allyPowerUp": "Ally Power Up — {name}",
+          "allySurge": "Ally Surge — {name}",
+          "counterSpent": "Counter Action spent — {name}",
+          "holdingBackGain": "Holding Back gained — {name}",
+          "holdingBackLoss": "Holding Back lost — {name}",
+          "allyTargeted": "Ally targeted — {name}"
+        },
+        "Effect": {
+          "holdingBack": "Holding Back stacks (±)",
+          "holdingBackSet": "Holding Back stacks (set)"
+        },
+        "Target": {
+          "ally": "The Ally of the event",
+          "allies": "Your Allies",
+          "team": "You and your Allies"
+        },
+        "Duration": {
+          "endOfTheirTurn": "until the end of their turn",
+          "endOfTheirNextTurn": "until the end of their next turn",
+          "startOfTheirNextTurn": "until the start of their next turn"
+        }
+      },
+      "State": {
+        "radiantGod": "Radiant God",
+        "blazingGod": "Blazing God",
+        "flow": "Flow",
+        "unitedPower": "United Power",
+        "berserk": "Berserk",
+        "unleashed": "Unleashed",
+        "unlimited": "Unlimited",
+        "exceed": "Exceed",
+        "overwhelmingFocus": "Overwhelming Focus",
+        "combatRealization": "Combat Realization",
+        "desperateHero": "Desperate Hero",
+        "heroicMindset": "Heroic Mindset",
+        "powerStressed": "Power Stressed",
+        "exposed": "Exposed",
+        "incorporeal": "Incorporeal",
+        "egotistical": "Egotistical",
+        "instinctual": "Instinctual",
+        "clockUp": "Clock Up",
+        "fullPower": "Full Power",
+        "soulSynergy": "Soul Synergy",
+        "hollowfied": "Hollowfied",
+        "clad": "Clad",
+        "farewell": "Farewell"
+      },
+      "StateHint": {
+        "radiantGod": "Transformation State: what it does comes from the Traits that name it.",
+        "blazingGod": "Transformation State: what it does comes from the Traits that name it.",
+        "flow": "Transformation State: what it does comes from the Traits that name it.",
+        "unitedPower": "Transformation State: what it does comes from the Traits that name it.",
+        "berserk": "Transformation State: what it does comes from the Traits that name it.",
+        "unleashed": "Transformation State: what it does comes from the Traits that name it.",
+        "unlimited": "Transformation State: what it does comes from the Traits that name it.",
+        "exceed": "Transformation State: what it does comes from the Traits that name it.",
+        "overwhelmingFocus": "Transformation State: what it does comes from the Traits that name it.",
+        "combatRealization": "Transformation State: what it does comes from the Traits that name it.",
+        "desperateHero": "Transformation State: what it does comes from the Traits that name it.",
+        "heroicMindset": "Transformation State: what it does comes from the Traits that name it.",
+        "powerStressed": "Transformation State: what it does comes from the Traits that name it.",
+        "exposed": "Transformation State: what it does comes from the Traits that name it.",
+        "incorporeal": "Transformation State: what it does comes from the Traits that name it.",
+        "egotistical": "Transformation State: what it does comes from the Traits that name it.",
+        "instinctual": "Transformation State: what it does comes from the Traits that name it.",
+        "clockUp": "Transformation State: what it does comes from the Traits that name it.",
+        "fullPower": "Transformation State: what it does comes from the Traits that name it.",
+        "soulSynergy": "Transformation State: what it does comes from the Traits that name it.",
+        "hollowfied": "Transformation State: what it does comes from the Traits that name it.",
+        "clad": "Transformation State: what it does comes from the Traits that name it.",
+        "farewell": "Transformation State: what it does comes from the Traits that name it."
+      },
+      "Target": {
+        "holdingBackIgnore": "Ignore the Holding Back stacks (they stay)"
+      }
+    }
+  }
+}

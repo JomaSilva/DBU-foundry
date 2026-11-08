@@ -1,0 +1,40 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Target": {
+        "kpCostBoost": "Movement: KP da Boosted Speed (±)",
+        "kpCostBoostFree": "Movement: Boosted Speed sem KP (1)",
+        "kpCostRapid": "Movement: KP do Rapid Movement (±)",
+        "kpCostRapidFree": "Movement: Rapid Movement sem KP (1)",
+        "dkpCostGod": "God Maneuvers: Divine Ki Points (±)"
+      },
+      "MoveManeuver": {
+        "Title": "Movement Maneuver",
+        "Normal": "Normal Speed ({n} quadrados)",
+        "Boosted": "Boosted Speed ({n} quadrados, {kp} KP)",
+        "Rapid": "Rapid Movement (+{kp} KP: +1(T) Strike até o fim do turno)",
+        "LineNormal": "Move até {n} quadrados (Normal Speed).",
+        "LineBoosted": "Move até {n} quadrados (Boosted Speed)."
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Target": {
+        "kpCostBoost": "Movement: KP of the Boosted Speed (±)",
+        "kpCostBoostFree": "Movement: Boosted Speed for no KP (1)",
+        "kpCostRapid": "Movement: KP of Rapid Movement (±)",
+        "kpCostRapidFree": "Movement: Rapid Movement for no KP (1)",
+        "dkpCostGod": "God Maneuvers: Divine Ki Points (±)"
+      },
+      "MoveManeuver": {
+        "Title": "Movement Maneuver",
+        "Normal": "Normal Speed ({n} Squares)",
+        "Boosted": "Boosted Speed ({n} Squares, {kp} KP)",
+        "Rapid": "Rapid Movement (+{kp} KP: +1(T) Strike until the end of the turn)",
+        "LineNormal": "Moves up to {n} Squares (Normal Speed).",
+        "LineBoosted": "Moves up to {n} Squares (Boosted Speed)."
+      }
+    }
+  }
+}

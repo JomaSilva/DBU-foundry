@@ -4,6 +4,7 @@ import { ADVENTURING_BY_KEY, addUses, availableAdventuringManeuvers, sessionUses
 import { fetchOfficialText } from "./rules/official-text.mjs";
 import { encounterOf } from "./combat/triggers.mjs";
 import { safeUpdate } from "./socket.mjs";
+import { resolveClash } from "./combat/clash.mjs";
 
 const L = (k, d) => d ? game.i18n.format(k, d) : game.i18n.localize(k);
 const { DialogV2 } = foundry.applications.api;
@@ -60,7 +61,7 @@ const skillSelect = keys => `<div class="form-group"><label>${L("DBU.Adv.Skill")
 /** Heal an actor (directly or through the GM) and return the line for the card. */
 async function heal(target, life, ki = 0) {
   const s = target.system;
-  const data = { "system.life.value": Math.min(s.life.max, s.life.value + life) };
+  const data = s.flags?.noLifeRegain ? {} : { "system.life.value": Math.min(s.life.max, s.life.value + life) };
   if ( ki ) data["system.ki.value"] = Math.min(s.ki.max, s.ki.value + ki);
   await safeUpdate(target, data);
   return ki ? L("DBU.Adv.Healed", { name: target.name, life, ki }) : L("DBU.Adv.HealedLife", { name: target.name, life });
@@ -151,14 +152,18 @@ export async function useAdventuringManeuver(actor, key) {
       // Pickpocket: −3 for each earlier attempt against that Character this session
       const penalty = c.penaltyPerTarget ? c.penaltyPerTarget * sessionUses(uses, `${key}:${targets[0].actor.uuid}`) : 0;
       const mode = c.secret ? "blindroll" : undefined;
-      const mine = await actor.rollSkill(c.skills[0], { subtitle: `${def.name} (Clash)`, penalty, penaltyLabel: def.name, messageMode: mode });
-      if ( !mine ) return null;
+      // One roll of the user's Skill against every target (combat/clash.mjs: clash.* pieces, clashWon / clashLost)
+      let mine = null;
       for ( const o of targets ) {
         const skill = bestSkill(o.actor, c.vs);
-        const theirs = await o.actor.rollSkill(skill, { subtitle: `${def.name} — ${actor.name}`,
-          messageMode: c.secret ? "blindroll" : (o.actor.isOwner ? undefined : "gmroll") });
-        const win = (mine.total ?? 0) > (theirs?.total ?? 0); // a tie goes to the defender
-        lines.push(L(win ? "DBU.Adv.ClashWin" : "DBU.Adv.ClashLose", { target: o.label, mine: mine.total ?? 0, theirs: theirs?.total ?? 0, skill: skillLabel(skill) }));
+        const r = await resolveClash(actor, o.actor, { mine: c.skills[0], theirs: skill, via: def.name, card: false, mineResult: mine,
+          rollOptions: { subtitle: `${def.name} (Clash)`, penalty, penaltyLabel: def.name, messageMode: mode },
+          defenderRollOptions: { subtitle: `${def.name} — ${actor.name}`,
+            messageMode: c.secret ? "blindroll" : (o.actor.isOwner ? undefined : "gmroll") } });
+        if ( !r ) return null;
+        mine = r.mineRoll;
+        const win = r.won; // a tie goes to the defender
+        lines.push(L(win ? "DBU.Adv.ClashWin" : "DBU.Adv.ClashLose", { target: o.label, mine: r.mine, theirs: r.theirs, skill: skillLabel(skill) }));
         if ( win && c.reveal ) {
           const a = o.actor.system;
           const alignment = L(DBU.alignments[String(a.zsoul?.alignment ?? 0)] ?? "");
@@ -177,10 +182,9 @@ export async function useAdventuringManeuver(actor, key) {
       if ( !form ) return null;
       const target = options[Number(form.target)]?.actor;
       if ( !target ) return null;
-      const mine = await actor.rollClash("might");
-      const theirs = await target.rollClash("might");
-      const win = (mine?.total ?? 0) > (theirs?.total ?? 0);
-      lines.push(L(win ? "DBU.Adv.ClashWin" : "DBU.Adv.ClashLose", { target: target.name, mine: mine?.total ?? 0, theirs: theirs?.total ?? 0, skill: "Might" }));
+      const r = await resolveClash(actor, target, { mine: "might", via: def.name, card: false });
+      const win = !!r?.won;
+      lines.push(L(win ? "DBU.Adv.ClashWin" : "DBU.Adv.ClashLose", { target: target.name, mine: r?.mine ?? 0, theirs: r?.theirs ?? 0, skill: "Might" }));
       break;
     }
     default: break;

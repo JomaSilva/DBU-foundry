@@ -25,7 +25,12 @@ import { diceToFormula } from "../rules/dice.mjs";
  * @param {Array}  [config.buttons]         [{action, label, icon, data}] buttons on the card
  * @param {Array}  [config.notes]           Extra lines of text
  * @param {boolean} [config.toMessage=true]
- * @returns {Promise<object>} result {total, natural, crit, botch, rolls, message}
+ * @param {object} [config.scope]           Formula variables of the roll for its reactions (an attack's: @armed, @via_*...;
+ *                                          thresholdCheck: 1 for the Steadfast Check of a Health Threshold)
+ * @param {Actor} [config.other]            The other Character of the roll (the "rolled" event's other)
+ * @param {boolean} [config.reactions=true] false: no roll reactions (combat/reactions.mjs)
+ * @returns {Promise<object>} result {total, natural, crit, botch, rolls, message}; after a "succeed" reaction also
+ *   forceSuccess: true (a check with a Target Number counts as a success), after any reaction reactionNotes / reactionParts
  */
 export async function dbuRoll(config) {
   const once = await rollOnce(config);
@@ -36,6 +41,23 @@ export async function dbuRoll(config) {
     result = pick ? second : once;
     result.rolls = [...once.rolls, ...second.rolls];
     result.twin = { mode: config.twin, totals: [once.total, second.total] };
+    stateOf(result).twinIndex = pick ? 1 : 0;
+  }
+  // Roll reactions: the "roll" triggers of the rolling actor (after the dice, before the result is used or posted) and
+  // its "rolled" event. Only on the client that owns the actor, and nothing at all without such triggers
+  if ( (config.reactions !== false) && config.actor?.isOwner && hasRollTriggers(config.actor) ) {
+    // (a broken reaction never breaks the roll: the result stands as it is)
+    try {
+      const { rollReactions } = await import("../combat/reactions.mjs");
+      await rollReactions(config, result);
+    } catch(err) { console.error("DBU | Roll reactions", err); }
+  }
+  // L: the others of the encounter that react to this Character's rolls ("opponentRolled" / "allyRolled")
+  if ( (config.reactions !== false) && config.actor?.isOwner && game.combats?.some?.(c => c.started) ) {
+    try {
+      const { fireRollWatchers } = await import("../combat/reactions.mjs");
+      fireRollWatchers(config, result);
+    } catch(err) { console.error("DBU | Roll watchers", err); }
   }
   if ( config.toMessage === false ) return result;
   result.message = await postRollCard(config, result);
@@ -81,9 +103,11 @@ async function rollOnce(config) {
   }
 
   let critRoll = null;
+  let critFormula = "";
   if ( crit && critDice.length ) {
     // A Critical on both Base Dice (Barrier Blow): the Critical dice twice
-    critRoll = await new Roll(diceToFormula((critMain && crit2) ? critDice.map(d => ({ ...d, number: d.number * 2 })) : critDice)).evaluate();
+    critFormula = diceToFormula((critMain && crit2) ? critDice.map(d => ({ ...d, number: d.number * 2 })) : critDice);
+    critRoll = await new Roll(critFormula).evaluate();
     rolls.push(critRoll);
   }
 
@@ -91,13 +115,134 @@ async function rollOnce(config) {
   const extraTotal = extra.reduce((t, e) => t + e.total, 0);
   let total = natural + extraTotal + flat + (critRoll?.total ?? 0) - (botch ? botchPenalty : 0);
   total = Math.max(0, total);
-  return { total, natural, rawNatural, naturalMod, crit, botch, extra, critRoll, flat, parts, rolls };
+  const result = { total, natural, rawNatural, naturalMod, crit, botch, extra, critRoll, flat, parts, rolls };
+  STATE.set(result, { natural2, critFormula, naturalDelta: 0, forcedCrit: false, twinIndex: 0 });
+  return result;
+}
+
+/* -------------------------------------------- */
+/*  Roll reactions: changing a rolled result    */
+/* -------------------------------------------- */
+
+/** What a result needs for the reactions (a WeakMap: the result keeps its shape). */
+const STATE = new WeakMap();
+const stateOf = result => {
+  let st = STATE.get(result);
+  if ( !st ) STATE.set(result, st = { natural2: null, critFormula: result.critRoll?.formula ?? "", naturalDelta: 0, forcedCrit: false, twinIndex: 0 });
+  return st;
+};
+
+/** Does the actor have triggers on the "roll" / "rolled" events (active or not)? The fast path of every roll. */
+export function hasRollTriggers(actor) {
+  const has = list => Array.isArray(list) && list.some(t => (t?.event === "roll") || (t?.event === "rolled"));
+  try {
+    for ( const item of actor?.items ?? [] ) if ( has(item?.system?.triggers) ) return true;
+    return has(actor?.system?.customTriggers);
+  } catch(err) { return false; }
+}
+
+/** The Natural Result a raw Base Die gives with the roll's own changes (naturalMod, minNatural). */
+function baseNatural(config, raw) {
+  let natural = Math.clamp(raw + (config.naturalMod ?? 0), 1, 10);
+  if ( config.minNatural ) natural = Math.max(natural, config.minNatural);
+  return natural;
+}
+
+/**
+ * Work out a result again after a reaction changed it: Critical / Botch from its Natural Result (a forced Critical
+ * stays one), the Critical dice rolled when it became a Critical (dropped when it is none any more) and the total.
+ */
+export async function settleRoll(config, result) {
+  const st = stateOf(result);
+  const { critTarget = 10, botchRange = 1, critDice = [], botchPenalty = 0, cutting = false, noCrit = false, noBotch = false } = config;
+  const crit2 = !noCrit && (st.natural2 !== null) && (st.natural2 >= critTarget);
+  const critMain = !noCrit && ((result.natural >= critTarget) || st.forcedCrit);
+  result.crit = critMain || crit2;
+  result.botch = !noBotch && !result.crit && (result.natural <= botchRange);
+  if ( cutting && !result.crit ) result.botch = true;
+  const want = (result.crit && critDice.length)
+    ? diceToFormula((critMain && crit2) ? critDice.map(d => ({ ...d, number: d.number * 2 })) : critDice) : "";
+  if ( !want ) {
+    result.critRoll = null;
+    st.critFormula = "";
+  }
+  else if ( !result.critRoll || (st.critFormula !== want) ) {
+    result.critRoll = await new Roll(want).evaluate();
+    result.rolls.push(result.critRoll);
+    st.critFormula = want;
+  }
+  const flat = (result.parts ?? []).reduce((t, p) => t + (Number(p.value) || 0), 0)
+    + (result.reactionParts ?? []).reduce((t, p) => t + (Number(p.value) || 0), 0);
+  result.flat = flat;
+  const extraTotal = (result.extra ?? []).reduce((t, e) => t + (Number(e.total) || 0), 0);
+  result.total = Math.max(0, result.natural + extraTotal + flat + (result.critRoll?.total ?? 0) - (result.botch ? botchPenalty : 0));
+  if ( result.twin ) result.twin.totals[st.twinIndex] = result.total;
+  return result;
+}
+
+/** ± the Natural Result (clamped 1–10); Critical / Botch worked out again. */
+export async function shiftNatural(config, result, delta) {
+  const st = stateOf(result);
+  const before = result.natural;
+  result.natural = Math.clamp(result.natural + delta, 1, 10);
+  st.naturalDelta += result.natural - before;
+  return settleRoll(config, result);
+}
+
+/** Set the Natural Result (1–10). */
+export async function setNatural(config, result, value) {
+  const st = stateOf(result);
+  result.natural = Math.clamp(Math.floor(Number(value) || 1), 1, 10);
+  st.naturalDelta = result.natural - baseNatural(config, result.rawNatural);
+  return settleRoll(config, result);
+}
+
+/** A Critical Result whatever the Natural Result (not a Botch). */
+export async function forceCritical(config, result) {
+  stateOf(result).forcedCrit = true;
+  return settleRoll(config, result);
+}
+
+/** Roll the Base Die again: the new result stands (with the Natural Result changes already bought). */
+export async function rerollBase(config, result) {
+  const st = stateOf(result);
+  const base = await new Roll(config.baseDie ?? "1d10").evaluate();
+  result.rolls.push(base);
+  result.rawNatural = base.total;
+  result.natural = Math.clamp(baseNatural(config, base.total) + st.naturalDelta, 1, 10);
+  return settleRoll(config, result);
+}
+
+/** Roll everything again (the kept roll of a Twin-Linked one): the new dice stand, the bonuses bought stay. */
+export async function rerollAll(config, result) {
+  const st = stateOf(result);
+  const fresh = await rollOnce(config);
+  const fst = STATE.get(fresh);
+  result.rolls.push(...fresh.rolls);
+  result.rawNatural = fresh.rawNatural;
+  result.natural = Math.clamp(fresh.natural + st.naturalDelta, 1, 10);
+  result.extra = [...fresh.extra, ...(result.extra ?? []).filter(e => e.reaction)];
+  result.critRoll = fresh.critRoll;
+  st.critFormula = fst?.critFormula ?? "";
+  st.natural2 = fst?.natural2 ?? null;
+  return settleRoll(config, result);
+}
+
+/** + to the Dice Score: a number, or dice rolled now ("1d6"). */
+export async function addRollBonus(config, result, label, value, formula = "") {
+  if ( formula ) {
+    const r = await new Roll(formula).evaluate();
+    result.rolls.push(r);
+    (result.extra ??= []).push({ label, formula, total: r.total, roll: r, reaction: true });
+  }
+  else (result.reactionParts ??= []).push({ label, value: Number(value) || 0 });
+  return settleRoll(config, result);
 }
 
 /** Render and post the roll card. */
 async function postRollCard(config, result) {
   const actor = config.actor;
-  const shownParts = (config.parts ?? []).filter(p => Number(p.value));
+  const shownParts = [...(config.parts ?? []), ...(result.reactionParts ?? [])].filter(p => Number(p.value));
   const context = {
     title: config.title,
     subtitle: config.subtitle ?? "",
@@ -117,9 +262,9 @@ async function postRollCard(config, result) {
     extra: result.extra.map(e => ({ label: e.label, formula: e.formula, total: e.total })),
     parts: shownParts.map(p => ({ label: p.label, value: p.value >= 0 ? `+${p.value}` : `${p.value}` })),
     target: config.target,
-    success: (config.target !== undefined) ? result.total >= config.target : null,
+    success: (config.target !== undefined) ? (!!result.forceSuccess || (result.total >= config.target)) : null,
     twin: result.twin,
-    notes: config.notes ?? [],
+    notes: result.reactionNotes?.length ? [...(config.notes ?? []), ...result.reactionNotes] : (config.notes ?? []),
     buttons: config.buttons ?? [],
     extraHTML: config.extraHTML ?? ""
   };

@@ -70,20 +70,40 @@ function applyScale(s, token, variable) {
  * @param {object} data   Roll-data style object
  * @param {object} [options]
  * @param {boolean} [options.floor=true]  Apply the Round Down rule
+ * @param {boolean} [options.strict=false]  NaN (instead of 0) when the formula cannot be evaluated
  * @returns {number}
  */
-export function evaluate(input, data = {}, { floor = true } = {}) {
+export function evaluate(input, data = {}, { floor = true, strict = false } = {}) {
   if ( typeof input === "number" ) return floor ? Math.floor(input) : input;
   if ( (input === undefined) || (input === null) || (String(input).trim() === "") ) return 0;
   const expr = toExpression(input);
   try {
     const replaced = Roll.replaceFormulaData(expr, data, { missing: "0", warn: false });
     const value = Roll.safeEval(replaced);
-    if ( !Number.isFinite(value) ) return 0;
+    if ( !Number.isFinite(value) ) return strict ? NaN : 0;
     return floor ? roundDown(value) : value;
   } catch(err) {
     console.warn(`DBU | Could not evaluate formula "${input}"`, err);
-    return 0;
+    return strict ? NaN : 0;
+  }
+}
+
+/** Does a formula hold dice ("1d6(bT)", "2d10 + 3")? */
+export function hasDice(input) {
+  return /\d*d\d+/i.test(String(input ?? ""));
+}
+
+/**
+ * A DBU formula that may hold dice, as a Roll formula with the data filled in: "1d6(bT) + 1(T)" → "3d6 + (1*3)".
+ * Without dice it is the evaluated number (Round Down rule), as text.
+ */
+export function rollExpression(input, data = {}) {
+  if ( !hasDice(input) ) return String(evaluate(input, data));
+  try {
+    return Roll.replaceFormulaData(toExpression(diceFormula(input, data)), data, { missing: "0", warn: false });
+  } catch(err) {
+    console.warn(`DBU | Could not read dice formula "${input}"`, err);
+    return "0";
   }
 }
 

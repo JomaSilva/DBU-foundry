@@ -1,0 +1,58 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Exploit": {
+        "Provoked": "{name} provocou o Exploit ({what}): {who} pode(m) usar o Exploit Maneuver.",
+        "By": {
+          "combatrecovery": "Combat Recovery",
+          "energycharge": "Energy Charge",
+          "empower": "Empower",
+          "arrogantdeclaration": "Arrogant Declaration",
+          "terrainlift": "Terrain Lift",
+          "ride": "Ride",
+          "movement": "saiu do Melee Range",
+          "grapple": "Grapple Check perdido",
+          "disarm": "Disarm perdido"
+        }
+      },
+      "Trigger": {
+        "EventLabel": {
+          "exploitTriggered": "Quando um oponente provoca o seu Exploit",
+          "provokedExploit": "Quando você provoca o Exploit de oponentes"
+        },
+        "Event": {
+          "exploitTriggered": "Exploit provocado — {name}",
+          "provokedExploit": "Você provocou o Exploit — {name}"
+        }
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Exploit": {
+        "Provoked": "{name} provoked the Exploit ({what}): {who} may use the Exploit Maneuver.",
+        "By": {
+          "combatrecovery": "Combat Recovery",
+          "energycharge": "Energy Charge",
+          "empower": "Empower",
+          "arrogantdeclaration": "Arrogant Declaration",
+          "terrainlift": "Terrain Lift",
+          "ride": "Ride",
+          "movement": "left the Melee Range",
+          "grapple": "lost Grapple Check",
+          "disarm": "lost Disarm"
+        }
+      },
+      "Trigger": {
+        "EventLabel": {
+          "exploitTriggered": "When an Opponent provokes your Exploit",
+          "provokedExploit": "When you provoke the Opponents' Exploit"
+        },
+        "Event": {
+          "exploitTriggered": "Exploit provoked — {name}",
+          "provokedExploit": "You provoked the Exploit — {name}"
+        }
+      }
+    }
+  }
+}

@@ -19,30 +19,59 @@ function findResource(list, name, create) {
 
 const rollLabel = k => L(`DBU.Split.${k}`);
 
+/** Effective maximum of a resource (modifiers "resMax.<slug>" may change the one stored on the sheet), 0 = none. */
+export function resourceMaxOf(actor, r) {
+  return actor.system.resourceMax?.[resourceSlug(r.name)] ?? r.max;
+}
+
+/**
+ * B2: the system gained / spent stacks (`via`: what did it, "trigger", "cost"...): the resource events fire. Changes by
+ * hand on the sheet pass no `via` and fire nothing; neither do the effects of a resource event's own triggers (`resEvent`).
+ */
+async function stacksEvent(actor, r, { before, after, wanted, via, resEvent }) {
+  if ( !via || resEvent ) return;
+  const slug = resourceSlug(r.name);
+  const { resourceEvent } = await import("./triggers.mjs");
+  if ( wanted > 0 ) await resourceEvent(actor, "gain", { slug, n: Math.max(0, after - before), wanted, via });
+  else if ( after < before ) await resourceEvent(actor, "spend", { slug, n: before - after, via });
+}
+
+/** Stacks a stored resource holds (split: on every Combat Roll and still to be placed). */
+const heldStacks = r => (r.split ? allocTotal(r) + (r.unassigned ?? 0) : (r.value ?? 0));
+
 /**
  * Gain or lose stacks of a resource. New stacks of a split resource (Battle Born, Progress...) wait "to be placed" and
  * the owner of the actor is asked which Combat Roll gets each one; a forced roll ("Battle Born:wound") skips the choice.
+ * `via` / `resEvent`: see stacksEvent (a gain at the maximum still fires "resourceGain", with @gained 0 and @overflow).
  * @returns {Promise<string>}  Description for the chat card
  */
-export async function changeStacks(actor, name, delta, { force = "", label = "" } = {}) {
+export async function changeStacks(actor, name, delta, { force = "", label = "", via = "", resEvent = false } = {}) {
   if ( !delta ) return "";
   const list = foundry.utils.deepClone(actor.system._source.resources ?? []);
   const r = findResource(list, name, delta > 0);
   if ( !r ) return "";
+  const max = resourceMaxOf(actor, r);
+  const before = heldStacks(r);
+  const event = { before, wanted: Math.max(0, delta), via, resEvent };
   if ( !r.split ) {
     const raw = r.value + delta;
-    r.value = Math.max(0, r.max > 0 ? Math.min(r.max, raw) : raw);
+    r.value = Math.max(0, max > 0 ? Math.min(max, raw) : raw);
     await actor.update({ "system.resources": list });
+    await stacksEvent(actor, r, { ...event, after: r.value });
     return `${delta > 0 ? "+" : ""}${delta} ${r.name}`;
   }
   if ( delta > 0 ) {
     const owned = allocTotal(r) + r.unassigned;
-    const n = (r.max > 0) ? Math.min(delta, Math.max(0, r.max - owned)) : delta;
-    if ( n <= 0 ) return L("DBU.Split.AtMax", { name: r.name });
+    const n = (max > 0) ? Math.min(delta, Math.max(0, max - owned)) : delta;
+    if ( n <= 0 ) {
+      await stacksEvent(actor, r, { ...event, after: before });
+      return L("DBU.Split.AtMax", { name: r.name });
+    }
     const roll = force || r.force;
     if ( roll ) r.alloc[roll] += n;
     else r.unassigned += n;
     await actor.update({ "system.resources": list });
+    await stacksEvent(actor, r, { ...event, after: before + n });
     if ( roll ) return `+${n} ${r.name} (${rollLabel(roll)})`;
     requestAllocation(actor, r.name, { label });
     return L("DBU.Split.Gained", { n, name: r.name });
@@ -59,6 +88,7 @@ export async function changeStacks(actor, name, delta, { force = "", label = "" 
     n -= 1;
   }
   await actor.update({ "system.resources": list });
+  await stacksEvent(actor, r, { ...event, after: heldStacks(r) });
   return `${delta} ${r.name}`;
 }
 
@@ -67,15 +97,19 @@ export async function setStacks(actor, name, value, options = {}) {
   const list = foundry.utils.deepClone(actor.system._source.resources ?? []);
   const r = findResource(list, name, value > 0);
   if ( !r ) return "";
+  const event = { before: heldStacks(r), via: options.via ?? "", resEvent: !!options.resEvent };
   if ( !r.split ) {
-    r.value = Math.max(0, r.max > 0 ? Math.min(r.max, value) : value);
+    const max = resourceMaxOf(actor, r);
+    r.value = Math.max(0, max > 0 ? Math.min(max, value) : value);
     await actor.update({ "system.resources": list });
+    await stacksEvent(actor, r, { ...event, after: r.value, wanted: Math.max(0, value - event.before) });
     return `${r.name} = ${r.value}`;
   }
   if ( value <= 0 ) {
     r.alloc = { strike: 0, dodge: 0, wound: 0 };
     r.unassigned = 0;
     await actor.update({ "system.resources": list });
+    await stacksEvent(actor, r, { ...event, after: 0, wanted: 0 });
     return `${r.name} = 0`;
   }
   const text = await changeStacks(actor, name, value - (allocTotal(r) + r.unassigned), options);

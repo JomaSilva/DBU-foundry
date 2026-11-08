@@ -34,7 +34,7 @@ export function traitStructure(html) {
  */
 export function traitUsable(s, t) {
   const mastery = s.mastery ?? 0;
-  if ( (s.transType === "awakening") && unchosenTraits(s).has(t.name) ) return false;
+  if ( unchosenTraits(s).has(t.name) ) return false;
   switch ( t.kind ) {
     case "mastery trait": return mastery >= Math.max(1, t.level);
     case "transcendent trait": return !!s.transcended && (mastery > (s.masteryNeeded ?? 1));

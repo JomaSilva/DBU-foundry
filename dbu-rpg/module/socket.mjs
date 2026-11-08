@@ -49,6 +49,12 @@ async function handle({ action, uuid, data, options }) {
       await storeDamageOnMessage(data.messageId, data.targetIndex, data.damage);
       break;
     }
+    // M2: a Wound bonus added to an attack by another Character's effect ("attackWound" stores the rolled Wound itself)
+    case "attackWoundAdd": {
+      const A = await import("./combat/attack.mjs");
+      await A.addAttackWound(data.messageId, data.label, data.value);
+      break;
+    }
     case "attackKnockback": {
       const { storeKnockbackOnMessage } = await import("./combat/attack.mjs");
       await storeKnockbackOnMessage(data.messageId, data.targetIndex, data.knockback);
@@ -80,6 +86,31 @@ async function handle({ action, uuid, data, options }) {
     case "scouterBreak": {
       const { breakScouters } = await import("./combat/scan.mjs");
       await breakScouters(data.actorUuid, data.power, data.entries, { hidden: true });
+      break;
+    }
+    // A trigger button used on a Character the player does not own
+    case "applyTrigger": {
+      const doc = await fromUuid(data.uuid);
+      const actor = doc?.actor ?? doc;
+      if ( !actor ) break;
+      const { applyTriggerEffect } = await import("./combat/triggers.mjs");
+      const text = await applyTriggerEffect(actor, data.effect, data.value, data.resource, data.options ?? {});
+      if ( text ) {
+        const { postInfoCard } = await import("./dice/roller.mjs");
+        await postInfoCard({ actor, title: data.options?.label ?? "", lines: [text] });
+      }
+      break;
+    }
+    // B1: a mark left a Character the player does not own: what the mark gave it ends
+    case "endMarkEffects": {
+      const { endMarkEffects } = await import("./combat/triggers.mjs");
+      await endMarkEffects(data.uuid, data.key);
+      break;
+    }
+    // A player's Character hit, was hit, crossed a Health Threshold...: its event triggers run here
+    case "triggerEvent": {
+      const { runEventTriggers } = await import("./combat/triggers.mjs");
+      await runEventTriggers(data.actorUuid, data.event, { other: data.otherUuid, scope: data.scope ?? {} });
       break;
     }
     // Effects of a player's Maneuver on documents the player does not own (forced movement, Collisions, Grapple)

@@ -57,7 +57,7 @@ export async function chooseTransformationOptions(actor, item, { required = true
       if ( !(await chooseStackPicks(actor, item, choice, { required, again: all })) ) return false;
       continue;
     }
-    const result = await askChoice(item, choice, { required });
+    const result = await askChoice(item, choice, { required, pick: item.system.picksOf?.(choice) ?? choice.pick });
     if ( !result ) return false;
     await applyChoice(actor, choice, result.selected, result.detail);
   }
@@ -157,6 +157,10 @@ async function grantItems(actor, item, choice, options) {
     if ( !doc ) continue;
     delete doc._id;
     foundry.utils.setProperty(doc, "flags.dbu-rpg.grantedBy", { item: item.id, choice: choice.id, option });
+    // D3: "while in this Transformation": it works only while the Transformation does (data/items.mjs grantWorks)
+    if ( choice.grantActive ) foundry.utils.setProperty(doc, "flags.dbu-rpg.grantActive", true);
+    // Q: "after you gain N Masteries": it works only from then on
+    if ( choice.grantMastery ) foundry.utils.setProperty(doc, "flags.dbu-rpg.grantMastery", choice.grantMastery);
     data.push(doc);
   }
   if ( data.length ) await actor.createEmbeddedDocuments("Item", data);
@@ -218,11 +222,13 @@ async function askChoice(item, choice, { required, pick = choice.pick, blocked =
  * Switch on the modifiers/triggers of the chosen option(s) of a Trait only (a Foundation detail fills "{foundation}").
  * @returns {object[]}  The list, changed in place
  */
-export function toggleOptions(list, trait, selected, detail = "") {
+export function toggleOptions(list, trait, selected, detail = "", options = null) {
   const prefix = optionLabel(trait, "");
   return list.map(x => {
     if ( !String(x.label ?? "").startsWith(prefix) ) return x;
     const option = x.label.slice(prefix.length);
+    // (R: the pieces of another choice of the same Trait are not this one's)
+    if ( Array.isArray(options) && options.length && !options.includes(option) ) return x;
     const on = selected.includes(option);
     const y = { ...x, active: on };
     if ( on && detail && ("target" in y) ) y.target = String(y.target).replace("{foundation}", detail);
@@ -246,12 +252,27 @@ export async function applyChoice(actor, choice, selected, detail = "") {
     choices[index].detail = detail;
     updates.push({
       _id: item.id, "system.choices": choices,
-      "system.modifiers": toggleOptions(foundry.utils.deepClone(src.modifiers ?? []), choice.trait, selected, detail),
-      "system.triggers": toggleOptions(foundry.utils.deepClone(src.triggers ?? []), choice.trait, selected, detail)
+      "system.modifiers": toggleOptions(foundry.utils.deepClone(src.modifiers ?? []), choice.trait, selected, detail, choice.options),
+      "system.triggers": toggleOptions(foundry.utils.deepClone(src.triggers ?? []), choice.trait, selected, detail, choice.options)
     });
   }
   if ( !updates.length ) return;
   await actor.updateEmbeddedDocuments("Item", updates);
+  // D3: a choice made once whose options are compendium items (God Maneuvers, Bestial Traits...): the picks bring their
+  // items, given by the first Transformation that has the choice; picks taken away take theirs
+  if ( choice.pack ) {
+    const owner = actor.items.get(updates[0]._id);
+    const left = [...selected];
+    const drop = [];
+    for ( const doc of actor.items.filter(i => (i.flags?.["dbu-rpg"]?.grantedBy?.choice === choice.id)
+      && updates.some(u => u._id === i.flags["dbu-rpg"].grantedBy.item)) ) {
+      const k = left.indexOf(doc.flags["dbu-rpg"].grantedBy.option);
+      if ( k >= 0 ) left.splice(k, 1);
+      else drop.push(doc.id);
+    }
+    if ( drop.length ) await actor.deleteEmbeddedDocuments("Item", drop);
+    if ( left.length && owner ) await grantItems(actor, owner, choice, left);
+  }
   const detailText = detail ? ` (${L(DBU.foundations[detail] ?? detail)})` : "";
   await postInfoCard({ actor, title: L("DBU.Choice.Chosen", { name: actor.name }),
     lines: [`${choice.trait}: ${selected.join(", ")}${detailText}`] });

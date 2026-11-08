@@ -1,0 +1,16 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Attack": {
+        "CompelledMiss": "Compelled: este ataque não inclui {name}, o alvo do Compelled."
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Attack": {
+        "CompelledMiss": "Compelled: this attack does not include {name}, the Compelled target."
+      }
+    }
+  }
+}

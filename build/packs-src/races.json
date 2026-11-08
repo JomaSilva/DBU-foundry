@@ -394,6 +394,7 @@
    "traits": [
     "Earthling Resolve",
     "Quick to Master",
+    "Last Resort",
     "Experienced Fighter",
     "Eye of the Dragon"
    ],
@@ -403,7 +404,7 @@
     "section": "Earthlings",
     "url": "https://dbu-rpg.com/earthlings/"
    },
-   "description": "<p><a href=\"https://dbu-rpg.com/earthlings/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/earthlings</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Earthling Resolve</li><li>Traço: Quick to Master</li><li>Traço: Experienced Fighter</li><li>Traço: Eye of the Dragon</li></ul>",
+   "description": "<p><a href=\"https://dbu-rpg.com/earthlings/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/earthlings</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Traço: Earthling Resolve</li><li>Traço: Quick to Master</li><li>Traço: Last Resort</li><li>Traço: Experienced Fighter</li><li>Traço: Eye of the Dragon</li></ul>",
    "modifiers": [],
    "triggers": []
   },

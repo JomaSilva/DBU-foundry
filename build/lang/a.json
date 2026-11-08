@@ -1,0 +1,142 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Target": {
+        "vsStrike": "Contra o alvo: Strike Roll (seu ataque contra ele; ou seu Parry contra o ataque dele)",
+        "vsWound": "Contra o alvo: Wound Roll do seu ataque",
+        "vsCombat": "Contra o alvo: Combat Rolls (Strike e Wound ao atacar; Dodge e Parry ao defender)",
+        "vsCategory": "Contra o alvo: +Damage Category do seu ataque",
+        "vsIgnoreSoak": "Contra o alvo: fração do Soak dele ignorada (a maior vale)",
+        "vsSteadfast": "Contra o alvo: ± no Steadfast Check de quem seu ataque levou a um Health Threshold",
+        "vsDodge": "Contra o atacante: Dodge Roll contra o ataque dele",
+        "vsDefenseValue": "Contra o atacante: Defense Value somado ao Dodge",
+        "vsSoak": "Contra o atacante: Soak contra o Damage dele",
+        "vsDr": "Contra o atacante: Damage Reduction contra o Damage dele",
+        "vsCategoryTaken": "Contra o atacante: Damage Category do Damage que você recebe (−1 = uma abaixo)",
+        "vsCategorySet": "Contra o atacante: define a Damage Category do Damage que você recebe (1 Standard, 2 Direct, 3 Lethal)",
+        "vsDamageTaken": "Contra o atacante: Damage recebido (fixo, quando há Damage)",
+        "vsDamageMult": "Contra o atacante: × o Damage recebido (arredondado para baixo)",
+        "vsGuardKp": "Contra o atacante: ± KP do seu Guard",
+        "vsGuardNoCharges": "Contra o atacante: o Guard ignora o KP que as Energy Charges somam (1)",
+        "vsRedodge": "Contra o atacante: depois de um Dodge (ou sem defesa) que foi atingido, rola o Dodge de novo com +valor",
+        "attackCalledShot": "Ataque: vira um Called Shot sem a Ação extra (1)",
+        "attackNoCalledShotPenalty": "Ataque: Called Shot sem o −2(T) no Strike (1)",
+        "attackOverCharges": "Ataque: +Energy Charges acima do máximo",
+        "attackKpBaseFree": "Ataque: o custo do Profile/Signature é 0 (1; o resto ainda é pago)",
+        "attackFreeCounter": "Ataque: feito através de Exploit/Defend sem gastar Counter Action (1)",
+        "attackAoe": "Ataque: um ataque sem AoE ganha esse formato (cone, line ou cone|line) em Standard Magnitude",
+        "attackMagnitude": "Ataque: +Magnitude da AoE (máximo 4)",
+        "attackGreaterDice": "Ataque: +n vezes os Greater Dice do seu ToP no Wound Roll",
+        "attackIgnoreSoak": "Ataque: fração do Soak do alvo ignorada (a maior vale)",
+        "attackCritSetStrike": "Ataque: define o Critical Target do Strike Roll (o menor vale; ignora o piso de 7)",
+        "attackCritSetWound": "Ataque: define o Critical Target do Wound Roll (o menor vale; ignora o piso de 7)",
+        "attackDimDefenseMult": "Ataque: × o Diminishing Defense que este ataque causa (o maior vale)",
+        "attackDimOnDeclare": "Ataque: o Diminishing Defense dele vale já na declaração (1)",
+        "attackState": "Ataque: entra nesse State antes do Strike (sai quando o card resolve ou no fim do turno)",
+        "attackIgnoreFoundationReq": "Ataque: sem o requisito de FO/MA Score (1)",
+        "flagNoLongRangePenalty": "Sem a penalidade de Long Range",
+        "wagerMaxSet": "Limite do Ki Wager (o menor vale)",
+        "flagDimDefenseFirstFree": "O primeiro Diminishing Defense de cada atacante por Combat Round é ignorado"
+      },
+      "Versus": {
+        "Title": "Contra este oponente",
+        "AskPre": "Antes de rolar a defesa",
+        "AskHit": "Você foi atingido",
+        "Line": "{label}: {value} {what}",
+        "Redodge": "Dodge de novo",
+        "StrikeVs": "Strike contra este alvo: {n}",
+        "CountLimit": "{n} uso(s) limitado(s) de efeitos \"contra o alvo\" deste ataque: o dono do atacante (ou o GM) precisa marcá-los."
+      },
+      "Attack": {
+        "OptionCost": "custo: {cost}",
+        "OptionAmount": "Quantos (até {max})",
+        "OptionCantPay": "Opção não pode ser paga: {why}",
+        "AoeShape": "Formato da AoE (ataque sem AoE)",
+        "AoeShapes": {
+          "cone": "Cone",
+          "line": "Line"
+        },
+        "AoeGiven": "{label}: AoE em {shape} (Standard Magnitude).",
+        "WoundOptions": "Opções do Wound Roll",
+        "SpendCounter": "Gastar Ação / Ação de Contra-ataque",
+        "CounterSpent": "Feito através de Exploit/Defend: gastou 1 Counter Action em vez da Ação.",
+        "ErrCounter": "Sem Counter Action para um ataque feito através de Exploit/Defend.",
+        "FullPower": "{name} (Full Power)"
+      },
+      "Sig": {
+        "Tags": "Tags",
+        "TagsHint": "Lista separada por vírgulas: copied, crafted, racial, fullPower, quickLearner (@tag_<tag> nas fórmulas)"
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Target": {
+        "vsStrike": "Against the target: Strike Roll (your attack against it; or your Parry against its attack)",
+        "vsWound": "Against the target: Wound Roll of your attack",
+        "vsCombat": "Against the target: Combat Rolls (Strike and Wound when attacking; Dodge and Parry when defending)",
+        "vsCategory": "Against the target: +Damage Category of your attack",
+        "vsIgnoreSoak": "Against the target: fraction of its Soak ignored (highest wins)",
+        "vsSteadfast": "Against the target: ± to the Steadfast Check of a Character your attack knocked through a Health Threshold",
+        "vsDodge": "Against the attacker: Dodge Roll against its attack",
+        "vsDefenseValue": "Against the attacker: Defense Value added to the Dodge",
+        "vsSoak": "Against the attacker: Soak against its Damage",
+        "vsDr": "Against the attacker: Damage Reduction against its Damage",
+        "vsCategoryTaken": "Against the attacker: Damage Category of the Damage you take (−1 = one lower)",
+        "vsCategorySet": "Against the attacker: sets the Damage Category of the Damage you take (1 Standard, 2 Direct, 3 Lethal)",
+        "vsDamageTaken": "Against the attacker: Damage taken (flat, when there is Damage)",
+        "vsDamageMult": "Against the attacker: × the Damage taken (rounded down)",
+        "vsGuardKp": "Against the attacker: ± KP of your Guard",
+        "vsGuardNoCharges": "Against the attacker: Guard ignores the KP the Energy Charges add (1)",
+        "vsRedodge": "Against the attacker: after a Dodge (or no defense) that was hit, roll the Dodge again with +value",
+        "attackCalledShot": "Attack: becomes a Called Shot without its extra Action (1)",
+        "attackNoCalledShotPenalty": "Attack: Called Shot without the −2(T) Strike (1)",
+        "attackOverCharges": "Attack: +Energy Charges beyond the maximum",
+        "attackKpBaseFree": "Attack: the Profile/Signature cost is 0 (1; the rest is still paid)",
+        "attackFreeCounter": "Attack: made through Exploit/Defend without spending a Counter Action (1)",
+        "attackAoe": "Attack: an attack without an AoE gets that shape (cone, line or cone|line) at Standard Magnitude",
+        "attackMagnitude": "Attack: +AoE Magnitude (at most 4)",
+        "attackGreaterDice": "Attack: +n times the Greater Dice of your ToP on the Wound Roll",
+        "attackIgnoreSoak": "Attack: fraction of the target's Soak ignored (highest wins)",
+        "attackCritSetStrike": "Attack: sets the Strike Roll's Critical Target (lowest wins; ignores the 7 floor)",
+        "attackCritSetWound": "Attack: sets the Wound Roll's Critical Target (lowest wins; ignores the 7 floor)",
+        "attackDimDefenseMult": "Attack: × the Diminishing Defense this attack inflicts (highest wins)",
+        "attackDimOnDeclare": "Attack: its Diminishing Defense applies at declaration (1)",
+        "attackState": "Attack: enter that State before the Strike (left when the card is resolved or at the end of the turn)",
+        "attackIgnoreFoundationReq": "Attack: no FO/MA Score requirement (1)",
+        "flagNoLongRangePenalty": "No Long Range penalty",
+        "wagerMaxSet": "Ki Wager limit (lowest wins)",
+        "flagDimDefenseFirstFree": "The first Diminishing Defense from each attacker per Combat Round is ignored"
+      },
+      "Versus": {
+        "Title": "Against this opponent",
+        "AskPre": "Before the defense roll",
+        "AskHit": "You were hit",
+        "Line": "{label}: {value} {what}",
+        "Redodge": "Dodge again",
+        "StrikeVs": "Strike against this target: {n}",
+        "CountLimit": "{n} limited use(s) of \"against the target\" effects of this attack: the attacker's owner (or the GM) must mark them."
+      },
+      "Attack": {
+        "OptionCost": "cost: {cost}",
+        "OptionAmount": "How many (up to {max})",
+        "OptionCantPay": "Option cannot be paid: {why}",
+        "AoeShape": "AoE shape (attack without an AoE)",
+        "AoeShapes": {
+          "cone": "Cone",
+          "line": "Line"
+        },
+        "AoeGiven": "{label}: AoE as a {shape} (Standard Magnitude).",
+        "WoundOptions": "Wound Roll options",
+        "SpendCounter": "Spend Action / Counter Action",
+        "CounterSpent": "Made through Exploit/Defend: spent 1 Counter Action instead of the Action.",
+        "ErrCounter": "No Counter Action for an attack made through Exploit/Defend.",
+        "FullPower": "{name} (Full Power)"
+      },
+      "Sig": {
+        "Tags": "Tags",
+        "TagsHint": "Comma list: copied, crafted, racial, fullPower, quickLearner (@tag_<tag> in formulas)"
+      }
+    }
+  }
+}

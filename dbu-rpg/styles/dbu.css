@@ -545,3 +545,6 @@ label.wide input { width: 100%; }
 /* Hyper Elemental fields (only with Flash of the Elements) and United Duel allies */
 .dbu-hyper.dbu-off { opacity: 0.45; pointer-events: none; }
 .dbu-duel-side.ally { padding-left: 18px; font-size: 0.9em; }
+
+/* A full-width note inside a details grid (what a Racial Trait grants) */
+.dbu-form-grid .hint.wide { grid-column: 1 / -1; font-size: 0.85em; opacity: 0.85; margin: 2px 0; }
