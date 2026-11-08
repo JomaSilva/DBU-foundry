@@ -34,7 +34,7 @@ export const fxSlug = s => awakeningSlug(s);
 export const fxRef = (slug, trait, n) => `${fxSlug(slug)}_${fxSlug(trait)}_${String(n ?? "").toLowerCase().replace(/[^a-z0-9]/g, "")}`;
 
 /** Targets on other effects (worked out by fxPass, never summed in the buckets). */
-export const FX_TARGET = /^fx(Off|On|Mult|Add|Limit)\./;
+export const FX_TARGET = /^fx(Off|On|Mult|Add|Limit|Ask)\./;
 /** Aspect targets (worked out by aspectPass). */
 export const ASPECT_TARGET = /^aspect(Set|All|Of)?\./;
 /** Targets that neither the stages nor the sheet sum: the passes of this file read them. */
@@ -43,8 +43,8 @@ const RULE_TARGET = /^(enterBlock|combineBlock|leaveBlock|leaveWhen|grandTrigger
 export const isPassTarget = target => FX_TARGET.test(String(target ?? "")) || ASPECT_TARGET.test(String(target ?? ""))
   || RULE_TARGET.test(String(target ?? ""));
 
-const EMPTY = Object.freeze({ inForce: {}, off: new Set(), on: new Set(), mult: {}, add: {}, limit: {} });
-export const emptyFx = () => ({ inForce: {}, off: new Set(), on: new Set(), mult: {}, add: {}, limit: {} });
+const EMPTY = Object.freeze({ inForce: {}, off: new Set(), on: new Set(), mult: {}, add: {}, limit: {}, ask: new Set() });
+export const emptyFx = () => ({ inForce: {}, off: new Set(), on: new Set(), mult: {}, add: {}, limit: {}, ask: new Set() });
 
 /** Does the item work now (its pieces apply)? */
 const itemWorks = item => !!(item.system?.isActive ?? true);
@@ -100,6 +100,8 @@ export function fxPass(actor, data = {}) {
     else if ( kind === "fxOn" ) { if ( v > 0 ) out.on.add(ref); }
     else if ( kind === "fxMult" ) { if ( Number.isFinite(v) ) out.mult[ref] = (out.mult[ref] ?? 1) * v; }
     else if ( kind === "fxAdd" ) { if ( v ) out.add[ref] = (out.add[ref] ?? 0) + v; }
+    // (T20 fxAsk: its pieces are asked instead of applied by themselves)
+    else if ( kind === "fxAsk" ) { if ( v > 0 ) (out.ask ??= new Set()).add(ref); }
   }
   return out;
 }
@@ -118,13 +120,15 @@ export function fxPiece(p, fx = EMPTY) {
   const mult = fx.mult?.[ref];
   const add = fx.add?.[ref];
   const limit = fx.limit?.[ref];
-  if ( (mult === undefined) && !add && (limit === undefined) ) return p;
+  const ask = !!fx.ask?.has?.(ref);
+  if ( (mult === undefined) && !add && (limit === undefined) && !ask ) return p;
   const out = { ...p };
   const v = String(p.value ?? "").trim();
   if ( v && !TEXT_VALUE.test(String(p.target ?? "")) && (((mult !== undefined) && (mult !== 1)) || add) ) {
     out.value = `((${v})*${mult ?? 1} + ${add ?? 0})`;
   }
   if ( limit !== undefined ) out.limit = limit;
+  if ( ask ) out.mode = "ask";
   return out;
 }
 

@@ -203,7 +203,7 @@ async function beginDuel(duel) {
   const refund = duel.refund ?? 0;
   if ( (refund > 0) && attacker ) {
     const a = attacker.system;
-    await attacker.update({ "system.ki.value": Math.min(a.ki.max, a.ki.value + refund),
+    await attacker.update({ "system.ki.value": Math.min(a.ki.cap ?? a.ki.max, a.ki.value + refund),
       "system.capacity.value": Math.min(a.capacity.max, a.capacity.value + refund) });
   }
   const attackMessage = game.messages.get(duel.attackMessageId);

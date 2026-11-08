@@ -35,7 +35,14 @@ export class DBUItem extends Item {
   /** @override E4: an Apparel piece worn before the change ("apparelDoff"). */
   async _preUpdate(changed, options, user) {
     if ( (await super._preUpdate(changed, options, user)) === false ) return false;
+    // (CS1 "block.armed": no Weapon may be equipped: Awkward Anatomy)
+    if ( (this.type === "weapon") && (foundry.utils.getProperty(changed, "system.equipped") === true) && !this.system.integrated
+      && ((this.parent?.system?.buckets?.["block.armed"]?.total ?? 0) > 0) ) {
+      ui.notifications.warn(game.i18n.format("DBU.CS1.NoWeapons", { name: this.parent.name }));
+      return false;
+    }
     if ( this.type === "apparel" ) options.dbuWorn = !!this.system.equipped && ((this.system.breakValue ?? 1) > 0);
+    if ( this.type === "apparel" ) options.dbuBV = Number(this.system.breakValue ?? 3);
   }
 
   /**
@@ -52,6 +59,12 @@ export class DBUItem extends Item {
         [`via_${viaSlug(this.name)}`]: 1, weights: (this.system.category === "weights") ? 1 : 0, armor: (this.system.category === "armor") ? 1 : 0,
         natural: this.system.natural ? 1 : 0, craftsmanship: this.system.craftsmanship ?? 1, broken: this.system.equipped ? 1 : 0
       } })).catch(console.error);
+    }
+    // F13 "breakValueLost": an Apparel piece of yours had its Break Value reduced (@via_<slug>, @natural, @n: by how much)
+    const bvNow = Number(this.system.breakValue ?? 3);
+    if ( actor && (this.type === "apparel") && Number.isFinite(options?.dbuBV) && (bvNow < options.dbuBV) ) {
+      import("../combat/triggers.mjs").then(({ fireEvent, viaSlug }) => fireEvent(actor, "breakValueLost", { scope: {
+        [`via_${viaSlug(this.name)}`]: 1, natural: this.system.natural ? 1 : 0, n: options.dbuBV - bvNow } })).catch(console.error);
     }
     actor?._scheduleRuleCheck?.();
   }
@@ -153,6 +166,14 @@ export class DBUItem extends Item {
     // Statstick (Villainous Trait): no Unique Abilities nor Special Maneuvers (except Soar)
     const V = await import("../combat/villainous.mjs");
     if ( V.statstickBlocks(actor, this) ) return ui.notifications.warn(game.i18n.localize("DBU.Villain.StatstickBlock"));
+    // BB: a State that forbids it (Liquid / Feral: Unique Abilities; Spectator: a warning for what targets another Character)
+    {
+      const SR = await import("../rules/state-rules.mjs");
+      const why = (this.type === "uniqueAbility") ? SR.stateBlock(actor, "uniqueAbility") : "";
+      if ( why ) return ui.notifications.warn(why);
+      const warn = SR.stateWarn(actor, this);
+      if ( warn ) ui.notifications.warn(warn);
+    }
     // Q: a Maneuver / Unique Ability granted "+mastery:N" waits for those Masteries of the item that grants it
     if ( ["maneuver", "uniqueAbility", "signature"].includes(this.type) ) {
       const { grantMasteryMissing } = await import("../data/items.mjs");

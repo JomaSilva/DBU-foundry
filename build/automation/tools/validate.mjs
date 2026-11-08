@@ -29,7 +29,7 @@ const { DBU } = await import(pathToFileURL(path.join(SYSTEM, "config.mjs")).href
 const VOCAB = await import(pathToFileURL(path.join(SYSTEM, "vocab/index.mjs")).href);
 // What the feature packages teach the validator (tools/vocab/a.mjs, b.mjs, c.mjs; see the comments there)
 const PKGS = [];
-for ( const name of ["a", "b", "c", "d", "e", "f", "g", "i", "l", "m", "n", "o", "p", "q", "r", "s", "v", "w", "x", "y"] ) PKGS.push({ name, ...(await import(pathToFileURL(path.join(TOOLS, "vocab", `${name}.mjs`)).href)) });
+for ( const name of ["a", "b", "c", "d", "e", "f", "g", "i", "l", "m", "n", "o", "p", "q", "r", "s", "v", "w", "x", "y", "z", "aa", "ra", "rb", "rd"] ) PKGS.push({ name, ...(await import(pathToFileURL(path.join(TOOLS, "vocab", `${name}.mjs`)).href)) });
 const fromPkgs = field => PKGS.flatMap(p => [...(p[field] ?? [])]);
 const TARGETS = new Set(Object.keys(DBU.modifierTargets));
 // Dynamic families (resMax.<slug>, resMaxSet.<slug>, ignoreState.<state>[.<level>].<n>)
@@ -54,7 +54,7 @@ const WITH_OTHER = new Set(["attackMade", "attackHit", "damaged", "attackMissed"
   ...fromPkgs("WITH_OTHER")]);
 const MANEUVERS = VOCAB.MANEUVER_KEYS;
 // (aa: Adversary Actions, only an Adversary with One-Man Army pays them, from its Counter Actions)
-const COST_KINDS = ["ki", "kp", "life", "lp", "safelife", "safelp", "dkp", "capacity", "counters", "actions", "power", "charges", "res", "aa"];
+const COST_KINDS = ["ki", "kp", "life", "lp", "safelife", "safelp", "nmlife", "nmlp", "dkp", "capacity", "counters", "actions", "power", "charges", "res", "aa", "karma", "jacket"];
 const VERDICTS = ["modifiers", "triggers", "both", "code", "covered", "narrative"];
 const CODE_CATS = ["attackOption", "versusTarget", "defenseOption", "maneuverChange", "outOfSequence", "areaEffect", "clash",
   "resourceRule", "transformationRule", "summon", "grant", "other"];
@@ -209,7 +209,8 @@ const variables = formula => [...toExpression(formula).matchAll(/@([\w.]+)/g)].m
 function checkLimit(limit, what) {
   const problems = [];
   for ( const part of splitTop(String(limit ?? "")) ) {
-    const lm = /^(.+?)\s*\/\s*(round|encounter|turn)$/i.exec(part);
+    // (CS3 "@<key>": a part counted under a key of its own)
+    const lm = /^(.+?)\s*\/\s*(round|encounter|turn)(?:\s*@\s*[\w-]+)?$/i.exec(part);
     if ( !lm ) { problems.push(`${what}: limit "${limit}"`); continue; }
     if ( !/^\d+$/.test(lm[1].trim()) ) problems.push(...check(lm[1], [], `${what} limit`, true));
   }
@@ -320,7 +321,11 @@ for ( const [key, e] of Object.entries(entries) ) {
       if ( !t.duration || (t.duration === "none") ) own.push(`trigger ${i}: buff without duration`);
     }
     if ( (t.duration === "untilRevert") && !["buff", "state", "condition"].includes(t.effect) ) own.push(`trigger ${i}: untilRevert only for buff/state/condition`);
-    if ( (t.effect !== "message") && (t.value !== undefined) && (t.value !== "") ) own.push(...check(t.value, vars, `trigger ${i} value`, true));
+    if ( (t.effect !== "message") && (t.value !== undefined) && (t.value !== "") ) {
+      // (a rollBonus may add dice: "1d8(T)" reads as its number of dice)
+      const val = (t.effect === "rollBonus") ? String(t.value).replace(/\b\d*d\d+\b/g, "1") : t.value;
+      own.push(...check(val, vars, `trigger ${i} value`, true));
+    }
     if ( t.condition ) own.push(...check(t.condition, vars, `trigger ${i} condition`, true));
     own.push(...hook("checkTrigger", [t, i]));
   }

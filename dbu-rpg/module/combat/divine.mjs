@@ -70,6 +70,7 @@ export function kiPayment(sys, amount, { divine = false } = {}) {
  */
 export async function empower(actor) {
   const sys = actor.system;
+  { const { stateBlock } = await import("../rules/state-rules.mjs"); const why = stateBlock(actor, "empower"); if ( why ) return ui.notifications.warn(why); }
   const target = Array.from(game.user.targets ?? []).find(t => t.actor && (t.actor !== actor));
   const ally = target?.actor;
   if ( !ally?.system?.ki ) return ui.notifications.warn(L("DBU.Empower.NoTarget"));
@@ -106,17 +107,23 @@ export async function empower(actor) {
   const melee = !!data.melee || (bucket("flag.empowerMelee") > 0);
   const limit = (bucket("flag.empowerMax") > 0) ? Infinity : 2 * might * (melee ? 2 : 1) * counted;
   const have = sys[pool].value;
-  const room = Math.max(0, (ally.system[pool].max ?? 0) - (ally.system[pool].value ?? 0));
-  const asked = Number(data.amount) > 0 ? Number(data.amount) : limit;
+  // RG "empowered.toLife" (the Ally's): the Ki Points it gets become Life Points (up to its missing Life Points)
+  const toLife = (pool === "ki") && ((ally.system.buckets?.["empowered.toLife"]?.total ?? 0) > 0);
+  const room = toLife ? Math.max(0, (ally.system.life.cap ?? ally.system.life.max ?? 0) - (ally.system.life.value ?? 0))
+    : Math.max(0, (ally.system[pool].max ?? 0) - (ally.system[pool].value ?? 0));
+  // RG "flag.empowerForceMax": you give as much as you can (the amount asked is ignored)
+  const forceMax = bucket("flag.empowerForceMax") > 0;
+  const asked = (!forceMax && (Number(data.amount) > 0)) ? Number(data.amount) : limit;
   const amount = Math.max(0, Math.min(asked, limit, have, room));
   const spend = actor._spendAction(actions);
   await actor.update({ [`system.${pool}.value`]: have - amount, ...spend }, { dbuSource: "empower" });
-  await safeUpdate(ally, { [`system.${pool}.value`]: (ally.system[pool].value ?? 0) + amount }, { dbuSource: "empower" });
+  if ( toLife ) await safeUpdate(ally, { "system.life.value": (ally.system.life.value ?? 0) + amount }, { dbuSource: "empower" });
+  else await safeUpdate(ally, { [`system.${pool}.value`]: (ally.system[pool].value ?? 0) + amount }, { dbuSource: "empower" });
   // B5 "empower" (other = the Ally) and "empowered" (other = the giver)
   const { fireEvent } = await import("./triggers.mjs");
   fireEvent(actor, "empower", { other: ally, scope: { actionsSpent: actions, kpGiven: (pool === "ki") ? amount : 0,
     dkpGiven: (pool === "dkp") ? amount : 0, oos: actor._dbuOutOfSequence ? 1 : 0 } });
-  fireEvent(ally, "empowered", { other: actor, scope: { kpGained: amount, dkpGained: (pool === "dkp") ? amount : 0 } });
+  fireEvent(ally, "empowered", { other: actor, scope: { kpGained: toLife ? 0 : amount, dkpGained: (pool === "dkp") ? amount : 0, lpGained: toLife ? amount : 0 } });
   // S: Empower provokes the Exploit of the adjacent Opponents
   await (await import("../rules/exploit.mjs")).provokeExploit(actor, "empower", { name: "Empower" });
   // E1: the Empower Maneuver was used ("maneuverUsed", @via_empower)
@@ -155,8 +162,12 @@ function frequencyProblem(item) {
   const same = used.combat === combat.id;
   const inRound = (same && (used.round === combat.round)) ? (used.inRound ?? 0) : 0;
   const inEncounter = same ? (used.inEncounter ?? 0) : 0;
-  const perRound = Number(/(\d+)\s*\/\s*Round/i.exec(f)?.[1] ?? 0);
-  const perEncounter = Number(/(\d+)\s*\/\s*Encounter/i.exec(f)?.[1] ?? 0);
+  let perRound = Number(/(\d+)\s*\/\s*Round/i.exec(f)?.[1] ?? 0);
+  let perEncounter = Number(/(\d+)\s*\/\s*Encounter/i.exec(f)?.[1] ?? 0);
+  // (T2 "godFreq.<slug>": <n>/Round instead, with no per-Encounter limit: Deeper Blue)
+  const slug = String(item?.name ?? "").toLowerCase().replace(/\bmaneuver\b/g, "").replace(/[^a-z0-9]/g, "");
+  const freq = Number(item.actor?.system?.buckets?.[`godFreq.${slug}`]?.total ?? 0) || 0;
+  if ( freq > 0 ) { perRound = freq; perEncounter = 0; }
   if ( perRound && (inRound >= perRound) ) return L("DBU.God.RoundLimit", { name: item.name, n: perRound });
   if ( perEncounter && (inEncounter >= perEncounter) ) return L("DBU.God.EncounterLimit", { name: item.name, n: perEncounter });
   return null;
@@ -276,7 +287,7 @@ export async function useGodManeuver(actor, item) {
       const r = await new Roll(`${5 * bT}d10 + ${surgency}`).evaluate();
       await r.toMessage({ speaker: ChatMessage.getSpeaker({ actor }), flavor: `${item.name} (Healing Surge, Surgency ${surgency})` });
       if ( !actor.system.flags?.noLifeRegain ) {
-        await actor.update({ "system.life.value": Math.min(actor.system.life.max, actor.system.life.value + r.total) });
+        await actor.update({ "system.life.value": Math.min(actor.system.life.cap ?? actor.system.life.max, actor.system.life.value + r.total) });
       }
       return card([L("DBU.God.Breathing", { n: r.total, dkp: fixed ?? (5 * bT) }),
         ...(actor.system.flags?.noLifeRegain ? [L("DBU.Life.NoRegain")] : [])]);
@@ -285,7 +296,7 @@ export async function useGodManeuver(actor, item) {
       const cost = fixed ?? (2 * bT);
       if ( !(await payGodManeuver(actor, item, cost, { actions: actionsOf || 1 })) ) return null;
       await actor.gainPower(2, { via: "maneuver" });
-      await actor.update({ "system.ki.value": Math.min(actor.system.ki.max, actor.system.ki.value + cost) }, { dbuSource: "maneuver" });
+      await actor.update({ "system.ki.value": Math.min(actor.system.ki.cap ?? actor.system.ki.max, actor.system.ki.value + cost) }, { dbuSource: "maneuver" });
       return card([L("DBU.God.Flame", { dkp: cost })]);
     }
     case "divine counter": {

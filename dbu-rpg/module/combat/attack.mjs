@@ -21,7 +21,7 @@ import { hyperElementalField, multiProfileField, resolveHyperElemental, resolveM
 import { ignoresCapacity, staminaAbsorb, staminaPayment } from "./adversary.mjs";
 import { collectModifiers } from "../rules/modifiers.mjs";
 import { evaluate, test } from "../rules/formula.mjs";
-import { OPTION_FRACTION, OPTION_TEXT, autoChosen, chosenPieces, countOptionLimits, optionCostPlan, optionDialog,
+import { OPTION_FRACTION, OPTION_TEXT, autoChosen, choseVars, chosenPieces, countOptionLimits, optionCostPlan, optionDialog,
   optionPieces, payOptions, pieceUseKey, spentVars, withOptionFields } from "../rules/options.mjs";
 import { VS_ATTACK_DAMAGE, VS_ATTACK_STRIKE, VS_DEFERRED, VS_HIT, VS_PRE, aggregates, areAllies, attackerSidePiece, punchOf,
   punchSizes, punchVars, versusData, versusMods, versusPieces } from "../rules/versus.mjs";
@@ -43,9 +43,48 @@ const DAMAGE_ATTRIBUTE = "attack.damageAttribute";
 /** Attack options whose value keeps its fraction (1/2 of the Damage Reduction ignored, x1.5 Diminishing Defense...). */
 const FRACTION_OPTIONS = OPTION_FRACTION;
 /** Attack options chosen with a select of the dialog instead of a box (the Damage Attribute, the AoE shape). */
-const SELECT_OPTIONS = new Set([DAMAGE_ATTRIBUTE, "attack.aoe", "attack.advantagePick"]);
+const SELECT_OPTIONS = new Set([DAMAGE_ATTRIBUTE, "attack.aoe", "attack.advantagePick", "attack.advantagePick.copied",
+  "attack.removeAdvantage", "attack.removeDisadvantage"]);
+/** AO: Advantages (or Disadvantages of 6 TP or less) of the Signature taken off this attack (Employed for Skill). */
+const REMOVE_TARGETS = { adv: "attack.removeAdvantage", dis: "attack.removeDisadvantage" };
+const REMOVE_TARGET_SET = new Set(Object.values(REMOVE_TARGETS));
+/** What the technique may lose: [{ value: "adv:<key>" | "dis:<key>", label }] (one entry per rank). */
+function removableOptions(sig, kinds) {
+  const out = [];
+  for ( const [kind, list] of [["adv", sig?.advantages], ["dis", sig?.disadvantages]] ) {
+    if ( !kinds.includes(kind) ) continue;
+    for ( const o of Array.from(list ?? []) ) {
+      const def = SIGNATURE_OPTIONS[o?.key];
+      if ( !def ) continue;
+      const rank = Math.max(1, Math.floor(Number(o.rank) || 1));
+      if ( (kind === "dis") && !(Math.abs(Number(def.costs?.[rank - 1] ?? def.costs?.[0] ?? 99)) <= 6) ) continue;
+      for ( let r = 0; r < Math.min(rank, 2); r++ ) out.push({ value: `${kind}:${o.key}`, label: `${def.name}${rank > 1 ? ` (${rank - r})` : ""}` });
+    }
+  }
+  return out;
+}
+/**
+ * AO: the one-shot pieces of the removals picked (two selects): each removes a rank (attack.advantage.<key> -1) and gives
+ * +2(T) Wound (an Advantage) or +1(T) Ki Point Cost (a Disadvantage); only one kind, up to the piece's value.
+ */
+function removePickPieces(mods, picks, sig) {
+  const chosen = picks.map(v => String(v ?? "")).filter(v => /^(adv|dis):/.test(v));
+  if ( !chosen.length || !sig ) return [];
+  const kind = chosen[0].slice(0, 3);
+  const piece = mods.find(m => m.target === REMOVE_TARGETS[kind]);
+  if ( !piece ) return [];
+  const list = chosen.filter(v => v.startsWith(`${kind}:`)).slice(0, Math.max(0, Math.floor(Number(piece.value) || 0)));
+  if ( !list.length ) return [];
+  // (fromRemove, not fromPick: every removal counts, not only the first pick)
+  const base = { ...piece, mode: "", group: "", amount: "", fromRemove: true, limitKey: String(piece.limitKey ?? "").trim() || pieceUseKey(piece) };
+  return [...list.map(v => ({ ...base, target: `attack.advantage.${v.slice(4)}`, value: "-1" })),
+    (kind === "adv") ? { ...base, target: "attack.wound", value: `${2 * list.length}(T)` } : { ...base, target: "attack.kp", value: `${list.length}(T)` }];
+}
 /** R: "attack.advantagePick" (value = the most TP): an Advantage of the player's choice for this attack, picked in the dialog. */
 const ADV_PICK = "attack.advantagePick";
+/** AP: "attack.advantagePick.copied": the same, among the Advantages of your Copied Techniques only. */
+const ADV_PICK_COPIED = "attack.advantagePick.copied";
+const isPick = t => (t === ADV_PICK) || (t === ADV_PICK_COPIED);
 /** The Advantages whose first rank costs at most `tp` TP. */
 export function pickableAdvantages(tp) {
   return Object.values(SIGNATURE_OPTIONS).filter(d => (d.kind === "advantage") && Number.isFinite(d.costs?.[0]) && (d.costs[0] <= tp))
@@ -56,7 +95,7 @@ export function pickableAdvantages(tp) {
 export function advantagePickPieces(mods, key) {
   const def = key ? SIGNATURE_OPTIONS[key] : null;
   if ( !def || (def.kind !== "advantage") || !Number.isFinite(def.costs?.[0]) ) return [];
-  return mods.filter(m => m.target === ADV_PICK).map(m => ({ ...m, target: `attack.advantage.${key}`, value: "1", mode: "", group: "", amount: "",
+  return mods.filter(m => isPick(m.target)).map(m => ({ ...m, target: `attack.advantage.${key}`, value: "1", mode: "", group: "", amount: "",
     fromPick: true, limitKey: String(m.limitKey ?? "").trim() || pieceUseKey(m),
     condition: [String(m.condition ?? "").trim(), `(${String(m.value || 0)}) >= ${def.costs[0]}`].filter(Boolean).map(c => `(${c})`).join(" && ") }));
 }
@@ -90,6 +129,15 @@ function defendVars(def) {
   const out = {};
   if ( DEFEND_MODES.includes(mode) ) out[mode] = 1;
   out.counter = COUNTER_MODES.includes(mode) ? 1 : 0;
+  // RB: the hit taken through Intervene (Defense Wall, a lost Deflect): @intervene
+  out.intervene = (mode === "intervene") ? 1 : 0;
+  // DC: the defender's option groups chosen for this defense (@defChose.<group>: its n) and the effect that waived its
+  // Counter Action (@waivedFx.<ref>)
+  out.defChose = { ...(def?.defChose ?? {}) };
+  out.waivedFx = def?.waivedFx ? { [String(def.waivedFx).toLowerCase()]: 1 } : {};
+  // RD: that Intervene spent no Counter Action (@interveneFree) and through which effect (@interveneFreeFx.<ref>)
+  out.interveneFree = ((mode === "intervene") && def?.free) ? 1 : 0;
+  if ( (mode === "intervene") && def?.freeFx ) out.interveneFreeFx = { [String(def.freeFx).toLowerCase()]: 1 };
   out.defenseCrit = def?.crit ? 1 : 0;
   return out;
 }
@@ -289,6 +337,16 @@ export async function openAttackDialog(actor, { signature = null, profile = null
   const swings = wildSwingsLeft(actor);
   const swingsBox = (swings !== null) ? `<div class="dbu-checks"><label><input type="checkbox" name="absolute" ${swings > 0 ? "" : "disabled"}>
     ${L("DBU.Villain.WildSwingsBox", { n: swings })}</label></div>` : "";
+  // (T11: the Actions spent through Giga Flare / Super Combination, when this Signature or an effect may have one)
+  const superActsOn = ["gigaFlare", "superCombination"].includes(sig?.superProfile ?? "")
+    || Array.from(actor.items ?? []).some(i => Array.from(i.system?.modifiers ?? []).some(m => /^attack\.superProfile\.(gigaFlare|superCombination)$/.test(String(m?.target ?? ""))));
+  const superActBox = superActsOn ? `<div class="form-group"><label>${L("DBU.T11.SuperActions")}</label>
+      <input type="number" name="superActions" value="0" min="0" step="1"></div>` : "";
+  // (T12: the Squares moved in a straight line through Charging Assault, when this Signature or an effect may have it)
+  const chargeOn = (sig?.advantages ?? []).some(a => a?.key === "chargingAssault")
+    || Array.from(actor.items ?? []).some(i => Array.from(i.system?.modifiers ?? []).some(m => String(m?.target ?? "") === "attack.advantage.chargingAssault"));
+  const chargeBox = chargeOn ? `<div class="form-group"><label>${L("DBU.T12.ChargeSquares")}</label>
+      <input type="number" name="chargeSquares" value="0" min="0" step="1"></div>` : "";
   // Adversaries: Narrative Stamina in the place of Ki Points
   const staminaBox =((actor.type === "adversary") && (sys.adversary?.stamina > 0)) ? `<div class="dbu-checks">
       <label><input type="checkbox" name="staminaPay" ${sys.adversary.staminaPays ? "checked" : ""}>
@@ -298,6 +356,10 @@ export async function openAttackDialog(actor, { signature = null, profile = null
   // boxes come before the Ki Wager, the Weapon, the Damage Attribute... are chosen: an option gets one when it applies
   // with any of those choices (the largest Ki Wager, Divine Ki for both payments)
   const { triggerUsesLeft, costPlan } = await import("./triggers.mjs");
+  // FC: Final Chance (the technique's Advantage, or an option that adds it) while below the Injured Health Threshold
+  const fcLife = Math.max(0, sys.life.value ?? 0);
+  const fcHas = (sig?.advantages ?? []).some(a => a?.key === "finalChance");
+  let finalChanceBox = "";
   const offered = attackOptionsAny(actor, dialogScopes(actor, { sig, comp, prof, profileKey,
     foundation: sig?.foundation ?? prof?.foundations?.[0], divine, outOfSequence, targets, sigName: signature?.name ?? "", viaFx }),
   oneShot);
@@ -318,12 +380,16 @@ export async function openAttackDialog(actor, { signature = null, profile = null
     const cost = (plan && !plan.empty) ? ` <small>(${esc(L("DBU.Attack.OptionCost", { cost: plan.text }))})</small>` : "";
     const amount = b.max ? ` <input type="number" name="optn_${i}" value="1" min="1" max="${Math.floor(b.max)}" step="1"
       data-tooltip="${esc(L("DBU.Attack.OptionAmount", { max: Math.floor(b.max) }))}">` : "";
-    return `<label><input type="checkbox" name="opt_${i}" ${off ? "disabled" : ""}>
+    const ex = b.pieces.map(p => String(p.exclusive ?? "").trim()).find(Boolean) ?? "";
+    return `<label><input type="checkbox" name="opt_${i}" ${off ? "disabled" : ""} ${ex ? `data-exclusive="${esc(ex)}"` : ""}>
       ${foundry.utils.escapeHTML(text)}${cost}</label>${amount}`;
   };
   const optionsBox = askBoxes.length ? `<div class="dbu-checks dbu-attack-options"><strong>${L("DBU.Attack.Options")}</strong>
     ${askBoxes.map(boxLine).join("")}</div>` : "";
   // An AoE shape for an attack without an AoE (attack.aoe options): Cone, Line
+  if ( ((sys.rollData?.below ?? 0) >= 2) && (fcLife > 0) && (fcHas || offered.some(o => o.target === "attack.advantage.finalChance")) ) {
+    finalChanceBox = `<label><input type="checkbox" name="finalChance"> ${L("DBU.Attack.FinalChanceBox", { n: fcLife })}</label>`;
+  }
   const aoeKeys = [...new Set(offered.filter(o => (o.target === "attack.aoe") && usable(o)).flatMap(o => aoeShapes(o.value)))];
   const aoeAuto = offered.some(o => (o.target === "attack.aoe") && (o.mode !== "ask") && usable(o));
   const aoeBox = aoeKeys.length ? `<div class="form-group"><label>${L("DBU.Attack.AoeShape")}</label>
@@ -335,10 +401,25 @@ export async function openAttackDialog(actor, { signature = null, profile = null
   // (F1 "attr": the effect's Damage Attribute, picked)
   const attrPick = damageAttributeKeys(withSpec.attr)[0] ?? "";
   // R: an Advantage of the player's choice up to N TP (attack.advantagePick): the highest N of the pieces that apply
-  const pickTp = Math.max(0, ...offered.filter(o => (o.target === ADV_PICK) && usable(o)).map(o => Number(o.value) || 0));
-  const advPickBox = (pickTp > 0) ? `<div class="form-group"><label>${L("DBU.Attack.AdvantagePick", { n: pickTp })}</label>
-    <select name="advantagePick"><option value="">—</option>
-      ${pickableAdvantages(pickTp).map(d => `<option value="${d.key}">${esc(d.name)} (${d.costs[0]} TP)</option>`).join("")}</select></div>` : "";
+  const pickPieces = offered.filter(o => isPick(o.target) && usable(o));
+  const pickTp = Math.max(0, ...pickPieces.map(o => Number(o.value) || 0));
+  // AP: the select joins an "exclusive" set when every pick piece that applies is in that set; ".copied" pieces only offer
+  // the Advantages one of your Copied Techniques has
+  const pickExs = [...new Set(pickPieces.map(p => String(p.exclusive ?? "").trim()))];
+  const pickEx = ((pickExs.length === 1) && pickExs[0]) ? pickExs[0] : "";
+  const copiedOnly = pickPieces.length && pickPieces.every(p => p.target === ADV_PICK_COPIED);
+  const copiedKeys = copiedOnly ? new Set(actor.items.filter(i => (i.type === "signature") && sigTags(i.system).includes("copied"))
+    .flatMap(i => Array.from(i.system.advantages ?? []).map(a => a?.key).filter(Boolean))) : null;
+  const pickList = pickableAdvantages(pickTp).filter(d => !copiedKeys || copiedKeys.has(d.key));
+  // AO: Employed for Skill: up to N Advantages (or Disadvantages of 6 TP or less) of the Signature taken off it
+  const removeKinds = Object.entries(REMOVE_TARGETS).filter(([, t]) => offered.some(o => (o.target === t) && usable(o))).map(([k]) => k);
+  const removeList = (sig && removeKinds.length) ? removableOptions(sig, removeKinds) : [];
+  const removeSelect = n => `<select name="removeOpt${n}"><option value="">—</option>${removeList.map(o =>
+    `<option value="${o.value}">${esc(L(o.value.startsWith("adv") ? "DBU.Attack.RemoveAdv" : "DBU.Attack.RemoveDis", { name: o.label }))}</option>`).join("")}</select>`;
+  const removeBox = removeList.length ? `<div class="form-group"><label>${L("DBU.Attack.RemovePick")}</label>${removeSelect(1)}${removeSelect(2)}</div>` : "";
+  const advPickBox = ((pickTp > 0) && pickList.length) ? `<div class="form-group"><label>${L("DBU.Attack.AdvantagePick", { n: pickTp })}</label>
+    <select name="advantagePick" ${pickEx ? `data-exclusive="${esc(pickEx)}"` : ""}><option value="">—</option>
+      ${pickList.map(d => `<option value="${d.key}">${esc(d.name)} (${d.costs[0]} TP)</option>`).join("")}</select></div>` : "";
   const damageBox = damageKeys.length ? `<div class="form-group"><label>${L("DBU.Attack.DamageAttribute")}</label>
     <select name="damageAttribute"><option value="">${L("DBU.Attack.DamageAttributeDefault")}</option>
       ${damageKeys.map(k => `<option value="${k}" ${(k === attrPick) ? "selected" : ""}>${esc(damageAttributeLabel(k))}</option>`).join("")}</select></div>` : "";
@@ -369,17 +450,21 @@ export async function openAttackDialog(actor, { signature = null, profile = null
     ${damageBox}
     ${aoeBox}
     ${advPickBox}
+    ${removeBox}
     ${viaBox}
     <div class="form-group"><label>${L("DBU.Attack.Wager")} (${L("DBU.Attack.WagerMax", { max: maxWager })})</label>
       <input type="number" name="wager" value="0" min="0" step="1"></div>
     ${(rules().desperation && !sys.optional.desperationUsed) ? `<div class="form-group"><label>${L("DBU.Attack.LifeWager", { max: Math.floor(sys.capacity.max / 2) })}</label>
       <input type="number" name="lifeWager" value="0" min="0" step="1"></div>` : ""}
+    ${finalChanceBox}
     ${dkp}
     ${staminaBox}
     ${swingsBox}
     ${optionsBox}
     <div class="form-group"><label>${L("DBU.Attack.Charges")} (${L("DBU.Attack.Pending", { n: pending })})</label>
       <input type="number" name="extraCharges" value="0" min="0" step="1"></div>
+    ${superActBox}
+    ${chargeBox}
     <div class="form-group"><label>${L("DBU.Attack.StrikeBonus")}</label><input type="number" name="strikeBonus" value="0" step="1"></div>
     <div class="form-group"><label>${L("DBU.Attack.WoundBonus")}</label><input type="number" name="woundBonus" value="0" step="1"></div>
     <div class="dbu-checks">
@@ -443,11 +528,38 @@ export async function openAttackDialog(actor, { signature = null, profile = null
         filterMulti();
       });
       filterMulti();
+      // RA: the boxes of one "exclusive" set: ticking one unticks the others
+      const root = dialog.element;
+      for ( const box of root.querySelectorAll("input[data-exclusive]") ) {
+        box.addEventListener("change", () => {
+          if ( !box.checked ) return;
+          for ( const other of root.querySelectorAll(`input[data-exclusive="${CSS.escape(box.dataset.exclusive)}"]`) ) if ( other !== box ) other.checked = false;
+          // (AP: the Advantage select of that set is cleared)
+          for ( const sel of root.querySelectorAll(`select[data-exclusive="${CSS.escape(box.dataset.exclusive)}"]`) ) sel.value = "";
+        });
+      }
+      // AP: picking an Advantage of an "exclusive" set unticks the boxes of that set
+      for ( const sel of root.querySelectorAll("select[data-exclusive]") ) {
+        sel.addEventListener("change", () => {
+          if ( !sel.value ) return;
+          for ( const box of root.querySelectorAll(`input[data-exclusive="${CSS.escape(sel.dataset.exclusive)}"]`) ) box.checked = false;
+        });
+      }
     },
     rejectClose: false
   });
   if ( !data || (data === "cancel") ) return null;
-  data.attackOptions = askBoxes.filter((b, i) => data[`opt_${i}`]).map(b => b.box);
+  // RA: one box per "exclusive" set (the first one ticked)
+  const exSeen = new Set();
+  data.attackOptions = askBoxes.filter((b, i) => data[`opt_${i}`]).filter(b => {
+    const ex = b.pieces.map(p => String(p.exclusive ?? "").trim()).find(Boolean) ?? "";
+    if ( !ex ) return true;
+    if ( exSeen.has(ex) ) return false;
+    exSeen.add(ex);
+    return true;
+  }).map(b => b.box);
+  // AP: an Advantage picked in a set whose box was ticked is dropped
+  if ( pickEx && exSeen.has(pickEx) ) data.advantagePick = "";
   // The n picked for the boxes with an amount
   const amounts = {};
   askBoxes.forEach((b, i) => { if ( b.max && data[`opt_${i}`] ) amounts[b.box] = Math.max(1, Math.floor(Number(data[`optn_${i}`]) || 1)); });
@@ -535,7 +647,8 @@ export async function executeAttack(actor, opts) {
   // The option pieces of the items (and the one-shot ones), the uses left, the ones the player must tick
   const baseOptionMods = preset ? [] : [...optionMods(actor), ...oneShot];
   // R: the Advantage picked for an "attack.advantagePick" piece: a one-shot attack.advantage.<key> piece (F2 below)
-  const optionModifiers = [...baseOptionMods, ...advantagePickPieces(baseOptionMods, String(opts.advantagePick ?? ""))];
+  const optionModifiers = [...baseOptionMods, ...advantagePickPieces(baseOptionMods, String(opts.advantagePick ?? "")),
+    ...removePickPieces(baseOptionMods, [opts.removeOpt1, opts.removeOpt2], sig)];
   const usesLeft = o => !o.limit || triggerUsesLeft(actor, { limit: o.limit, ctx: o.ctx }, optKey(o));
   const askedGroups = askedBoxes(optionModifiers);
   const isAsked = o => (o.mode === "ask") || !!o.max || askedGroups.has(o.box);
@@ -558,6 +671,24 @@ export async function executeAttack(actor, opts) {
   const eff = sig ?? (grant?.basic ? grant.sig : null);
   const adv = sig ? comp : (grant?.basic ? grant.comp : null);
   const superProfile = eff?.superProfile ?? "";
+  // (T11 Giga Flare: up to 2 more Actions, each +2 Energy Charges and +2(T) KP; Super Combination: any number of Actions,
+  // each +1 Energy Charge and a rank of Alotta Lotta Attacks and Peppering Blows, noted on the card)
+  const superActsAsked = Math.max(0, Math.floor(Number(opts.superActions) || 0));
+  const superActs = (superProfile === "gigaFlare") ? Math.min(2, superActsAsked) : ((superProfile === "superCombination") ? superActsAsked : 0);
+  const superCharges = (superProfile === "gigaFlare") ? 2 * superActs : superActs;
+  if ( superActs && (superProfile === "superCombination") ) optionNotes.push(L("DBU.T11.SuperCombo", { n: superActs }));
+  // (T11 Genki: every Lifeforce stack is lost, +2(bT) Wound each)
+  const genkiStacks = (superProfile === "genki") ? Math.max(0, Number(sys.rollData?.res?.lifeforce ?? 0) || 0) : 0;
+  const genkiWound = 2 * (sys.top?.base ?? 1) * genkiStacks;
+  // (T12 Charging Assault: +1 Wound per Square moved after the 3rd, at most 2(T) ("chargingAssault.capT": that many (T),
+  // the highest wins); Splitting: -1(T) Wound per target after the first, 2 targets at rank 1, 4 at rank 2)
+  const chargeHas = (eff?.advantages ?? []).some(a => a?.key === "chargingAssault");
+  const chargeSquares = chargeHas ? Math.max(0, Math.floor(Number(opts.chargeSquares) || 0)) : 0;
+  const chargeCapT = Math.max(2, Number(sys.buckets?.["chargingAssault.capT"]?.total ?? 0) || 0);
+  const chargeWound = Math.min(chargeCapT * T, Math.max(0, chargeSquares - 3));
+  const splitRank = Number((eff?.advantages ?? []).find(a => a?.key === "splitting")?.rank ?? 0) || 0;
+  const splitTargets = splitRank ? Math.min(targetActors.length, (splitRank >= 2) ? 4 : 2) : 0;
+  const splitWound = (splitTargets > 1) ? -T * (splitTargets - 1) : 0;
   const optionList = eff ? [...(eff.advantages ?? []), ...(eff.disadvantages ?? [])] : [];
   // (Efficiency / Inefficiency added to a Basic Attack: its Ki Point Cost units)
   const kpAdjust = grant?.basic ? (grant.comp.kpAdjust - grant.base.kpAdjust) : 0;
@@ -585,6 +716,21 @@ export async function executeAttack(actor, opts) {
   }
   if ( sys.effectiveConditions.transfigured && (foundation !== "physical" || sig) ) problems.push(L("DBU.Attack.ErrTransfigured"));
   if ( sys.effectiveConditions.pinned ) problems.push(L("DBU.Attack.ErrPinned"));
+  // BB: a State that forbids it (Liquid, Spectator; Feral for a Signature Technique)
+  {
+    const { stateBlock } = await import("../rules/state-rules.mjs");
+    const why = stateBlock(actor, "attack") || (sig ? stateBlock(actor, "signature") : "") || (weapon ? stateBlock(actor, "armed") : "")
+      // (T25 "block.energyAttack" / "block.magicAttack")
+      || ((foundation === "energy") ? stateBlock(actor, "energyAttack") : "") || ((foundation === "magic") ? stateBlock(actor, "magicAttack") : "")
+      || (opts.signature?.flags?.["dbu-rpg"]?.oneUseSpent ? L("DBU.CS4.OneUseSpent", { name: opts.signature.name }) : "");
+    if ( why ) problems.push(why);
+    // Surging (3): the attack must include the Focus
+    const focusOn = (actor.system?._effectiveStates?.surging ?? 0) > 0;
+    if ( focusOn && (opts.targets ?? []).length ) {
+      const { versusData } = await import("../rules/versus.mjs");
+      if ( !(opts.targets ?? []).some(t => t.actor && versusData(actor, t.actor).mark?.focus) ) optionNotes.push(L("DBU.StateRule.SurgingFocus"));
+    }
+  }
   // U: Compelled: the attack must include the Compelled target (a note on the card when it does not)
   {
     const { compelledTarget, isCharacter } = await import("../rules/versus.mjs");
@@ -612,6 +758,8 @@ export async function executeAttack(actor, opts) {
   const costDkp = divineOk && (!!opts.dkpCost || !!divine?.forceDkp);
   const wagerDkp = divineOk && !!opts.dkpWager && (superProfile !== "allOut");
   const capacityOf = (n, fromDkp) => (fromDkp ? Math.ceil(n / 2) : n);
+  // (T25 "flag.costNoCapacity": the Ki Point Cost lowers no Capacity, Unleash it All 4)
+  const costCapacity = n => (flagOn(sys, "costNoCapacity") ? 0 : capacityOf(n, costDkp));
 
   /* ----- Ki Wager (its limits) ----- */
   // Without Capacity (Adversaries): no Capacity spent nor checked, and the Ki Wager stays within the Max Capacity
@@ -619,12 +767,18 @@ export async function executeAttack(actor, opts) {
   const wired = weapon?.system.qualities?.some(q => /wired/i.test(q.name));
   // Desperation Rules: Life Points may join the Ki Wager (up to 1/2 of the Capacity)
   const lifeWager = (R.desperation && !sys.optional.desperationUsed) ? Math.max(0, Number(opts.lifeWager) || 0) : 0;
+  // FC: Final Chance (the attack has the Advantage, below the Injured Health Threshold): your Life Points go to 0 at Attack
+  // Declaration and join the Ki Wager; you are Defeated only once this attack is over (finalChanceOver)
+  const finalChance = (opts.finalChance && !preset && optionList.some(o => o?.key === "finalChance")
+    && ((sys.rollData?.below ?? 0) >= 2)) ? Math.max(0, sys.life.value) : 0;
   // The Ki Wager limit set by effects (wager.maxSet: the lowest wins)
   const wagerMaxSet = preset ? null : lowestSet(actor, "wager.maxSet");
   // The Ki Wager and its maximum for a Ki Point Cost (All Out and All or Nothing depend on it)
+  // MW "attack.wagerMax": the Ki Wager limit of this attack (an option or a `with` piece; the lowest wins)
+  let wagerMaxOpt = null;
   const wagerFor = cost => {
     let w = preset ? (preset.wager ?? 0) : Math.max(0, Number(opts.wager) || 0);
-    const capacityLeft = noCapacity ? sys.capacity.max : sys.capacity.value - capacityOf(cost, costDkp);
+    const capacityLeft = noCapacity ? sys.capacity.max : sys.capacity.value - costCapacity(cost);
     // How much can still be wagered with the Capacity left (DKP only use half of it)
     const wagerRoom = Math.max(0, wagerDkp ? 2 * capacityLeft : capacityLeft);
     let limit = noCapacity ? sys.capacity.max : Math.floor(sys.capacity.max / 2);
@@ -632,6 +786,7 @@ export async function executeAttack(actor, opts) {
     if ( adv?.fullWager || fx.freeAdvantages.includes("fullWager") || flagOn(sys, "fullWager") ) limit = wagerRoom;
     if ( ballistic ) limit = wired ? Math.floor(sys.capacity.max / 4) : 0;
     if ( wagerMaxSet !== null ) limit = Math.max(0, Math.min(limit, wagerMaxSet));
+    if ( wagerMaxOpt !== null ) limit = Math.max(0, Math.min(limit, wagerMaxOpt));
     // All Out: every Ki Point is wagered, up to the Max Capacity (the Ki Wager limit does not apply to it)
     if ( superProfile === "allOut" ) {
       w = Math.min(sys.ki.value - (costDkp ? 0 : cost), sys.capacity.max);
@@ -646,10 +801,11 @@ export async function executeAttack(actor, opts) {
   // the automatic ones, and the chosen ones still available (1/Round...). Their conditions see the attack's variables
   const extraProfiles = [mp?.key, hyper?.extraKey].filter(Boolean);
   // (@opt_<key> / @superProfile_<key> see what effects added: eff; @weapon_<slug>, @sig_<slug>, @viaFx.<ref>: F3)
-  const baseVars = { sig: eff, wager: wagerFor(kpBefore).wager + lifeWager, dkpCost: costDkp, dkpWager: wagerDkp, kp: kpBefore,
+  const baseVars = { sig: eff, wager: wagerFor(kpBefore).wager + lifeWager + finalChance, dkpCost: costDkp, dkpWager: wagerDkp, kp: kpBefore,
     favored: favoredElement(actor, fx), calledShot: !!opts.calledShot, oos, armed: !!weapon, via,
     oblivious: !!opts.oblivious, allyTargets: allyCount(actor, targetActors), integrated: !!weapon?.system?.integrated,
-    tags: sigTags(sig), agg, weapon, sigName: signature?.name ?? "", viaFx: opts.viaFx };
+    tags: sigTags(sig), agg, weapon, sigName: signature?.name ?? "", viaFx: opts.viaFx,
+    techUse: techUseVars(actor, signature?.id ?? null, extraProfiles.length ? [profileKey, ...extraProfiles] : [profileKey]) };
   const scopeOf = damage => preAttackScope({ sig, comp, profileKey, foundation, extraProfiles,
     charges: (sys.combat.energyCharges ?? 0) + (Number(opts.extraCharges) || 0), vars: attackVars({ ...baseVars, damage }) });
   // The Damage Attribute of the Wound Roll: FO (MA for Magic Attacks), or one an attack option allows (the dialog's pick,
@@ -680,7 +836,7 @@ export async function executeAttack(actor, opts) {
   const aoeShape = aoeOption ? (wantShape || aoeShapes(aoeOption.value)[0]) : "";
   // (the Advantages / Super Profile pieces: the ones F2 applied above, so that their uses and costs are those)
   const attackOpts = [...applying
-    .filter(o => (o.target !== "attack.aoe") && (o.target !== ADV_PICK) && !isGrant(o))
+    .filter(o => (o.target !== "attack.aoe") && !isPick(o.target) && !isGrant(o) && !REMOVE_TARGET_SET.has(o.target))
     .filter(o => !isAsked(o) || chosen.has(o.box))
     .filter(o => {
       if ( usesLeft(o) ) return true;
@@ -689,6 +845,13 @@ export async function executeAttack(actor, opts) {
     }), ...(grant?.pieces ?? [])];
   const optSum = target => attackOpts.filter(o => o.target === target).reduce((t, o) => t + o.value, 0);
   const optAny = target => attackOpts.some(o => o.target === target);
+  // EN "attack.capacityFull": the Capacity is reset to its maximum before this attack (the Entrusted State's 4th effect)
+  if ( optAny("attack.capacityFull") && !preset && ((sys.capacity?.value ?? 0) < (sys.capacity?.max ?? 0)) ) {
+    await actor.update({ "system.capacity.value": sys.capacity.max });
+    // (the actor data read below was taken before this update)
+    if ( sys.capacity ) sys.capacity.value = sys.capacity.max;
+    optionNotes.push(L("DBU.Attack.CapacityFull", { n: sys.capacity.max }));
+  }
   // F1 "only": what the effect's attack must be (refused otherwise)
   if ( withSpec.only.length && !preset ) {
     const facts = { foundation, armed: !!weapon, signature: !!signature, basic: !signature || sigTags(sig).includes("fullPower"),
@@ -709,11 +872,22 @@ export async function executeAttack(actor, opts) {
   // Signature cost (attack.kpBaseFree: the attack.kp options, Called Shot and Rapid are still paid)
   let kp = attackKp(actor, { ...kpArgs, calledShot, baseFree: optAny("attack.kpBaseFree"), extra: optSum("attack.kp") });
   if ( optAny("attack.kpFree") ) kp = 0;
+  if ( superActs && (superProfile === "gigaFlare") ) kp += 2 * T * superActs;
   // The costs of the options used (cost), summed: they block the attack when they cannot be paid
   const paidOpts = [...attackOpts, ...(damageOption ? [damageOption] : []), ...(aoeOption ? [aoeOption] : [])].filter(o => !blank(o.cost));
   const optPlan = paidOpts.length ? costPlan(actor, paidOpts.map(o => ({ cost: o.cost,
     data: { ...(sys.rollData ?? {}), ...(o.ctx ?? {}), ...scopeOf(damage), n: o.n ?? 1 } }))) : null;
   if ( optPlan?.problems.length ) problems.push(L("DBU.Attack.OptionCantPay", { why: optPlan.problems.join(" ") }));
+  // CC "checkCost": a cost the options' effects pay later (once the attack is over): only checked now, summed with the others
+  {
+    const checkOpts = attackOpts.filter(o => !blank(o.checkCost));
+    if ( checkOpts.length && !optPlan?.problems.length ) {
+      const all = [...paidOpts.map(o => ({ cost: o.cost, data: { ...(sys.rollData ?? {}), ...(o.ctx ?? {}), ...scopeOf(damage), n: o.n ?? 1 } })),
+        ...checkOpts.map(o => ({ cost: o.checkCost, data: { ...(sys.rollData ?? {}), ...(o.ctx ?? {}), ...scopeOf(damage), n: o.n ?? 1 } }))];
+      const check = costPlan(actor, all);
+      if ( check.problems.length ) problems.push(L("DBU.Attack.OptionCantPay", { why: check.problems.join(" ") }));
+    }
+  }
   const optKi = (optPlan?.need?.kiPool === "ki") ? (optPlan.need.kiPaid ?? 0) : 0;
   // (Divine Ki Points: a "dkp" cost, and the KP of a cost paid from them in the God Ki State when preferred)
   const optDkp = (optPlan?.need?.dkp ?? 0) + ((optPlan?.need?.kiPool === "dkp") ? (optPlan.need.kiPaid ?? 0) : 0);
@@ -728,11 +902,15 @@ export async function executeAttack(actor, opts) {
   /* ----- Ki Wager ----- */
   if ( lifeWager > Math.floor(sys.capacity.value / 2) ) problems.push(L("DBU.Attack.ErrLifeWager", { max: Math.floor(sys.capacity.value / 2) }));
   if ( lifeWager >= sys.life.value ) problems.push(L("DBU.Attack.ErrLifeWagerLP"));
+  {
+    const wm = attackOpts.filter(o => o.target === "attack.wagerMax").map(o => Number(o.value)).filter(Number.isFinite);
+    if ( wm.length ) wagerMaxOpt = Math.max(0, Math.min(...wm));
+  }
   const { wager, wagerLimit } = wagerFor(kp);
   if ( wager > wagerLimit ) problems.push(L("DBU.Attack.ErrWagerMax", { max: wagerLimit }));
   const kiPaid = (costDkp ? 0 : kp) + (wagerDkp ? 0 : wager);
   const dkpPaid = (costDkp ? kp : 0) + (wagerDkp ? wager : 0);
-  const capacityUsed = capacityOf(kp, costDkp) + capacityOf(wager, wagerDkp);
+  const capacityUsed = costCapacity(kp) + capacityOf(wager, wagerDkp);
   // Narrative Stamina (Elite and Villain Adversaries) is spent in the place of Ki Points
   const stamina = staminaPayment(actor, kiPaid, opts.staminaPay !== false);
   if ( stamina.fromKi + optKi > sys.ki.value ) problems.push(L("DBU.Attack.ErrKi", { need: stamina.fromKi + optKi, have: sys.ki.value }));
@@ -751,11 +929,13 @@ export async function executeAttack(actor, opts) {
   // Shot's extra Action is still an Action (none when an attack option makes the attack one: attack.calledShot)
   const counterVia = ["exploit", "defend"].includes(via) && !!opts.spendAction;
   const counterCost = (counterVia && !optAny("attack.freeCounter")) ? 1 : 0;
-  const actionCost = ((opts.spendAction && !counterVia) ? 1 : 0) + ((opts.calledShot && !calledShotOpt) ? 1 : 0);
+  const actionCost = ((opts.spendAction && !counterVia) ? 1 : 0) + ((opts.calledShot && !calledShotOpt) ? 1 : 0) + superActs;
   if ( opts.spendAction && (sys.combat.actions < actionCost) && inEncounter(actor) ) {
     problems.push(L("DBU.Attack.ErrActions", { need: actionCost, have: sys.combat.actions }));
   }
   if ( counterCost && ((sys.combat.counters ?? 0) < counterCost) && inEncounter(actor) ) problems.push(L("DBU.Attack.ErrCounter"));
+  // (F13 "flag.noCounterManeuver": no Counter Maneuver now: Inherited Freedom)
+  if ( counterCost && ((sys.buckets?.["flag.noCounterManeuver"]?.total ?? 0) > 0) ) problems.push(L("DBU.F13.NoCounterManeuver", { name: actor.name }));
   // The options' Actions / Counter Actions come on top of the attack's own (costPlan checked each alone)
   const optActions = optPlan?.need?.actions ?? 0;
   const optCounters = optPlan?.need?.counters ?? 0;
@@ -790,7 +970,7 @@ export async function executeAttack(actor, opts) {
   maxCharges += sys.buckets?.["charges.max"]?.total ?? 0;
   if ( limitedPower(sys) ) maxCharges = Math.min(maxCharges, 3);
   // attack.overCharges: Energy Charges beyond the maximum
-  charges = Math.min(charges, maxCharges) + optSum("attack.overCharges");
+  charges = Math.min(charges, maxCharges) + optSum("attack.overCharges") + superCharges;
   const bonusCharges = fx.bonusCharges; // Beam: does not count toward the maximum
   if ( preset ) charges = Math.max(0, (preset.charges ?? 0) - bonusCharges);
   const totalCharges = charges + bonusCharges;
@@ -832,16 +1012,24 @@ export async function executeAttack(actor, opts) {
   if ( inEncounter(actor) && counterCost ) update["system.combat.counters"] = Math.max(0, (sys.combat.counters ?? 0) - counterCost);
   if ( pending && sys.conditions.guardDown ) update["system.conditions.guardDown"] = 0;
   if ( sig && comp.ultimate ) update["system.combat.ultimatesUsed"] = (sys.combat.ultimatesUsed ?? 0) + 1;
-  if ( lifeWager > 0 || lifeCost > 0 ) {
-    update["system.life.value"] = sys.life.value - lifeWager - lifeCost;
+  if ( lifeWager > 0 || lifeCost > 0 || finalChance > 0 ) {
+    update["system.life.value"] = (finalChance > 0) ? 0 : sys.life.value - lifeWager - lifeCost;
     if ( lifeWager > 0 ) update["system.optional.desperationUsed"] = true;
   }
-  await actor.update(update, { dbuSource: "attack", ...((lifeWager > 0 || lifeCost > 0) ? { dbuSelfInflicted: true } : {}) });
+  // (FC: the Health Thresholds of a Final Chance wait until the attack is over: flags.dbu-rpg.finalChance)
+  // (T29 "flag.attackLifeNoMomentum": paying only the attack's Life Point Cost gives no Reduced Momentum: Kaioken)
+  const lifeCostOnly = (lifeCost > 0) && !(lifeWager > 0) && !(finalChance > 0) && flagOn(sys, "attackLifeNoMomentum");
+  await actor.update(update, { dbuSource: "attack", ...((lifeWager > 0 || lifeCost > 0 || finalChance > 0) ? { dbuSelfInflicted: true } : {}),
+    ...(lifeCostOnly ? { dbuNoMomentum: true } : {}),
+    ...((finalChance > 0) ? { dbuFinalChance: true } : {}) });
+  if ( genkiStacks ) await (await import("./triggers.mjs")).applyTriggerEffect(actor, "resourceSet", 0, "Lifeforce", { label: "Genki" });
   // The options' costs, once the attack passed every check and paid its own
   if ( optPlan && !optPlan.empty && !optPlan.problems.length ) optionPaid = await payTriggerCost(actor, optPlan);
   if ( ballistic ) await weapon.update({ "system.ammo.value": Math.max(0, weapon.system.ammo.value - ammoCost) });
   if ( pending && sys.conditions.guardDown ) await actor.toggleStatusEffect("guardDown", { active: false }).catch(() => null);
   if ( sig && comp.ultimate ) await signature.update({ "system.usedThisEncounter": true });
+  // RA: this technique's and its Profiles' uses this encounter / Round
+  await recordTechUse(actor, signature?.id ?? null, [profileKey, ...extraProfiles]);
   }
   // Multi-Profile from an effect: one more use this Round/Encounter, and its resource (Sunlight) spent
   const multiNotes = (mp?.key && !preset) ? [mp.note, ...(await spendMultiProfile(actor, mp))] : [];
@@ -986,7 +1174,7 @@ export async function executeAttack(actor, opts) {
     name: preset?.name ?? signature?.name ?? (divine ? `${divine.name}: ${prof.label}` : `${L("DBU.Attack.Basic")}: ${prof.label}`),
     signatureId: signature?.id ?? null, profile: profileKey, profiles: fx.keys, foundation, weaponId: weapon?.id ?? null,
     // A Maneuver's attack shows what it really cost (Planet Burst: the Narrative Stamina)
-    kp: forced?.kp ?? kp, wager: wager + lifeWager, charges: totalCharges, chargeCategory, category, ballistic: !!ballistic,
+    kp: forced?.kp ?? kp, wager: wager + lifeWager + finalChance + Math.max(0, optSum("attack.wagerFree")), charges: totalCharges, chargeCategory, category, ballistic: !!ballistic,
     dkp: { cost: costDkp, wager: wagerDkp, paid: dkpPaid },
     caliber: ballistic ? (weapon.system.caliber ?? 0) : 0,
     calledShot, injuryType: calledShot ? (opts.injuryType || "") : "",
@@ -1003,7 +1191,8 @@ export async function executeAttack(actor, opts) {
     knockback: knockbackOf(actor, { comp: adv, sig: eff, fx, aoe }),
     notes: notesExtra,
     // The attacker's base ToP (a Ki Wager of 10(bT)+ can be answered with a Duel Maneuver); the winner's attack of a Duel
-    bT, fromDuel: !!duel, fromToken: actorTokens(actor)[0]?.document?.uuid ?? null,
+    bT, fromDuel: !!duel, fromToken: actorTokens(actor)[0]?.document?.uuid ?? null, ...(genkiWound ? { genkiWound } : {}),
+    ...(chargeWound ? { chargeWound } : {}), ...(splitWound ? { splitWound } : {}),
     // What the Duel Escape Maneuver gives back; Power Shot stacks of a Maneuver's attack; answered only with a Duel
     actionCost: (opts.spendAction && inEncounter(actor)) ? actionCost : 0, powerShot: forced?.powerShot ?? 0,
     extraWoundT: duel?.extraWoundT ?? (2 * (forced?.powerShot ?? 0)), duelOnly: !!forced?.duelOnly, noStrike: !!preset, absolute,
@@ -1067,13 +1256,28 @@ export async function executeAttack(actor, opts) {
     cutting: fx.cutting,
     twin: (attack.sig?.twinLinked === "strike") ? "high" : ((attack.sig?.deadLink === "strike") ? "low" : null),
     notes: [
-      L("DBU.Attack.Paid", { kp, wager: wager + lifeWager, charges: totalCharges }),
+      L("DBU.Attack.Paid", { kp, wager: wager + lifeWager + finalChance + Math.max(0, optSum("attack.wagerFree")), charges: totalCharges }),
       ...notesExtra,
       ...(problems.length ? [`⚠ ${problems.join(" ")}`] : [])
     ],
     toMessage: false
   });
   attack.strike = { total: result.total, natural: result.natural, crit: result.crit, botch: result.botch };
+  // HM: the Homing Advantage (an attack without an AoE): what a missed Opponent's defense needs to roll this Strike Roll
+  // again (its ranks times, +1(T) per miss so far)
+  {
+    const homing = optionList.find(o => o?.key === "homing");
+    // (CS4: the Power Shot ranks of the attack, for @powerShot of "targeted")
+    const ps = Number(optionList.find(o => o?.key === "powerShot")?.rank ?? 0) || 0;
+    if ( ps > 0 ) attack.powerShotRanks = ps;
+    if ( homing && !aoe && !preset ) attack.homing = { ranks: Math.max(1, Math.floor(Number(homing.rank) || 1)), T: sys.top.current,
+      cfg: { naturalMod: strikeData.natural + optSum("attack.natural.strike"), minNatural: fx.minNatural ?? 0,
+        critTarget: critSetOf(critWith(strikeData.crit, optSum("attack.crit.strike")), attackOpts, "attack.critSet.strike"),
+        botchRange: strikeData.botch, diceGroups: strikeData.dice, critDice: strikeData.critDice, botchPenalty: strikeData.botchPenalty,
+        cutting: !!fx.cutting, parts: parts.map(p => ({ label: p.label, value: Number(p.value) || 0 })) } };
+  }
+  // RX: what the roll reactions of the Strike Roll spent (@rollSpent.strike.<resource>)
+  attack.rollSpent = { strike: result.rollSpent ?? {} };
   // Cutting: a Critical Result on the Strike Roll increases the Damage Category by 1 Category
   if ( fx.cutting && result.crit ) {
     attack.category += 1;
@@ -1086,15 +1290,52 @@ export async function executeAttack(actor, opts) {
     category: attack.category, charges: totalCharges, crit: result.crit, botch: result.botch
   });
 
+  // Z: the Basic Attack uses each Profile (but Simple) once per Combat Round ("profileUses.<key>": more), the Signature
+  // Technique Maneuver is 1/Round ("flag.sigUnlimited": no limit); a warning on the card (an Out-of-Sequence use is not counted)
+  if ( !preset && !oos && inEncounter(actor) ) {
+    const tu = techUseVars(actor, signature?.id ?? null, [profileKey]);
+    const bk = sys.buckets ?? {};
+    if ( !sig && (profileKey !== "simple") && ((tu.profileUsedRound?.[profileKey] ?? 0) > (1 + (bk[`profileUses.${profileKey}`]?.total ?? 0))) ) {
+      attack.notes.push(L("DBU.Attack.ProfileRoundUsed", { profile: DBU.profiles[profileKey]?.label ?? profileKey }));
+    }
+    if ( sig && !flagOn(sys, "sigUnlimited") && ((tu.sigsUsedRound ?? 0) > (1 + (bk["sigUses"]?.total ?? 0))) ) attack.notes.push(L("DBU.Attack.SigRoundUsed"));
+  }
+  // (NM5: whose technique a Copied Technique is)
+  if ( sig?.copiedFrom ) attack.copiedFrom = sig.copiedFrom;
+  // (DD3: what a cancelled attack gives back: the Energy Charges held, the Ki Wager's Life Points)
+  if ( pending > 0 ) attack.heldCharges = pending;
+  if ( lifeWager > 0 ) attack.lifeWager = lifeWager;
+  if ( finalChance > 0 ) {
+    attack.finalChance = finalChance;
+    attack.notes.push(L("DBU.Attack.FinalChanceNote", { n: finalChance }));
+  }
+  // AR Self-Explosion: the Sphere's Target Square is the attacker's own (placed on the map)
+  if ( !preset && optionList.some(o => o?.key === "selfExplosion") && String(aoe ?? "").startsWith("sphere") ) {
+    try {
+      const { placeSphere } = await import("../canvas/areas.mjs");
+      const placed = await placeSphere(actor, magnitude, { name: `${attack.name}: Self-Explosion`, kind: "selfExplosion", color: "#ff7a2a" });
+      if ( placed ) attack.notes.push(placed);
+    } catch(err) { console.error("DBU | Self-Explosion area", err); }
+  }
   const message = await postAttackCard(actor, attack, result);
+  if ( finalChance > 0 ) await actor.setFlag("dbu-rpg", "finalChance", { ...(actor.getFlag("dbu-rpg", "finalChance") ?? {}), messageId: message?.id ?? null });
   // Triggers "when you make an Attacking Maneuver" (not the attack of a won Duel, which was made already)
   if ( !duel ) {
     const { fireEvent } = await import("./triggers.mjs");
     // (messageId: the attack's card, for the effects that add to it: "attackWound")
     fireEvent(actor, "attackMade", { other: targetActors[0] ?? null,
       scope: { ...attackScope(attack), vs: versusData(actor, targetActors[0] ?? null), messageId: message.id } });
+    // (CS4: a one-use Signature is spent: gone at the end of the turn)
+    if ( signature?.flags?.["dbu-rpg"]?.oneUse ) await signature.setFlag("dbu-rpg", "oneUseSpent", true).catch(() => null);
     // ...and "when you are targeted by an Attacking Maneuver" for each target (@vs: the attacker)
-    for ( const t of targetActors ) fireEvent(t, "targeted", { other: actor, scope: { ...attackScope(attack), vs: versusData(t, actor), messageId: message.id } });
+    // (CS4: the other targets that are Allies of that one, their Might, and the attack's Power Shot)
+    for ( const t of targetActors ) {
+      const mates = targetActors.filter(o => (o !== t) && versusData(t, o).ally);
+      fireEvent(t, "targeted", { other: actor, scope: { ...attackScope(attack), vs: versusData(t, actor), messageId: message.id,
+        targetIndex: targetActors.indexOf(t),
+        alliesTargeted: mates.length, alliesTargetedMight: mates.reduce((n, o) => n + (Number(o.system?.aptitudes?.might) || 0), 0),
+        powerShot: (attack.powerShotRanks ?? 0) + (attack.powerShot ?? 0) } });
+    }
   }
 
   // Post-attack Signature drawbacks
@@ -1139,7 +1380,8 @@ export function attackOptionsFor(actor, scope, mods = optionMods(actor), { nOf =
     const value = (m.target === DAMAGE_ATTRIBUTE) ? (damageAttributeKeys(m.value).length ? String(m.value).trim() : "")
       : OPTION_TEXT.has(m.target) ? String(m.value ?? "").trim()
       : evaluate(m.value, scN, { floor: !FRACTION_OPTIONS.has(m.target) });
-    if ( !value ) continue;
+    // (MW: a Ki Wager limit of 0 is a value)
+    if ( !value && (m.target !== "attack.wagerMax") ) continue;
     const o = { ...m, value, key };
     if ( usesN || !blank(m.cost) ) Object.assign(o, { box, max, n, scope });
     else o.box = box;
@@ -1385,9 +1627,43 @@ function dialogScopes(actor, { sig, comp, prof, profileKey, foundation, divine =
  * Package F: @weapon_<slug> (the Weapon used: its name, Category or a Quality), @sig_<slug> (the Signature used, by
  * name), @viaFx.<ref> (the effect whose button made the attack).
  */
+/**
+ * RA: this encounter's uses of the actor's techniques before this attack: flags.dbu-rpg.techUses = { combat, round,
+ * sig: { <id>: { e, r } }, sigsRound, profile: { <key>: { e, r } } } (counts of another encounter / Round read as 0).
+ */
+export function techUseVars(actor, sigId = null, profiles = []) {
+  const f = actor?.flags?.["dbu-rpg"]?.techUses ?? {};
+  const combat = (game.combats ?? []).find(c => c.started && c.combatants.some(cb => cb.actor?.uuid === actor?.uuid)) ?? null;
+  const same = combat && (f.combat === combat.id);
+  const round = same && (f.round === combat.round);
+  const out = { sigUsedEnc: 0, sigUsedRound: 0, sigsUsedRound: round ? (f.sigsRound ?? 0) : 0, profileUsedRound: {}, profileUsedEnc: {} };
+  if ( sigId && same ) { out.sigUsedEnc = f.sig?.[sigId]?.e ?? 0; out.sigUsedRound = round ? (f.sig?.[sigId]?.r ?? 0) : 0; }
+  for ( const k of profiles ) {
+    out.profileUsedEnc[k] = same ? (f.profile?.[k]?.e ?? 0) : 0;
+    out.profileUsedRound[k] = round ? (f.profile?.[k]?.r ?? 0) : 0;
+  }
+  return out;
+}
+
+/** RA: count this attack's technique and Profiles (techUseVars). */
+async function recordTechUse(actor, sigId, profiles = []) {
+  const combat = (game.combats ?? []).find(c => c.started && c.combatants.some(cb => cb.actor?.uuid === actor?.uuid));
+  if ( !combat || !actor?.isOwner ) return;
+  const f = foundry.utils.deepClone(actor.flags?.["dbu-rpg"]?.techUses ?? {});
+  const same = f.combat === combat.id;
+  const round = same && (f.round === combat.round);
+  const next = { combat: combat.id, round: combat.round, sig: same ? (f.sig ?? {}) : {}, sigsRound: round ? (f.sigsRound ?? 0) : 0,
+    profile: same ? (f.profile ?? {}) : {} };
+  const bump = (o, k) => { const cur = o[k] ?? { e: 0, r: 0 }; o[k] = { e: cur.e + 1, r: (round ? cur.r : 0) + 1 }; };
+  if ( !round ) { for ( const o of [next.sig, next.profile] ) for ( const v of Object.values(o) ) v.r = 0; }
+  if ( sigId ) { bump(next.sig, sigId); next.sigsRound += 1; }
+  for ( const k of profiles ) bump(next.profile, k);
+  await actor.setFlag("dbu-rpg", "techUses", next).catch(() => null);
+}
+
 function attackVars({ sig = null, wager = 0, dkpCost = false, dkpWager = false, kp = 0, damage = null, favored = false,
   calledShot = false, oos = false, armed = false, via = "", oblivious = false, allyTargets = 0, integrated = false, tags = [],
-  agg = null, weapon = null, sigName = "", viaFx = "" } = {}) {
+  agg = null, weapon = null, sigName = "", viaFx = "", techUse = null } = {}) {
   const vars = {
     wager, dkpCost: dkpCost ? 1 : 0, dkpWager: dkpWager ? 1 : 0, kp, dmgAttr: damage?.value ?? 0, favored: favored ? 1 : 0,
     calledShot: calledShot ? 1 : 0, oos: oos ? 1 : 0, armed: armed ? 1 : 0, unarmed: armed ? 0 : 1,
@@ -1411,6 +1687,7 @@ function attackVars({ sig = null, wager = 0, dkpCost = false, dkpWager = false, 
   for ( const s of weaponSlugs(weapon) ) vars[`weapon_${s}`] = 1;
   if ( slugOf(sigName) ) vars[`sig_${slugOf(sigName)}`] = 1;
   if ( String(viaFx ?? "").trim() ) vars.viaFx = { [String(viaFx).trim().toLowerCase()]: 1 };
+  if ( techUse ) Object.assign(vars, techUse);
   return vars;
 }
 
@@ -1451,6 +1728,13 @@ function attackKp(actor, { sig = null, comp = null, prof = null, foundation, mp 
   // (O: the same Rapid Movement cost as the Movement Maneuver's: "kpCost.rapid" ±, "kpCost.rapidFree")
   if ( rapid && !((sys.buckets?.["kpCost.rapidFree"]?.total ?? 0) > 0) ) kp += Math.max(0, (2 * T) + (sys.buckets?.["kpCost.rapid"]?.total ?? 0));
   return kp;
+}
+
+/** RB: the Ki Point Cost of a plain attack of that Profile for this actor (United Attack: "the same Profile"). */
+export function profileKpFor(actor, profileKey, foundation) {
+  const prof = DBU.profiles[profileKey] ?? DBU.profiles.simple ?? { kp: 2 };
+  try { return attackKp(actor, { prof, foundation: foundation ?? prof.foundations?.[0] ?? "physical" }); }
+  catch(err) { console.error("DBU | profile KP", err); return 0; }
 }
 
 /** A Critical Target changed by the attack options (−1 = one lower), never below 7. */
@@ -1513,11 +1797,15 @@ export function attackScope(attack) {
   const fx = attackProfileEffects(attack);
   return {
     ...(attack.vars ?? {}),
+    // RX: what the roll reactions of its Strike / Wound Rolls spent (@rollSpent.strike.<resource>, @rollSpent.wound.<resource>)
+    rollSpent: { strike: attack.rollSpent?.strike ?? {}, wound: attack.wound?.rollSpent ?? attack.rollSpent?.wound ?? {} },
     physical: attack.foundation === "physical" ? 1 : 0, energy: attack.foundation === "energy" ? 1 : 0,
     magic: attack.foundation === "magic" ? 1 : 0, signature: attack.signatureId ? 1 : 0,
     basic: (attack.signatureId && !attack.vars?.tag_fullPower) ? 0 : 1,
     ultimate: attack.ultimate ? 1 : 0, aoe: (attack.aoe || attack.vars?.aoe) ? 1 : 0, charges: attack.charges ?? 0, wager: attack.wager ?? 0,
     category: attack.category ?? 1, crit: attack.strike?.crit ? 1 : 0, critWound: attack.wound?.crit ? 1 : 0,
+    // (T23 @chargeWound: the Wound bonus its Charging Assault gives)
+    chargeWound: attack.chargeWound ?? 0,
     targets: attack.targets?.length ?? 0, elemental: fx.keys.some(k => DBU.profiles[k]?.elemental) ? 1 : 0,
     ...Object.fromEntries(fx.keys.map(k => [`profile_${k}`, 1]))
   };
@@ -1550,8 +1838,13 @@ function favoredElement(actor, fx) {
 /* -------------------------------------------- */
 
 async function renderAttackContent(attack, rollResult) {
+  // RB: United Attack still open, the target rows that can be Intervened for, who may Reflect it
+  const TM = await import("./team-maneuvers.mjs");
   return foundry.applications.handlebars.renderTemplate("systems/dbu-rpg/templates/chat/attack-card.hbs", {
     attack,
+    unitedOk: TM.unitedOpen(attack),
+    interveneOk: (attack.targets ?? []).map(t => TM.interveneOpen(attack, t)),
+    reflectable: TM.reflectors(attack),
     roll: rollResult ?? attack.strikeView,
     category: L(DBU.damageCategories[Math.clamp(attack.category, 1, 3)]),
     hasTargets: attack.targets.length > 0,
@@ -1566,6 +1859,9 @@ export async function updateAttackCard(message, attack) {
   const content = await renderAttackContent(attack);
   return safeUpdate(message, { content, [`flags.${FLAG}.attack`]: attack });
 }
+
+/** RB: post an attack card made outside of the attack dialog (a Reflect). */
+export function postAttackMessage(actor, attack, result) { return postAttackCard(actor, attack, result); }
 
 async function postAttackCard(actor, attack, result) {
   attack.strikeView = {
@@ -1604,6 +1900,321 @@ export async function addAttackWound(messageId, label, value) {
   return true;
 }
 
+/**
+ * AA: change the Wound Roll an attack already made, before any of its Damage is applied: + add (a number), + the dice of
+ * `charges` more Energy Charges (rolled now, the attack's Charge Dice Category), + category (Damage Category; "lethal":
+ * Lethal, which cannot be reduced). Through the GM for an attack message the user does not own. @returns a text, or "".
+ */
+export async function bumpStoredWound(messageId, { add = 0, charges = 0, crits = 0, category = 0, lethal = false, label = "" } = {}) {
+  const message = game.messages.get(messageId);
+  const attack = message ? foundry.utils.deepClone(message.getFlag(FLAG, "attack")) : null;
+  if ( !attack?.wound ) return "";
+  if ( (attack.targets ?? []).some(t => (t.damage !== null) && (t.damage !== undefined)) ) {
+    ui.notifications?.warn(L("DBU.Wound.DamageApplied"));
+    return "";
+  }
+  if ( !message.isOwner ) {
+    const { emitGM } = await import("../socket.mjs");
+    return emitGM("attackWoundBump", { messageId, add, charges, crits, category, lethal, label }) ? L("DBU.Wound.Bumped", { label }) : "";
+  }
+  const notes = [];
+  let plus = Math.floor(Number(add) || 0);
+  if ( (Number(charges) || 0) > 0 ) {
+    const attacker = await fromUuid(attack.attackerUuid).catch(() => null);
+    const T = Number(attack.sig?.conditionT) || Number(attack.punch?.T) || attacker?.system?.top?.current || 1;
+    const per = categoryToDice(attack.chargeCategory ?? 1, T);
+    const formula = per.map(g => `${g.number * Math.floor(charges)}d${g.faces}`).join(" + ");
+    const r = await new Roll(formula).evaluate();
+    await r.toMessage({ speaker: message.speaker, flavor: `${label || L("DBU.Attack.Charges")} (+${Math.floor(charges)} ${L("DBU.Attack.ChargesShort")})` });
+    plus += r.total;
+    attack.charges = (attack.charges ?? 0) + Math.floor(charges);
+  }
+  // (crits: the attacker's Critical Result Extra Dice of that Wound Roll, rolled once more per crit)
+  if ( (Number(crits) || 0) > 0 ) {
+    const attacker = await fromUuid(attack.attackerUuid).catch(() => null);
+    const f = attack.foundation ?? "physical";
+    const groups = attacker?.system?.rolls?.wound?.[f]?.critDice ?? [];
+    const formula = groups.filter(g => g?.number && g?.faces).map(g => `${g.number * Math.floor(crits)}d${g.faces}`).join(" + ");
+    if ( formula ) {
+      const r = await new Roll(formula).evaluate();
+      await r.toMessage({ speaker: message.speaker, flavor: `${label || "Critical"} (Critical Extra Dice)` });
+      plus += r.total;
+    }
+  }
+  if ( plus ) {
+    attack.wound = { ...attack.wound, total: (attack.wound.total ?? 0) + plus };
+    notes.push(L("DBU.Wound.Added", { label, n: plus }));
+  }
+  if ( lethal ) {
+    attack.lethal = true;
+    attack.category = Math.max(attack.category ?? 1, 3);
+    notes.push(L("DBU.Wound.Lethal", { label }));
+  }
+  else if ( Number(category) ) {
+    attack.category = Math.clamp((attack.category ?? 1) + Math.round(Number(category)), 1, 3);
+    notes.push(L("DBU.Wound.Category", { label, n: Math.round(Number(category)) }));
+  }
+  if ( !notes.length ) return "";
+  attack.notes = [...(attack.notes ?? []), ...notes];
+  await refreshAttackMessage(message, attack);
+  return notes.join(" · ");
+}
+
+/**
+ * CB: an attack's Strike Roll Critical Result becomes a Botch Result (an Opponent's effect: Karmic Reflection) before any
+ * target defended: its Critical Extra Dice go, the attacker's Botch penalty applies, Cutting's +1 Category goes back.
+ * Through the GM for a card the user does not own. @returns a text, or "".
+ */
+export async function critToBotchOnMessage(messageId, { label = "" } = {}) {
+  const message = game.messages.get(messageId);
+  const attack = message ? foundry.utils.deepClone(message.getFlag(FLAG, "attack")) : null;
+  if ( !attack?.strike?.crit ) return "";
+  if ( (attack.targets ?? []).some(t => t.result) ) {
+    ui.notifications?.warn(L("DBU.Attack.CritBotchLate"));
+    return "";
+  }
+  if ( !message.isOwner ) {
+    return emitGM("attackCritToBotch", { messageId, label }) ? L("DBU.Attack.CritBotched", { label }) : "";
+  }
+  const attacker = await fromUuid(attack.attackerUuid).catch(() => null);
+  const penalty = Number(attacker?.system?.rolls?.strike?.botchPenalty ?? 0) || 0;
+  const critTotal = Number(attack.strikeView?.critTotal ?? 0) || 0;
+  const total = Math.max(0, (attack.strike.total ?? 0) - critTotal - penalty);
+  attack.strike = { ...attack.strike, total, crit: false, botch: true };
+  if ( attack.strikeView ) attack.strikeView = { ...attack.strikeView, total, crit: false, botch: true, critTotal: 0 };
+  if ( attackProfileEffects(attack).cutting ) attack.category = Math.max(1, (attack.category ?? 1) - 1);
+  attack.notes = [...(attack.notes ?? []), L("DBU.Attack.CritBotched", { label })];
+  await refreshAttackMessage(message, attack);
+  return L("DBU.Attack.CritBotched", { label });
+}
+
+/**
+ * FC: the end of a Final Chance: its attacker's Health Thresholds (and the Defeat) once every target of the attack is
+ * resolved (a miss, its Damage applied, a Duel settled) — the active GM, on the card's updates — or at the end of its turn.
+ */
+export async function finalChanceOver(actor) {
+  const fc = actor?.getFlag?.("dbu-rpg", "finalChance");
+  if ( !fc ) return false;
+  await actor.unsetFlag("dbu-rpg", "finalChance");
+  await actor._processThresholds(Number(fc.oldLife) || 0, actor.system.life.value, { dbuSelfInflicted: true });
+  return true;
+}
+
+export function registerFinalChanceHook() {
+  Hooks.on("updateChatMessage", message => {
+    if ( !game.user.isActiveGM ) return;
+    const attack = message.getFlag(FLAG, "attack");
+    if ( !attack?.finalChance ) return;
+    const done = (attack.targets ?? []).every(t => (t.result === "miss") || (t.result === "duel")
+      || ((t.result === "hit") && (t.damage !== undefined) && (t.damage !== null)));
+    if ( !done ) return;
+    fromUuid(attack.attackerUuid).then(a => {
+      const actor = (a?.documentName === "Token") ? a.actor : a;
+      if ( actor?.getFlag("dbu-rpg", "finalChance")?.messageId === message.id ) return finalChanceOver(actor);
+    }).catch(console.error);
+  });
+}
+
+/**
+ * AG: + Soak for one row of an attack, before its Damage (Power of the Weak: an Ally pays it). Through the GM for a card
+ * the user does not own. @returns a text, or "".
+ */
+/** F6: the cost of an allyGuard piece, paid by its giver (through the GM when this client does not own it). */
+async function payGuardCost(giver, cost) {
+  const T = await import("./triggers.mjs");
+  for ( const c of T.parseCost(cost) ) {
+    if ( c.kind !== "res" ) continue;
+    const all = /^all$/i.test(String(c.amount));
+    const effect = all ? "resourceSet" : "resource";
+    const value = all ? 0 : -Math.max(0, Number(c.amount) || 0);
+    if ( giver.isOwner ) await T.applyTriggerEffect(giver, effect, value, c.name, { label: "" });
+    else emitGM("applyTrigger", { uuid: giver.uuid, effect, value, resource: c.name, options: {} });
+  }
+}
+
+export async function addTargetSoak(messageId, index, value, label = "", kind = "soak") {
+  const message = game.messages.get(messageId);
+  const attack = message ? foundry.utils.deepClone(message.getFlag(FLAG, "attack")) : null;
+  const t = attack?.targets?.[Number(index)];
+  const n = Math.floor(Number(value) || 0);
+  // (F5 kind "none": no Damage at all from this attack, vs.damageMax 0)
+  if ( !t || (!(n > 0) && (kind !== "none")) ) return "";
+  if ( (t.damage !== null) && (t.damage !== undefined) ) {
+    ui.notifications?.warn(L("DBU.Damage.Already"));
+    return "";
+  }
+  const k = ["dr", "damage", "none"].includes(kind) ? kind : "soak";
+  const text = L({ soak: "DBU.Attack.TargetSoak", dr: "DBU.Attack.TargetDr", damage: "DBU.Attack.TargetLess", none: "DBU.Attack.TargetNone" }[k], { label, n, name: t.name ?? "" });
+  if ( !message.isOwner ) return emitGM("attackTargetSoak", { messageId, index, value: n, label, kind: k }) ? text : "";
+  t.defense = t.defense ?? { mode: "none" };
+  const piece = { soak: { target: "vs.soak", value: n }, dr: { target: "vs.dr", value: n }, damage: { target: "vs.damageTaken", value: -n },
+    none: { target: "vs.damageMax", value: 0 } }[k];
+  t.defense.extraVs = [...(t.defense.extraVs ?? []), { ...piece, label }];
+  await refreshAttackMessage(message, attack);
+  return text;
+}
+
+/**
+ * DD2: the attack goes back to Defense Declaration for one target (its Damage not applied yet): it may defend again
+ * (no second Diminishing Defense). Through the GM for a card the user does not own. @returns a text, or "".
+ */
+export async function reopenDefense(messageId, index, label = "") {
+  const message = game.messages.get(messageId);
+  const attack = message ? foundry.utils.deepClone(message.getFlag(FLAG, "attack")) : null;
+  const t = attack?.targets?.[Number(index)];
+  if ( !t || !t.result ) return "";
+  if ( (t.damage !== null) && (t.damage !== undefined) ) {
+    ui.notifications?.warn(L("DBU.Damage.Already"));
+    return "";
+  }
+  const text = L("DBU.Attack.Reopened", { label, name: t.name ?? "" });
+  if ( !message.isOwner ) return emitGM("attackReopen", { messageId, index, label }) ? text : "";
+  t.result = null;
+  t.reopened = (t.reopened ?? 0) + 1;
+  t.defense = null;
+  attack.notes = [...(attack.notes ?? []), text];
+  await refreshAttackMessage(message, attack);
+  return text;
+}
+
+/**
+ * DD3: cancel your own attack (an Opponent answered it with a Counter): every row without Damage misses, its Ki Points
+ * (and Capacity), Action Cost and held Energy Charges come back, then the attack dialog opens against that Opponent.
+ */
+export async function cancelOwnAttack(messageId, { otherUuid = null, label = "" } = {}) {
+  const message = game.messages.get(messageId);
+  const attack = message ? foundry.utils.deepClone(message.getFlag(FLAG, "attack")) : null;
+  if ( !attack || attack.nullified ) return "";
+  if ( (attack.targets ?? []).some(t => (t.damage !== null) && (t.damage !== undefined)) ) {
+    ui.notifications?.warn(L("DBU.Damage.Already"));
+    return "";
+  }
+  const doc = await fromUuid(attack.attackerUuid).catch(() => null);
+  const actor = (doc?.documentName === "Token") ? doc.actor : doc;
+  if ( !actor?.isOwner ) return "";
+  const sys = actor.system;
+  const kp = (attack.dkp?.cost ? 0 : (attack.kp ?? 0)) + (attack.dkp?.wager ? 0 : Math.max(0, (attack.wager ?? 0) - (attack.lifeWager ?? 0) - (attack.finalChance ?? 0)));
+  const { ignoresCapacity } = await import("./adversary.mjs");
+  const update = { "system.ki.value": Math.min(sys.ki.cap ?? sys.ki.max ?? Infinity, (sys.ki.value ?? 0) + kp),
+    "system.combat.actions": (sys.combat.actions ?? 0) + (attack.actionCost ?? 0),
+    "system.combat.energyCharges": (sys.combat.energyCharges ?? 0) + (attack.heldCharges ?? 0) };
+  if ( !ignoresCapacity(actor) ) update["system.capacity.value"] = Math.min(sys.capacity.max ?? Infinity, (sys.capacity.value ?? 0) + kp);
+  await actor.update(update);
+  attack.nullified = true;
+  for ( const t of attack.targets ?? [] ) if ( (t.damage === null) || (t.damage === undefined) ) { t.result = "miss"; t.defense = { mode: L("DBU.Attack.Cancelled") }; }
+  const text = L("DBU.Attack.CancelledText", { label, kp, charges: attack.heldCharges ?? 0 });
+  attack.notes = [...(attack.notes ?? []), text];
+  if ( message.isOwner ) await refreshAttackMessage(message, attack);
+  else emitGM("update", { uuid: message.uuid, data: { [`flags.${FLAG}.attack`]: attack } });
+  // The new attack: against the Character who countered
+  if ( otherUuid ) {
+    try {
+      const o = await fromUuid(otherUuid);
+      const oa = (o?.documentName === "Token") ? o.actor : o;
+      const token = oa?.getActiveTokens?.()?.[0];
+      token?.setTarget?.(true, { releaseOthers: true, groupSelection: false });
+    } catch(err) { /* no target */ }
+  }
+  openAttackDialog(actor).catch(err => console.error("DBU | Attack dialog", err));
+  return text;
+}
+
+/**
+ * CS4: that attack misses you and every Ally of yours it targets (the rows without Damage). Through the GM for a card the
+ * user does not own. @returns a text, or "".
+ */
+export async function missTeam(messageId, ownerUuid, label = "") {
+  const message = game.messages.get(messageId);
+  const attack = message ? foundry.utils.deepClone(message.getFlag(FLAG, "attack")) : null;
+  if ( !attack ) return "";
+  const text = L("DBU.Attack.MissTeam", { label });
+  if ( !message.isOwner ) return emitGM("attackMissTeam", { messageId, ownerUuid, label }) ? text : "";
+  const doc = await fromUuid(ownerUuid).catch(() => null);
+  const owner = (doc?.documentName === "Token") ? doc.actor : doc;
+  if ( !owner ) return "";
+  for ( const t of attack.targets ?? [] ) {
+    if ( (t.damage !== null) && (t.damage !== undefined) ) continue;
+    const a = await resolveActor(t);
+    if ( !a || ((a.uuid !== owner.uuid) && !versusData(owner, a).ally) ) continue;
+    t.result = "miss";
+    t.defense = { mode: label || "—" };
+  }
+  attack.notes = [...(attack.notes ?? []), text];
+  await refreshAttackMessage(message, attack);
+  return text;
+}
+
+/**
+ * PD Attack Absorption: the absorber Parried this Energy / Magic attack away: the attacker's Urgent Wound Roll for it (its
+ * Wound dice and Energy Charges, rolled here) and the absorber regains 1/2 of its Dice Score in Ki Points; with 1/5 of its
+ * Max KP or more, a Power Up as an Out-of-Sequence Maneuver is offered. @returns a text, or "".
+ */
+export async function absorbAttackOn(messageId, absorber, { label = "", any = false, noPowerUp = false, out = {} } = {}) {
+  const message = game.messages.get(messageId);
+  const attack = message?.getFlag(FLAG, "attack");
+  if ( !attack || !absorber?.system ) return "";
+  // (F11 any: an attack of any Foundation, its own Wound Roll: Light Consumption)
+  if ( !any && !["energy", "magic"].includes(attack.foundation) ) return "";
+  const doc = await fromUuid(attack.attackerUuid).catch(() => null);
+  const attacker = (doc?.documentName === "Token") ? doc.actor : doc;
+  const w = attacker?.system?.rolls?.wound?.[attack.foundation];
+  if ( !w ) return "";
+  const T = attacker.system.top?.current ?? 1;
+  const diceGroups = [...(w.dice ?? [])];
+  const charges = Number(attack.charges) || 0;
+  if ( charges > 0 ) {
+    const per = categoryToDice(attack.chargeCategory ?? 1, T);
+    diceGroups.push({ dice: per.map(g => ({ number: g.number * charges, faces: g.faces })), label: L("DBU.Attack.Charges") });
+  }
+  const parts = [...(w.parts ?? []), ...(attack.extraWound ?? []).map(x => ({ label: x.label, value: Number(x.value) || 0 }))];
+  const r = await dbuRoll({ actor: attacker, kind: "wound", reactions: false, title: `${label || "Attack Absorption"} — ${attack.name}`,
+    subtitle: L("DBU.Absorb.Urgent"), naturalMod: w.natural, critTarget: w.crit, botchRange: w.botch, diceGroups, parts,
+    critDice: w.critDice, botchPenalty: w.botchPenalty });
+  const sys = absorber.system;
+  const gain = Math.max(0, Math.floor((Number(r?.total) || 0) / 2));
+  const before = sys.ki.value ?? 0;
+  const after = Math.min(sys.ki.cap ?? sys.ki.max ?? Infinity, before + gain);
+  await absorber.update({ "system.ki.value": after }, { dbuSource: "trigger" });
+  const text = L("DBU.Absorb.Gained", { n: after - before, total: r?.total ?? 0 });
+  out.gained = after - before;
+  if ( !noPowerUp && ((after - before) >= Math.ceil((sys.ki.max ?? 0) / 5)) ) {
+    const ok = await foundry.applications.api.DialogV2.confirm({ window: { title: label || "Attack Absorption" },
+      content: `<p>${foundry.utils.escapeHTML(L("DBU.Absorb.PowerUp"))}</p>` }).catch(() => false);
+    if ( ok ) await absorber.useOutOfSequence?.("powerUp");
+  }
+  return text;
+}
+
+/**
+ * E2 Petite Genius: the target of the attack (fromUuid) swaps places with an adjacent willing Ally (toUuid), who becomes
+ * the attack's target on its row (no defense rolled yet). Through the GM for what the user cannot change.
+ */
+export async function swapAttackTarget(messageId, fromActorUuid, toActorUuid) {
+  const message = game.messages.get(messageId);
+  const attack = message ? foundry.utils.deepClone(message.getFlag(FLAG, "attack")) : null;
+  if ( !attack ) return "";
+  const asActor = d => (d?.documentName === "Token") ? d.actor : d;
+  const from = asActor(await fromUuid(fromActorUuid).catch(() => null));
+  const to = asActor(await fromUuid(toActorUuid).catch(() => null));
+  if ( !from || !to ) return "";
+  const row = (attack.targets ?? []).find(t => !t.result && ((t.actorUuid === from.uuid) || (t.tokenUuid && from.getActiveTokens?.().some(k => k.document.uuid === t.tokenUuid))));
+  if ( !row ) return "";
+  if ( !message.isOwner && !game.user.isGM ) {
+    return emitGM("swapAttackTarget", { messageId, fromUuid: fromActorUuid, toUuid: toActorUuid }) ? L("DBU.Attack.Swapped", { name: from.name, ally: to.name }) : "";
+  }
+  const ft = from.getActiveTokens?.()?.[0]?.document;
+  const tt = to.getActiveTokens?.()?.[0]?.document;
+  if ( ft && tt && (ft.parent === tt.parent) ) {
+    const a = { x: ft._source.x, y: ft._source.y };
+    const b = { x: tt._source.x, y: tt._source.y };
+    await ft.parent.updateEmbeddedDocuments("Token", [{ _id: ft.id, ...b }, { _id: tt.id, ...a }]);
+  }
+  Object.assign(row, { tokenUuid: tt?.uuid ?? null, actorUuid: to.uuid, name: to.name, img: tt?.texture?.src ?? to.img });
+  attack.notes = [...(attack.notes ?? []), L("DBU.Attack.Swapped", { name: from.name, ally: to.name })];
+  await refreshAttackMessage(message, attack);
+  return L("DBU.Attack.Swapped", { name: from.name, ally: to.name });
+}
+
 async function refreshAttackMessage(message, attack) {
   const content = await renderAttackContent(attack);
   return message.update({ content, [`flags.${FLAG}.attack`]: attack });
@@ -1638,7 +2249,8 @@ export async function rollDefense(message, index, mode = "dodge") {
   const atkMods = attacker ? versusMods(attacker) : [];
   const critStrike = attack.strike?.crit ? 1 : 0;
   // (@punchDown / @punchUp: this pair's Punching Down / Up)
-  const vsScope = (hit, def = { mode }) => ({ ...attackScope(attack), ...defendVars(def), hit: hit ? 1 : 0, critStrike,
+  // (PA attackId: this attack's card, for the per-attack limits)
+  const vsScope = (hit, def = { mode }) => ({ ...attackScope(attack), ...defendVars(def), hit: hit ? 1 : 0, critStrike, attackId: message.id,
     ...pairPunch(attack, actor) });
   const rollScope = { ...attackScope(attack), critStrike };
   // The attacker's vs.strike / vs.combat against this defender: added to its Strike for this pair only
@@ -1662,15 +2274,20 @@ export async function rollDefense(message, index, mode = "dodge") {
   }
   if ( freeCounter ) rec.freeCounter = freeCounter.label;
   if ( freeKp ) rec.freeKp = freeKp.label;
+  // (DC: the effect that waived the Counter Action, for @waivedFx.<ref>)
+  if ( freeCounter?.fx ) rec.waivedFx = freeCounter.fx;
   // Before the roll: the defender's pieces for its roll or its cost (vs.dodge, vs.defenseValue, vs.strike, vs.combat,
   // vs.guardKp, vs.guardNoCharges); one dialog only when one of them is asked (none for a Guard without its KP cost)
   const preTargets = ((mode === "guard") && freeKp) ? [] : (VS_PRE[mode] ?? []);
-  const pre = await versusChoose(actor, attacker, preTargets, vsScope(false), defMods, attack.name, L("DBU.Versus.AskPre"));
+  const pre = await versusChoose(actor, attacker, preTargets, vsScope(false, rec), defMods, attack.name, L("DBU.Versus.AskPre"));
+  // DC: the groups chosen before the roll, seen by the pieces once hit and by the events after it (@defChose.<group>)
+  { const dc = choseVars(pre.chosen); if ( Object.keys(dc).length ) rec.defChose = dc; }
   const preSum = target => pre.applied.filter(p => p.target === target).reduce((t, p) => t + (Number(p.value) || 0), 0);
   const preParts = targets => pre.applied.filter(p => targets.includes(p.target)).map(p => ({ label: versusLabel(p), value: Number(p.value) || 0 }));
 
   if ( usesCounter && !freeCounter ) {
     if ( (sys.combat.counters ?? 0) < 1 ) ui.notifications.warn(L("DBU.Defense.NoCounter"));
+    if ( (sys.buckets?.["flag.noCounterManeuver"]?.total ?? 0) > 0 ) ui.notifications.warn(L("DBU.F13.NoCounterManeuver", { name: actor.name }));
     update["system.combat.counters"] = Math.max(0, (sys.combat.counters ?? 0) - 1);
   }
 
@@ -1679,7 +2296,10 @@ export async function rollDefense(message, index, mode = "dodge") {
   if ( mode === "dodge" || mode === "crossCounter" ) {
     const d = sys.rolls.dodge;
     const parts = [...d.parts];
-    if ( mode === "crossCounter" ) parts.push({ label: "Cross Counter (½ DV)", value: -Math.ceil(sys.aptitudes.defenseValue / 2) });
+    // (T25 "flag.crossCounterFullDv": no Defense Value lost, Unpredictable Combat 1)
+    if ( (mode === "crossCounter") && !flagOn(sys, "crossCounterFullDv") ) {
+      parts.push({ label: "Cross Counter (½ DV)", value: -Math.ceil(sys.aptitudes.defenseValue / 2) });
+    }
     parts.push(...preParts(["vs.dodge", "vs.defenseValue", "vs.combat"]));
     const r = await dbuRoll({
       actor, kind: "dodge", other: attacker ?? null, title: `${L("DBU.Roll.Dodge")} — ${actor.name}`, subtitle: L("DBU.Defense.Against", { name: attack.name, total: strike + strikeVs }),
@@ -1738,6 +2358,26 @@ export async function rollDefense(message, index, mode = "dodge") {
     hit = true; // Direct Hit / Power Flare / no defense
   }
 
+  // HM: Homing: a missed Opponent (after its Dodge / Parry roll): the attacker's Strike Roll again, up to the Advantage's
+  // ranks, +1(T) per miss so far, against the same defense (still one attack: no more Diminishing Defense)
+  let strikeEff = strike;
+  if ( !hit && attack.homing && attacker && ["dodge", "parry", "crossCounter"].includes(mode) ) {
+    const H = attack.homing;
+    const tries = [];
+    for ( let i = 1; i <= H.ranks; i++ ) {
+      const r = await dbuRoll({ ...H.cfg, actor: attacker, kind: "strike", other: actor, reactions: false,
+        title: `${L("DBU.Attack.Homing")} — ${attack.name}`, subtitle: L("DBU.Defense.Against", { name: actor.name, total: rec.total }),
+        parts: [...(H.cfg.parts ?? []), { label: L("DBU.Attack.HomingBonus", { n: i }), value: i * (H.T || 1) }], scope: rollScope });
+      tries.push(r.total);
+      if ( r.total + strikeVs > rec.total ) {
+        hit = true;
+        strikeEff = r.total;
+        break;
+      }
+    }
+    rec.homing = tries.join(" → ");
+  }
+
   // Once hit: the defender's pieces for the Damage (vs.soak, vs.dr, vs.categoryTaken, vs.categorySet, vs.damageTaken,
   // vs.damageMult, vs.ignoreDamageBelow, vs.damageMax), vs.autoDodge (the hit becomes a miss) and vs.redodge (after a
   // Dodge or no defense: the Dodge again, with the bonus)
@@ -1760,12 +2400,12 @@ export async function rollDefense(message, index, mode = "dodge") {
       const parts = [...d.parts, ...((mode === "dodge") ? preParts(["vs.dodge", "vs.defenseValue", "vs.combat"]) : []),
         { label: L("DBU.Versus.Redodge"), value: redodge }];
       const r = await dbuRoll({
-        actor, kind: "dodge", other: attacker ?? null, title: `${L("DBU.Versus.Redodge")} — ${actor.name}`, subtitle: L("DBU.Defense.Against", { name: attack.name, total: strike + strikeVs }),
+        actor, kind: "dodge", other: attacker ?? null, title: `${L("DBU.Versus.Redodge")} — ${actor.name}`, subtitle: L("DBU.Defense.Against", { name: attack.name, total: strikeEff + strikeVs }),
         naturalMod: d.natural, critTarget: d.crit, botchRange: d.botch, diceGroups: d.dice, parts,
         critDice: d.critDice, botchPenalty: d.botchPenalty, scope: rollScope
       });
       rec.redodge = r.total;
-      if ( !(strike + strikeVs > r.total) ) {
+      if ( !(strikeEff + strikeVs > r.total) ) {
         hit = false;
         rec.total = r.total; rec.natural = r.natural; rec.crit = r.crit;
         // A miss now: the Damage pieces picked with it never apply, so only vs.redodge is paid and counted
@@ -1775,6 +2415,7 @@ export async function rollDefense(message, index, mode = "dodge") {
       }
     }
     // (the pieces counted only when they change the Damage keep their limit: computeDamage says when they did)
+    { const dc = { ...(rec.defChose ?? {}), ...choseVars(post.chosen) }; if ( Object.keys(dc).length ) rec.defChose = dc; }
     if ( hit ) rec.vs = post.applied.filter(p => p.target !== "vs.redodge").map(p => ({ target: p.target, value: p.value, label: versusLabel(p),
       ...((VS_DEFERRED.has(p.target) && !blank(p.limit)) ? { limit: p.limit, key: p.useKey, ctx: p.ctx ?? {} } : {}) }));
   }
@@ -1784,7 +2425,7 @@ export async function rollDefense(message, index, mode = "dodge") {
   // vs.noDimDefense (asked before the roll): none from this attack
   const noDim = pre.applied.filter(p => (p.target === "vs.noDimDefense") && ((Number(p.value) || 0) > 0));
   if ( noDim.length ) rec.noDim = noDim.map(p => versusLabel(p)).join(", ");
-  if ( !usesCounter && ((target.dimDeclared ?? null) === null) && !noDim.length ) {
+  if ( !usesCounter && ((target.dimDeclared ?? null) === null) && !noDim.length && !target.reopened ) {
     const mult = attack.ext?.dimMult ?? 1;
     if ( (mult === 1) && !flagOn(sys, "dimDefenseFirstFree") ) {
       let stacks = sys.dimDefensePerAttack;
@@ -1810,7 +2451,7 @@ export async function rollDefense(message, index, mode = "dodge") {
     }
     // (not the ones counted when they change the Damage: VS_DEFERRED)
     const counting = step.chosen.map(c => ({ ...c, pieces: c.pieces.filter(p => !VS_DEFERRED.has(p.target)) }));
-    await countOptionLimits(actor, counting, { skip: countedKeys });
+    await countOptionLimits(actor, counting, { skip: countedKeys, attackId: message.id });
     countedKeys.push(...chosenPieces(counting).filter(p => !blank(p.limit)).map(p => p.useKey));
   }
   if ( vsLines.length ) await postInfoCard({ actor, title: attack.name, subtitle: L("DBU.Versus.Title"), lines: vsLines });
@@ -1830,16 +2471,41 @@ export async function rollDefense(message, index, mode = "dodge") {
   }
 
   const result = { hit, defense: rec };
+  // RA "untilDefended": what lasted until this Character's next defense ends now (a Guard Down only against that attack)
+  if ( actor.isOwner ) { const { expireTimed } = await import("./triggers.mjs"); await expireTimed(actor, "defended").catch(() => null); }
   if ( !hit ) {
     const { fireEvent } = await import("./triggers.mjs");
     // The Defend variables (@dodge..., @counter, @defenseCrit) and @vs (the other Character of the pair)
-    const scope = { ...attackScope(attack), ...defendVars(rec), [mode]: 1, ...pairPunch(attack, actor) };
+    const scope = { ...attackScope(attack), ...defendVars(rec), [mode]: 1, ...pairPunch(attack, actor),
+      // CC: every target of the attack has now missed (@missedAll)
+      missedAll: (attack.targets ?? []).every((x, i) => (i === index) || (x.result === "miss")) ? 1 : 0, messageId: message.id };
     if ( attacker ) fireEvent(attacker, "attackMissed", { other: actor, scope: { ...scope, vs: versusData(attacker, actor) } });
     fireEvent(actor, "dodged", { other: attacker, scope: { ...scope, vs: versusData(actor, attacker) } });
+    // CS1 "allyDodged": an attack missed an Ally of yours (other = the attacker; @allyDistance)
+    try {
+      const { encounterOthers } = await import("../rules/allies.mjs");
+      const { collectTriggers } = await import("./triggers.mjs");
+      for ( const o of encounterOthers(actor) ) {
+        if ( !o.ally || !collectTriggers(o.actor, "allyDodged").length ) continue;
+        fireEvent(o.actor, "allyDodged", { other: attacker, scope: { ...scope, allyDistance: o.distance ?? 99, vs: versusData(o.actor, attacker) } });
+      }
+    } catch(err) { console.warn("DBU | allyDodged", err); }
   }
   if ( message.isOwner ) await resolveDefenseOnMessage(message.id, index, result);
   else if ( !emitGM("attackResult", { messageId: message.id, targetIndex: index, result }) ) {
     await postInfoCard({ actor, title: hit ? L("DBU.Defense.Hit") : L("DBU.Defense.Miss"), lines: [attack.name] });
+  }
+  // DD3 "attackCountered": a Defend option with a Counter Action (Parry, Guard, Cross Counter...) answered the attack
+  if ( usesCounter && attacker ) {
+    const { fireEvent } = await import("./triggers.mjs");
+    fireEvent(attacker, "attackCountered", { other: actor, scope: { ...attackScope(attack), [mode]: 1, hit: hit ? 1 : 0,
+      messageId: message.id, targetIndex: index, vs: versusData(attacker, actor) } });
+  }
+  // AG "wasHit": the defense ended in a hit, before the Damage (its Allies: "allyWasHit"); the card and the row go with it
+  if ( hit ) {
+    const { fireEvent } = await import("./triggers.mjs");
+    fireEvent(actor, "wasHit", { other: attacker, scope: { ...attackScope(attack), ...defendVars(rec), [mode]: 1, ...pairPunch(attack, actor),
+      messageId: message.id, targetIndex: index, vs: versusData(actor, attacker) } });
   }
   return result;
 }
@@ -1866,6 +2532,17 @@ async function versusChoose(actor, other, targets, scope, mods, title, hint) {
   const sc = pieces[0].scope;
   let chosen = await optionDialog(pieces, { title, hint, actor, scope: sc });
   if ( chosen === null ) chosen = autoChosen(actor, pieces, sc);
+  // (PA "+after:<key>": a box that needs that other piece, ticked with it or already used for this attack)
+  {
+    const { afterKeyOf, sameAttackUse } = await import("./triggers.mjs");
+    const ticked = new Set(chosenPieces(chosen).map(p => p.useKey));
+    const lacks = p => { const a = afterKeyOf(p.useKey); return a && !ticked.has(a) && !sameAttackUse(actor, a, scope.attackId); };
+    const bad = chosenPieces(chosen).filter(lacks);
+    if ( bad.length ) {
+      ui.notifications.warn(L("DBU.Trigger.NeedsFirst", { label: bad.map(p => p.label).join(", ") }));
+      chosen = chosen.map(c => ({ ...c, pieces: c.pieces.filter(p => !lacks(p)) })).filter(c => c.pieces.length);
+    }
+  }
   let plan = optionCostPlan(actor, chosen, sc);
   if ( plan.problems.length ) {
     ui.notifications.warn(L("DBU.Attack.OptionCantPay", { why: plan.problems.join(" ") }));
@@ -1912,7 +2589,7 @@ async function freeDefense(actor, attack, mode, target, prefer = null, attacker 
     // A cost (rules/options.mjs): paid when the waiver is used; one that cannot be paid is left out
     const plan = blank(m.cost) ? null : costPlan(actor, [{ cost: m.cost, data: { ...sc, n: 1 } }]);
     if ( plan?.problems.length ) continue;
-    found.push({ key, label, limit: m.limit, ctx: m.ctx, ask: m.mode === "ask", plan });
+    found.push({ key, label, limit: m.limit, ctx: m.ctx, ask: m.mode === "ask", plan, fx: String(m.fx ?? "").toLowerCase() });
   }
   const same = prefer ? found.find(f => f.key === prefer) : null;
   // (the same trait waiving both: its cost is the Counter's, paid once)
@@ -2006,6 +2683,9 @@ export async function rollWound(message) {
     if ( p.extraDamageAttribute ) add(`${p.label} (+${L("DBU.Attack.DamageAttribute")})`, dmgAttr * p.extraDamageAttribute);
   }
   if ( attack.sig?.superProfile === "annihilation" ) add("Complete Annihilation", dmgAttr);
+  if ( attack.genkiWound ) add("Genki", attack.genkiWound);
+  if ( attack.chargeWound ) add("Charging Assault", attack.chargeWound);
+  if ( attack.splitWound ) add("Splitting", attack.splitWound);
   // attack.damageAttrTimes: the Damage Attribute that many more times (at declaration and as it hits)
   const attrTimes = (attack.ext?.damageAttrTimes ?? 0) + wsum("attack.damageAttrTimes");
   if ( attrTimes && !attack.ballistic ) add(L("DBU.Attack.DamageAttrTimes", { n: attrTimes }), dmgAttr * attrTimes);
@@ -2108,8 +2788,19 @@ export async function rollWound(message) {
     patch.notes = [...woundOpts.map(p => optionText(p)), ...(woundOpts.paidText ? [L("DBU.Trigger.Paid", { cost: woundOpts.paidText })] : [])];
     wound.patch = patch;
   }
+  // RX: the reactions of the Wound Roll and what they spent
+  if ( result.rollSpent ) wound.rollSpent = result.rollSpent;
   if ( message.isOwner ) await storeWoundOnMessage(message.id, wound);
   else emitGM("attackWound", { messageId: message.id, wound });
+  // AA "woundRolled": its result for the effects that change it afterwards (woundAdd / woundCategory, @messageId);
+  // a Super Critical is a Natural Result of 10
+  {
+    const { fireEvent } = await import("./triggers.mjs");
+    fireEvent(actor, "woundRolled", { other: woundTargets[0] ?? null, scope: { ...attackScope(attack), critStrike,
+      rollSpent: { strike: attack.rollSpent?.strike ?? {}, wound: result.rollSpent ?? {} },
+      crit: result.crit ? 1 : 0, superCrit: (Number(result.natural) >= 10) ? 1 : 0, natural: Number(result.natural) || 0,
+      total: Number(result.total) || 0, messageId: message.id } });
+  }
   return wound;
 }
 
@@ -2272,7 +2963,10 @@ export function computeDamage(targetActor, attack, attacker = null, def = null) 
     damage += tsys.damageTaken ?? 0;
     for ( const p of vs.def.filter(x => x.target === "vs.damageTaken") ) { damage += Math.round(Number(p.value) || 0); vline(p); }
     if ( attack.sig?.shatteringBlow ) damage += attack.sig.shatteringBlow * Math.floor(tsys.aptitudes.soak / 4);
-    const mults = vs.def.filter(x => x.target === "vs.damageMult");
+    // (F5: less Damage never heals)
+    damage = Math.max(0, damage);
+    // (T25 vs.damageDealtMult: the attacker's own x against that Character, Superior Being)
+    const mults = [...vs.def.filter(x => x.target === "vs.damageMult"), ...vs.atk.filter(x => x.target === "vs.damageDealtMult")];
     if ( mults.length ) {
       damage = Math.max(0, Math.floor(mults.reduce((t, p) => t * (Number(p.value) || 0), damage)));
       for ( const p of mults ) lines.push(L("DBU.Versus.Line", { label: p.label, value: `x${p.value}`, what: targetLabel(p.target) }));
@@ -2290,6 +2984,13 @@ export function computeDamage(targetActor, attack, attacker = null, def = null) 
       for ( const p of applies ) vline(p);
       usedOf(applies);
     }
+  }
+  // F12 vs.ignoreWoundBelow: a Wound Roll lower than the highest value deals no Damage (the Incorporeal State)
+  const woundBelow = vs.def.filter(p => (p.target === "vs.ignoreWoundBelow") && (wound < (Number(p.value) || 0)));
+  if ( (damage > 0) && woundBelow.length ) {
+    damage = 0;
+    for ( const p of woundBelow ) vline(p);
+    usedOf(woundBelow);
   }
   const caps = vs.def.filter(p => (p.target === "vs.damageMax") && (damage > Math.max(0, Number(p.value) || 0)));
   if ( caps.length ) {
@@ -2333,7 +3034,9 @@ function damageVersus(target, attack, attacker, def) {
         }
       }
     }
-    if ( Array.isArray(def?.vs) ) out.def = def.vs.map(p => ({ ...p }));
+    // (AG: what others added to this row before its Damage: attackSoak)
+    const extra = Array.isArray(def?.extraVs) ? def.extraVs.map(p => ({ ...p })) : [];
+    if ( Array.isArray(def?.vs) ) out.def = [...def.vs.map(p => ({ ...p })), ...extra];
     else if ( target?.system ) {
       const mods = versusMods(target);
       if ( mods.length ) {
@@ -2345,7 +3048,9 @@ function damageVersus(target, attack, attacker, def) {
             ...((VS_DEFERRED.has(p.target) && !blank(p.limit)) ? { limit: p.limit, key: p.useKey, ctx: p.ctx ?? {} } : {}) }));
         }
       }
+      out.def = [...(out.def ?? []), ...extra];
     }
+    else out.def = extra;
   } catch(err) { console.warn("DBU | Versus pieces", err); }
   return out;
 }
@@ -2365,12 +3070,67 @@ export async function applyAttackDamage(message, index) {
   if ( !target ) return;
   const half = absolute ? { ...attack, wound: { ...attack.wound, total: Math.floor((attack.wound.total ?? 0) / 2),
     ...(attack.wound.punchDown ? { punchDown: Math.floor(attack.wound.punchDown / 2) } : {}) } } : attack;
-  const res = computeDamage(target, half, attacker, t.defense);
+  // RB: a lost Deflect (Intervene) raises the Damage Category for the one who stepped in
+  const rowAttack = t.categoryBonus ? { ...half, category: Math.clamp((half.category ?? 1) + t.categoryBonus, 1, 3) } : half;
+  const res = computeDamage(target, rowAttack, attacker, t.defense);
+  if ( t.categoryBonus ) res.lines.unshift(L("DBU.Team.CategoryUp"));
   if ( absolute ) res.lines.unshift(L("DBU.Damage.Absolute", { n: half.wound.total }));
+  const lifeBefore = target.system.life?.value ?? 0;
+  // AG "allyGuard.defeat" (an Ally's piece: Intelligent Fighter): an Opponent's Damage that would Defeat this target is
+  // reduced by that piece's value (its limit counted on the Ally)
+  if ( (res.damage > 0) && attacker && !versusData(target, attacker).ally && (res.damage >= lifeBefore + (target.system.lifeFloor ?? 0)) ) {
+    const { allyGuards } = await import("../rules/allies.mjs");
+    const { triggerUsesLeft, useTriggerLimit } = await import("./triggers.mjs");
+    for ( const g of allyGuards(target, "defeat") ) {
+      if ( !(res.damage >= lifeBefore + (target.system.lifeFloor ?? 0)) ) break;
+      if ( g.limit && !triggerUsesLeft(g.giver, { limit: g.limit }, g.key) ) continue;
+      const cut = Math.min(res.damage, g.value);
+      if ( !(cut > 0) ) continue;
+      res.damage -= cut;
+      res.lines.push(L("DBU.Damage.AllyGuard", { label: g.label, n: cut }));
+      // (F6: its cost, paid by the Ally who gives it: "res:<name>:all" empties that resource)
+      if ( g.cost ) await payGuardCost(g.giver, g.cost);
+      if ( g.limit ) {
+        if ( g.giver.isOwner ) await useTriggerLimit(g.giver, { limit: g.limit }, g.key);
+        else emitGM("useLimit", { actorUuid: g.giver.uuid, limit: g.limit, key: g.key });
+      }
+    }
+  }
+  // CS1 "allyGuard.defeatKeep" (Squadron Species 6): an adjacent Ally takes the Damage that would Defeat this target down
+  // to 1 LP above that, and loses those LP itself
+  if ( (res.damage > 0) && attacker && !versusData(target, attacker).ally && (res.damage >= lifeBefore + (target.system.lifeFloor ?? 0)) ) {
+    const { allyGuards } = await import("../rules/allies.mjs");
+    const { triggerUsesLeft, useTriggerLimit } = await import("./triggers.mjs");
+    for ( const g of allyGuards(target, "defeatKeep") ) {
+      if ( g.limit && !triggerUsesLeft(g.giver, { limit: g.limit }, g.key) ) continue;
+      const cut = res.damage - (lifeBefore + (target.system.lifeFloor ?? 0)) + 1;
+      if ( !(cut > 0) ) break;
+      res.damage -= cut;
+      res.lines.push(L("DBU.Damage.AllyGuard", { label: g.label, n: cut }));
+      await safeUpdate(g.giver, { "system.life.value": (g.giver.system.life?.value ?? 0) - cut });
+      if ( g.limit ) {
+        if ( g.giver.isOwner ) await useTriggerLimit(g.giver, { limit: g.limit }, g.key);
+        else emitGM("useLimit", { actorUuid: g.giver.uuid, limit: g.limit, key: g.key });
+      }
+      break;
+    }
+  }
   // R: did the target already suffer from the Condition Advantage's Combat Condition (then it got +3(T) Wound instead)
   const condKey = attack.sig?.condition ?? "";
   const condHad = !!condKey && ((target.system.effectiveConditions?.[condKey] ?? target.system.conditions?.[condKey] ?? 0) > 0);
   await applyDamageToActor(target, res.damage, { attacker, attack, lines: res.lines, category: res.category });
+  // RB Intervene (Defense Wall, a lost Deflect): the Damage beyond the Life Points of the one who stepped in goes to the
+  // Ally, reduced by its Soak and Damage Reduction as usual for that attack and Damage Category
+  if ( t.intervened?.forUuid && ["wall", "deflect"].includes(t.intervened.option) && (res.damage > Math.max(0, lifeBefore)) ) {
+    const excess = res.damage - Math.max(0, lifeBefore);
+    const allyDoc = await fromUuid(t.intervened.forUuid).catch(() => null);
+    const ally = (allyDoc?.documentName === "Token") ? allyDoc.actor : allyDoc;
+    if ( ally ) {
+      const er = computeDamage(ally, { ...rowAttack, wound: { ...rowAttack.wound, total: excess, punchDown: 0 } }, attacker, null);
+      er.lines.unshift(L("DBU.Team.Excess", { n: excess, name: target.name }));
+      await applyDamageToActor(ally, er.damage, { attacker, attack, lines: er.lines, category: er.category });
+    }
+  }
   // The target's limited pieces that changed this Damage (vs.ignoreDamageBelow, vs.damageMax)
   if ( res.defUsed?.length ) await countDefenderLimits(target, res.defUsed);
   // Not a hit nor damage of the Attacking Maneuver for the attacker's effects
@@ -2412,13 +3172,16 @@ export async function applyAttackDamage(message, index) {
     const max = target.system.life.max;
     const after = target.system.life.value;
     const before = after + res.damage;
-    const knocked = DBU.thresholds.filter(k => (before > max * DBU.THRESHOLD_FRACTIONS[k]) && (after <= max * DBU.THRESHOLD_FRACTIONS[k])).length;
+    const knocked = DBU.thresholds.filter(k => (before > max * (target.system.thresholdFractions ?? DBU.THRESHOLD_FRACTIONS)[k]) && (after <= max * (target.system.thresholdFractions ?? DBU.THRESHOLD_FRACTIONS)[k])).length;
     // The Defend variables (@dodge, @parry..., @counter, @defenseCrit) and @vs (the other Character of the pair)
     const scope = { ...attackScope(attack), damage: res.damage, knocked, defeated: (after <= 0) ? 1 : 0,
       targetBelow: target.system.health?.count ?? 0, ...defendVars(t.defense), guard: (t.defense?.mode === "guard") ? 1 : 0,
       ...pairPunch(attack, target) };
-    if ( attacker ) fireEvent(attacker, "attackHit", { other: target, scope: { ...scope, vs: versusData(attacker, target) } });
-    fireEvent(target, "damaged", { other: attacker, scope: { ...scope, vs: versusData(target, attacker) } });
+    // (RB: a Reflected attack is not the original attacker's hit; the one who reflected it is the other Character)
+    const byDoc = attack.reflected?.byUuid ? await fromUuid(attack.reflected.byUuid).catch(() => null) : null;
+    const by = ((byDoc?.documentName === "Token") ? byDoc.actor : byDoc) ?? attacker;
+    if ( attacker && !attack.reflected ) fireEvent(attacker, "attackHit", { other: target, scope: { ...scope, vs: versusData(attacker, target) } });
+    fireEvent(target, "damaged", { other: by, scope: { ...scope, vs: versusData(target, by) } });
   }
   const damage = { amount: res.damage, category: res.category };
   // The attacker's limited vs pieces that applied to this target (its Strike, its Damage): one use per attack
@@ -2525,7 +3288,7 @@ async function profileDamageEffects(attacker, target, attack, damage) {
     const theirs = { total: clash?.theirs ?? 0 };
     if ( clash?.autoWin ) lines.push(L("DBU.Clash.AutoWin", { name: (clash.won ? attacker : target).name }));
     if ( clash?.won ) {
-      ops.push({ op: "condition", uuid: target.uuid, key: "prone", value: 1 });
+      ops.push({ op: "condition", uuid: target.uuid, key: "prone", value: 1, by: attacker.uuid });
       lines.push(L("DBU.Profile.GravityProne", { name: target.name, mine: mine.total, theirs: theirs.total }));
       // Gravity Controller: winning that Might Clash costs another 1/4 of the Might
       const controller = attacker.items.some(i => (i.type === "transformation") && /^gravity controller$/i.test(i.name) && i.system.isActive);
@@ -2656,7 +3419,8 @@ export async function applyDamageToActor(target, damage, { attacker = null, atta
   const before = tsys.life.value;
   const after = before - damage;
   const undying = (tsys._effectiveStates?.undying ?? 0) > 0;
-  const value = undying ? after : Math.max(0, after);
+  // (RC "lifeFloor": Life Points may go down to −lifeFloor before the Defeat)
+  const value = undying ? after : Math.max(-(tsys.lifeFloor ?? 0), after);
   const lifeUpdate = { "system.life.value": value };
   if ( stamina.absorbed ) lifeUpdate["system.adversary.stamina"] = stamina.stamina;
   // (the attack's variables go along, so the attacker's "vs.steadfast" pieces can read its tags and weapon)
@@ -2689,7 +3453,7 @@ export async function applyDamageToActor(target, damage, { attacker = null, atta
   // Bonus Momentum: knocking an Opponent through a Health Threshold (once per Combat Round)
   if ( attacker && inEncounter(attacker) && !selfInflicted && !V.traitOf(target, "Dauntless") ) {
     const max = tsys.life.max;
-    const crossed = DBU.thresholds.some(k => (before > max * DBU.THRESHOLD_FRACTIONS[k]) && (value <= max * DBU.THRESHOLD_FRACTIONS[k]));
+    const crossed = DBU.thresholds.some(k => (before > max * (tsys.thresholdFractions ?? DBU.THRESHOLD_FRACTIONS)[k]) && (value <= max * (tsys.thresholdFractions ?? DBU.THRESHOLD_FRACTIONS)[k]));
     const minionDefeated = (target.type === "npc") && (target.system.npcType === "minion") && (value <= 0);
     if ( (crossed || minionDefeated) && !attacker.system.combat.momentumUsed ) {
       await safeUpdate(attacker, {
@@ -2697,6 +3461,8 @@ export async function applyDamageToActor(target, damage, { attacker = null, atta
         "system.combat.momentumUsed": true
       });
       await postInfoCard({ actor: attacker, title: L("DBU.Momentum.Title"), lines: [L("DBU.Momentum.Text", { name: attacker.name })] });
+      // (T3 "bonusMomentum": Style of the Crane School 7)
+      (await import("./triggers.mjs")).fireEvent(attacker, "bonusMomentum", { other: target, scope: {} });
     }
   }
 }

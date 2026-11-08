@@ -18,6 +18,18 @@ export function registerSocket() {
       const { onInjuryRequest } = await import("./combat/injuries.mjs");
       return onInjuryRequest(payload.data);
     }
+    // F13 another Character's owner is asked about a roll (combat/reactions.mjs), and answers
+    // (T5: a Clash defender's owner is asked its boxes, and answers)
+    if ( (payload?.action === "clashAsk") || (payload?.action === "clashAnswer") ) {
+      if ( payload.userId !== game.user.id ) return;
+      const C = await import("./combat/clash.mjs");
+      return (payload.action === "clashAsk") ? C.onClashAsk(payload.data) : C.onClashAnswer(payload.data);
+    }
+    if ( (payload?.action === "rollAsk") || (payload?.action === "rollAnswer") ) {
+      if ( payload.userId !== game.user.id ) return;
+      const R = await import("./combat/reactions.mjs");
+      return (payload.action === "rollAsk") ? R.onRollAsk(payload.data) : R.onRollAnswer(payload.data);
+    }
     if ( !game.user.isActiveGM ) return;
     try {
       await handle(payload);
@@ -53,6 +65,99 @@ async function handle({ action, uuid, data, options }) {
     case "attackWoundAdd": {
       const A = await import("./combat/attack.mjs");
       await A.addAttackWound(data.messageId, data.label, data.value);
+      break;
+    }
+    // AA: a Wound Roll already made, changed by an effect ("woundAdd" / "woundCategory")
+    case "attackWoundBump": {
+      const A = await import("./combat/attack.mjs");
+      await A.bumpStoredWound(data.messageId, data);
+      break;
+    }
+    // AG: + Soak for one row of an attack (an Ally's effect), and a limit counted on another actor
+    case "attackTargetSoak": {
+      const A = await import("./combat/attack.mjs");
+      await A.addTargetSoak(data.messageId, data.index, data.value, data.label, data.kind);
+      break;
+    }
+    // DD2: the attack goes back to Defense Declaration for one target
+    case "attackReopen": {
+      const A = await import("./combat/attack.mjs");
+      await A.reopenDefense(data.messageId, data.index, data.label);
+      break;
+    }
+    // CS4: an attack misses a team
+    case "attackMissTeam": {
+      const A = await import("./combat/attack.mjs");
+      await A.missTeam(data.messageId, data.ownerUuid, data.label);
+      break;
+    }
+    // AR: an area an effect places on the map (a Region)
+    case "placeArea": {
+      const scene = game.scenes.get(data.sceneId);
+      if ( scene && data.data ) await scene.createEmbeddedDocuments("Region", [data.data], { keepId: true });
+      break;
+    }
+    case "createGoop": {
+      const doc = await fromUuid(data.ownerUuid).catch(() => null);
+      const owner = (doc?.documentName === "Token") ? doc.actor : doc;
+      if ( owner ) { const N = await import("./combat/minions.mjs"); await N.createGoop(owner); }
+      break;
+    }
+    // F14 the Avatar takes the Character's place (combat/avatar.mjs)
+    case "switchAvatar": {
+      const AV = await import("./combat/avatar.mjs");
+      await AV.doSwitch(data.actorUuid, data.avatarUuid);
+      break;
+    }
+    case "createDuplicate": {
+      const doc = await fromUuid(data.ownerUuid).catch(() => null);
+      const owner = (doc?.documentName === "Token") ? doc.actor : doc;
+      if ( owner ) { const N = await import("./combat/minions.mjs"); await N.createDuplicate(owner, data); }
+      break;
+    }
+    case "removeMinions": {
+      const N = await import("./combat/minions.mjs");
+      await N.removeMinions(data.uuids ?? []);
+      break;
+    }
+    case "createMinion": {
+      const doc = await fromUuid(data.ownerUuid).catch(() => null);
+      const owner = (doc?.documentName === "Token") ? doc.actor : doc;
+      if ( owner ) { const N = await import("./combat/minions.mjs"); await N.createMinion(owner, data); }
+      break;
+    }
+    case "glassSoldiers": {
+      const doc = await fromUuid(data.ownerUuid).catch(() => null);
+      const owner = (doc?.documentName === "Token") ? doc.actor : doc;
+      if ( owner ) { const F = await import("./canvas/features.mjs"); await F.createGlassSoldiers(owner, data.n); }
+      break;
+    }
+    case "removeFeature": {
+      const t = await fromUuid(data.uuid).catch(() => null);
+      if ( t ) await t.delete();
+      break;
+    }
+    case "removeArea": {
+      const r = await fromUuid(data.uuid).catch(() => null);
+      if ( r ) await r.delete();
+      break;
+    }
+    // E2: a document the user cannot change (a Combatant's initiative, another token)
+    case "swapAttackTarget": {
+      const A = await import("./combat/attack.mjs");
+      await A.swapAttackTarget(data.messageId, data.fromUuid, data.toUuid);
+      break;
+    }
+    case "useLimit": {
+      const doc = await fromUuid(data.actorUuid).catch(() => null);
+      const a = (doc?.documentName === "Token") ? doc.actor : doc;
+      if ( a ) { const T = await import("./combat/triggers.mjs"); await T.useTriggerLimit(a, { limit: data.limit }, data.key); }
+      break;
+    }
+    // CB: an Opponent's effect turns the Strike Roll's Critical Result into a Botch Result
+    case "attackCritToBotch": {
+      const A = await import("./combat/attack.mjs");
+      await A.critToBotchOnMessage(data.messageId, data);
       break;
     }
     case "attackKnockback": {

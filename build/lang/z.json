@@ -1,0 +1,38 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Roll": {
+        "Pressure": "Pressure Check"
+      },
+      "Pressure": {
+        "Auto": "Sucesso automático (efeito)."
+      },
+      "Trigger": {
+        "EventLabel": {
+          "pressureCheck": "Quando você faz um Pressure Check"
+        },
+        "Event": {
+          "pressureCheck": "Pressure Check — {name}"
+        }
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Roll": {
+        "Pressure": "Pressure Check"
+      },
+      "Pressure": {
+        "Auto": "Automatic success (an effect)."
+      },
+      "Trigger": {
+        "EventLabel": {
+          "pressureCheck": "When you make a Pressure Check"
+        },
+        "Event": {
+          "pressureCheck": "Pressure Check — {name}"
+        }
+      }
+    }
+  }
+}

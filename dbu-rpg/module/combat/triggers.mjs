@@ -2,7 +2,7 @@ import { DBU } from "../config.mjs";
 import { evaluate, rollExpression, test } from "../rules/formula.mjs";
 import { postInfoCard } from "../dice/roller.mjs";
 import { changeStacks, setStacks } from "./stacks.mjs";
-import { awakeningSlug, stackChoiceCount } from "../rules/awakening.mjs";
+import { awakeningSlug, possessedAwakenings, stackChoiceCount } from "../rules/awakening.mjs";
 import { twinnedOff } from "../rules/modifiers.mjs";
 import { fxForcedOn, fxPiece } from "../rules/fx.mjs";
 import { allocTotal, resourceSlug } from "../rules/resources.mjs";
@@ -77,6 +77,8 @@ function whoListOf(t, actor, other, scope = {}) {
   }
   // J: every Opponent of your encounter (within `range`)
   if ( t.target === "opponents" ) return opponentsInRange(actor, t.range);
+  // F12 "targets": every Character the clicking user targets (a Cone's Opponents)
+  if ( t.target === "targets" ) return [...new Set([...(game.user?.targets ?? [])].map(x => x.actor).filter(a => a && (a !== actor)))];
   if ( (t.target === "allies") || (t.target === "team") ) {
     const list = alliesInRange(actor, t.range);
     return (t.target === "team") ? [actor, ...list] : list;
@@ -84,7 +86,7 @@ function whoListOf(t, actor, other, scope = {}) {
   const who = whoOf(t, actor, other);
   return who ? [who] : [];
 }
-const manyTargets = t => ["allies", "team", "opponents"].includes(t.target);
+const manyTargets = t => ["allies", "team", "opponents", "targets"].includes(t.target);
 
 /**
  * Gather the active turn/round triggers of an actor for one event. `itemId`: the Transformation the event is about (the
@@ -101,7 +103,7 @@ export function collectTriggers(actor, event, { itemId = null, alsoActive = null
     if ( !s?.triggers?.length ) continue;
     // (Q alsoActive: the Transformations a Defeat just left, for the "threshold" event of that Defeat)
     const active = (s.isActive ?? true) || ((event === "revert") && (item.id === itemId)) || !!alsoActive?.includes(item.id);
-    const ctx = (item.type === "transformation") ? s.formulaContext : {};
+    const ctx = (item.type === "transformation") ? s.formulaContext : ((item.type === "uniqueAbility") ? uaContext(s) : {});
     for ( let t of s.triggers ) {
       if ( twinnedOff(item, t) ) continue;
       if ( t.fx && fx ) {
@@ -132,10 +134,22 @@ export function collectTriggers(actor, event, { itemId = null, alsoActive = null
   // ignored ("ignoreState.<state>.<n>")
   for ( const st of DBU.stateTriggers ?? [] ) {
     if ( (st.event !== event) || stateEffectIgnoredNow(actor, st.state, st.n) ) continue;
+    // (BB: only the States the actor is in, but the "stateLeave" ones: that State was just left)
+    if ( (event !== "stateLeave") && !((actor.system?._effectiveStates?.[st.state] ?? actor.system?.states?.[st.state] ?? 0) > 0) ) continue;
     list.push({ effect: "message", value: "", resource: "", condition: "", mode: "auto", duration: "none", target: "self", limit: "",
       ...st, label: `${L(`DBU.State.${st.state}`)} (${st.n})`, source: L(`DBU.State.${st.state}`), active: true, ctx: {}, copy: 0 });
   }
+  // BB Spectator (5): in the Spectator State only its own start-of-turn / start-of-round effects run
+  if ( ["startOfTurn", "startOfRound"].includes(event) && ((actor.system?._effectiveStates?.spectator ?? actor.system?.states?.spectator ?? 0) > 0)
+    && !stateEffectIgnoredNow(actor, "spectator", 5) ) return list.filter(t => t.state === "spectator");
   return list;
+}
+
+/** UA: the Advancements owned and the Restrictions applied of a Unique Ability: { adv: {<slug>: 1}, restr: {<slug>: 1} }. */
+function uaContext(s) {
+  const slug = n => String(n ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  return { adv: Object.fromEntries((s.advancements ?? []).filter(a => a.owned).map(a => [slug(a.name), 1])),
+    restr: Object.fromEntries((s.restrictions ?? []).filter(r => r.applied).map(r => [slug(r.name), 1])) };
 }
 
 /** Is that built-in effect of a State ignored now ("ignoreState.<state>.<n>" modifiers, summed by rules/derived.mjs)? */
@@ -169,7 +183,7 @@ function fireManeuverWatch(actor, event, scope) {
   if ( event === "maneuverUsed" ) slug = Object.keys(scope).find(k => k.startsWith("via_") && scope[k])?.slice(4) ?? "";
   if ( !slug ) return;
   const kind = {};
-  for ( const k of ["oos", "ua", "god", "villainous", "special", "standard", "instant", "counterManeuver", "modifierManeuver"] ) {
+  for ( const k of ["oos", "ua", "god", "villainous", "special", "standard", "instant", "counterManeuver", "modifierManeuver", "actionCost"] ) {
     if ( k in scope ) kind[k] = Number(scope[k]) || 0;
   }
   if ( event !== "maneuverUsed" ) Object.assign(kind, { standard: 1, oos: actor._dbuOutOfSequence ? 1 : 0 });
@@ -177,7 +191,9 @@ function fireManeuverWatch(actor, event, scope) {
     if ( !e.ally && !e.opponent ) continue;
     const ev = e.opponent ? "opponentManeuver" : "allyManeuver";
     if ( !collectTriggers(e.actor, ev).length ) continue;
-    fireEvent(e.actor, ev, { other: actor, scope: { [`by_${slug}`]: 1, distance: e.distance, ...kind } });
+    // (F12 @targetsMe: the user of that Maneuver targets you)
+    const targetsMe = [...(game.user?.targets ?? [])].some(t => t.actor === e.actor) ? 1 : 0;
+    fireEvent(e.actor, ev, { other: actor, scope: { [`by_${slug}`]: 1, distance: e.distance, targetsMe, ...kind } });
   }
 }
 
@@ -186,7 +202,7 @@ export function fireEvent(actor, event, { other = null, scope = {} } = {}) {
     try { fireManeuverWatch(actor, event, scope); } catch(err) { console.error("DBU | maneuver watch", err); }
   }
   // E1: an attack that damaged someone is also an event of the Allies ("allyHit" / "allyDamaged")
-  if ( ["attackHit", "damaged", "attackMade", "powerUp", "surge", "targeted"].includes(event) ) {
+  if ( ["attackHit", "damaged", "attackMade", "powerUp", "surge", "targeted", "exploitTriggered", "inflict", "wasHit"].includes(event) ) {
     try { fireAllyEvents(actor, event, other, scope); } catch(err) { console.error("DBU | ally events", err); }
   }
   // D1 @viaFx.<ref>: the events of a Maneuver used through a "maneuver" button of that effect
@@ -220,6 +236,18 @@ export async function runEventTriggers(actor, event, { other = null, scope = {},
   // B4: one roll / check per rollKey in this firing; the ask triggers with a roll or a check, grouped by rollKey
   const rolls = new Map();
   const rolledButtons = new Map();
+  // Z: the pieces of one firing that share a limitKey count it once (the first one counts it, the others follow it)
+  const firedKeys = new Set();
+  const sharedKey = t => !blank(t.limitKey);
+  // (PA: a per-attack key sees the event's attack)
+  const atkOf = (t, key) => ((perAttackKey(key) && scope.messageId) ? { ...t, attackId: scope.messageId } : t);
+  const usesLeftNow = (t, key) => (sharedKey(t) && firedKeys.has(key)) || triggerUsesLeft(actor, atkOf(t, key), key);
+  const spendLimitNow = async (t, key) => {
+    if ( sharedKey(t) && firedKeys.has(key) ) return true;
+    const ok = await useTriggerLimit(actor, atkOf(t, key), key);
+    if ( ok && sharedKey(t) ) firedKeys.add(key);
+    return ok;
+  };
   // K: the rolls and checks made against each Character of a many-target trigger
   const perTarget = new Map();
   const rollsOf = w => perTarget.get(w.uuid) ?? perTarget.set(w.uuid, new Map()).get(w.uuid);
@@ -235,13 +263,13 @@ export async function runEventTriggers(actor, event, { other = null, scope = {},
     const rolled = !blank(t.roll) || !blank(t.check);
     if ( !rolled && !test(t.condition, sc) ) continue;
     const whos = whoListOf(t, actor, other, scope);
-    const who = whos[0];
+    let who = whos[0];
     if ( !who ) continue;
     const label = t.label || t.source;
     const limitKey = triggerLimitKey(t);
     // K: an automatic trigger with a roll or a check that goes to several Characters makes it against each of them
     if ( rolled && !button && manyTargets(t) ) {
-      if ( !triggerUsesLeft(actor, t, limitKey) ) continue;
+      if ( !usesLeftNow(t, limitKey) ) continue;
       let plan = null;
       if ( !blank(t.cost) ) {
         plan = triggerCostPlan(actor, t.cost, sc);
@@ -250,7 +278,7 @@ export async function runEventTriggers(actor, event, { other = null, scope = {},
           continue;
         }
       }
-      if ( !(await useTriggerLimit(actor, t, limitKey)) ) continue;
+      if ( !(await spendLimitNow(t, limitKey)) ) continue;
       const paid = plan ? await payTriggerCost(actor, plan, {}) : "";
       if ( paid ) lines.push(`${label}: ${L("DBU.Trigger.Paid", { cost: paid })}`);
       if ( readsVs([t]) || /clash:/i.test(String(t.check ?? "")) ) await versusModule();
@@ -266,23 +294,27 @@ export async function runEventTriggers(actor, event, { other = null, scope = {},
           continue;
         }
         const valueW = ["state", "condition"].includes(t.effect) && !t.value ? 1 : evaluate(t.value, scW);
+        // (CS2: the Ally who took that Clash on itself gets its effect)
+        const wT = scW.redirectTo ? (await actorOfUuid(scW.redirectTo) ?? w) : w;
         const optsW = { duration: baseDuration(t.duration), ...rawOf(t.duration), event, label, itemId: t.itemId ?? null,
-          ...timedOptions(actor, w, t.duration), ...effectOptions(actor, w, t, event, scope) };
-        const text = await applyOn(actor, w, t, valueW, withInflictor(actor, w, t, event, optsW));
-        if ( text ) lines.push(`${label} → ${w.name}: ${text}`);
+          ...timedOptions(actor, wT, t.duration), ...effectOptions(actor, wT, t, event, scope) };
+        const text = await applyOn(actor, wT, t, valueW, withInflictor(actor, wT, t, event, optsW));
+        if ( text ) lines.push(`${label} → ${wT.name}: ${text}`);
       }
       continue;
     }
     // A roll / check of an automatic trigger is made now (before its condition is tested for good)
     if ( rolled && !button ) {
-      if ( !triggerUsesLeft(actor, t, limitKey) ) continue;
+      if ( !usesLeftNow(t, limitKey) ) continue;
       sc = await rollAndCheck(actor, t, sc, { other, rolls, label, lines });
       if ( !sc ) continue;
+      // (CS2: the Ally who took that Clash on itself instead of the event's other one gets its effect)
+      if ( sc.redirectTo && other && (who?.uuid === other.uuid) ) who = (await actorOfUuid(sc.redirectTo)) ?? who;
     }
     // (Y: a "targeted" button whose condition reads @vs: tested when it is clicked, against the clicking user's target)
     else if ( rolled && !(((t.target === "targeted") && /@vs[A-Za-z]*\./.test(String(t.condition ?? ""))) || maybeHolds(t, sc)) ) continue;
     if ( ((t.effect === "message") && !(button && rolled)) || (t.mode === "remind") ) {
-      if ( !(await useTriggerLimit(actor, t, limitKey)) ) continue;
+      if ( !(await spendLimitNow(t, limitKey)) ) continue;
       lines.push(`${label}${t.value && (t.effect === "message") ? `: ${t.value}` : ""}`);
       continue;
     }
@@ -290,10 +322,10 @@ export async function runEventTriggers(actor, event, { other = null, scope = {},
     const options = { duration: baseDuration(t.duration), ...rawOf(t.duration), event, label, itemId: t.itemId ?? null, ...timedOptions(actor, who, t.duration),
       ...effectOptions(actor, who, t, event, scope) };
     // P: an attack Maneuver of the event's effect targets the event's other Character (combat/triggers.mjs targetOther)
-    if ( (t.effect === "maneuver") && other?.uuid ) options.otherUuid = other.uuid;
+    if ( ["maneuver", "cancelAttack", "moveOther", "teleport", "provoke"].includes(t.effect) && other?.uuid ) options.otherUuid = other.uuid;
     // An amount to pick ("up to M stacks") needs the player: a chat button
     if ( button ) {
-      if ( !triggerUsesLeft(actor, t, limitKey) ) continue;
+      if ( !usesLeftNow(t, limitKey) ) continue;
       const btnScope = { round: combat?.round ?? 0, ...scope, ...own };
       // B4: the ask triggers sharing a rollKey are ONE button that rolls (or checks) when clicked; B3: the ones sharing a
       // group are ONE button that applies them all; G2: one for every Ally ("allies" / "team")
@@ -314,14 +346,14 @@ export async function runEventTriggers(actor, event, { other = null, scope = {},
     // An automatic trigger with a cost pays it when it can
     let plan = null;
     if ( !blank(t.cost) ) {
-      if ( !triggerUsesLeft(actor, t, limitKey) ) continue;
+      if ( !usesLeftNow(t, limitKey) ) continue;
       plan = triggerCostPlan(actor, t.cost, sc);
       if ( plan.problems.length ) {
         lines.push(`${label}: ${L("DBU.Trigger.CantPay", { why: plan.problems.join(" ") })}`);
         continue;
       }
     }
-    if ( !(await useTriggerLimit(actor, t, limitKey)) ) continue;
+    if ( !(await spendLimitNow(t, limitKey)) ) continue;
     const paid = plan ? await payTriggerCost(actor, plan, options.resEvent ? { resEvent: true } : {}) : "";
     // G2: the same effect on every Character of "allies" / "team" (each one's own timing)
     for ( const [k, w] of whos.entries() ) {
@@ -332,9 +364,28 @@ export async function runEventTriggers(actor, event, { other = null, scope = {},
     }
   }
   for ( const g of rolledButtons.values() ) buttons.push(rolledButton(actor, g));
+  // LT: a [Triggered/Defeated] effect happens when you would have been Defeated (the Undying State's 2nd effect): when
+  // the Defeat's own triggers leave you standing, the Forms and Enhancements that Defeat ended are kept
+  if ( (event === "threshold") && scope.defeatForms?.length && !manyOnly ) {
+    const kept = await keepDefeatForms(actor, scope.defeatForms).catch(err => { console.error("DBU | Defeat forms", err); return ""; });
+    if ( kept ) lines.push(kept);
+  }
   if ( lines.length || buttons.length ) {
     await postInfoCard({ actor, title: L(`DBU.Trigger.Event.${event}`, { name: actor.name }), lines, buttons });
   }
+}
+
+/**
+ * LT: the Defeat's triggers brought the Life Points back above 0 (Undying entered, "set your Life Points to 1"...): the
+ * Transformations that Defeat left become active again (no Stress Test, no "transform" event: they were never left).
+ * @returns {Promise<string>} the card line, "" when nothing comes back
+ */
+export async function keepDefeatForms(actor, ids = []) {
+  if ( !actor?.isOwner || !((actor.system?.life?.value ?? 0) > 0) ) return "";
+  const back = ids.map(id => actor.items.get(id)).filter(i => i && (i.type === "transformation") && !i.system.isActive);
+  if ( !back.length ) return "";
+  await actor.updateEmbeddedDocuments("Item", back.map(i => ({ _id: i.id, "system.active": true })), { dbuSource: "defeatKept" });
+  return L("DBU.Trigger.DefeatFormsKept", { list: back.map(i => i.name).join(", ") });
 }
 
 /**
@@ -351,10 +402,28 @@ function effectOptions(actor, who, t, event, scope = {}) {
   }
   if ( ["mark", "unmark"].includes(t.effect) ) out.markerUuid = actor.uuid;
   // M2: the attack of the event, for "attackWound"
-  if ( (t.effect === "attackWound") && scope.messageId ) out.messageId = scope.messageId;
+  if ( ["attackWound", "woundAdd", "woundCategory", "critToBotch", "attackSoak", "redefend", "cancelAttack", "attackMissTeam", "absorbAttack"].includes(t.effect) && scope.messageId ) out.messageId = scope.messageId;
+  // PD: who drains (Power Drain: the KP the target loses go to its user)
+  if ( t.effect === "powerDrain" ) out.drainer = actor.uuid;
+  // E2: whose turn moves (actAfter), who swaps places (swapTarget: the attack's card too), which Maneuver is copied
+  if ( t.effect === "actAfter" ) out.actAfterOf = actor.uuid;
+  if ( t.effect === "swapTarget" ) { out.swapFrom = actor.uuid; if ( scope.messageId ) out.messageId = scope.messageId; }
+  if ( t.effect === "copyManeuver" ) out.copySlug = Object.keys(scope).find(k => k.startsWith("by_") && scope[k])?.slice(3) ?? "";
+  // F14 recordCopy: the Character of the event (an Absorbed Character, the Grappled)
+  if ( t.effect === "recordCopy" ) out.copySlug = String(scope.copyName ?? "");
+  // F16 borrowApparel: the Absorbed Character and the Awakening of the event
+  if ( t.effect === "borrowApparel" ) { out.copySlug = String(scope.copyName ?? ""); out.awakeningId = scope.itemId ?? null; }
+  // AG: the row of that attack (wasHit / allyWasHit)
+  if ( ["attackSoak", "redefend"].includes(t.effect) && (scope.targetIndex !== undefined) ) out.targetIndex = scope.targetIndex;
+  // GS: whose Glass Feature next to it is destroyed (Glass Combat: the one hit)
+  if ( t.effect === "destroyFeature" ) out.otherUuid = (event === "allyWasHit") ? (scope.allyUuid ?? null) : actor.uuid;
   if ( (t.effect === "maneuver") && !blank(t.with) ) out.with = String(t.with);
   if ( ["resourceGain", "resourceSpend"].includes(event) ) out.resEvent = true;
   if ( event === "stateLeave" ) out.noLeave = true;
+  // LT: an effect of the Defeat's own triggers (a button too) keeps the Forms that Defeat left when it leaves you standing
+  if ( (event === "threshold") && scope.defeatForms?.length ) out.defeatForms = scope.defeatForms;
+  // FK: a [Triggered/Defeated] effect of yours (a "threshold" trigger on @defeated, its button too) was triggered
+  if ( (event === "threshold") && (Number(scope.defeated) === 1) && /@defeated\b/.test(String(t.condition ?? "")) ) out.onDefeat = actor.uuid;
   if ( (event === "markPlaced") && scope.markKey && (who !== actor) ) out.withMark = scope.markKey;
   // A mark placed by a "markPlaced" trigger does not fire it again
   if ( (event === "markPlaced") && (t.effect === "mark") ) out.quietMark = true;
@@ -362,7 +431,11 @@ function effectOptions(actor, who, t, event, scope = {}) {
 }
 
 /** G2: an automatic effect on a Character this client may not change goes through the GM (as a clicked button does). */
-async function applyOn(actor, who, t, value, options) {
+export async function applyOn(actor, who, t, value, options) {
+  // RE "flag.noKiLossFromOthers": another Character's effect cannot reduce its Ki Points
+  if ( (who !== actor) && (t.effect === "ki") && (Number(value) < 0) && ((who.system?.buckets?.["flag.noKiLossFromOthers"]?.total ?? 0) > 0) ) {
+    return L("DBU.Block.KiWard", { name: who.name });
+  }
   if ( (who === actor) || who.isOwner || ["mark", "unmark"].includes(t.effect) ) return applyTriggerEffect(who, t.effect, value, t.resource, options);
   if ( emitGM("applyTrigger", { uuid: who.uuid, effect: t.effect, value, resource: t.resource, options }) ) {
     return describeEffect(t.effect, value, t.resource, options.duration);
@@ -394,6 +467,8 @@ const useSlugs = name => [...new Set([viaSlug(name), awakeningSlug(name)])].filt
 export function itemUseScope(actor, item, extra = {}) {
   const s = item?.system ?? {};
   const scope = { [`via_${viaSlug(item?.name)}`]: 1, oos: actor?._dbuOutOfSequence ? 1 : 0 };
+  // (CS1 @tag_<tag>: the tags an effect gave the item: Racial Technique)
+  for ( const tag of Object.keys(item?.flags?.["dbu-rpg"]?.tags ?? {}) ) scope[`tag_${tag}`] = 1;
   if ( item?.type === "item" ) {
     const details = String(s.details ?? "");
     Object.assign(scope, { consumable: /consumable/i.test(details) ? 1 : 0, food: /food/i.test(details) ? 1 : 0,
@@ -441,6 +516,11 @@ export async function noteItemUse(actor, item, extra = {}) {
   if ( !actor || !item ) return;
   try { await recordItemUse(actor, item); } catch(err) { console.warn("DBU | maneuverUses", err); }
   const event = (item.type === "item") ? "itemUsed" : "maneuverUsed";
+  // (CS3 @kpBase: its Ki Point Cost before a tag makes it free: Racial Technique 3)
+  if ( (event === "maneuverUsed") && (extra.kpBase === undefined) ) {
+    try { const UC = await import("./use-costs.mjs"); extra = { ...extra, kpBase: UC.useCostOf(actor, item, { ignoreTagFree: true })?.kp ?? 0 }; }
+    catch(err) { /* no cost known */ }
+  }
   fireEvent(actor, event, { other: (event === "maneuverUsed") ? currentTarget(actor) : null, scope: itemUseScope(actor, item, extra) });
   // S: the Maneuvers only their item uses (Arrogant Declaration, Terrain Lift, Ride) provoke the Exploit
   if ( item.type === "maneuver" ) await (await import("../rules/exploit.mjs")).provokeByItem(actor, item).catch(err => console.error("DBU | exploit", err));
@@ -484,6 +564,9 @@ export function alliesOf(actor) {
 }
 
 const isMinionActor = a => ((a?.type === "npc") && (a.system?.npcType === "minion")) ? 1 : 0;
+/** MO: is `a` a Minion of `leader` (@allyMyMinion)? */
+const isMinionOfActor = (a, leader) => (isMinionActor(a) && !!a.system?.minionOf
+  && [leader?.uuid, leader?.id ? `Actor.${leader.id}` : null, leader?.baseActor?.uuid].includes(a.system.minionOf)) ? 1 : 0;
 /** G2 @allyDistance: Squares between you and the Ally of the event (99 when unknown). */
 function allyDistance(me, ally) {
   try { return encounterOthers(me).find(o => o.actor?.uuid === ally?.uuid)?.distance ?? 99; }
@@ -503,7 +586,7 @@ function marksOn(marker, target) {
  * a Minion) and @allyMark.<slug>; @vs is worked out for the Ally.
  */
 const ALLY_EVENT = { attackHit: "allyHit", damaged: "allyDamaged", attackMade: "allyAttack", powerUp: "allyPowerUp", surge: "allySurge",
-  targeted: "allyTargeted" };
+  targeted: "allyTargeted", exploitTriggered: "allyExploitTriggered", inflict: "allyInflict", wasHit: "allyWasHit" };
 function fireAllyEvents(actor, event, other, scope = {}) {
   if ( !actor?.system ) return;
   const hit = event === "attackHit";
@@ -519,12 +602,15 @@ function fireAllyEvents(actor, event, other, scope = {}) {
   for ( const ally of alliesOf(actor) ) {
     if ( other && (ally.uuid === other.uuid) ) continue;
     // "allyHit" / "allyAttack": the target is an Opponent of that Ally
-    if ( (hit || (["attackMade", "targeted"].includes(event) && other)) && (dispositionOf(other.uuid) === dispositionOf(ally.uuid)) ) continue;
+    if ( (hit || (["attackMade", "targeted", "exploitTriggered", "inflict"].includes(event) && other)) && (dispositionOf(other.uuid) === dispositionOf(ally.uuid)) ) continue;
     const triggers = collectTriggers(ally, ev);
     if ( !triggers.length ) continue;
     // G2 allyUuid: the Ally of the event (trigger target "ally")
-    const extra = { allyMinion: isMinionActor(actor), allyMark: marksOn(ally, actor), allyUuid: actor.uuid,
-      allyDistance: allyDistance(ally, actor) };
+    const extra = { allyMinion: isMinionActor(actor), allyMyMinion: isMinionOfActor(actor, ally), allyMark: marksOn(ally, actor), allyUuid: actor.uuid,
+      allyHasAwk: possessedAwakenings(actor),
+      allyDistance: allyDistance(ally, actor),
+      // GS: a Glass Feature next to that Ally (Glass Combat)
+      allyNextToGlassFeature: actor.system?.rollData?.nextToGlassFeature ?? 0, allyGlassFeatureHV: actor.system?.rollData?.glassFeatureHV ?? 0 };
     if ( !hit ) extra.allyBelow = actor.system.health?.count ?? 0;
     fireEvent(ally, ev, { other: opponent, scope: { ...base, ...extra, ...versusVars(ally, opponent, triggers) } });
   }
@@ -580,7 +666,11 @@ export function parseCheck(check) {
   const s = String(check ?? "").trim();
   let m;
   if ( (m = /^steadfast(?::\s*([+-]?\d+))?$/i.exec(s)) ) return { kind: "steadfast", mod: Number(m[1] ?? 0) };
+  // Z: "pressure" / "pressure:+1": a Pressure Check (actor.rollPressure)
+  if ( (m = /^pressure(?::\s*([+-]?\d+))?$/i.exec(s)) ) return { kind: "pressure", mod: Number(m[1] ?? 0) };
   if ( (m = /^(save|skill)\.(\w+):\s*(\d+)$/i.exec(s)) ) return { kind: m[1].toLowerCase(), key: m[2], tn: Number(m[3]) };
+  // F11 "clash:grapple": a Grapple Check (Strike vs Strike/Dodge, with the clash.grapple pieces)
+  if ( /^clash:\s*grapple$/i.test(s) ) return { kind: "clash", mine: "strike", theirs: "dodge|strike", grapple: true };
   if ( (m = /^clash:\s*([\w|]+)(?:\s+vs\s+([\w|]+))?$/i.exec(s)) ) return { kind: "clash", mine: m[1], theirs: m[2] ?? m[1] };
   return null;
 }
@@ -605,11 +695,16 @@ async function rollClashSide(actor, spec) {
  * or a Clash against `other` (combat/clash.mjs resolveClash; ties go to the Defender).
  * @returns {Promise<{total: number, success: boolean, margin: number}|null>}  null when it cannot be made
  */
-export async function runCheck(actor, check, other = null, { label = "", via = "" } = {}) {
+export async function runCheck(actor, check, other = null, { label = "", via = "", scope = {} } = {}) {
   const spec = parseCheck(check);
   if ( !spec ) return null;
   const ok = (r, total, tn) => !!(r?.forceSuccess || ((typeof r?.success === "boolean") ? r.success : (total >= tn)));
   switch ( spec.kind ) {
+    case "pressure": {
+      const r = await actor.rollPressure({ label, bonus: spec.mod, other });
+      const total = Number(r?.total ?? 0);
+      return { total, success: !!r?.success, margin: total - 4 };
+    }
     case "steadfast": {
       const r = await actor.rollSteadfast({ penalty: spec.mod });
       const total = Number(r?.total ?? 0);
@@ -628,9 +723,11 @@ export async function runCheck(actor, check, other = null, { label = "", via = "
       let C = null;
       try { C = await import("./clash.mjs"); } catch(err) { C = null; }
       if ( typeof C?.resolveClash === "function" ) {
-        const r = await C.resolveClash(actor, other, { mine: spec.mine, theirs: spec.theirs, label, ...(via ? { via } : {}) });
+        const r = await C.resolveClash(actor, other, { mine: spec.mine, theirs: spec.theirs, label, ...(via ? { via } : {}),
+          ...(spec.grapple ? { grapple: true } : {}), ...(Object.keys(scope ?? {}).length ? { scope } : {}) });
         if ( !r ) return null;
-        return { total: Number(r.mine ?? 0), success: !!r.won, margin: Number(r.margin ?? ((r.mine ?? 0) - (r.theirs ?? 0))) };
+        return { total: Number(r.mine ?? 0), success: !!r.won, margin: Number(r.margin ?? ((r.mine ?? 0) - (r.theirs ?? 0))),
+          ...(r.redirectTo ? { redirectTo: r.redirectTo } : {}) };
       }
       const mine = await rollClashSide(actor, spec.mine);
       const theirs = await rollClashSide(other, spec.theirs);
@@ -650,9 +747,22 @@ async function sharedRoll(actor, t, rolls, label, lines, scope = null) {
     // "1d6(bT)", "2d4(T) + 1(T)": the Tier of Power scaling is worked out first (rules/formula.mjs)
     const data = { ...(actor.system.rollData ?? {}), ...(scope ?? {}) };
     const expr = /\((?:b)?T\)/.test(formula) ? rollExpression(formula, data) : formula;
-    const roll = await new Roll(expr, data).evaluate();
-    const first = roll.dice?.[0]?.results?.find(r => r.active !== false)?.result;
+    let roll = await new Roll(expr, data).evaluate();
+    let first = roll.dice?.[0]?.results?.find(r => r.active !== false)?.result;
     vars = { roll: Number(roll.total) || 0, rollNatural: Number(first ?? roll.total) || 0 };
+    // F15 "triggerRoll" (@rollKey_<key>): the owner may roll it again once (reroll pieces: their cost and limit); the new
+    // result stands
+    if ( !blank(t.rollKey) ) {
+      try {
+        const RX = await import("./reactions.mjs");
+        if ( await RX.triggerRollReroll(actor, String(t.rollKey).trim(), vars, label) ) {
+          await roll.toMessage?.({ speaker: ChatMessage.getSpeaker({ actor }), flavor: `${label} (${L("DBU.F15.Rerolled")})` });
+          roll = await new Roll(expr, data).evaluate();
+          first = roll.dice?.[0]?.results?.find(r => r.active !== false)?.result;
+          vars = { roll: Number(roll.total) || 0, rollNatural: Number(first ?? roll.total) || 0 };
+        }
+      } catch(err) { console.warn("DBU | trigger roll reroll", err); }
+    }
     await roll.toMessage?.({ speaker: ChatMessage.getSpeaker({ actor }), flavor: label });
   } catch(err) {
     console.warn(`DBU | Could not roll "${formula}"`, err);
@@ -663,7 +773,7 @@ async function sharedRoll(actor, t, rolls, label, lines, scope = null) {
 }
 
 /** The check of a trigger, made once per rollKey and check in `rolls`. */
-async function sharedCheck(actor, t, other, rolls, label, lines) {
+async function sharedCheck(actor, t, other, rolls, label, lines, sc = {}) {
   const check = String(t.check).trim();
   const key = `check|${blank(t.rollKey) ? `${t.source}|${t.label}|${t.effect}|${t.resource}` : String(t.rollKey).trim()}|${check}`;
   if ( rolls.has(key) ) return rolls.get(key);
@@ -672,7 +782,10 @@ async function sharedCheck(actor, t, other, rolls, label, lines) {
   const item = t.itemId ? actor.items?.get?.(t.itemId) : null;
   let via = "";
   if ( item ) { try { via = (await import("./clash.mjs")).viaOfItem(item); } catch(err) { via = ""; } }
-  try { c = await runCheck(actor, check, other, { label, via }); }
+  // (CS4: the event's attack facts reach the Clash pieces: @aoe, @charges, @powerShot, @alliesTargeted, @alliesTargetedMight)
+  const evScope = Object.fromEntries(["aoe", "charges", "powerShot", "alliesTargeted", "alliesTargetedMight"]
+    .filter(k => sc?.[k] !== undefined).map(k => [k, sc[k]]));
+  try { c = await runCheck(actor, check, other, { label, via, scope: evScope }); }
   catch(err) { console.warn(`DBU | Could not make the check "${check}"`, err); }
   if ( !c ) lines?.push(`${label}: ${L("DBU.Trigger.CheckNone", { check })}`);
   else lines?.push(L(c.success ? "DBU.Trigger.CheckPassed" : "DBU.Trigger.CheckFailed", { label, check, total: c.total }));
@@ -691,9 +804,9 @@ async function rollAndCheck(actor, t, sc, { other = null, rolls, label, lines })
   if ( !blank(t.check) ) {
     // With the roll known, a condition that cannot hold for any result of the check decides first (no check for nothing)
     if ( !mayHold(t.condition, scope, CHECK_VARS) ) return null;
-    const c = await sharedCheck(actor, t, other, rolls, label, lines);
+    const c = await sharedCheck(actor, t, other, rolls, label, lines, sc);
     if ( !c ) return null;
-    scope = { ...scope, checkTotal: c.total, checkSuccess: c.success ? 1 : 0, margin: c.margin };
+    scope = { ...scope, checkTotal: c.total, checkSuccess: c.success ? 1 : 0, margin: c.margin, ...(c.redirectTo ? { redirectTo: c.redirectTo } : {}) };
     if ( c.success === (String(t.onCheck ?? "").trim().toLowerCase() === "fail") ) return null;
   }
   return test(t.condition, scope) ? scope : null;
@@ -806,11 +919,15 @@ export async function applyRolledTrigger(actor, p, { other = null, n = 1 } = {})
       who = await fromUuid(item.targetUuid);
       if ( who?.documentName === "Token" ) who = who.actor;
     }
+    // (CS2: the Ally who took the Clash on itself gets the effect meant for the Character it stood in for)
+    if ( check?.redirectTo && who && other && (who.uuid === other.uuid) ) who = (await actorOfUuid(check.redirectTo)) ?? who;
     if ( !who ) { lines.push(`${label}: ${L("DBU.TraitUse.NoTarget")}`); continue; }
     const value = ["state", "condition"].includes(item.effect) && blank(item.formula) ? 1 : evaluate(item.formula, sc);
     const options = { ...(item.options ?? {}), ...((item.target === "targeted") ? timedOptions(actor, who, item.options?.rawDuration ?? item.options?.duration) : {}) };
     // (not on an "inflict" event: its own Conditions never fire it again)
     if ( (item.effect === "condition") && (who !== actor) && (options.event !== "inflict") ) options.inflictor = actor.uuid;
+    // (Z: your own Compelled from a button against another Character is toward that one: Noble Dragon)
+    else if ( (item.effect === "condition") && (who === actor) && other && /^compelled$/i.test(String(item.resource ?? "")) ) options.inflictor = other.uuid;
     let text = "";
     if ( who.isOwner || ["mark", "unmark"].includes(item.effect) ) text = await applyTriggerEffect(who, item.effect, value, item.resource, options);
     else if ( emitGM("applyTrigger", { uuid: who.uuid, effect: item.effect, value, resource: item.resource, options }) ) {
@@ -819,6 +936,12 @@ export async function applyRolledTrigger(actor, p, { other = null, n = 1 } = {})
     if ( text ) lines.push(`${who !== actor ? `${who.name}: ` : ""}${text}`);
   }
   return lines;
+}
+
+/** The actor of a uuid (a token's actor), or null. */
+async function actorOfUuid(uuid) {
+  const d = await Promise.resolve(fromUuid(uuid)).catch(() => null);
+  return (d?.documentName === "Token") ? d.actor : (d ?? null);
 }
 
 /** The Character the user targets (not the actor itself), or null. */
@@ -832,6 +955,11 @@ export function currentTarget(actor) {
  */
 function timedOptions(source, who, duration) {
   if ( THEIR[duration] ) return {};
+  // SW3 "endOfThisTurn": until the end of the turn going on now, whoever's it is (a Counter Maneuver's duration)
+  if ( duration === "endOfThisTurn" ) {
+    const cur = encounterOf(source)?.combatant?.actor;
+    return cur ? { timedDuration: "endOfSourceTurn", source: cur.uuid, skip: 0 } : {};
+  }
   if ( !who || (who === source) || !["endOfTurn", "endOfNextTurn", "startOfNextTurn"].includes(duration) ) return {};
   if ( duration === "startOfNextTurn" ) return { timedDuration: "startOfSourceTurn", source: source.uuid, skip: 0 };
   const myTurn = encounterOf(source)?.combatant?.actor?.uuid === source.uuid;
@@ -844,9 +972,9 @@ export { timedOptions as timedOptionsFor };
  * but always with the turns of the Character who gets the effect (an Ally's "until the end of its next turn").
  */
 const THEIR = { endOfTheirTurn: "endOfTurn", endOfTheirNextTurn: "endOfNextTurn", startOfTheirNextTurn: "startOfNextTurn" };
-export const baseDuration = d => THEIR[d] ?? d ?? "none";
+export const baseDuration = d => THEIR[d] ?? ((d === "endOfThisTurn") ? "endOfTurn" : d) ?? "none";
 /** The duration as written, kept on a button only when it differs from its base one (the click works the timing out). */
-const rawOf = d => (THEIR[d] ? { rawDuration: d } : {});
+const rawOf = d => ((THEIR[d] || (d === "endOfThisTurn")) ? { rawDuration: d } : {});
 
 /** The key a trigger's uses are counted under: its limitKey (shared by every trigger with it), or the trigger itself. */
 export const triggerLimitKey = t => (String(t.limitKey ?? "").trim() || [t.source, t.label, t.event, t.effect, t.resource].join("|"));
@@ -920,13 +1048,34 @@ function usesIn(u, combat, per) {
 export function triggerLimits(actor, t, key = triggerLimitKey(t)) {
   const combat = encounterOf(actor);
   if ( !combat || blank(t.limit) ) return [];
-  const limits = parseLimits(t.limit, { ...(actor.system.rollData ?? {}), ...(t.ctx ?? {}) });
-  const u = actor.getFlag("dbu-rpg", "triggerUses")?.[flagKey(key)];
-  return limits.map(l => ({ ...l, used: usesIn(u, combat, l.per) }));
+  const data = { ...(actor.system.rollData ?? {}), ...(t.ctx ?? {}) };
+  // (CS3 "<n>/<per>@<key>": that part counts under a key of its own, shared by other effects: Killer Instinct 2)
+  const out = [];
+  for ( const part of splitTop(t.limit) ) {
+    const m = /^(.*?)@\s*([\w-]+)\s*$/.exec(part.trim());
+    const own = m ? m[2] : key;
+    const u = actor.getFlag("dbu-rpg", "triggerUses")?.[flagKey(own)];
+    for ( const l of parseLimits(m ? m[1] : part, data) ) out.push({ ...l, key: own, used: usesIn(u, combat, l.per) });
+  }
+  return out;
+}
+
+/** PA: a limit key "attack:<name>" counts once per attack: after its first use for an attack, the others are free. */
+export const perAttackKey = key => /^attack:/i.test(String(key ?? ""));
+/** PA "+after:<key>": the per-attack key another use of that attack must already have (Telepathic Warning 3 after 2). */
+export const afterKeyOf = key => (/\+after:(.+)$/.exec(String(key ?? ""))?.[1] ?? "").trim();
+
+/** PA: was this per-attack key already counted (and paid) for that attack (its card's message id) in this combat? */
+export function sameAttackUse(actor, key, attackId) {
+  if ( !attackId || !perAttackKey(key) ) return false;
+  const combat = encounterOf(actor);
+  const u = actor?.getFlag?.("dbu-rpg", "triggerUses")?.[flagKey(key)];
+  return !!(combat && u && (u.combat === combat.id) && (u.atk === attackId));
 }
 
 /** Uses left of a limited trigger in the current combat (unlimited outside of combat). */
 export function triggerUsesLeft(actor, t, key = triggerLimitKey(t)) {
+  if ( sameAttackUse(actor, key, t?.attackId) ) return true;
   return triggerLimits(actor, t, key).every(l => l.used < l.max);
 }
 
@@ -934,14 +1083,21 @@ export function triggerUsesLeft(actor, t, key = triggerLimitKey(t)) {
 export async function useTriggerLimit(actor, t, key = triggerLimitKey(t)) {
   const limits = triggerLimits(actor, t, key);
   if ( !limits.length ) return true;
+  // (PA: a per-attack key already counted for this attack)
+  if ( sameAttackUse(actor, key, t?.attackId) ) return true;
   if ( !limits.every(l => l.used < l.max) ) return false;
   const combat = encounterOf(actor);
-  const k = flagKey(key);
-  const u = actor.getFlag("dbu-rpg", "triggerUses")?.[k];
-  const next = { combat: combat.id, round: combat.round, turn: combat.turn };
-  for ( const [per, field] of Object.entries(WINDOW_FIELD) ) next[field] = usesIn(u, combat, per) + 1;
-  next.n = next[WINDOW_FIELD[limits[0].per]];
-  await actor.update({ [`flags.dbu-rpg.triggerUses.${k}`]: next });
+  const update = {};
+  for ( const own of [...new Set(limits.map(l => l.key ?? key))] ) {
+    const k = flagKey(own);
+    const u = actor.getFlag("dbu-rpg", "triggerUses")?.[k];
+    const next = { combat: combat.id, round: combat.round, turn: combat.turn };
+    if ( perAttackKey(own) && t?.attackId ) next.atk = t.attackId;
+    for ( const [per, field] of Object.entries(WINDOW_FIELD) ) next[field] = usesIn(u, combat, per) + 1;
+    next.n = next[WINDOW_FIELD[(limits.find(l => (l.key ?? key) === own) ?? limits[0]).per]];
+    update[`flags.dbu-rpg.triggerUses.${k}`] = next;
+  }
+  await actor.update(update);
   return true;
 }
 
@@ -956,8 +1112,23 @@ const COST_KINDS = { ki: "ki", kp: "ki", life: "life", lp: "life", dkp: "dkp", c
   // V: Life Points paid "safely": the Health Thresholds this loss crosses pass their Steadfast Checks and give no
   // Reduced Momentum
   safelife: "safelife", safelp: "safelife",
+  // T29: Life Points paid whose Health Thresholds give no Reduced Momentum (their Steadfast Checks are still rolled)
+  nmlife: "nmlife", nmlp: "nmlife",
   // L: Adversary Actions (only an Adversary with One-Man Army has them: its Counter Actions)
-  aa: "aa", adversaryactions: "aa" };
+  aa: "aa", adversaryactions: "aa",
+  // MD: Karma Points (a new Majin-Dama)
+  karma: "karma",
+  // WJ: Life Points of the Battle Jacket you pilot (an NPC "battleJacket" whose Leader / Owner is you)
+  jacket: "jacket", jacketlp: "jacket" };
+
+/** WJ: the Battle Jacket an actor pilots (an NPC of type battleJacket whose minionOf is that actor), or null. */
+export function jacketOf(actor) {
+  const ids = [actor?.uuid, actor?.token?.uuid, actor?.token?.actor?.uuid].filter(Boolean);
+  if ( !ids.length ) return null;
+  const mine = a => (a?.type === "npc") && (a.system?.npcType === "battleJacket") && ids.includes(a.system?.minionOf);
+  for ( const t of globalThis.canvas?.scene?.tokens ?? [] ) if ( mine(t.actor) ) return t.actor;
+  return globalThis.game?.actors?.find?.(mine) ?? null;
+}
 
 /** "ki:2(bT); counters:1; res:Battle Born:all" → [{ kind, amount, name }] (amount: a formula, "all" for a resource). */
 export function parseCost(cost) {
@@ -991,7 +1162,15 @@ export function costPlan(actor, entries) {
   for ( const { cost, data = {} } of entries ) {
     for ( const c of parseCost(cost) ) {
       if ( c.kind === "res" ) {
-        const r = (sys.resources ?? []).find(x => resourceSlug(x.name) === resourceSlug(c.name));
+        let r = (sys.resources ?? []).find(x => resourceSlug(x.name) === resourceSlug(c.name));
+        // (F8 Dragon of Light 1: Positive Energy spent as Negative Energy)
+        if ( (resourceSlug(c.name) === "negativeenergy") && !(r && (stacksOf(r) > 0)) && (actor.items ?? []).some(i => (i.type === "racialTrait") && /^dragon of light$/i.test(i.name)) ) {
+          r = (sys.resources ?? []).find(x => resourceSlug(x.name) === "positiveenergy") ?? r;
+        }
+        // (F6 Konatsian-Raised 2: Inherited Tension spent as if it was Tension, when there is no Tension to pay with)
+        if ( (resourceSlug(c.name) === "tension") && !(r && (stacksOf(r) > 0)) && (actor.items ?? []).some(i => (i.type === "racialTrait") && /^konatsian-raised$/i.test(i.name)) ) {
+          r = (sys.resources ?? []).find(x => resourceSlug(x.name) === "inheritedtension") ?? r;
+        }
         const have = r ? stacksOf(r) : 0;
         const all = /^all$/i.test(c.amount);
         const n = all ? have : Math.max(0, evaluate(c.amount, data));
@@ -1007,7 +1186,7 @@ export function costPlan(actor, entries) {
         need.counters = (need.counters ?? 0) + Math.max(0, evaluate(c.amount, data));
         continue;
       }
-      if ( !["ki", "life", "safelife", "dkp", "capacity", "counters", "actions", "power", "charges"].includes(c.kind) ) {
+      if ( !["ki", "life", "safelife", "nmlife", "dkp", "capacity", "counters", "actions", "power", "charges", "karma", "jacket"].includes(c.kind) ) {
         problems.push(`${c.kind}?`);
         continue;
       }
@@ -1017,6 +1196,8 @@ export function costPlan(actor, entries) {
   const fighting = !!encounterOf(actor);
   if ( !fighting ) { delete need.actions; delete need.counters; }
   const check = (what, n, have) => { if ( n > have ) problems.push(L("DBU.Trigger.CostNeed", { what, need: n, have })); };
+  // (F13 "flag.noCounterManeuver": no Counter Action may be spent now: Inherited Freedom)
+  if ( need.counters && ((sys.buckets?.["flag.noCounterManeuver"]?.total ?? 0) > 0) ) problems.push(L("DBU.F13.NoCounterManeuver", { name: actor.name }));
   const noCapacity = ignoresCapacity(actor);
   const divine = !!(sys.dkp?.usable && sys.dkp.prefer);
   let capacity = need.capacity ?? 0;
@@ -1035,19 +1216,26 @@ export function costPlan(actor, entries) {
   const dkpTotal = (need.dkp ?? 0) + ((need.kiPool === "dkp") ? need.kiPaid : 0);
   if ( kpFromKi ) check("KP", kpFromKi, sys.ki?.value ?? 0);
   if ( dkpTotal ) check("DKP", dkpTotal, sys.dkp?.value ?? 0);
-  if ( need.life || need.safelife ) check("LP", (need.life ?? 0) + (need.safelife ?? 0), sys.life?.value ?? 0);
+  if ( need.life || need.safelife || need.nmlife ) check("LP", (need.life ?? 0) + (need.safelife ?? 0) + (need.nmlife ?? 0), sys.life?.value ?? 0);
   if ( capacity ) check(L("DBU.Capacity"), capacity, sys.capacity?.value ?? 0);
   if ( need.counters ) check("Counter", need.counters, sys.combat?.counters ?? 0);
   if ( need.actions ) check(L("DBU.Actions"), need.actions, sys.combat?.actions ?? 0);
   if ( need.power ) check("Power", need.power, sys.combat?.power ?? 0);
   if ( need.charges ) check("Energy Charges", need.charges, sys.combat?.energyCharges ?? 0);
+  if ( need.karma ) check("Karma", need.karma, sys.karma?.value ?? 0);
+  if ( need.jacket ) {
+    const j = jacketOf(actor);
+    if ( !j ) problems.push(L("DBU.Trigger.NoJacket"));
+    else check(L("DBU.Trigger.JacketLp"), need.jacket, j.system?.life?.value ?? 0);
+  }
   for ( const r of res ) if ( !r.all ) check(r.name, r.n, r.have);
   const text = [
     need.ki ? `${need.ki} ${divine ? "DKP" : "KP"}` : "", need.dkp ? `${need.dkp} DKP` : "", need.life ? `${need.life} LP` : "",
-    need.safelife ? `${need.safelife} LP` : "",
+    need.safelife ? `${need.safelife} LP` : "", need.nmlife ? `${need.nmlife} LP` : "",
     need.capacity ? `${need.capacity} ${L("DBU.Capacity")}` : "", need.counters ? `${need.counters} Counter` : "",
     need.actions ? `${need.actions} ${L("DBU.Actions")}` : "", need.power ? `${need.power} Power` : "",
-    need.charges ? `${need.charges} Energy Charge(s)` : "", ...res.filter(r => r.n).map(r => `${r.n} ${r.name}`)
+    need.charges ? `${need.charges} Energy Charge(s)` : "", need.karma ? `${need.karma} Karma` : "",
+    need.jacket ? `${need.jacket} ${L("DBU.Trigger.JacketLp")}` : "", ...res.filter(r => r.n).map(r => `${r.n} ${r.name}`)
   ].filter(Boolean).join(", ");
   return { problems, need, res, text, empty: !text };
 }
@@ -1074,13 +1262,17 @@ export async function payTriggerCost(actor, plan, { resEvent = false } = {}) {
     const from = updates["system.dkp.value"] ?? sys.dkp?.value ?? 0;
     updates["system.dkp.value"] = Math.max(0, from - need.dkp);
   }
-  if ( need.life || need.safelife ) updates["system.life.value"] = (sys.life?.value ?? 0) - (need.life ?? 0) - (need.safelife ?? 0);
+  if ( need.life || need.safelife || need.nmlife ) {
+    updates["system.life.value"] = (sys.life?.value ?? 0) - (need.life ?? 0) - (need.safelife ?? 0) - (need.nmlife ?? 0);
+  }
   if ( need.capacityTotal ) updates["system.capacity.value"] = Math.max(0, (sys.capacity?.value ?? 0) - need.capacityTotal);
   if ( need.counters ) updates["system.combat.counters"] = Math.max(0, (sys.combat?.counters ?? 0) - need.counters);
   if ( need.actions ) updates["system.combat.actions"] = Math.max(0, (sys.combat?.actions ?? 0) - need.actions);
   if ( need.charges ) updates["system.combat.energyCharges"] = Math.max(0, (sys.combat?.energyCharges ?? 0) - need.charges);
+  if ( need.karma ) updates["system.karma.value"] = Math.max(0, (sys.karma?.value ?? 0) - need.karma);
   // (V: only "safelife" LP: a safe loss; with "life" LP too, the usual self-inflicted loss)
-  const lifeVia = need.life ? { dbuSelfInflicted: true } : (need.safelife ? { dbuSelfInflicted: true, dbuSafeLoss: true } : {});
+  const lifeVia = need.life ? { dbuSelfInflicted: true } : (need.safelife ? { dbuSelfInflicted: true, dbuSafeLoss: true }
+    : (need.nmlife ? { dbuSelfInflicted: true, dbuNoMomentum: true } : {}));
   if ( !foundry.utils.isEmpty(updates) ) await actor.update(updates, { ...lifeVia, ...via });
   // Power: its timers go with it (and a lower Max Capacity lowers the Capacity)
   if ( need.power ) {
@@ -1090,6 +1282,11 @@ export async function payTriggerCost(actor, plan, { resEvent = false } = {}) {
   }
   // Split resources (Battle Born) lose the stacks not placed yet first, then from the Combat Roll with the most
   for ( const r of plan.res ) if ( r.n > 0 ) await changeStacks(actor, r.name, -r.n, { via: "cost", resEvent });
+  // WJ: the Battle Jacket's Life Points (through the GM when you do not own its sheet)
+  if ( need.jacket ) {
+    const j = jacketOf(actor);
+    if ( j ) { const { runOps } = await import("./movement.mjs"); await runOps([{ op: "life", uuid: j.uuid, amount: need.jacket }]); }
+  }
   return plan.text;
 }
 
@@ -1232,6 +1429,8 @@ function askButton(actor, t, { who = actor, value, options, limitKey = null, sco
   const targeted = t.target === "targeted";
   if ( limits ) {
     Object.assign(payload, { targetUuid: (who !== actor) && !targeted ? who.uuid : null, limitKey: t.limit ? limitKey : null, limit: t.limit || null });
+    // PA: a per-attack limit counts (and pays) once for the event's attack
+    if ( t.limit && perAttackKey(limitKey) && data.messageId ) payload.attackId = data.messageId;
     // A limit that is a formula ("M/Encounter") is worked out again with the Transformation's variables
     if ( t.limit && !plainLimit(t.limit) ) payload.ctx = t.ctx ?? {};
   }
@@ -1269,6 +1468,8 @@ export async function runTriggers(actor, event, { round = 0, turn = 0 } = {}) {
   const blocked = new Set();
   const rolls = new Map();
   const rolledButtons = new Map();
+  // Z: the pieces of one firing that share a limitKey count it once
+  const firedKeys = new Set();
   // D: the ones that go to several Characters ("allies" / "team" / "opponents") run like the other events' triggers
   if ( triggers.some(manyTargets) ) await runEventTriggers(actor, event, { scope: { turn, even: (round % 2 === 0) ? 1 : 0 }, manyOnly: true });
   for ( const t of triggers ) {
@@ -1285,11 +1486,12 @@ export async function runTriggers(actor, event, { round = 0, turn = 0 } = {}) {
       if ( !scope ) continue;
     }
     else if ( rolled && !maybeHolds(t, scope) ) continue;
-    if ( (t.effect === "message") || (t.mode === "remind") ) {
+    // (Z: a message with a check / a roll and mode ask is a button, as in runEventTriggers)
+    if ( ((t.effect === "message") && !(button && rolled)) || (t.mode === "remind") ) {
       lines.push(`${label}${t.value && (t.effect === "message") ? `: ${t.value}` : ""}`);
       continue;
     }
-    const value = ["state", "condition"].includes(t.effect) && !t.value ? 1 : evaluate(t.value, scope);
+    const value = (t.effect === "message") ? 0 : (["state", "condition"].includes(t.effect) && !t.value ? 1 : evaluate(t.value, scope));
     const options = { duration: baseDuration(t.duration), ...rawOf(t.duration), event, label, itemId: t.itemId ?? null, ...effectOptions(actor, actor, t, event) };
     // Its limit ("[Triggered/Start of Turn, 1/Encounter]"): a button only while uses are left, counted when clicked. The
     // copies of a per-Stack choice follow their first one (the limit counts once)
@@ -1322,7 +1524,9 @@ export async function runTriggers(actor, event, { round = 0, turn = 0 } = {}) {
         continue;
       }
     }
-    if ( !e.t.copy && !(await useTriggerLimit(actor, e.t, e.limitKey)) ) continue;
+    const sharedHit = !blank(e.t.limitKey) && firedKeys.has(e.limitKey);
+    if ( !e.t.copy && !sharedHit && !(await useTriggerLimit(actor, e.t, e.limitKey)) ) continue;
+    if ( !blank(e.t.limitKey) ) firedKeys.add(e.limitKey);
     if ( !blank(e.cost) ) paid = await payTriggerCost(actor, triggerCostPlan(actor, e.cost, e.data));
     const text = await applyTriggerEffect(actor, e.effect, e.value, e.resource, e.options);
     if ( text || paid ) lines.push(`${e.label}: ${[text, paid ? L("DBU.Trigger.Paid", { cost: paid }) : ""].filter(Boolean).join(" · ")}`);
@@ -1514,6 +1718,8 @@ export async function useTrait(actor, key) {
     }
     const options = { duration: baseDuration(t.duration), ...rawOf(t.duration), event: "use", label: g.label, itemId: t.itemId ?? null,
       ...timedOptions(actor, who, t.duration), ...effectOptions(actor, who, t, "use"), ...withInflictor(actor, who, t, "use", {}) };
+    // (PL: whom a move / teleport of yours goes to: your target)
+    if ( ["moveOther", "teleport"].includes(t.effect) && other?.uuid ) options.otherUuid = other.uuid;
     let text = "";
     const resource = picked.get(t) ?? t.resource;
     // A mark lives on the marker (you): it never needs the marked Character's owner
@@ -1526,8 +1732,9 @@ export async function useTrait(actor, key) {
   }
   await postInfoCard({ actor, title: g.label, subtitle: L("DBU.Trigger.Event.use", { name: actor.name }), lines });
   for ( const { t, value } of later ) {
+    // (F11: the effect it comes from, so the events of that Maneuver see @viaFx.<ref>)
     await applyTriggerEffect(actor, t.effect, value, t.resource, { event: "use", label: g.label, itemId: t.itemId ?? null,
-      ...(blank(t.with) ? {} : { with: String(t.with) }) });
+      ...(blank(t.with) ? {} : { with: String(t.with) }), ...(blank(t.fx) ? {} : { fx: String(t.fx) }) });
   }
   return true;
 }
@@ -1628,6 +1835,8 @@ function describeEffect(effect, value, resource, duration = "none") {
     case "counters": return `${sign} Counter`;
     case "holdingBack": return `${sign} Holding Back`;
     case "attackWound": return `${sign} Wound (${L("DBU.Trigger.TheAttack")})`;
+    case "woundAdd": return /charge/i.test(String(resource ?? "")) ? `${sign} Energy Charge (${L("DBU.Trigger.TheAttack")})` : `${sign} Wound (${L("DBU.Trigger.TheAttack")})`;
+    case "woundCategory": return /lethal/i.test(String(resource ?? "")) ? `Lethal (${L("DBU.Trigger.TheAttack")})` : `${sign} ${L("DBU.Trigger.DamageCategory")} (${L("DBU.Trigger.TheAttack")})`;
     case "resourcePick": return L("DBU.Trigger.PickShort", { what: String(resource ?? "").split("|").map(x => x.trim()).filter(Boolean).join(" / ") });
     case "holdingBackSet": return `Holding Back = ${value}`;
     case "legend": return L("DBU.Legend.Effect", { what: String(resource ?? "").trim() || L("DBU.Legend.CurrentForm") });
@@ -1647,6 +1856,63 @@ function describeEffect(effect, value, resource, duration = "none") {
     case "mark": return L("DBU.Marks.Effect", { mark: String(resource ?? "").trim().replace(/\+$/, "").trim() }) + until;
     case "unmark": return L("DBU.Marks.Unmark", { mark: String(resource ?? "").trim().replace(/\+$/, "").trim() });
     case "removeCondition": return L("DBU.Trigger.RemoveConditionShort", { what: removeConditionLabel(resource), n: value || L("DBU.Trigger.AllStacks") });
+    case "steadfastPass": return L("DBU.Trigger.SteadfastPassShort");
+    case "critToBotch": return L("DBU.Trigger.CritToBotchShort");
+    case "attackSoak": {
+      const k = String(resource || "soak").toLowerCase();
+      return L({ dr: "DBU.Trigger.AttackDrShort", damage: "DBU.Trigger.AttackLessShort", none: "DBU.Trigger.AttackNoneShort" }[k] ?? "DBU.Trigger.AttackSoakShort", { n: value });
+    }
+    case "redefend": return L("DBU.Trigger.RedefendShort");
+    case "attackMissTeam": return L("DBU.Trigger.MissTeamShort");
+    case "createItem": return L("DBU.Trigger.CreateItemShort", { name: resource });
+    case "glassSoldiers": return L("DBU.Trigger.GlassSoldiersShort", { n: value });
+    case "soldierTurn": return L("DBU.Trigger.SoldierTurnShort");
+    case "destroyFeature": return L("DBU.Trigger.DestroyFeatureShort");
+    case "originFromFeature": return L("DBU.Trigger.OriginFromFeatureShort");
+    case "moveOther": return L("DBU.Trigger.MoveOtherShort", { n: value });
+    case "maxLifeLoss": return L("DBU.Trigger.MaxLifeLossShort", { n: value });
+    case "createMinion": return L("DBU.Trigger.CreateMinionShort");
+    case "createGoop": return L("DBU.Trigger.CreateGoopShort");
+    case "createDuplicate": return L("DBU.Trigger.CreateDuplicateShort");
+    case "integrateItem": return L("DBU.Trigger.IntegrateItemShort");
+    case "traitSwitch": return L(value > 0 ? "DBU.Trigger.TraitOnShort" : "DBU.Trigger.TraitOffShort", { what: String(resource ?? "").replace(/^(pick|all):/i, "") }) + until;
+    case "destroyIntegrated": return L("DBU.Trigger.DestroyIntegratedShort");
+    case "compelRandom": return L("DBU.Trigger.CompelRandomShort", { n: value });
+    case "reabsorbGoops": return L("DBU.Trigger.ReabsorbGoopsShort", { n: value > 0 ? value : "∞" });
+    case "launchOther": return L("DBU.Trigger.LaunchOtherShort");
+    case "consumeMinions": return L("DBU.Trigger.ConsumeMinionsShort");
+    case "tempItem": return L("DBU.Trigger.TempItemShort");
+    case "recordCopy": return L("DBU.Trigger.RecordCopyShort", { what: String(resource ?? "").split(":")[0] });
+    case "lifeLostAs": return L("DBU.Trigger.LifeLostAsShort", { n: value });
+    case "borrowApparel": return L("DBU.Trigger.BorrowApparelShort");
+    case "initiativeShift": return L(/^set$/i.test(String(resource ?? "")) ? "DBU.Trigger.InitiativeSetShort" : "DBU.Trigger.InitiativeShiftShort", { n: value });
+    case "tempGrant": return /^pick:/i.test(String(resource ?? "")) ? L("DBU.Trigger.TempPickShort", { n: String(resource).split(":")[2] ?? "" })
+      : L("DBU.Trigger.TempGrantShort", { name: String(resource ?? "").split(":")[1] ?? "" });
+    case "extendTimed": return L("DBU.Trigger.ExtendTimedShort", { what: resource || "dot" });
+    case "rerollInitiative": return L("DBU.Trigger.RerollInitShort");
+    case "awakeningLose": return L("DBU.Trigger.AwakeningLoseShort", { name: resource });
+    case "absorbManeuver": return L(/^goop$/i.test(String(resource ?? "")) ? "DBU.Trigger.AbsorbGoopShort" : "DBU.Trigger.AbsorbShort2");
+    case "copyStack": return L("DBU.Trigger.CopyStackShort", { what: String(resource ?? "").split("|")[0] });
+    case "switchAvatar": return L("DBU.Trigger.SwitchAvatarShort");
+    case "storeItems": return L("DBU.Trigger.StoreItemsShort");
+    case "takeStored": return L("DBU.Trigger.TakeStoredShort");
+    case "storeWeaponOf": return L("DBU.Trigger.StoreWeaponShort");
+    case "consumeLight": return L("DBU.Trigger.ConsumeLightShort", { what: resource || "Light" });
+    case "weaponQualities": return L(value > 0 ? "DBU.Trigger.QualitiesAddShort" : "DBU.Trigger.QualitiesRemoveShort", { what: resource });
+    case "tagItem": return L("DBU.Trigger.TagItemShort");
+    case "teleport": if ( /^nexttotarget$/i.test(String(resource ?? "")) ) return L("DBU.Trigger.TeleportNextShort");
+      if ( /^nearpicked$/i.test(String(resource ?? "")) ) return L("DBU.Trigger.TeleportFeatureShort", { n: value });
+      return L(value > 0 ? "DBU.Trigger.TeleportNearShort" : "DBU.Trigger.TeleportShort", { n: value,
+      who: L(`DBU.Trigger.TeleportWho.${["other", "target"].includes(String(resource || "").toLowerCase()) ? String(resource).toLowerCase() : "self"}`) });
+    case "placeArea": return L("DBU.Trigger.PlaceAreaShort", { name: resource, n: value });
+    case "actAfter": return L("DBU.Trigger.ActAfterShort");
+    case "swapTarget": return L("DBU.Trigger.SwapTargetShort");
+    case "copyManeuver": return L("DBU.Trigger.CopyManeuverShort");
+    case "powerDrain": return L("DBU.Trigger.PowerDrainShort", { n: value });
+    case "absorbAttack": return L("DBU.Trigger.AbsorbShort");
+    case "cancelAttack": return L("DBU.Trigger.CancelAttackShort");
+    case "equip": return L("DBU.Trigger.EquipShort", { name: resource });
+    case "unequip": return L("DBU.Trigger.UnequipShort", { name: resource });
     case "leaveState": {
       const key = statusKey("state", resource);
       return L("DBU.Trigger.LeaveStateShort", { what: key ? statusLabel("state", key) : resource });
@@ -1672,19 +1938,34 @@ function describeEffect(effect, value, resource, duration = "none") {
  * States and Combat Conditions can be timed: they are reverted by {@link expireTimed} when their duration ends.
  */
 export async function applyTriggerEffect(actor, effect, value, resource = "", options = {}) {
-  const text = await applyEffect(actor, effect, value, resource, options);
+  let text = await applyEffect(actor, effect, value, resource, options);
+  // FK: triggering a [Triggered/Defeated] effect of yours: Born for Battle's Temporary Zenkai (once per encounter)
+  if ( options.onDefeat && (effect !== "message") ) {
+    try {
+      const owner = (options.onDefeat === actor.uuid) ? actor : await fromUuid(options.onDefeat);
+      if ( owner ) { const AW = await import("./awakening.mjs"); await AW.bornForBattle(owner); }
+    } catch(err) { console.error("DBU | Born for Battle", err); }
+  }
+  // LT: this effect of the Defeat's triggers left you standing: the Forms that Defeat left are kept
+  if ( options.defeatForms?.length && (effect !== "message") ) {
+    const kept = await keepDefeatForms(actor, options.defeatForms).catch(err => { console.error("DBU | Defeat forms", err); return ""; });
+    if ( kept ) text = [text, kept].filter(Boolean).join(" · ");
+  }
   // D1 "fxUsed": a piece of that effect was applied (not the reminders, nor the effects of an fxUsed trigger)
   if ( options.fx && options.fxOwner && (effect !== "message") ) {
     let owner = (options.fxOwner === actor.uuid) ? actor : await Promise.resolve(fromUuid(options.fxOwner)).catch(() => null);
     if ( owner?.documentName === "Token" ) owner = owner.actor;
-    if ( owner ) fireEvent(owner, "fxUsed", { other: (owner === actor) ? null : actor, scope: { fxUsed: { [options.fx]: 1 } } });
+    // (LT: the Forms a Defeat left still run their "fxUsed" triggers of that Defeat's effects)
+    if ( owner ) fireEvent(owner, "fxUsed", { other: (owner === actor) ? null : actor, scope: { fxUsed: { [options.fx]: 1 },
+      ...(options.defeatForms?.length ? { defeatForms: options.defeatForms } : {}) } });
   }
   return text;
 }
 
 async function applyEffect(actor, effect, value, resource = "", { duration = "none", event = "", label = "",
   timedDuration = null, source = null, skip = null, itemId = null, markerUuid = null, inflictor = null, resEvent = false,
-  noLeave = false, withMark = null, quietMark = false, with: withSpec = "", fx = "", messageId = null, otherUuid = null } = {}) {
+  noLeave = false, withMark = null, quietMark = false, with: withSpec = "", fx = "", messageId = null, otherUuid = null, rawDuration = null,
+  fxOwner = null, targetIndex = null, drainer = null, actAfterOf = null, swapFrom = null, copySlug = null, awakeningId = null } = {}) {
   const sys = actor.system;
   const updates = {};
   // B2: what an effect changes fires the resource events (@viaTrigger), except inside a resource event (no loop)
@@ -1693,11 +1974,21 @@ async function applyEffect(actor, effect, value, resource = "", { duration = "no
     case "life": {
       // Life Points that cannot be regained (losing them still works)
       if ( (value > 0) && sys.flags?.noLifeRegain ) return L("DBU.Trigger.NoLifeRegain");
-      const next = Math.min(sys.life.max, sys.life.value + value);
+      // F1 "flag.noTraitLifeRegain": none from the effects of your own Traits (Racial Traits, Transformations)
+      if ( (value > 0) && ((sys.buckets?.["flag.noTraitLifeRegain"]?.total ?? 0) > 0) && itemId
+        && ["racialTrait", "transformation"].includes(actor.items?.get?.(itemId)?.type) ) return L("DBU.Trigger.NoTraitLifeRegain");
+      let next = Math.min(sys.life.cap ?? sys.life.max, sys.life.value + value);
+      // RD "flag.lifeOneAtFloor": below 0 LP, an effect that would leave 1 LP leaves 1 above −lifeFloor
+      if ( (next === 1) && (sys.life.value < 0) && ((sys.buckets?.["flag.lifeOneAtFloor"]?.total ?? 0) > 0) ) next = 1 - (sys.lifeFloor ?? 0);
       if ( next === sys.life.value ) return "";
-      updates["system.life.value"] = (sys._effectiveStates?.undying > 0) ? next : Math.max(0, next);
+      // (RC: Life Points may go down to −lifeFloor)
+      updates["system.life.value"] = (sys._effectiveStates?.undying > 0) ? next : Math.max(-(sys.lifeFloor ?? 0), next);
       // V: resource "safe": a loss whose Health Thresholds pass their Steadfast Checks and give no Reduced Momentum
       if ( (value < 0) && /\bsafe\b/i.test(String(resource ?? "")) ) via.dbuSafeLoss = true;
+      // (T29 resource "noMomentum": the Health Thresholds of this loss give no Reduced Momentum, their Checks are rolled)
+      if ( (value < 0) && /\bnomomentum\b/i.test(String(resource ?? "")) ) via.dbuNoMomentum = true;
+      // RE resource "silent": you cannot trigger effects in response to this loss (its Defeat included)
+      if ( (value < 0) && /\bsilent\b/i.test(String(resource ?? "")) ) via.dbuSilentDefeat = true;
       break;
     }
     // Divine Ki Points: regained or spent, between 0 and the Divine Ki maximum
@@ -1709,7 +2000,7 @@ async function applyEffect(actor, effect, value, resource = "", { duration = "no
       return describeEffect(effect, next - before, resource);
     }
     case "ki": {
-      const next = Math.clamp(sys.ki.value + value, 0, sys.ki.max);
+      const next = Math.clamp(sys.ki.value + value, 0, sys.ki.cap ?? sys.ki.max);
       if ( next === sys.ki.value ) return "";
       updates["system.ki.value"] = next;
       break;
@@ -1726,6 +2017,571 @@ async function applyEffect(actor, effect, value, resource = "", { duration = "no
       if ( !messageId ) return "";
       const A = await import("./attack.mjs");
       return (await A.addAttackWound(messageId, label, value)) ? describeEffect("attackWound", value, resource) : "";
+    }
+    // AA: the Wound Roll already made ("woundRolled"): + value, or + value Energy Charges' dice (resource "charge")
+    case "woundAdd": {
+      if ( !messageId ) return "";
+      const A = await import("./attack.mjs");
+      const charge = /charge/i.test(String(resource ?? ""));
+      const crit = /crit/i.test(String(resource ?? ""));
+      return A.bumpStoredWound(messageId, charge ? { charges: value, label } : (crit ? { crits: value || 1, label } : { add: value, label }));
+    }
+    // PD powerDrain (on the Grappled): per Action (value), LP and KP down by 1/2 (rounded up) of the drainer's Might; the
+    // drainer regains the KP lost (none when another Character's effects cannot reduce its KP: Energy Core)
+    case "powerDrain": {
+      const d = drainer ? await actorOfUuid(drainer) : null;
+      const n = Math.max(1, Math.floor(Number(value) || 1));
+      const amount = Math.ceil((Number(d?.system?.aptitudes?.might) || 0) / 2) * n;
+      if ( !(amount > 0) ) return "";
+      const ward = (sys.buckets?.["flag.noKiLossFromOthers"]?.total ?? 0) > 0;
+      const kiLost = ward ? 0 : Math.min(sys.ki?.value ?? 0, amount);
+      await actor.update({ "system.life.value": (sys.life?.value ?? 0) - amount, "system.ki.value": (sys.ki?.value ?? 0) - kiLost },
+        { dbuSource: "trigger" });
+      if ( d && kiLost ) {
+        const { safeUpdate } = await import("../socket.mjs");
+        await safeUpdate(d, { "system.ki.value": Math.min(d.system.ki?.max ?? Infinity, (d.system.ki?.value ?? 0) + kiLost) });
+      }
+      return L(ward ? "DBU.Drain.Warded" : "DBU.Drain.Done", { name: actor.name, n: amount, ki: kiLost, by: d?.name ?? "" });
+    }
+    // PD absorbAttack ("dodged" after a Parry): the attack's Urgent Wound Roll, 1/2 of it back as KP
+    case "absorbAttack": {
+      if ( !messageId ) return "";
+      const A = await import("./attack.mjs");
+      // F11 resource: a resource gaining 1(bT) per 1/5 of your Maximum KP regained (Light Consumption's Light), from an
+      // attack of any Foundation, with no Power Up offered
+      const stackName = String(resource ?? "").trim();
+      const out = {};
+      const text = await A.absorbAttackOn(messageId, actor, { label, ...(stackName ? { any: true, noPowerUp: true } : {}), out });
+      if ( !stackName || !(out.gained > 0) ) return text;
+      const step = Math.max(1, Math.ceil((sys.ki?.max ?? 0) / 5));
+      const n = Math.floor(out.gained / step) * Math.max(1, Number(sys.top?.base ?? 1) || 1);
+      if ( !n ) return text;
+      const more = await changeStacks(actor, stackName, n, { label, via: "trigger", resEvent });
+      return [text, more].filter(Boolean).join(" ");
+    }
+    // F11 launchOther (the other Character: the attacker you Parried...): the Launch Maneuver Out-of-Sequence against
+    // it, as if you were Grappling it
+    case "launchOther": {
+      const other = otherUuid ? await actorOfUuid(otherUuid) : null;
+      if ( !other || (other === actor) ) return L("DBU.TraitUse.NoTarget");
+      const G = await import("./grapple.mjs");
+      actor._dbuOutOfSequence = true;
+      try { await G.launch(actor, { against: other }); }
+      finally { actor._dbuOutOfSequence = false; }
+      return "";
+    }
+    // F11 tagItem (resource "<item type>:<tag>"): one of your items of that type, picked, carries the tag
+    // (flags.dbu-rpg.tags.<tag>; one item at a time): "kpCost.tag.<tag>" pieces change its Ki Point Cost
+    case "tagItem": {
+      const [type, tagRaw = ""] = String(resource ?? "").split(":").map(x => x.trim());
+      const tag = awakeningSlug(tagRaw);
+      if ( !type || !tag ) return "";
+      const items = actor.items.filter(i => i.type === type);
+      if ( !items.length ) return L("DBU.Tag.None");
+      const current = items.find(i => i.flags?.["dbu-rpg"]?.tags?.[tag]);
+      const opts = items.map(i => `<option value="${i.id}" ${(i === current) ? "selected" : ""}>${foundry.utils.escapeHTML(i.name)}</option>`).join("");
+      const id = await DialogV2.wait({ window: { title: label || L("DBU.Tag.Title") },
+        content: `<div class="dbu-dialog"><p>${L("DBU.Tag.Pick")}</p><select name="id">${opts}</select></div>`,
+        buttons: [{ action: "ok", label: L("DBU.Choice.Confirm"), default: true, callback: (e, b) => b.form.elements.id.value },
+          { action: "cancel", label: L("Cancel") }], rejectClose: false });
+      const item = (id && (id !== "cancel")) ? actor.items.get(id) : null;
+      if ( !item ) return "";
+      for ( const i of items ) if ( (i !== item) && i.flags?.["dbu-rpg"]?.tags?.[tag] ) await i.update({ [`flags.dbu-rpg.tags.-=${tag}`]: null });
+      if ( !item.flags?.["dbu-rpg"]?.tags?.[tag] ) await item.update({ [`flags.dbu-rpg.tags.${tag}`]: 1 });
+      return L("DBU.Tag.Done", { name: item.name });
+    }
+    // AR placeArea: a Sphere AoE of that Magnitude (value; 1 Standard) centered on you, of that kind (resource: "Bog");
+    // E2: with a duration it is removed when that duration ends
+    case "placeArea": {
+      const { placeSphere } = await import("../canvas/areas.mjs");
+      const kind = String(resource ?? "").trim();
+      const out = {};
+      const text = await placeSphere(actor, Math.max(0, Math.floor(Number(value) || 1)), { name: label ? `${label}: ${kind}` : kind,
+        kind: kind.toLowerCase(), color: /bog/i.test(kind) ? "#5a6b2a" : (/glass/i.test(kind) ? "#8fd3ff" : (/obscured/i.test(kind) ? "#777777" : "#6b4f2a")), out });
+      if ( text && out.uuid && duration && (duration !== "none") ) {
+        await addTimed(actor, { kind: "area", key: out.uuid, duration, event, label: label || kind });
+      }
+      return text;
+    }
+    // E2 actAfter (target the Ally, start of Round): your turn comes right after the Ally's this Round
+    case "actAfter": {
+      const owner = actAfterOf ? await actorOfUuid(actAfterOf) : null;
+      const combat = encounterOf(actor);
+      const mine = combat?.combatants?.find(c => c.actor?.uuid === owner?.uuid);
+      const theirs = combat?.combatants?.find(c => c.actor?.uuid === actor.uuid);
+      if ( !mine || !theirs || !Number.isFinite(theirs.initiative) || !Number.isFinite(mine.initiative) ) return "";
+      if ( !(theirs.initiative < mine.initiative) ) return L("DBU.InitiativeMove.NotLower", { name: actor.name });
+      const { safeUpdate } = await import("../socket.mjs");
+      await safeUpdate(mine, { initiative: theirs.initiative - 0.01, "flags.dbu-rpg.initRestore": mine.flags?.["dbu-rpg"]?.initRestore ?? mine.initiative });
+      return L("DBU.InitiativeMove.After", { name: owner.name, ally: actor.name });
+    }
+    // E2 swapTarget ("targeted", target the adjacent willing Ally): you swap places and it becomes the attack's target
+    case "swapTarget": {
+      if ( !messageId || !swapFrom ) return "";
+      const A = await import("./attack.mjs");
+      return A.swapAttackTarget(messageId, swapFrom, actor.uuid);
+    }
+    // E2 copyManeuver ("opponentManeuver"): the Maneuver the Opponent used, Out-of-Sequence (a Special one only if you have it)
+    case "copyManeuver": {
+      const slug = String(copySlug ?? "");
+      if ( !slug ) return "";
+      const CORE = ["powerUp", "energyCharge", "combatRecovery", "healingSurge", "kiSurge", "empower", "movement", "basicAttack", "grapple", "launch", "pin"];
+      const core = CORE.find(k => k.toLowerCase() === slug);
+      const own = actor.items.find(i => ["maneuver", "uniqueAbility"].includes(i.type) && (viaSlug(i.name) === slug));
+      if ( !core && !own ) return L("DBU.Copy.NoAccess", { slug });
+      await actor.useOutOfSequence(core ?? `item:${own.name}`);
+      return "";
+    }
+    // LN maxLifeLoss (value): Maximum Life Points lost until the end of the Combat Encounter (Life Burn)
+    case "maxLifeLoss": {
+      const n = Math.max(0, Math.floor(Number(value) || 0));
+      if ( !n ) return "";
+      await actor.setFlag("dbu-rpg", "maxLifeLoss", (actor.getFlag("dbu-rpg", "maxLifeLoss") ?? 0) + n);
+      return L("DBU.Trigger.MaxLifeLossDone", { n });
+    }
+    // TS traitSwitch (value 1 on / 0 off; resource: a Racial Trait's name, "pick:<group>" one of that group picked in a
+    // dialog, "all:<group>" every one of it; group "*" = any Racial Trait): switched for the duration, then back
+    case "traitSwitch": {
+      const spec = String(resource ?? "").trim();
+      const on = Number(value) > 0;
+      const m = /^(pick|all):(.*)$/i.exec(spec);
+      const inGroup = (i, g) => (g === "*") || (String(i.system?.group ?? "").trim().toLowerCase() === g.toLowerCase());
+      let items;
+      if ( m ) items = actor.items.filter(i => (i.type === "racialTrait") && inGroup(i, m[2].trim()) && (!!i.system?.active !== on));
+      else items = actor.items.filter(i => (i.type === "racialTrait") && (i.name.trim().toLowerCase() === spec.toLowerCase()) && (!!i.system?.active !== on));
+      if ( !items.length ) return L("DBU.TraitSwitch.None");
+      if ( m && (m[1].toLowerCase() === "pick") && (items.length > 1) ) {
+        const esc = s => foundry.utils.escapeHTML(String(s));
+        const data = await foundry.applications.api.DialogV2.wait({
+          window: { title: label || L("DBU.TraitSwitch.Title") },
+          content: `<div class="dbu-dialog"><div class="form-group"><select name="item">${items.map(i => `<option value="${i.id}">${esc(i.name)}</option>`).join("")}</select></div></div>`,
+          buttons: [{ action: "ok", label: L(on ? "DBU.TraitSwitch.On" : "DBU.TraitSwitch.Off"), default: true,
+            callback: (e, b) => new foundry.applications.ux.FormDataExtended(b.form).object }, { action: "cancel", label: L("Cancel") }],
+          rejectClose: false
+        });
+        if ( !data || (data === "cancel") ) return "";
+        items = items.filter(i => i.id === data.item);
+      }
+      else if ( m && (m[1].toLowerCase() === "pick") ) items = items.slice(0, 1);
+      await actor.updateEmbeddedDocuments("Item", items.map(i => ({ _id: i.id, "system.active": on })));
+      if ( duration && (duration !== "none") ) {
+        for ( const i of items ) await addTimed(actor, { kind: "traitSwitch", key: i.id, prev: !on, duration, event, label: label || i.name, source, skip });
+      }
+      return L(on ? "DBU.TraitSwitch.Done" : "DBU.TraitSwitch.DoneOff", { names: items.map(i => i.name).join(", ") });
+    }
+    // F5 integrateItem / destroyIntegrated: Integrate an item you possess / destroy one of your Integrated items (picked)
+    case "integrateItem": {
+      const I = await import("../rules/integrate.mjs");
+      return I.integrateItem(actor, { title: label });
+    }
+    case "destroyIntegrated": {
+      const I = await import("../rules/integrate.mjs");
+      return I.destroyIntegrated(actor, { title: label });
+    }
+    // F5 compelRandom (value: Squares): Compelled toward a random Opponent within that many Squares (Field of Aggression)
+    case "compelRandom": {
+      const { encounterOthers } = await import("../rules/allies.mjs");
+      const near = encounterOthers(actor).filter(o => o.opponent && (o.distance <= Math.max(1, Number(value) || 4))).map(o => o.actor);
+      if ( !near.length ) return "";
+      const pick = near[Math.floor(Math.random() * near.length)];
+      const text = await applyTriggerEffect(actor, "condition", 1, "compelled", { duration, label, inflictor: pick.uuid, event,
+        ...(timedDuration ? { timedDuration, source, skip } : {}) });
+      return `${text} → ${pick.name}`;
+    }
+    // F10 createDuplicate (value: Size Categories bigger, negative smaller; resource: its name): a Duplicate Minion of yours
+    case "createDuplicate": {
+      const { createDuplicate } = await import("./minions.mjs");
+      // F12 "duplicate.shrinkMax": up to that many more Size Categories smaller, asked (Mini Minions)
+      const most = Math.max(0, Math.floor(Number(sys.buckets?.["duplicate.shrinkMax"]?.total ?? 0) || 0));
+      let extraShrink = 0;
+      if ( most > 0 ) {
+        const n = await DialogV2.wait({ window: { title: label || "Duplicate" },
+          content: `<div class="dbu-dialog"><div class="form-group"><label>${L("DBU.Minion.Shrink", { n: most })}</label>
+            <input type="number" name="n" value="0" min="0" max="${most}" step="1"></div></div>`,
+          buttons: [{ action: "ok", label: L("DBU.Choice.Confirm"), default: true, callback: (e, b) => Number(b.form.elements.n.value) || 0 },
+            { action: "cancel", label: L("Cancel") }], rejectClose: false });
+        if ( typeof n !== "number" ) return "";
+        extraShrink = Math.clamp(Math.floor(n), 0, most);
+      }
+      return createDuplicate(actor, { label: String(resource || "Duplicate"), sizeShift: Number(value) || 0, extraShrink });
+    }
+    // F12 consumeMinions (resource: the Duplicates' name): Defeat Minions of yours for 1/4 of their KP
+    // CS1 initiativeShift (value: ± Initiative; resource "set": the value becomes it): until the end of the Combat Round
+    case "initiativeShift": {
+      const combat = encounterOf(actor);
+      const mine = combat?.combatants?.find(c => c.actor?.uuid === actor.uuid);
+      if ( !mine || !Number.isFinite(mine.initiative) ) return "";
+      const now = Number(mine.initiative) || 0;
+      // (T2 "first" / "last": before / after every other combatant this Round, ties kept by the Initiative before)
+      const others = combat.combatants.filter(c => (c !== mine) && Number.isFinite(c.initiative)).map(c => Number(c.initiative));
+      const mode = String(resource ?? "").trim().toLowerCase();
+      const next = (mode === "set") ? (Number(value) || 0)
+        : (mode === "first") ? ((others.length ? Math.max(...others) : now) + 1 + (now / 1000))
+        : (mode === "last") ? ((others.length ? Math.min(...others) : now) - 1 + (now / 1000))
+        : now + (Number(value) || 0);
+      const { safeUpdate } = await import("../socket.mjs");
+      await safeUpdate(mine, { initiative: next, "flags.dbu-rpg.initRestore": mine.flags?.["dbu-rpg"]?.initRestore ?? now });
+      return L("DBU.CS1.Initiative", { name: actor.name, n: next });
+    }
+    // T2 rerollInitiative: your Initiative rolled again (Erratic Majin)
+    case "rerollInitiative": {
+      const combat = encounterOf(actor);
+      const mine = combat?.combatants?.find(c => c.actor?.uuid === actor.uuid);
+      if ( !mine ) return "";
+      await combat.rollInitiative([mine.id]);
+      return L("DBU.T2.Rerolled", { name: actor.name });
+    }
+    // T2 awakeningLose (resource: the Awakening's name; value: Stacks, 0 = all): its Stacks lost
+    case "awakeningLose": {
+      const aw = actor.items.find(i => (i.type === "transformation") && (awakeningSlug(i.name) === awakeningSlug(String(resource ?? ""))));
+      const have = Number(aw?.system?.stacks ?? 0) || 0;
+      if ( !aw || !have ) return "";
+      const AW = await import("./awakening.mjs");
+      const n = (Number(value) > 0) ? Math.min(have, Math.floor(Number(value))) : have;
+      await AW.loseStack(actor, aw, { n, reason: label, silent: true });
+      return L("DBU.T2.StacksLost", { name: aw.name, n });
+    }
+    // CS1 tempGrant (resource "<type>:<Name>"): the item from the compendium for this Combat Encounter (Foreseer 7's Precognition)
+    case "tempGrant": {
+      // (CS2 "pick:<type>:<max TP>": one picked from the compendium, with that TP Cost at most, until the end of the Round)
+      const pickSpec = /^pick:\s*(\w+)\s*:\s*(\d+)$/i.exec(String(resource ?? "").trim());
+      if ( pickSpec ) {
+        const packName = { uniqueAbility: "unique-abilities", maneuver: "maneuvers", talent: "talents" }[pickSpec[1]];
+        const max = Number(pickSpec[2]);
+        const docs = packName ? (await (game.packs.get(`dbu-rpg.${packName}`)?.getDocuments() ?? [])).filter(d => (Number(d.system?.tpCost) || 0) <= max
+          && !actor.items.some(i => i.name === d.name)) : [];
+        if ( !docs.length ) return "";
+        docs.sort((a, b) => a.name.localeCompare(b.name));
+        const id = await DialogV2.wait({ window: { title: label || "Unique Ability" },
+          content: `<div class="dbu-dialog"><select name="id">${docs.map(d => `<option value="${d.id}">${foundry.utils.escapeHTML(d.name)} (${d.system?.tpCost ?? 0} TP)</option>`).join("")}</select></div>`,
+          buttons: [{ action: "ok", label: L("DBU.Choice.Confirm"), default: true, callback: (e, b) => b.form.elements.id.value },
+            { action: "cancel", label: L("Cancel") }], rejectClose: false });
+        const doc = docs.find(d => d.id === id);
+        if ( !doc ) return "";
+        const combat = encounterOf(actor);
+        const data = doc.toObject();
+        delete data._id;
+        foundry.utils.setProperty(data, "flags.dbu-rpg.encounterTemp", combat?.id ?? null);
+        foundry.utils.setProperty(data, "flags.dbu-rpg.roundTemp", { combat: combat?.id ?? null, round: combat?.round ?? 0 });
+        await actor.createEmbeddedDocuments("Item", [data]);
+        return L("DBU.CS2.TempRound", { name: actor.name, item: doc.name });
+      }
+      const [type, name = ""] = String(resource ?? "").split(":").map(x => x.trim());
+      const packName = { uniqueAbility: "unique-abilities", maneuver: "maneuvers", talent: "talents" }[type];
+      const docs = packName ? await (game.packs.get(`dbu-rpg.${packName}`)?.getDocuments() ?? []) : [];
+      const doc = docs.find(d => d.name.toLowerCase() === name.toLowerCase());
+      if ( !doc || actor.items.some(i => i.name === doc.name) ) return "";
+      const data = doc.toObject();
+      delete data._id;
+      foundry.utils.setProperty(data, "flags.dbu-rpg.encounterTemp", encounterOf(actor)?.id ?? null);
+      await actor.createEmbeddedDocuments("Item", [data]);
+      return L("DBU.CS1.TempGrant", { name: actor.name, item: doc.name });
+    }
+    // CS2 extendTimed (resource: the kind, "dot"; value: how many more): the timed entries of that kind last that many
+    // more of their moments (Lingering Presence 4: the DOT stacks one Combat Round more)
+    case "extendTimed": {
+      const kind = String(resource || "dot").trim();
+      const n = Math.max(1, Math.floor(Number(value) || 1));
+      const list = foundry.utils.deepClone(actor.getFlag("dbu-rpg", "timed") ?? []);
+      let changed = 0;
+      for ( const e of list ) if ( e.kind === kind ) { e.skip = (Number(e.skip) || 0) + n; changed += 1; }
+      if ( !changed ) return "";
+      await actor.setFlag("dbu-rpg", "timed", list);
+      return L("DBU.CS2.Extended", { name: actor.name, n: changed });
+    }
+    // F17 absorbManeuver (resource "goop": a Goop of yours makes it, Assimilation 3): the Absorb Maneuver against your target
+    case "absorbManeuver": {
+      const AB = await import("./absorb.mjs");
+      return AB.absorbTarget(actor, { byGoop: /^goop$/i.test(String(resource ?? "").trim()), label });
+    }
+    // F16 borrowApparel: the Top Layer of Apparel of the Absorbed Character replaces yours while that Stack lasts
+    case "borrowApparel": {
+      const S = await import("../rules/store.mjs");
+      return S.borrowApparel(actor, String(copySlug ?? ""), { awakeningId, title: label });
+    }
+    // F15 lifeLostAs (value): that many Ki Points spent count as Life Points lost for your effects (Dragon of Light 2)
+    case "lifeLostAs": {
+      const n = Math.max(0, Math.floor(Number(value) || 0));
+      if ( n ) await resourceEvent(actor, "spend", { slug: "life", n, via: "cost", resEvent });
+      return n ? L("DBU.F15.LifeLostAs", { n }) : "";
+    }
+    // F14 recordCopy (resource "<List>:<max>"): the event's Character (@copyName) joins that list of copies of yours
+    // (flags.dbu-rpg.copies.<slug>); a full list asks which one it replaces
+    case "recordCopy": {
+      const [list, maxRaw = "3"] = String(resource ?? "").split(":").map(x => x.trim());
+      const name = String(copySlug ?? "").trim();
+      if ( !list || !name ) return "";
+      const slug = awakeningSlug(list);
+      // (T19 "copies.max.<slug>": a higher maximum of that list: DNA Library 1)
+      const max = Math.max(1, Math.floor(Number(maxRaw) || 3), Math.floor(Number(sys.buckets?.[`copies.max.${slug}`]?.total ?? 0) || 0));
+      const have = [...(actor.flags?.["dbu-rpg"]?.copies?.[slug] ?? [])];
+      if ( have.includes(name) ) return "";
+      if ( have.length >= max ) {
+        const out = await DialogV2.wait({ window: { title: label || list },
+          content: `<div class="dbu-dialog"><p>${L("DBU.F14.CopyFull", { list, name: foundry.utils.escapeHTML(name), max })}</p>
+            <select name="old">${have.map((h, i) => `<option value="${i}">${foundry.utils.escapeHTML(h)}</option>`).join("")}</select></div>`,
+          buttons: [{ action: "ok", label: L("DBU.F14.Replace"), default: true, callback: (e, b) => Number(b.form.elements.old.value) },
+            { action: "keep", label: L("DBU.F14.Keep") }], rejectClose: false });
+        if ( typeof out !== "number" ) return L("DBU.F14.CopyKept", { list });
+        have.splice(out, 1, name);
+      }
+      else have.push(name);
+      await actor.setFlag("dbu-rpg", `copies.${slug}`, have);
+      return L("DBU.F14.CopyAdded", { list, name, all: have.join(", ") });
+    }
+    // F14 copyStack (resource "<List>|<Awakening>|<level>"): a copy of that list, picked, is what a Temporary Stack of the
+    // Awakening holds (level 1/2); a Stack this effect gave this Combat Encounter is changed to the new copy instead
+    case "copyStack": {
+      const [list, awName = "Absorption", levelRaw = "2", modeRaw = ""] = String(resource ?? "").split("|").map(x => x.trim());
+      const slug = awakeningSlug(list);
+      const have = actor.flags?.["dbu-rpg"]?.copies?.[slug] ?? [];
+      if ( !have.length ) return L("DBU.F14.NoCopies", { list });
+      // (T2 "|all": a Temporary Stack for each copy not held yet, up to 3 such Stacks in all: Ultimate Assimilation)
+      if ( /^all$/i.test(modeRaw) ) {
+        const AWm = await import("./awakening.mjs");
+        const aw0 = actor.items.find(i => (i.type === "transformation") && (awakeningSlug(i.name) === awakeningSlug(awName)));
+        const held = new Set((aw0?.system?.stackNotes ?? []).filter(x => have.includes(x)));
+        const got = [];
+        for ( const c of have ) {
+          if ( held.size >= 3 ) break;
+          if ( held.has(c) ) continue;
+          if ( await AWm.gainAwakening(actor, awName, { temp: Math.clamp(Math.floor(Number(levelRaw) || 2), 1, 2), note: c, source: label, ask: false }) ) { held.add(c); got.push(c); }
+        }
+        return got.length ? L("DBU.F14.CopyStack", { name: awName, copy: got.join(", ") }) : "";
+      }
+      const pick = (have.length === 1) ? have[0] : await DialogV2.wait({ window: { title: label || list },
+        content: `<div class="dbu-dialog"><select name="c">${have.map(h => `<option>${foundry.utils.escapeHTML(h)}</option>`).join("")}</select></div>`,
+        buttons: [{ action: "ok", label: L("DBU.Choice.Confirm"), default: true, callback: (e, b) => b.form.elements.c.value },
+          { action: "cancel", label: L("Cancel") }], rejectClose: false });
+      if ( !pick || (pick === "cancel") ) return "";
+      const AW = await import("./awakening.mjs");
+      const combat = encounterOf(actor);
+      const mark = actor.flags?.["dbu-rpg"]?.copyStack?.[slug];
+      const aw = actor.items.find(i => (i.type === "transformation") && (awakeningSlug(i.name) === awakeningSlug(awName)));
+      if ( mark && combat && (mark.combat === combat.id) && aw && ((aw.system.tempStacks?.length ?? 0) > 0) ) {
+        const notes = [...(aw._source.system.stackNotes ?? [])];
+        while ( notes.length < aw.system.stacks ) notes.push("");
+        notes[aw.system.stacks - 1] = pick;
+        await aw.update({ "system.stackNotes": notes });
+        return L("DBU.F14.CopySwapped", { name: aw.name, copy: pick });
+      }
+      const got = await AW.gainAwakening(actor, awName, { temp: Math.clamp(Math.floor(Number(levelRaw) || 2), 1, 2), note: pick, source: label, ask: false });
+      if ( got ) await actor.setFlag("dbu-rpg", `copyStack.${slug}`, { combat: combat?.id ?? null });
+      return got ? L("DBU.F14.CopyStack", { name: awName, copy: pick }) : "";
+    }
+    // F14 switchAvatar: your Avatar takes your place on the map and in the Initiative Order (combat/avatar.mjs)
+    case "switchAvatar": {
+      const AV = await import("./avatar.mjs");
+      return AV.switchToAvatar(actor, { label });
+    }
+    // F13 tempItem (resource: the item type; value: its name): a blank item of yours for this Combat Encounter, removed when
+    // it ends (Inherited Creativity's Signature Technique)
+    case "tempItem": {
+      const combat = encounterOf(actor);
+      // (CS4 "signature!oneUse": gone once used; starting at 0 TP with "flag.tcBaseZero": Technique Crafter)
+      const [typeRaw, mod = ""] = String(resource || "signature").split("!").map(x => x.trim());
+      const type = typeRaw || "signature";
+      const name = String(label || "Temporary").trim();
+      const oneUse = /^oneuse$/i.test(mod);
+      const zero = oneUse && ((sys.buckets?.["flag.tcBaseZero"]?.total ?? 0) > 0);
+      await actor.createEmbeddedDocuments("Item", [{ name, type, flags: { "dbu-rpg": { encounterTemp: combat?.id ?? null,
+        ...(oneUse ? { oneUse: true } : {}), ...(zero ? { baseTpZero: true } : {}) } } }]);
+      return L("DBU.F13.TempItem", { name });
+    }
+    case "consumeMinions": {
+      const { consumeMinions } = await import("./minions.mjs");
+      return consumeMinions(actor, { label: String(resource || "Duplicate"), title: label });
+    }
+    // F12 Stored items (Slimy Consistency): store, take out, store the other Character's Weapon
+    case "storeItems": { const S = await import("../rules/store.mjs"); return S.storeItems(actor, { title: label }); }
+    case "takeStored": { const S = await import("../rules/store.mjs"); return S.takeStored(actor, { title: label }); }
+    case "storeWeaponOf": {
+      const other = otherUuid ? await actorOfUuid(otherUuid) : null;
+      if ( !other ) return L("DBU.TraitUse.NoTarget");
+      const S = await import("../rules/store.mjs");
+      return S.storeWeaponOf(actor, other, { title: label });
+    }
+    // F12 consumeLight (on the Opponent; resource: the source's resource, Light): it leaves its Light Dependent
+    // Transformations (no Stress Exhaustion) and loses its Power; the one who did it gains their ToP Requirements plus
+    // 1/2 (rounded up) of its Tier of Power, and 1/2 of its Tier per stack of Power
+    case "consumeLight": {
+      const half = Math.ceil((Number(sys.top?.current ?? sys.top?.base ?? 1) || 1) / 2);
+      let gain = 0;
+      const out = [];
+      const lit = (sys.transformation?.active ?? []).filter(t => (t.system.aspects ?? []).some(a => a.key === "lightDependent"));
+      if ( lit.length ) {
+        await actor.revert(lit, { forced: true, quiet: true, why: label });
+        gain += lit.reduce((n, t) => n + (Number(t.system.topReq) || 0), 0) + half;
+        out.push(L("DBU.F12.LeftLight", { name: actor.name, forms: lit.map(t => t.name).join(", ") }));
+      }
+      const stacks = Number(sys.combat?.power ?? 0) || 0;
+      if ( stacks > 0 ) {
+        await actor.update({ "system.combat.power": 0 }, via);
+        gain += half * stacks;
+        out.push(L("DBU.F12.LostPower", { name: actor.name, n: stacks }));
+      }
+      if ( !out.length ) return L("DBU.F12.NothingToConsume", { name: actor.name });
+      const src = inflictor ? await actorOfUuid(inflictor) : null;
+      if ( src && gain ) {
+        await changeStacks(src, String(resource || "Light").trim(), gain, { label, via: "trigger", resEvent });
+        out.push(L("DBU.F12.GainedLight", { name: src.name, n: gain, what: String(resource || "Light").trim() }));
+      }
+      return out.join(" ");
+    }
+    // F12 weaponQualities (resource: "Telekinetic, Extending"): value 1 gives them to a wielded Weapon of yours that lacks
+    // them (they take no Quality slot: flags.dbu-rpg.addedQualities), 0 takes them back
+    case "weaponQualities": {
+      const names = String(resource ?? "").split(",").map(x => x.trim()).filter(Boolean);
+      const has = (w, n) => (w.system.qualities ?? []).some(q => String(q.name).toLowerCase() === n.toLowerCase());
+      const plain = w => (w.system.qualities ?? []).map(q => ({ name: q.name, slots: q.slots }));
+      if ( !(value > 0) ) {
+        const ws = actor.items.filter(i => (i.type === "weapon") && (i.flags?.["dbu-rpg"]?.addedQualities ?? []).length);
+        for ( const w of ws ) {
+          const added = new Set(w.flags["dbu-rpg"].addedQualities.map(x => String(x).toLowerCase()));
+          await w.update({ "system.qualities": plain(w).filter(q => !added.has(String(q.name).toLowerCase())), "flags.dbu-rpg.-=addedQualities": null });
+        }
+        return ws.length ? L("DBU.F12.QualitiesRemoved", { names: ws.map(w => w.name).join(", ") }) : "";
+      }
+      const ws = actor.items.filter(i => (i.type === "weapon") && i.system.equipped && names.some(n => !has(i, n)));
+      if ( !ws.length ) return L("DBU.F12.NoWeaponFor", { what: names.join(", ") });
+      let w = ws[0];
+      if ( ws.length > 1 ) {
+        const id = await DialogV2.wait({ window: { title: label || "Weapon" },
+          content: `<div class="dbu-dialog"><select name="id">${ws.map(i => `<option value="${i.id}">${foundry.utils.escapeHTML(i.name)}</option>`).join("")}</select></div>`,
+          buttons: [{ action: "ok", label: L("DBU.Choice.Confirm"), default: true, callback: (e, b) => b.form.elements.id.value },
+            { action: "cancel", label: L("Cancel") }], rejectClose: false });
+        w = ws.find(i => i.id === id) ?? null;
+        if ( !w ) return "";
+      }
+      const add = names.filter(n => !has(w, n));
+      await w.update({ "system.qualities": [...plain(w), ...add.map(n => ({ name: n, slots: 0 }))],
+        "flags.dbu-rpg.addedQualities": [...(w.flags?.["dbu-rpg"]?.addedQualities ?? []), ...add] });
+      return L("DBU.F12.QualitiesAdded", { name: w.name, what: add.join(", ") });
+    }
+    // GP createGoop: a Goop of yours next to you (a Duplicate Minion without Apparel, Accessories and Weapons)
+    case "createGoop": {
+      const { createGoop } = await import("./minions.mjs");
+      return createGoop(actor);
+    }
+    // GP reabsorbGoops (value: how many, 0 = any number; resource "all": every one, no dialog; "notThisTurn"): Defeat
+    // your Goops and regain 1/2 of their remaining LP
+    case "reabsorbGoops": {
+      const { reabsorbGoops } = await import("./minions.mjs");
+      const kind = String(resource ?? "").toLowerCase();
+      const max = (Number(value) > 0) ? Math.floor(Number(value)) : Infinity;
+      return reabsorbGoops(actor, max, { pick: kind !== "all", notThisTurn: kind === "notthisturn" });
+    }
+    // LN createMinion (resource: its Racial Traits, "|" between them): a Minion of yours next to you (combat/minions.mjs)
+    case "createMinion": {
+      const { createMinion } = await import("./minions.mjs");
+      const traits = String(resource ?? "").split("|").map(s => s.trim()).filter(Boolean);
+      // (its name: the last part of the label, "Spirit of Namek — option: Poko Priest" → "Poko Priest Minion")
+      const name = `${String(label || "").split(/:\s*/).pop().replace(/\s*\(.*$/, "").trim() || "Minion"} Minion`.replace(/Minion Minion$/, "Minion");
+      return createMinion(actor, { traits, label: name, hint: L("DBU.Minion.Finish") });
+    }
+    // PL moveOther (value = Squares): the event's other Character (your target) moved up to that many Squares in a
+    // direction you pick (the forced movement dialog: Collisions apply)
+    case "moveOther": {
+      const who = otherUuid ? await actorOfUuid(otherUuid) : null;
+      const tok = who?.getActiveTokens?.()?.[0] ?? null;
+      if ( !tok ) return L("DBU.TraitUse.NoTarget");
+      const { forcedMove } = await import("./movement.mjs");
+      const r = await forcedMove({ source: actor, target: tok, squares: Math.max(0, Math.floor(Number(value) || 0)), label: label || "Move" });
+      return r ? L("DBU.Place.Moved", { name: who.name, n: r.moved }) : "";
+    }
+    // PL teleport: a Character placed on a Square you pick (canvas/place.mjs): resource "" you, "other" the event's other
+    // Character (your target), "target" your target now (a willing Ally); value: at most that many Squares from you
+    // (0: anywhere on the Battlefield)
+    case "teleport": {
+      const P = await import("../canvas/place.mjs");
+      const kind = String(resource || "self").toLowerCase();
+      // F11 nextToTarget (value: how far from you your target may be): you, onto a Square adjacent to your target
+      if ( kind === "nexttotarget" ) {
+        const t = [...(game.user?.targets ?? [])][0] ?? null;
+        return P.placeNextTo(actor, t, { maxFrom: (Number(value) > 0) ? Math.floor(Number(value)) : null, label });
+      }
+      // F11 nearPicked (value: the Sphere's Squares, 4 a Large one): the Square of the Feature picked first, you inside
+      // that Sphere, then a Square of it
+      if ( kind === "nearpicked" ) return P.placeNearPicked(actor, { range: Math.max(1, Math.floor(Number(value) || 4)), label });
+      let who = actor;
+      if ( kind === "other" ) who = otherUuid ? await actorOfUuid(otherUuid) : null;
+      else if ( kind === "target" ) who = [...(game.user?.targets ?? [])][0]?.actor ?? null;
+      if ( !who ) return L("DBU.TraitUse.NoTarget");
+      const range = (Number(value) > 0) ? Math.floor(Number(value)) : null;
+      const center = range ? (actor.getActiveTokens?.()?.[0]?.document ?? null) : null;
+      return P.placeCharacter(actor, who, { range, center, label, via: label });
+    }
+    // GS glassSoldiers (value = how many): Glass Soldiers on the Glass Squares nearest to you
+    case "glassSoldiers": {
+      const F = await import("../canvas/features.mjs");
+      const n = await F.createGlassSoldiers(actor, Math.max(0, Math.floor(Number(value) || 0)));
+      return n ? L("DBU.Feature.Created", { n }) : L("DBU.Feature.NoGlass");
+    }
+    // GS soldierTurn (start of your turn): your Glass Soldiers heal on Glass, or spread Glass around them
+    case "soldierTurn": {
+      const F = await import("../canvas/features.mjs");
+      return F.soldiersTurn(actor);
+    }
+    // GS originFromFeature (Warriors of Glass): your attacks this turn originate from a Glass Soldier's Square (the one
+    // you control on the map, else the one nearest to your target): their distances count from it
+    case "originFromFeature": {
+      const F = await import("../canvas/features.mjs");
+      const t = F.chooseSoldier(actor);
+      if ( !t ) return L("DBU.Feature.NoSoldier");
+      await actor.setFlag("dbu-rpg", "originFrom", t.uuid);
+      return L("DBU.Feature.Origin", { name: t.name });
+    }
+    // GS destroyFeature: the Glass Feature next to that Character (you, or the Ally of the event) is destroyed
+    case "destroyFeature": {
+      const F = await import("../canvas/features.mjs");
+      const who = otherUuid ? await actorOfUuid(otherUuid) : actor;
+      const tok = who?.getActiveTokens?.()?.[0]?.document;
+      const f = F.adjacentGlassFeature(tok);
+      return (f && await F.destroyFeature(f)) ? L("DBU.Feature.Destroyed", { name: f.name }) : "";
+    }
+    // MD createItem: an equipped (Integrated) accessory of that name on the sheet (a new Majin-Dama)
+    case "createItem": {
+      const name = String(resource ?? "").trim();
+      if ( !name ) return "";
+      await actor.createEmbeddedDocuments("Item", [{ name, type: "item", img: "icons/svg/item-bag.svg",
+        system: { itemType: "accessory", equipped: true, quantity: 1, details: "Special Accessory, Integrated" } }]);
+      return L("DBU.Trigger.ItemCreated", { name });
+    }
+    // CS4: that attack misses you and every Ally of yours it targets ("targeted")
+    case "attackMissTeam": {
+      if ( !messageId ) return "";
+      const A = await import("./attack.mjs");
+      return A.missTeam(messageId, actor.uuid, label);
+    }
+    // DD2: that attack goes back to Defense Declaration for you (wasHit)
+    case "redefend": {
+      if ( !messageId || (targetIndex === null) ) return "";
+      const A = await import("./attack.mjs");
+      return A.reopenDefense(messageId, targetIndex, label);
+    }
+    // DD3: cancel your attack an Opponent countered (attackCountered), then attack that Opponent again
+    case "cancelAttack": {
+      if ( !messageId ) return "";
+      const A = await import("./attack.mjs");
+      return A.cancelOwnAttack(messageId, { otherUuid, label });
+    }
+    // AG: + value Soak for that row of the attack, before its Damage (wasHit / allyWasHit)
+    case "attackSoak": {
+      if ( !messageId || (targetIndex === null) ) return "";
+      const A = await import("./attack.mjs");
+      return A.addTargetSoak(messageId, targetIndex, value, label, String(resource || "soak").toLowerCase());
+    }
+    // CB: the Critical Result of that attack's Strike Roll becomes a Botch Result ("targeted": the attack on you)
+    case "critToBotch": {
+      if ( !messageId ) return "";
+      const A = await import("./attack.mjs");
+      return A.critToBotchOnMessage(messageId, { label });
+    }
+    // AA: + value Damage Category to that attack (resource "lethal": Lethal, which cannot be reduced)
+    case "woundCategory": {
+      if ( !messageId ) return "";
+      const A = await import("./attack.mjs");
+      return A.bumpStoredWound(messageId, /lethal/i.test(String(resource ?? "")) ? { lethal: true, label } : { category: value || 1, label });
     }
     // M: pick one of several sheet resources (a Stance, a Mode): it becomes 1, the other ones 0 (the player picks: a button)
     case "resourcePick": {
@@ -1765,7 +2621,7 @@ async function applyEffect(actor, effect, value, resource = "", { duration = "no
         return "";
       }
       await actor.update({ "system.combat.power": next });
-      if ( next > before ) await addTimedPower(actor, next - before);
+      if ( next > before ) await addTimedPower(actor, next - before, { duration: (duration && (duration !== "none")) ? baseDuration(duration) : null });
       await resourceEvent(actor, (next > before) ? "gain" : "spend", { slug: "power", n: Math.abs(next - before),
         wanted: (value > 0) ? value : 0, via: "trigger", resEvent });
       return describeEffect(effect, next - before, resource);
@@ -1776,17 +2632,25 @@ async function applyEffect(actor, effect, value, resource = "", { duration = "no
     // Y: this effect provokes the Exploit of the Opponents at that range ("adjacent" by default, "melee", "notLong")
     case "provoke": {
       const X = await import("../rules/exploit.mjs");
-      const range = ["adjacent", "melee", "notLong"].includes(String(resource ?? "").trim()) ? String(resource).trim() : "adjacent";
+      // (UA "other": only the event's other Character)
+      if ( (String(resource ?? "").trim() === "other") && otherUuid ) {
+        const o = await actorOfUuid(otherUuid);
+        const list = o ? await X.provokeExploit(actor, "effect", { opponents: [o], name: label || "" }) : [];
+        return list.length ? L("DBU.Exploit.ProvokedShort", { n: list.length }) : L("DBU.Exploit.NoneProvoked");
+      }
+      const range = (["adjacent", "melee", "notLong"].includes(String(resource ?? "").trim()) || /^\d+$/.test(String(resource ?? "").trim())) ? String(resource).trim() : "adjacent";
       const list = await X.provokeExploit(actor, "effect", { opponents: X.exploitersAt(actor, range), name: label || "" });
       return list.length ? L("DBU.Exploit.ProvokedShort", { n: list.length }) : L("DBU.Exploit.NoneProvoked");
     }
     // X: the Legend Realized of your current Form (or of the Form named), outside of the Transformation Maneuver
     case "legend": {
-      const name = String(resource ?? "").trim();
+      // (Z "+extra": a Legend Realized on top of the once-per-encounter one)
+      const extra = /\+\s*extra\b/i.test(String(resource ?? ""));
+      const name = String(resource ?? "").replace(/\+\s*extra\b/i, "").trim();
       const form = name ? itemNamed(actor, name) : (sys.transformation?.forms?.[0] ?? null);
       if ( !form || (form.type !== "transformation") ) return L("DBU.Legend.NoForm");
       if ( !form.system.active ) return L("DBU.Legend.NotIn", { name: form.name });
-      const lines = await actor.legendRealized(form, { outside: true });
+      const lines = await actor.legendRealized(form, { outside: true, extra });
       return lines.join(" · ") || L("DBU.Legend.NoneNow", { name: form.name });
     }
     case "maneuver": {
@@ -1794,7 +2658,11 @@ async function applyEffect(actor, effect, value, resource = "", { duration = "no
       // P: an attack of an event's button (the Exploit an Opponent's movement provokes...) targets that other Character
       if ( otherUuid && keys.some(k => ATTACK_KEYS.test(k)) ) await targetOther(otherUuid);
       // B5 "with": one-shot buckets for that use ("surge.healMult=2; actions=3")
-      const use = key => actor.useOutOfSequence(key, { ...(blank(withSpec) ? {} : { with: withSpec }), ...(fx ? { viaFx: fx } : {}) });
+      // SW: an Empower another Character uses through your effect (Spiritual Warrior: your Bonded Ally's) goes to you
+      const use = async key => {
+        if ( (key === "empower") && fxOwner && (fxOwner !== actor.uuid) ) await targetOther(fxOwner);
+        return actor.useOutOfSequence(key, { ...(blank(withSpec) ? {} : { with: withSpec }), ...(fx ? { viaFx: fx } : {}) });
+      };
       if ( keys.length < 2 ) await use(String(resource || ""));
       else {
         const key = await pickManeuver(keys, label);
@@ -1843,6 +2711,10 @@ async function applyEffect(actor, effect, value, resource = "", { duration = "no
     case "condition": {
       const key = statusKey(effect, resource);
       if ( !key ) return `${resource}?`;
+      // (T14 "flag.godKiAsSuperior": an effect that would put you in God Ki puts you in the Superior State instead)
+      if ( (effect === "state") && (key === "godKi") && ((sys.buckets?.["flag.godKiAsSuperior"]?.total ?? 0) > 0) ) {
+        return applyEffect(actor, "state", value, "superior", { duration, event, label, timedDuration, source, skip, itemId, fx, rawDuration, otherUuid });
+      }
       const field = effect === "state" ? "states" : "conditions";
       const prev = sys._source[field]?.[key] ?? 0;
       const level = Math.max(prev, Math.max(1, Math.round(value) || 1));
@@ -1854,6 +2726,10 @@ async function applyEffect(actor, effect, value, resource = "", { duration = "no
       if ( (effect === "condition") && (key === "compelled") && inflictor && (inflictor !== actor.uuid) ) {
         await actor.setFlag("dbu-rpg", "compelledBy", inflictor).catch(() => null);
       }
+      // RA: who inflicted each Combat Condition (@opponentsCondByMe, @vs.condByMe)
+      if ( (effect === "condition") && inflictor && (inflictor !== actor.uuid) ) {
+        await actor.setFlag("dbu-rpg", `condBy.${key}`, inflictor).catch(() => null);
+      }
       // D1: an effect that would put you in a State you are already in ("stateEnter" with @already = 1)
       else if ( (effect === "state") && (prev > 0) ) {
         fireEvent(actor, "stateEnter", { scope: { [`state_${key}`]: 1, level: prev, already: 1, ...(fx ? { viaFx: { [fx]: 1 } } : {}) } });
@@ -1863,18 +2739,24 @@ async function applyEffect(actor, effect, value, resource = "", { duration = "no
           mark: withMark });
       }
       let text = describeEffect(effect, level, key, duration);
-      // B4: entering Undying while Defeated ends the Defeat (the Forms it ended stay left); E1: "defeatEnd" with @byUndying
+      // B4: entering Undying while Defeated ends the Defeat (LT: the Forms it ended come back after the Defeat's triggers,
+      // keepDefeatForms); E1: "defeatEnd" with @byUndying
       if ( (effect === "state") && (key === "undying") && (level > prev) && isDefeated(actor) ) {
+        const setOne = (actor.system.life?.value ?? 0) <= 0;
         actor._dbuDefeatEndBy = "undying";
         await Promise.resolve(actor.toggleStatusEffect?.(CONFIG.specialStatusEffects?.DEFEATED ?? "dead", { active: false })).catch(() => null);
         delete actor._dbuDefeatEndBy;
+        // BB Undying (2): entered when you would have been Defeated: your Life Points become 1 (its Defeat already ended)
+        if ( setOne ) await actor.update({ "system.life.value": 1 }, { dbuSource: "trigger", dbuUndyingSet: true });
         text = `${text} · ${L("DBU.Trigger.UndyingDefeated")}`;
       }
       // B3 "inflict": one of your trigger effects gave someone else a Combat Condition
       if ( (effect === "condition") && inflictor && (inflictor !== actor.uuid) && (level > prev) ) {
         const by = await Promise.resolve(fromUuid(inflictor)).catch(() => null);
         const giver = (by?.documentName === "Token") ? by.actor : by;
-        if ( giver ) fireEvent(giver, "inflict", { other: actor, scope: { [`cond_${key}`]: 1, level } });
+        // (F16 @via_<slug>: the giver's item whose effect it was: the Terrify Maneuver)
+        const srcItem = (giver && itemId) ? giver.items?.get?.(itemId) : null;
+        if ( giver ) fireEvent(giver, "inflict", { other: actor, scope: { [`cond_${key}`]: 1, level, ...(srcItem ? { [`via_${viaSlug(srcItem.name)}`]: 1 } : {}) } });
       }
       return text;
     }
@@ -1889,10 +2771,51 @@ async function applyEffect(actor, effect, value, resource = "", { duration = "no
       const self = (marker === actor) || (marker.uuid === actor.uuid);
       if ( effect === "unmark" ) return M.removeMark(marker, resource, self ? null : actor);
       if ( self ) return L("DBU.TraitUse.NoTarget");
-      return (await M.placeMark(marker, actor, resource, { duration, label, event, quiet: quietMark })).text;
+      // MT: a mark that lasts the marked Character's turns ("endOfTheirTurn" / "endOfTheirNextTurn" / "startOfTheirNextTurn")
+      let timing = null;
+      if ( THEIR[rawDuration] ) {
+        const base = THEIR[rawDuration];
+        const theirTurn = encounterOf(actor)?.combatant?.actor?.uuid === actor.uuid;
+        timing = (base === "startOfNextTurn") ? { duration: "startOfSourceTurn", source: actor.uuid, skip: 0 }
+          : { duration: "endOfSourceTurn", source: actor.uuid, skip: ((base === "endOfNextTurn") && theirTurn) ? 1 : 0 };
+      }
+      return (await M.placeMark(marker, actor, resource, { duration, label, event, quiet: quietMark, timing })).text;
     }
     // B3: remove a Combat Condition (a key, "any" the player picks, "all"; "!key" never), value stacks (blank: all)
     case "removeCondition": return removeConditions(actor, resource, value, { label });
+    // RD "equip" / "unequip": the actor's item of that name (Equipment, Apparel, Weapon) is equipped / unequipped
+    case "equip":
+    case "unequip": {
+      const wanted = String(resource ?? "").trim().toLowerCase();
+      const item = actor.items.find(i => ["item", "apparel", "weapon"].includes(i.type) && (i.name.trim().toLowerCase() === wanted))
+        ?? actor.items.find(i => ["item", "apparel", "weapon"].includes(i.type) && (viaSlug(i.name) === viaSlug(wanted)));
+      if ( !item ) return L("DBU.Trigger.NoItem", { name: resource });
+      const on = effect === "equip";
+      if ( !!item.system.equipped === on ) return "";
+      await item.update({ "system.equipped": on });
+      return L(on ? "DBU.Trigger.Equipped" : "DBU.Trigger.Unequipped", { name: item.name });
+    }
+    // LT "steadfastPass": the failed Steadfast Checks of your Health Thresholds become successes (value: how many; 0 = all)
+    case "steadfastPass": {
+      const failedK = (DBU.thresholds ?? []).filter(k => sys.thresholds?.[k] === "fail");
+      // DR4: no Health Threshold failed: the failed Condition Recovery Steadfast Check succeeds instead
+      if ( !failedK.length ) {
+        const rec = actor.getFlag("dbu-rpg", "recoveryFailed");
+        if ( !rec ) return "";
+        await actor.unsetFlag("dbu-rpg", "recoveryFailed");
+        return L("DBU.Recovery.ConditionOk", { n: rec.n ?? 1 });
+      }
+      const turned = failedK.slice(0, (value > 0) ? Math.min(value, failedK.length) : failedK.length);
+      await actor.update(Object.fromEntries(turned.map(k => [`system.thresholds.${k}`, "pass"])), { dbuSource: "trigger" });
+      const lines = [L("DBU.Trigger.SteadfastPassed", { n: turned.length })];
+      // (DR4: a Stress Test forced only by that failure is not needed any more)
+      if ( (turned.length === failedK.length) && actor.getFlag("dbu-rpg", "stressByFail") && (sys._source?.pending ?? []).includes("stressTest") ) {
+        await actor.removePending("stressTest");
+        await actor.unsetFlag("dbu-rpg", "stressByFail");
+        lines.push(L("DBU.Trigger.StressUndone"));
+      }
+      return lines.join(" ");
+    }
     // B3: leave a State, even one another effect gave (its timed entries go with it)
     case "leaveState": {
       const key = statusKey("state", resource);
@@ -2019,7 +2942,34 @@ export async function pickCondition(keys, label = "") {
 
 /** The combat event at which each duration is checked. */
 const EXPIRES_AT = { endOfTurn: "endOfTurn", endOfNextTurn: "endOfTurn", startOfNextTurn: "startOfTurn", endOfRound: "endOfRound",
-  endOfNextRound: "endOfRound" };
+  endOfNextRound: "endOfRound", untilDefended: "defended" };
+
+/**
+ * RA "nextRoll": the timed bonuses (buff) of this actor that end with its next roll of their kind (a Strike bonus with the
+ * next Strike Roll...): after that roll, they go.
+ */
+export async function expireNextRoll(actor, kind) {
+  const list = actor?.getFlag?.("dbu-rpg", "timed") ?? [];
+  if ( !list.some(e => e.duration === "nextRoll") ) return;
+  const fits = target => {
+    const t = String(target ?? "");
+    if ( ["strike", "dodge"].includes(kind) ) return [kind, "combat"].includes(t) || t.startsWith(`${kind}.`);
+    if ( kind === "wound" ) return (t === "wound") || t.startsWith("wound.");
+    if ( kind === "save" ) return t.startsWith("save.");
+    if ( kind === "skill" ) return t.startsWith("skill.");
+    return t === kind;
+  };
+  const keep = [];
+  const gone = [];
+  for ( const e of foundry.utils.deepClone(list) ) {
+    const target = /\(([^)]+)\)$/.exec(String(e.key ?? ""))?.[1] ?? "";
+    if ( (e.duration === "nextRoll") && (e.kind === "modifier") && fits(target) ) gone.push(e);
+    else keep.push(e);
+  }
+  if ( !gone.length ) return;
+  for ( const e of gone ) await removeTimedModifier(actor, e.key);
+  await actor.setFlag("dbu-rpg", "timed", keep);
+}
 
 /** Is it this actor's turn in the running combat? */
 function isActorsTurn(actor) {
@@ -2150,15 +3100,16 @@ async function removeTimedModifier(actor, label) {
   return true;
 }
 
-/** Power Up: each stack of Power lasts until the end of your next turn. */
-function powerEntry(actor) {
-  return { kind: "power", key: "power", count: 1, duration: "endOfNextTurn", skip: isActorsTurn(actor) ? 1 : 0,
+/** Power Up: each stack of Power lasts until the end of your next turn (RD: or the duration of the effect that gave it). */
+function powerEntry(actor, duration = null) {
+  const d = duration ?? "endOfNextTurn";
+  return { kind: "power", key: "power", count: 1, duration: d, skip: ((d === "endOfNextTurn") && isActorsTurn(actor)) ? 1 : 0,
     label: "Power", round: encounterOf(actor)?.round ?? 0 };
 }
 
-export async function addTimedPower(actor, n = 1) {
+export async function addTimedPower(actor, n = 1, { duration = null } = {}) {
   const list = foundry.utils.deepClone(actor.getFlag("dbu-rpg", "timed") ?? []);
-  for ( let i = 0; i < n; i++ ) list.push(powerEntry(actor));
+  for ( let i = 0; i < n; i++ ) list.push(powerEntry(actor, duration));
   await actor.setFlag("dbu-rpg", "timed", list);
 }
 
@@ -2188,6 +3139,18 @@ export function powerTimers(actor) {
 }
 
 async function revert(actor, entry, { quiet = false } = {}) {
+  // TS: a Racial Trait switched for a while comes back as it was
+  if ( entry.kind === "traitSwitch" ) {
+    const item = actor.items.get(entry.key);
+    if ( !item || (!!item.system?.active === !!entry.prev) ) return false;
+    await item.update({ "system.active": !!entry.prev });
+    return true;
+  }
+  // E2: an area placed for a while is removed
+  if ( entry.kind === "area" ) {
+    const { removeArea } = await import("../canvas/areas.mjs");
+    return removeArea(entry.key);
+  }
   // A system flag that lasts a while (Arrogant and Unstoppable: treated as Healthy)
   if ( entry.kind === "flag" ) {
     if ( actor.getFlag("dbu-rpg", entry.key) === undefined ) return false;
@@ -2230,7 +3193,9 @@ export async function expireTimed(actor, event, { source = null } = {}) {
     // With `source`: what that Character's effects caused "until the end of / the start of your next turn" on others
     const ends = source ? ((entry.source === source) && (((event === "endOfTurn") && (entry.duration === "endOfSourceTurn"))
       || ((event === "startOfTurn") && (entry.duration === "startOfSourceTurn"))))
-      : (EXPIRES_AT[entry.duration] === event);
+      : ((EXPIRES_AT[entry.duration] === event)
+        // RD "untilDefendedRound": the holder's next defense or the end of the Round, whichever comes first
+        || ((entry.duration === "untilDefendedRound") && ["defended", "endOfRound"].includes(event)));
     if ( !ends ) { keep.push(entry); continue; }
     due += 1;
     if ( entry.skip > 0 ) { entry.skip -= 1; keep.push(entry); continue; }

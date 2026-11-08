@@ -169,6 +169,11 @@ export function awakeningSlug(name) {
 }
 
 /** Stacks of every Awakening of an actor, by slug (for "for every stack of Absorption you possess"). */
+/** T4 { <slug>: 1 } for every Awakening a Character possesses (@allyHasAwk.<slug> on the events about an Ally). */
+export function possessedAwakenings(actor) {
+  return Object.fromEntries(Object.entries(awakeningStacks(Array.from(actor?.items ?? []))).filter(([, n]) => n > 0).map(([s]) => [s, 1]));
+}
+
 export function awakeningStacks(items) {
   const out = {};
   for ( const t of items ?? [] ) {

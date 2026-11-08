@@ -23,10 +23,11 @@ import { refreshAllHeightMarkers, registerHeight } from "./module/canvas/height.
 import { SIGNATURE_SUMMARIES } from "./module/rules/signature.mjs";
 import { OPTIONAL_RULES, OptionalRulesConfig } from "./module/optional-rules.mjs";
 import * as formula from "./module/rules/formula.mjs";
-import { openAttackDialog } from "./module/combat/attack.mjs";
+import { openAttackDialog, registerFinalChanceHook } from "./module/combat/attack.mjs";
 import { inCombat } from "./module/combat/triggers.mjs";
 import { autoOfficialText } from "./module/rules/official-text.mjs";
 import { registerGrantHooks } from "./module/rules/grants.mjs";
+import { registerBattleConfig } from "./module/rules/battle.mjs";
 import { registerProximityHooks } from "./module/rules/proximity.mjs";
 import { registerAllyHooks } from "./module/rules/allies.mjs";
 import { registerMovementWatch } from "./module/rules/movement-watch.mjs";
@@ -285,10 +286,14 @@ for ( const hook of ["createItem", "updateItem", "deleteItem"] ) {
 
 // A Trait added to a Character brings the Maneuvers, Talents and Unique Abilities it grants (and takes them away with it)
 registerGrantHooks();
+import("./module/rules/store.mjs").then(S => S.registerBorrowHooks()).catch(console.error);
+registerBattleConfig();
 // D: a token that moves refreshes the distances (@alliesWithin.<n>...) of its encounter
 registerProximityHooks();
 // G: the Allies of a Character with "ally.<target>" pieces, and those that read the encounter, follow its changes
 registerAllyHooks();
+// FC: a Final Chance's Defeat once its attack is over
+registerFinalChanceHook();
 // P: a token moved in combat: "moved", and "opponentLeftMelee" (the Exploit it provokes)
 registerMovementWatch();
 

@@ -15,7 +15,7 @@ export const EVENT_VARS = {
   // B3 moments
   stateLeave: ["state_", "level"],
   allyDefeated: ["allyMinion", "byAttack", "byOpponent", "vs."],
-  inflict: ["cond_", "level", "vs."],
+  inflict: ["cond_", "level", "vs.", "via_"],
   // B5 Legend Realized and Empower
   legendRealized: ["legendLife", "legendKi"],
   empower: ["actionsSpent", "kpGiven", "dkpGiven", "oos", "vs."],
@@ -58,7 +58,7 @@ export const OPTION_PREFIXES = ["surge.", "recovery.", "charge."];
 /** Targets whose value is text, not a formula (check the text in checkModifier). */
 export const TEXT_TARGETS = [];
 /** Targets whose value may hold dice ("1d10 + 2"). */
-export const DICE_TARGETS = ["surge.healBonus"];
+export const DICE_TARGETS = ["surge.healBonus", "surge.vengefulDice"];
 /** RegExps of variable names allowed wherever the attack variables are, like the base /^(da|via|superProfile|opt|profile)_/. */
 export const PREFIX_RE = [];
 
@@ -74,9 +74,14 @@ const WITH_TARGETS = {
   healingSurge: t => /^surge\./.test(t),
   kiSurge: t => /^surge\./.test(t),
   surge: t => /^surge\./.test(t),
+  vengefulSurge: t => /^surge\./.test(t),
+  primalSurge: t => /^surge\./.test(t),
+  legendarySurge: t => /^surge\./.test(t),
   combatRecovery: t => /^recovery\./.test(t) || (t === "flag.recoveryNoDvPenalty") || (t === "actions"),
   transformation: t => /^legend\./.test(t),
-  empower: t => /^empower\./.test(t) || ["flag.empowerMelee", "flag.empowerMax", "actions"].includes(t)
+  empower: t => /^empower\./.test(t) || ["flag.empowerMelee", "flag.empowerMax", "actions"].includes(t),
+  // RG: the Out-of-Sequence Grapple's extra Melee Range
+  grapple: t => (t === "grapple.reach")
 };
 /** One side of a Clash check: might, a Save, a Skill key, strike, dodge; "a|b" = the better one. */
 // (an Attribute too: combat/clash.mjs rolls its Modifier, the Karmic Clash)
@@ -91,7 +96,7 @@ export function checkModifier(m, i, ctx) {
   const out = [];
   const t = String(m.target ?? "");
   // B5 stressReq.<slug of a Transformation's name>
-  if ( t.startsWith("stressReq.") && !/^stressReq\.[a-z0-9]+$/.test(t) ) {
+  if ( t.startsWith("stressReq.") && !/^stressReq\.(tag\.)?[a-z0-9]+$/.test(t) ) {
     out.push(`modifier ${i}: "${t}" needs the Transformation's slug (lowercase letters and digits: stressReq.seethingfury)`);
   }
   if ( (t === "recovery.minActions") && m.mode ) out.push(`modifier ${i}: recovery.minActions cannot be an option box`);
@@ -129,7 +134,8 @@ export function checkTrigger(t, i, ctx) {
   }
   // B4 rolls and checks
   if ( has("roll") ) {
-    const dice = String(t.roll).replace(/\d*d\d+(kh|kl)?\d*/gi, "1");
+    // (T24 "(@T)d6": a parenthesised number of dice)
+    const dice = String(t.roll).replace(/\(([^()]*)\)d\d+(kh|kl)?\d*/gi, "($1)").replace(/\d*d\d+(kh|kl)?\d*/gi, "1");
     if ( !/d\d+/i.test(t.roll) ) out.push(`${what}: roll "${t.roll}" has no dice`);
     out.push(...ctx.check(dice, [], `${what} roll`, true));
   }
@@ -137,8 +143,8 @@ export function checkTrigger(t, i, ctx) {
   if ( has("rollKey") && !has("roll") && !has("check") ) out.push(`${what}: rollKey without roll or check`);
   if ( has("check") ) {
     const c = String(t.check).trim();
-    const m = /^(steadfast(:[+-]?\d+)?|save\.(\w+):\d+|skill\.(\w+):\d+|clash:([\w|]+)(?: vs ([\w|]+))?)$/.exec(c);
-    if ( !m ) out.push(`${what}: check "${c}" (steadfast[:mod], save.<save>:<tn>, skill.<skill>:<tn>, clash:<mine>[ vs <theirs>])`);
+    const m = /^(steadfast(:[+-]?\d+)?|pressure(:[+-]?\d+)?|save\.(\w+):\d+|skill\.(\w+):\d+|clash:([\w|]+)(?: vs ([\w|]+))?)$/.exec(c);
+    if ( !m ) out.push(`${what}: check "${c}" (steadfast[:mod], pressure[:mod], save.<save>:<tn>, skill.<skill>:<tn>, clash:<mine>[ vs <theirs>])`);
     else if ( m[3] && !SAVES.includes(m[3]) ) out.push(`${what}: check "${c}": unknown save`);
     else if ( m[4] && !(m[4] in (ctx.DBU.skills ?? {})) ) out.push(`${what}: check "${c}": unknown skill`);
     else if ( m[5] && (!clashSide(m[5], ctx) || (m[6] && !clashSide(m[6], ctx))) ) out.push(`${what}: check "${c}": unknown Clash roll`);
@@ -162,7 +168,7 @@ export function checkTrigger(t, i, ctx) {
       if ( !target || !formula ) { out.push(`${what}: with "${part}" (target=formula)`); continue; }
       if ( (target !== "actions") && !ctx.isTarget(target) ) { out.push(`${what}: with: unknown target "${target}"`); continue; }
       if ( !keys.some(k => WITH_TARGETS[k]?.(target)) ) { out.push(`${what}: with: "${target}" is not a target of ${t.resource}`); continue; }
-      const f = ["surge.healBonus", "recovery.bonus", "legend.bonus"].includes(target) ? formula.replace(/\d*d\d+/gi, "1") : formula;
+      const f = ["surge.healBonus", "recovery.bonus", "legend.bonus", "surge.vengefulDice"].includes(target) ? formula.replace(/\d*d\d+/gi, "1") : formula;
       out.push(...ctx.check(f, [], `${what} with`, true));
     }
   }
@@ -188,7 +194,7 @@ export function checkEntry(e, key, ctx) {
     for ( const a of m[2].matchAll(/\+aspect:\s*([A-Za-z0-9]+)(?::\s*(\d+))?/g) ) {
       if ( !(a[1] in (ctx.DBU.aspects ?? {})) ) out.push(`grant ${m[1]}: unknown aspect "${a[1]}"`);
     }
-    if ( /\+(?!aspect:|active\b|mastery\s*:)/.test(m[2]) ) out.push(`grant ${m[1]}: "${m[2].trim()}" (an Aspect patch is +aspect:<key>[:<level>])`);
+    if ( /\+(?!aspect:|active\b|mastery\s*:|free\b|option\s*:)/.test(m[2]) ) out.push(`grant ${m[1]}: "${m[2].trim()}" (an Aspect patch is +aspect:<key>[:<level>])`);
   }
   return out;
 }

@@ -1429,7 +1429,18 @@
      "applied": false
     }
    ],
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "skill.medicine",
+     "value": "1",
+     "condition": "",
+     "label": "Healing Hands (passive)",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    }
+   ],
    "summary": "10 TP · KP 5(T) · Standard",
    "source": {
     "slug": "unique-abilities",
@@ -1437,7 +1448,38 @@
     "url": "https://dbu-rpg.com/unique-abilities/"
    },
    "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Healing Expertise, Overexertion, Desperate Heal, Energy Zone, Patch-Up</li><li>Restrictions: Natural Healing Hands, Minimal Healing</li><li>Passive Bonus: manual</li></ul>",
-   "triggers": []
+   "triggers": [
+    {
+     "event": "maneuverUsed",
+     "effect": "life",
+     "value": "@roll + @ma",
+     "resource": "",
+     "condition": "@via_healinghands == 1",
+     "label": "Healing Hands",
+     "target": "other",
+     "duration": "none",
+     "mode": "auto",
+     "limit": "",
+     "active": true,
+     "always": false,
+     "roll": "1d10(bT)"
+    },
+    {
+     "event": "maneuverUsed",
+     "effect": "life",
+     "value": "@roll",
+     "resource": "",
+     "condition": "@via_healinghands == 1 && @adv.healingexpertise == 1",
+     "label": "Healing Hands: Healing Expertise",
+     "target": "other",
+     "duration": "none",
+     "mode": "auto",
+     "limit": "",
+     "active": true,
+     "always": false,
+     "roll": "1d10(bT)"
+    }
+   ]
   },
   "effects": [],
   "folder": null,
@@ -3198,7 +3240,48 @@
      "applied": false
     }
    ],
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "ally.defenseValue",
+     "value": "-2(bT)",
+     "condition": "@res.frozenturn >= 1",
+     "label": "Time Freeze: Frozen Turn",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    },
+    {
+     "target": "foe.defenseValue",
+     "value": "-2(bT)",
+     "condition": "@res.frozenturn >= 1",
+     "label": "Time Freeze: Frozen Turn",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    },
+    {
+     "target": "ally.skill.perception",
+     "value": "-2",
+     "condition": "@res.frozenturn >= 1",
+     "label": "Time Freeze: Frozen Turn",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    },
+    {
+     "target": "foe.skill.perception",
+     "value": "-2",
+     "condition": "@res.frozenturn >= 1",
+     "label": "Time Freeze: Frozen Turn",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    }
+   ],
    "summary": "40 TP · KP 14(bT) · Instant",
    "source": {
     "slug": "unique-abilities",
@@ -3206,7 +3289,64 @@
     "url": "https://dbu-rpg.com/unique-abilities/"
    },
    "description": "<p><a href=\"https://dbu-rpg.com/unique-abilities/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/unique-abilities</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Improved Time Freeze</li><li>Restrictions: Pained Time, Limited Time Freeze, Straining Time Freeze, Difficult Time Freeze</li><li>Passive Bonus: manual</li></ul>",
-   "triggers": []
+   "triggers": [
+    {
+     "event": "maneuverUsed",
+     "effect": "resourceSet",
+     "value": "1",
+     "resource": "Frozen Turn",
+     "condition": "@via_timefreeze == 1",
+     "label": "Time Freeze: Frozen Turn",
+     "target": "self",
+     "duration": "none",
+     "mode": "auto",
+     "limit": "",
+     "active": true,
+     "always": false
+    },
+    {
+     "event": "maneuverUsed",
+     "effect": "message",
+     "value": "Frozen Turn: 2 Actions, Standard Maneuvers only (no Ki Wager, Instant / Out-of-Sequence Maneuvers, Combat Recovery, Power Up, Energy Charge, Unique Abilities or Special Maneuvers on others); the others use no Counter, Instant or Out-of-Sequence Maneuvers (Surges allowed)",
+     "resource": "",
+     "condition": "@via_timefreeze == 1",
+     "label": "Time Freeze",
+     "target": "self",
+     "duration": "none",
+     "mode": "remind",
+     "limit": "",
+     "active": true,
+     "always": false
+    },
+    {
+     "event": "use",
+     "effect": "resourceSet",
+     "value": "0",
+     "resource": "Frozen Turn",
+     "condition": "@res.frozenturn >= 1",
+     "label": "Time Freeze: end the Frozen Turn",
+     "target": "self",
+     "duration": "none",
+     "mode": "auto",
+     "limit": "",
+     "active": true,
+     "always": false
+    },
+    {
+     "event": "endOfTurn",
+     "effect": "resourceSet",
+     "value": "0",
+     "resource": "Frozen Turn",
+     "condition": "@res.frozenturn >= 1",
+     "label": "Time Freeze: the Frozen Turn ends",
+     "target": "self",
+     "duration": "none",
+     "mode": "auto",
+     "limit": "",
+     "active": true,
+     "always": false
+    }
+   ]
   },
   "effects": [],
   "folder": null,
@@ -3495,6 +3635,1042 @@
   "flags": {
    "dbu-rpg": {
     "slug": "unique-abilities"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "GLch3GlBHdSr6msX",
+  "name": "Instant Transmission",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Spirit Control",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 15,
+   "kpCost": "4(T)",
+   "maneuverType": "Instant",
+   "actionCost": "N/A",
+   "advancements": [
+    {
+     "name": "Combat Transmitter",
+     "tp": 10,
+     "prerequisite": "Insight Score 8+",
+     "owned": false
+    },
+    {
+     "name": "Masterful Combat Transmitter",
+     "tp": 5,
+     "prerequisite": "Combat Transmitter",
+     "owned": false
+    },
+    {
+     "name": "Sonic Transmission",
+     "tp": 8,
+     "prerequisite": "3+ Skill Ranks in Clairvoyance",
+     "owned": false
+    },
+    {
+     "name": "Spirit Transporter",
+     "tp": 8,
+     "prerequisite": "4+ Skill Ranks in Clairvoyance, Insight Score 12+",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP 4(T) · Instant",
+   "source": {
+    "slug": "spirit-control",
+    "section": "Instant Transmission",
+    "url": "https://dbu-rpg.com/spirit-control/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/spirit-control/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/spirit-control</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Combat Transmitter, Masterful Combat Transmitter, Sonic Transmission, Spirit Transporter</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "spirit-control"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "cbSzkTsD0YNNv24V",
+  "name": "Instant Transmission: Saviour",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Instant Transmission",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 15,
+   "kpCost": "8(T)",
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP 8(T) · Counter",
+   "source": {
+    "slug": "spirit-control",
+    "section": "Instant Transmission: Saviour",
+    "url": "https://dbu-rpg.com/spirit-control/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/spirit-control/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/spirit-control</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "spirit-control"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "t3etws6wteEo6qB8",
+  "name": "Instant Transmission: Assault",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Instant Transmission, Combat Transmitter Advancement",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 15,
+   "kpCost": "4(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP 4(T) · Standard",
+   "source": {
+    "slug": "spirit-control",
+    "section": "Instant Transmission: Assault",
+    "url": "https://dbu-rpg.com/spirit-control/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/spirit-control/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/spirit-control</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "spirit-control"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "rRQmcWpzmISDx1TJ",
+  "name": "Gigantification",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Spirit Control",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 10,
+   "kpCost": "4(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "10 TP · KP 4(T) · Standard",
+   "source": {
+    "slug": "spirit-control",
+    "section": "Gigantification",
+    "url": "https://dbu-rpg.com/spirit-control/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/spirit-control/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/spirit-control</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "spirit-control"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "UtE5g5hRbqTSc1Rd",
+  "name": "Spiritual Healing",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Spirit Control",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 10,
+   "kpCost": "10(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "10 TP · KP 10(T) · Standard",
+   "source": {
+    "slug": "spirit-control",
+    "section": "Spiritual Healing",
+    "url": "https://dbu-rpg.com/spirit-control/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/spirit-control/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/spirit-control</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "spirit-control"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "38Zjllu161pDFjqf",
+  "name": "Spiritual Cloning",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Spirit Control",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 15,
+   "kpCost": "10(T)",
+   "maneuverType": "Standard",
+   "actionCost": "3 Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP 10(T) · Standard",
+   "source": {
+    "slug": "spirit-control",
+    "section": "Spiritual Cloning",
+    "url": "https://dbu-rpg.com/spirit-control/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/spirit-control/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/spirit-control</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "spirit-control"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "B0vB6zhrIr1uykEp",
+  "name": "Forced Spirit Fission",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "2+ stacks of Spirit Control",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 30,
+   "kpCost": "6(T)",
+   "maneuverType": "Instant Maneuver",
+   "actionCost": "N/A",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [
+    {
+     "target": "save.cognitive",
+     "value": "1(bT)",
+     "condition": "",
+     "label": "Forced Spirit Fission (Passive Bonus)",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "wound",
+     "value": "1(bT)",
+     "condition": "",
+     "label": "Forced Spirit Fission (Passive Bonus)",
+     "active": true,
+     "always": false
+    }
+   ],
+   "summary": "30 TP · KP 6(T) · Instant Maneuver",
+   "source": {
+    "slug": "spirit-control",
+    "section": "Forced Spirit Fission",
+    "url": "https://dbu-rpg.com/spirit-control/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/spirit-control/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/spirit-control</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: automatizado</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "spirit-control"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "COiUE0oPv6bNbNdV",
+  "name": "Gravity Manipulation",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Gravity Controller Awakening",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 0,
+   "kpCost": "4(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Precise Gravity",
+     "tp": 5,
+     "prerequisite": "N/A",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "N/A TP · KP 4(T) · Standard",
+   "source": {
+    "slug": "gravity-controller",
+    "section": "Gravity Manipulation",
+    "url": "https://dbu-rpg.com/gravity-controller/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/gravity-controller/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/gravity-controller</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Precise Gravity</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "gravity-controller"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "ITyeGJs4mEkheKqO",
+  "name": "Gravity Crush",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Gravity Controller Awakening",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 20,
+   "kpCost": "8(T)",
+   "maneuverType": "Standard",
+   "actionCost": "2 Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "20 TP · KP 8(T) · Standard",
+   "source": {
+    "slug": "gravity-controller",
+    "section": "Gravity Crush",
+    "url": "https://dbu-rpg.com/gravity-controller/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/gravity-controller/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/gravity-controller</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "gravity-controller"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "otxRFv9gposfQT2K",
+  "name": "Gravity Restraint",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Gravity Controller Awakening",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 20,
+   "kpCost": "6(T)",
+   "maneuverType": "Counter",
+   "actionCost": "1 Counter Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "20 TP · KP 6(T) · Counter",
+   "source": {
+    "slug": "gravity-controller",
+    "section": "Gravity Restraint",
+    "url": "https://dbu-rpg.com/gravity-controller/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/gravity-controller/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/gravity-controller</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "gravity-controller"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "I6GdgLo3GRQucHhx",
+  "name": "Gravity Burst",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical/Magical",
+   "prerequisites": "Gravity Controller Awakening, Gravity Crush and Gravity Restraint Unique Abilities",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 20,
+   "kpCost": "12(T)",
+   "maneuverType": "Standard",
+   "actionCost": "3 Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "20 TP · KP 12(T) · Standard",
+   "source": {
+    "slug": "gravity-controller",
+    "section": "Gravity Burst",
+    "url": "https://dbu-rpg.com/gravity-controller/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/gravity-controller/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/gravity-controller</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "gravity-controller"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "7pifBVuqilkpmmXE",
+  "name": "Will Armament",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Manifested Willpower",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 15,
+   "kpCost": "N/A",
+   "maneuverType": "Out-of-Sequence Maneuver",
+   "actionCost": "N/A",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP N/A · Out-of-Sequence Maneuver",
+   "source": {
+    "slug": "manifested-willpower",
+    "section": "Will Armament",
+    "url": "https://dbu-rpg.com/manifested-willpower/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/manifested-willpower/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/manifested-willpower</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "manifested-willpower"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "NmbCsialAZnZOWe2",
+  "name": "Will Observation",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Manifested Willpower",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 15,
+   "kpCost": "N/A",
+   "maneuverType": "Out-of-Sequence Maneuver",
+   "actionCost": "N/A",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP N/A · Out-of-Sequence Maneuver",
+   "source": {
+    "slug": "manifested-willpower",
+    "section": "Will Observation",
+    "url": "https://dbu-rpg.com/manifested-willpower/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/manifested-willpower/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/manifested-willpower</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "manifested-willpower"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "FS9O1qJTMaDoy1p9",
+  "name": "Will of the Conqueror",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Manifested Willpower, ARC Permission",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 15,
+   "kpCost": "11(T)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "15 TP · KP 11(T) · Standard",
+   "source": {
+    "slug": "manifested-willpower",
+    "section": "Will of the Conqueror",
+    "url": "https://dbu-rpg.com/manifested-willpower/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/manifested-willpower/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/manifested-willpower</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "manifested-willpower"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Tw9X8T6nbvqOFqIR",
+  "name": "Planetary Consumption",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Energy Consumption Awakening",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 0,
+   "kpCost": "N/A",
+   "maneuverType": "Standard",
+   "actionCost": "3 Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "N/A TP · KP N/A · Standard",
+   "source": {
+    "slug": "energy-consumption",
+    "section": "Planetary Consumption",
+    "url": "https://dbu-rpg.com/energy-consumption/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/energy-consumption/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/energy-consumption</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "energy-consumption"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "Xiyu0MRlT0cybwvo",
+  "name": "Fire and Flames",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Energy Consumption Awakening",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 0,
+   "kpCost": "N/A",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "N/A TP · KP N/A · Standard",
+   "source": {
+    "slug": "energy-consumption",
+    "section": "Fire and Flames",
+    "url": "https://dbu-rpg.com/energy-consumption/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/energy-consumption/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/energy-consumption</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "energy-consumption"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "D6oXaeWQQyvGSx3e",
+  "name": "Over-Empower",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Energy Consumption Awakening",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 0,
+   "kpCost": "N/A",
+   "maneuverType": "Standard",
+   "actionCost": "Varies (1~3 Actions)",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "N/A TP · KP N/A · Standard",
+   "source": {
+    "slug": "energy-consumption",
+    "section": "Over-Empower",
+    "url": "https://dbu-rpg.com/energy-consumption/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/energy-consumption/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/energy-consumption</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "energy-consumption"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "MoRC2znSB6kaiEDA",
+  "name": "Time Seal",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Access to the Time Power Enhancement Power",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 0,
+   "kpCost": "12(T)",
+   "maneuverType": "Standard",
+   "actionCost": "2 Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "N/A TP · KP 12(T) · Standard",
+   "source": {
+    "slug": "time-power",
+    "section": "Time Seal",
+    "url": "https://dbu-rpg.com/time-power/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/time-power/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/time-power</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "time-power"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "s6nkSICJmk7knBJM",
+  "name": "Time Reversion",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Access to the Time Power Enhancement Power",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 0,
+   "kpCost": "12(T)",
+   "maneuverType": "Counter",
+   "actionCost": "2 Counter Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "N/A TP · KP 12(T) · Counter",
+   "source": {
+    "slug": "time-power",
+    "section": "Time Reversion",
+    "url": "https://dbu-rpg.com/time-power/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/time-power/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/time-power</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "time-power"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "61vrhKxK8imCtNjU",
+  "name": "Injury Transfer",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "N/A",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 0,
+   "kpCost": "10(T)",
+   "maneuverType": "Standard",
+   "actionCost": "3 Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "N/A TP · KP 10(T) · Standard",
+   "source": {
+    "slug": "appointed-god",
+    "section": "Injury Transfer",
+    "url": "https://dbu-rpg.com/appointed-god/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/appointed-god/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/appointed-god</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "appointed-god"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "MNcEDeDzAPx3sXuh",
+  "name": "Space-Time Connection",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "N/A",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 0,
+   "kpCost": "10(T)",
+   "maneuverType": "Standard",
+   "actionCost": "3 Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "N/A TP · KP 10(T) · Standard",
+   "source": {
+    "slug": "appointed-god",
+    "section": "Space-Time Connection",
+    "url": "https://dbu-rpg.com/appointed-god/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/appointed-god/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/appointed-god</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "appointed-god"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "WrKYswEFAW8t5yHh",
+  "name": "Manipulation Sorcery",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Magical Manipulation Wizardry Trait",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 0,
+   "kpCost": "12(T)",
+   "maneuverType": "Standard",
+   "actionCost": "3 Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "N/A TP · KP 12(T) · Standard",
+   "source": {
+    "slug": "warlock",
+    "section": "Manipulation Sorcery",
+    "url": "https://dbu-rpg.com/warlock/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/warlock/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/warlock</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "warlock"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "oSWndLGypGjnVPYz",
+  "name": "Time-Skip",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Time Skipper Awakening",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 0,
+   "kpCost": "4(T)",
+   "maneuverType": "Instant",
+   "actionCost": "N/A",
+   "advancements": [
+    {
+     "name": "Imperceptible Strike",
+     "tp": 10,
+     "prerequisite": "N/A",
+     "owned": false
+    },
+    {
+     "name": "Barrage from Time",
+     "tp": 5,
+     "prerequisite": "N/A",
+     "owned": false
+    },
+    {
+     "name": "Time to Make the Donuts",
+     "tp": 5,
+     "prerequisite": "N/A",
+     "owned": false
+    },
+    {
+     "name": "Walk through Time",
+     "tp": 15,
+     "prerequisite": "N/A",
+     "owned": false
+    },
+    {
+     "name": "Time Shift",
+     "tp": 15,
+     "prerequisite": "N/A",
+     "owned": false
+    },
+    {
+     "name": "Time Restraint",
+     "tp": 15,
+     "prerequisite": "N/A",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "N/A TP · KP 4(T) · Instant",
+   "source": {
+    "slug": "time-skipper",
+    "section": "Time-Skip",
+    "url": "https://dbu-rpg.com/time-skipper/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/time-skipper/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/time-skipper</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Imperceptible Strike, Barrage from Time, Time to Make the Donuts, Walk through Time, Time Shift, Time Restraint</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "time-skipper"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "yCveeIzW4YpYBVIs",
+  "name": "Flash Step",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Technical",
+   "prerequisites": "Hohou Specialist effect of Soul Reaper Factor Trait",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 0,
+   "kpCost": "4(bT)",
+   "maneuverType": "Standard",
+   "actionCost": "1 Action",
+   "advancements": [
+    {
+     "name": "Distant Step",
+     "tp": 5,
+     "prerequisite": "Agility Score of 8+",
+     "owned": false
+    },
+    {
+     "name": "Flash Master",
+     "tp": 10,
+     "prerequisite": "Agility Score of 10+",
+     "owned": false
+    },
+    {
+     "name": "Flash Blossom",
+     "tp": 15,
+     "prerequisite": "Flash Master",
+     "owned": false
+    },
+    {
+     "name": "Cicada Shell",
+     "tp": 10,
+     "prerequisite": "Flash Master Advancement",
+     "owned": false
+    }
+   ],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "N/A TP · KP 4(bT) · Standard",
+   "source": {
+    "slug": "shinigami-factor",
+    "section": "Flash Step",
+    "url": "https://dbu-rpg.com/shinigami-factor/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/shinigami-factor/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/shinigami-factor</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: Distant Step, Flash Master, Flash Blossom, Cicada Shell</li><li>Restrictions: —</li><li>Passive Bonus: manual</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "shinigami-factor"
+   }
+  }
+ },
+ {
+  "_type": "Item",
+  "_id": "COnePqrEqBXV3SsP",
+  "name": "Time Labyrinth",
+  "type": "uniqueAbility",
+  "img": "icons/svg/mage-shield.svg",
+  "system": {
+   "abilityType": "Magical",
+   "prerequisites": "Ruler of Time",
+   "prereq": {
+    "scores": []
+   },
+   "tpCost": 0,
+   "kpCost": "Max Capacity (ignoring any reductions to your Max Capacity)",
+   "maneuverType": "Standard",
+   "actionCost": "3 Actions",
+   "advancements": [],
+   "restrictions": [],
+   "modifiers": [],
+   "summary": "N/A TP · KP Max Capacity (ignoring any reductions to your Max Capacity) · Standard",
+   "source": {
+    "slug": "ruler-of-time",
+    "section": "Time Labyrinth",
+    "url": "https://dbu-rpg.com/ruler-of-time/"
+   },
+   "description": "<p><a href=\"https://dbu-rpg.com/ruler-of-time/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/ruler-of-time</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p><p><strong>Efeitos (estrutura):</strong></p><ul><li>Advancements: —</li><li>Restrictions: —</li><li>Passive Bonus: —</li></ul>",
+   "triggers": []
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "flags": {
+   "dbu-rpg": {
+    "slug": "ruler-of-time"
    }
   }
  }

@@ -1544,3 +1544,934 @@ a Maneuver the system pays elsewhere (an attack, a Surge, Energy Charge) keeps i
 - **`@vs.*` on a `targeted` button of any event** (powerUp, startOfTurn...): allowed when the trigger has a `roll` or a
   `check` (mode ask) — its condition is then tested when the button is clicked, against the clicking user's target. A
   `targeted` button with neither keeps testing its condition when the event happens (no `@vs` there).
+
+## More vocabulary (6Z): the Pressure Check as a check, an extra Legend Realized
+
+- **`check: "pressure"`** (or `"pressure:+1"`): a Pressure Check — 1d10 + `@pressureBonus` (the `pressure` pieces), 4+ a
+  success, a success by itself with `pressure.auto`. It REPLACES the 6W way (`roll: "1d10"` with `@roll + @pressureBonus`): a trigger "make a Pressure Check; on a success X, on a failure Y" → the X triggers
+  with `check: "pressure"`, `onCheck: "success"` and the Y ones with `onCheck: "fail"`, sharing a `rollKey` so one
+  check decides both (mode as the text says). Being a roll of the system (kind `pressure`), it gets the **roll
+  reactions** (5C: event `roll` with `@kind_pressure == 1`: `reroll`, `rollBonus`, `succeed`, `natural`...): "reroll a
+  failed Pressure Check" / "you may treat a failed Pressure Check as a success (spend X)" / "+1 to a Pressure Check
+  by paying LP" are `roll` reactions now.
+- **Event `pressureCheck`** (after any Pressure Check): `@success`, `@failed`, `@total`, `@natural`, `@auto`. "After a
+  successful Pressure Check, ..." → `pressureCheck` with `@success == 1`; counting the successes of a Round → a
+  resource the trigger raises.
+- **`legend` with `+extra`** (resource `"+extra"` for your current Form, or `"<Form> +extra"`): a Legend Realized on
+  top of the once-per-encounter one (neither the per-Form nor the same-Type limit), when the text gives an additional
+  application. `legendRealized` has `@legendExtra`.
+- **A shared `limitKey` counts once per firing:** the automatic pieces of one event that share a `limitKey` now spend
+  ONE use together (the first one counts it, the others of that firing follow), so "1/Round: on a success X and Y" can be
+  automatic pieces with one `limitKey`. Turn and round triggers (`startOfTurn`...) too, and their `message` with a
+  `check` / `roll` in mode ask is a button there as well.
+
+## More vocabulary (6AA): after the Wound Roll, the Stress Test per Grade
+
+- **Event `woundRolled`** (your Wound Roll was made and stored; other = its first target): **`@crit`** (a Critical
+  Result), **`@superCrit`** (a Super Critical: Natural Result 10), `@natural`, `@total`, `@critStrike` and the attack's
+  variables (`@signature`, `@physical`...). Its effects change THAT Wound Roll before its Damage is applied (refused
+  once any of it is applied):
+  - **`woundAdd`**: + value to it; with resource **`"charge"`**, the dice of value more Energy Charges (rolled now, the
+    attack's Charge Dice Category) — "If you score a Super Critical on the Wound Roll, apply an additional Energy Charge
+    to that Attacking Maneuver" → `woundRolled`, condition `@superCrit == 1`, effect `woundAdd`, resource `charge`,
+    value `1` (mode ask for "you may").
+  - **`woundCategory`**: + value Damage Category (to 3 at most); resource **`"lethal"`**: Lethal (Category 3, not
+    reducible) — "you may set the Damage Category to Lethal" → `woundCategory` resource `lethal`.
+  - "Apply your Critical Result Extra Dice an additional time" → `woundAdd` with resource **`"crit"`** (value: how many
+    more times, 1 by default): the attacker's Critical Extra Dice of that Wound Roll rolled again and added.
+- **`stressGradeStep.<slug>`** (a Graded Transformation): ± the Stress Test Requirement per Grade above the first
+  (2 by default): "+3 per Grade instead of +2" → `{ "target": "stressGradeStep.crusherform", "value": "1" }` (only when
+  the Transformation has no Grade table of its own; a table entry wins).
+
+## More vocabulary (6BB): the States and Special States do more by themselves
+
+The system now applies these State effects (dbu-rpg.com/states, /special-states) — an effect that only restates them is
+`covered`; "ignoreState.<state>.<n>" still switches each off:
+- Raging, Apoplectic (1): a Basic Attack button (Out-of-Sequence, 1/Round) when you enter it and at the start of your turn.
+- Mindful, Zen (1): Ki Points 2L(bT) when you spend a Counter Action; Tranquil (1): a Counter Action when you enter it.
+- Undying (1): leaving it with 0 or negative Life Points Defeats you; (2): entering it when you would be Defeated sets
+  your Life Points to 1.
+- Surging (3): an attack that does not include your Focus gets a note on its card.
+- Determined (3): at the start of your turn you leave it (and a reminder to skip that turn).
+- Entrusted (3): 1 Action when you enter it. (Its 4th effect — Full Wager / All-or-Nothing Basic Attack — stays with
+  the GM.)
+- Liquid (2) cannot be Pinned, (4) its movement provokes no Exploit (`noProvoke.movement`), (5) no Attacking Maneuver
+  nor Unique Ability (refused).
+- Multiple Arms (2) one more Counter Action each Combat Round and when you enter it, (4) a reroll button for the Strike
+  of a Combination attack (1/Round), (6) Diminishing Offense from your 5th attack.
+- Spectator (1) a +1(bT) Combat Rolls button for your targeted Ally (entering it and at the start of your turn), (2) a
+  button to leave it, (3) a button that rolls 2d10(bT) Life and Ki Points and spends your Actions, (4) Power Up,
+  Transformation, Energy Charge and attacks refused (a warning for Maneuvers / Unique Abilities that target another
+  Character), (5) no other start-of-turn / start-of-round effect runs.
+- Drunk, Plastered (1): every Combat Condition but Pinned, Suffocating, Stress Exhaustion and Transfigured is ignored.
+- Feral, Wild (1): no Signature Technique nor Unique Ability (refused); Unhinged (1): a Critical Result on the Strike or
+  the Wound Roll raises the attack's Damage Category by 1.
+
+## More vocabulary (6RA): racial package — Allies' events, until defended / next roll, exclusive options, technique uses
+
+- Events `allyExploitTriggered` (an Ally's Exploit was provoked; other = the provoker; `@by_<maneuver>`) and `allyInflict`
+  (an Ally gave an Opponent a Combat Condition through an effect or a Signature Condition; other = that Opponent;
+  `@cond_<key>`, `@level`). Both see `@allyMinion`, `@allyDistance`, `@allyBelow`, `@allyMark.<mark>` and `@vs.`.
+- Durations `untilDefended` (ends after the holder's next defense roll against an attack — "Guard Down against that
+  attack") and `nextRoll` (buff only: ends after the holder's next roll of that kind — strike/dodge/wound/save/skill;
+  "+2 to your next Strike Roll").
+- Option piece field `exclusive: "<set>"` (attack.* pieces with mode ask): the boxes of one set cannot be ticked
+  together in the attack dialog ("either +2 Strike or +2 Wound, not both").
+- Technique uses this encounter before this attack: `@sigUsedEnc`, `@sigUsedRound` (this Signature), `@sigsUsedRound`
+  (Signatures used this Round), `@profileUsedRound.<profile>`, `@profileUsedEnc.<profile>` — in attack options, wound
+  options, attackMade / attackHit triggers. ("The second time you use the same Signature in a Round" =
+  `@sigUsedRound >= 1`.)
+- Target `lifeOverMax`: Life Points can be regained up to the maximum + this (every regain clamps at `life.cap`).
+- `@opponentsCondByMe`: Opponents in the encounter suffering a Combat Condition you inflicted; `@vs.condByMe`: how many
+  of the other Character's Conditions you inflicted; `@vs.markOthers.<mark>`: how many OTHER encounter Characters placed
+  that mark on it.
+
+## More vocabulary (6LT): Legendary Traits at all times, the Forms a Defeat left
+
+- A Legendary Trait is possessed at all times once the character has its Legendary Form (the rule): its pieces are
+  `always` and apply / fire whether or not that Form is active. Never condition them on being in that Form
+  (`@this`, `@active.<self>`, `@inForm`) unless the text itself says "while in this Transformation".
+- `@legendaryForm` / `@alternateForm`: how many active Forms are Legendary / Alternate Forms.
+- Event `transform`: `@enteredAlternate`, `@enteredLegendary` (what was entered), `@enteredAspects.<key>` (the Aspects of
+  the Transformation just entered — "upon entering a Transformation with the Super Saiyan Form Aspect" =
+  `@enteredAspects.superSaiyanForm >= 1`; `@aspects.` reads every active one).
+- Roll reactions of a Stress Test (`@kind_stress`): `@stressAspects.<key>` (the Aspects of the Transformations tested) and
+  `@entering` (1: the Stress Test to enter one; 0: to remain).
+- `legend.bonus` pieces: `@legendAspects.<key>` (the Aspects of the Form whose Legend Realized it is).
+- A Defeat's own `threshold` triggers run for the Forms it left (`@defeated == 1`), and so do the `fxUsed` triggers of
+  their effects. A [Triggered/Defeated] effect happens when you would have been Defeated: when the Defeat's triggers (a
+  button of theirs too) bring your Life Points above 0, the Forms and Enhancements that Defeat ended become active again.
+- Effect `steadfastPass` (value: how many; 0 = all): your failed Steadfast Checks of the Health Thresholds become
+  successes.
+
+## More vocabulary (6RB): United Attack, Intervene and Reflect run from the attack card
+
+The attack card now runs these rules Maneuvers (combat/team-maneuvers.mjs), so an effect that only restates them is
+`covered`:
+- United Attack (card button): an Ally adjacent to the attacker pays 1 Action and the KP of the same Profile (+ its Ki
+  Wager, up to 1/4 Max Capacity): the attack's Wound gets 1/2 Force (Magic for a Magic Attack) + the Wager; 1/Round each.
+- Intervene (a hit target's row): an Ally of it, not targeted by the attack and not at Long Range from it, pays 1
+  Counter Action + 0 / 2(bT) / 8(bT) KP: Defense Wall (takes its place; the Damage beyond their LP goes to the Ally,
+  reduced by its Soak / DR), Deflect (Might Clash −1(T) per Energy Charge / Power Shot rank: won = every target missed,
+  lost = takes its place at +1 Damage Category), Distant Deflect (the same Clash; lost = nothing).
+- Reflect (card button): who parried an Energy / Magic attack without AoE, or deflected it, pays 5(T) KP: Strike against
+  the Opponent they target, a new card whose Wound Roll the original attacker makes.
+- Each fires `maneuverUsed` with `@via_unitedattack` / `@via_intervene` / `@via_reflect`; costs: `kpCost.use.<slug>` /
+  `kpCost.useFree.<slug>` (slugs unitedattack, intervene, reflect).
+
+Pieces that change them (modifiers, value 1 unless said; `limit` / `limitKey` / `condition` allowed, no `at`):
+- `intervene.noCounter` — you Intervene without a Counter Action. Scope: `@vs.` = the Ally you protect, `@wall` /
+  `@deflect` / `@distant` (the option), the attack's variables (`@physical`, `@energy`, `@signature`...).
+- `intervene.noCounterFor` — on the protected Character: who Intervenes for you spends no Counter Action (`@vs.` = that
+  Character). ("Your Bonded Ally may Intervene without a Counter Action" = this piece with `@vs.mark.<bond> >= 1`.)
+- `united.noAction` — you join a United Attack without an Action (`@vs.` = the attacker, `@unitedCount` = who joined
+  before you, the attack's variables); `unitedBy.noAction` — on the attacker: who joins your attack spends no Action.
+- `united.wound` (value: Wound) — + Wound to the attack you join; `unitedBy.charges` (value: Energy Charges) — on the
+  attacker: + Energy Charges when someone joins your attack (cap with `@unitedCount`).
+- `reflect.strike` (value: Strike) — + Strike Roll of your Reflect (`@vs.` = its new target).
+
+## More vocabulary (6RC): pieces read with the Max LP, Life Points below 0, @isMinion
+
+- `lifeOverMax` and the new `lifeFloor` are worked out after the Max LP, so their value may read `@lifeMax`
+  ("half of your Maximum Life Points above the maximum" = `lifeOverMax` `floor(@lifeMax/2)`).
+- `lifeFloor` (value N): Damage may take your Life Points down to −N and the Defeat comes on reaching −N instead of 0
+  (`@lifeFloor` reads it).
+- `@isMinion`: 1 when the character itself is a Minion ("As a Minion, instead ...").
+
+## More vocabulary (6RD): small pieces for the main races
+
+- `@kiMultiplier` (a Form gives the Ki Multiplier now), `@greaterDiceOn` (the Greater Dice apply to your rolls now),
+  `@vs.dimDefense` (the other Character's Diminishing Defense penalty now).
+- A `power` trigger with a `duration` keeps the Power it gives that long (instead of to the end of your next turn).
+- Duration `untilDefendedRound`: the holder's next defense or the end of the Round, whichever comes first.
+- Target `clash.autoLose` (value 1; condition with `@initiated`, `@via_<x>`): the other side wins the Clash without rolling.
+- Target `apparel.maxLayers` (value N): the sheet shows an error when more Apparel layers are worn.
+- `flag.lifeOneAtFloor`: below 0 LP, an effect that would leave 1 LP leaves 1 above −`lifeFloor`.
+- Effects `equip` / `unequip` (resource: the item's name): equip / unequip that Equipment, Apparel or Weapon.
+- On an Intervene's hit: `@interveneFree` (it spent no Counter Action) and `@interveneFreeFx.<ref>` (the effect that waived
+  it); the Deflect's Might Clash has `@via_deflect`.
+- Racial option pieces are switched on one by one, so a sub-choice can be one piece per value (one `favoredElement` piece per
+  Element, one `saveProf.<save>` per Save...): the player switches on the option and the value picked.
+
+## More vocabulary (6OG / 6RG / 6RT): option grants, Grapple Out-of-Sequence, Empower, each Threshold's penalty
+
+- Grant suffixes: `+option:<Name>` (the granted item comes when that Racial option is switched on and goes when it is
+  switched off) and `+res:<slug>` (it works only while that sheet resource is 1+). An entry's own field
+  `"grant": "maneuver: X +option:Y; talent: Z"` grants while the entry stays partial (its code spec still listed for the GM);
+  a code category `grant` makes the entry fully automatic. Target `optionSwitch` (value 1, no effect) gives an option that
+  only grants items a piece the player switches on.
+- Maneuver keys `grapple`, `launch`, `pin` (the Grapple flows Out-of-Sequence, no Action; the target is the event's other /
+  the user's target); `with: "grapple.reach=<n>"` adds Squares of Melee Range to that Grapple.
+- Empower: `flag.empowerForceMax` (the giver always gives the most it can); `empowered.toLife` (the recipient: the Ki
+  Points it gets become Life Points, up to its missing LP; `empowered` has `@lpGained`).
+- `threshold.bruisedPenaltyMult` / `threshold.injuredPenaltyMult` / `threshold.criticalPenaltyMult` (that failed
+  Threshold's penalty multiplied: 0 = none, 2 = doubled), `steadfast.bruised` / `.injured` / `.critical` (± only that
+  Threshold's Steadfast Check), `@failedThr.<threshold>` (1 when its Steadfast Check failed).
+
+## More vocabulary (6RE / 6AP): blocks, silent Defeat, an Opponent Defeated, Ki ward, the Advantage pick in a set
+
+- `block.attack` / `block.signature` / `block.uniqueAbility` / `block.powerUp` / `block.energyCharge` /
+  `block.transformation` (value 1): that action is refused (the warning names the effect).
+- Event `opponentDefeated` (an Opponent of yours was Defeated; other = it; `@byMe`, `@byAttack`, `@opponentMinion`, `@vs.`).
+- `life` effect resource `silent`: nothing of yours triggers in response to that loss (its own `threshold` event does not
+  fire; the Allies' `allyDefeated` and the Opponents' `opponentDefeated` still do). `safe silent` combines both.
+- `flag.noKiLossFromOthers`: another Character's trigger effect cannot reduce your Ki Points.
+- `@vs.alliesAdjacent` / `@vs.opponentsAdjacent`: how many of the other Character's Allies / Opponents are adjacent to it.
+- `attack.advantagePick` pieces may carry `exclusive`: the select joins that set when every pick piece that applies is in
+  it (a pick piece without one makes the select free). `attack.advantagePick.copied` (value = TP): only the Advantages one
+  of your Copied Techniques has.
+
+## More vocabulary (6RX / 6CC): what reacted to a roll, costs checked now and paid later
+
+- `pressureCheck`: `@reacted.<fx ref>` (that effect reacted to the Pressure Check's roll) and `@rollSpent.<resource>`;
+  `clashWon` / `clashLost`: `@reacted.<fx ref>` (to your roll of the Clash) and `@chose.<group>` (your Clash boxes).
+- Attacks: `@rollSpent.strike.<resource>` / `@rollSpent.wound.<resource>` — what roll reactions spent on this attack's
+  Strike / Wound Roll (for "if you spent 2+ X on the Strike Roll of that attack").
+- Option field `checkCost` (attack.* pieces): a cost only checked when the attack is declared, summed with the other ticked
+  boxes' costs, and paid later by the effect's own triggers ("you do not lose them until the attack is over").
+- `attackMissed`: `@missedAll` (every target of the attack has now missed).
+
+## More vocabulary (6MW / 6EN): marks on the marked one's turns, the Ki Wager limit, environment Damage, Entrusted (4)
+
+- A `mark` effect may last `endOfTheirTurn` / `endOfTheirNextTurn` / `startOfTheirNextTurn`: counted on the marked
+  Character's turns.
+- Option / `with` target `attack.wagerMax` (value N, lowest wins): the Ki Wager limit of this attack
+  (`with: "attack.wagerMax=0"` = no Ki Wager).
+- Collision, Suffocating, Heightened Gravity and Damage Over Time losses count as Damage for `resourceSpend` (`@viaDamage`).
+- The Entrusted State's 4th effect is now a box of the attack dialog (group `entrusted4`, 1/Encounter): Full Wager +
+  All-or-Nothing + `attack.capacityFull` (the Capacity reset to its maximum first) on a Basic Attack — on a Signature
+  Technique too with `entrusted4.signature` (`@entrusted4Sig`). An effect that adds to that use joins the box with
+  `group: "entrusted4"`; `@chose.entrusted4` tells it was used.
+
+## More vocabulary (6DC): what the defender chose, seen after its defense
+
+- `@defChose.<group>` (the n of each of the defender's option groups chosen for that defense, before the roll or once hit):
+  in its vs.* pieces once hit, in the Damage, in `damaged` / `dodged`. ("+1(T) Soak per step paid in that box" =
+  `vs.soak` `(@defChose.<group>)(T)`; "that Opponent stops being Studied after you use it" = an unmark on `damaged` /
+  `dodged` with `@defChose.<group> >= 1`.)
+- `@waivedFx.<ref>` (the effect whose `defense.freeCounter` waived the Counter Action of that defense): in its pieces
+  (a `vs.guardKp` of that use) and the events after it.
+
+## More vocabulary (6SZ): a Score of 0, always in a State, a Condition that cannot be removed, the tail held
+
+- `scoreSet.<attr>` (value N, 0 included; the lowest wins): that Attribute Score is N ("your Scholarship Score is 0").
+- `innateState.<state>` (value 1, no condition): you are always in that State (Feral...), like the Innate State Aspect.
+- `conditionLock.<condition>` (value 1, condition allowed): that Combat Condition cannot be removed while it holds.
+- `@tailHeld`: your tail is held in the Grapple you are in (Tail Restraint); the Grapple Check's `clashWon` /
+  `clashLost` have `@tailGrab` (that Grapple grabbed the tail).
+
+## More vocabulary (6CB / 6FK / 6NF): a Critical becomes a Botch, Born for Battle, a Natural Result set flat
+
+- effect `critToBotch` ("targeted": the attack on you): the Strike Roll's Critical Result of that attack becomes a Botch
+  Result before any target defended (its Critical dice go, the attacker's Botch penalty applies, Cutting's +1 Category
+  goes back). Through the GM when the card is not yours.
+- Born for Battle (Saiyan Racial Trait 4) is covered: an effect of a "threshold" trigger on `@defeated` (a
+  [Triggered/Defeated] effect of yours, its button too) gives the Temporary Zenkai stack, once per encounter, as crossing
+  the Critical Threshold does.
+- reaction `naturalSet` with resource `flat`: that roll has no Critical nor Botch Result, and +1 Dice Score per effect of
+  yours raising its Natural Result or lowering its Critical Target (`natural.combat` / `natural.<kind>` above 0,
+  `crit.combat` / `crit.<kind>` below 0).
+
+## More vocabulary (6HM): the Homing Advantage
+
+- `attack.advantage.homing` (or a Signature Technique's own Homing) on an attack without an AoE now works: when a
+  target's Dodge / Parry / Cross Counter roll makes the attack miss, the system rolls the attacker's Strike Roll again
+  (as it was made, no roll reactions), up to the Homing ranks, +1(T) per miss so far, against the same defense; the card
+  shows the rolls. Still one attack: no more Diminishing Defense. The 2+ ranks "target left the range" part is the GM's.
+
+## More vocabulary (6AH): also Healthy; a fixed Score refuses Attribute Points
+
+- `alsoHealthy` (value 1, condition allowed, e.g. `@states.superior >= 1`): your effects also count you as in the Healthy
+  Health Threshold, as well as the real one: a condition reading `@below` that fails is tried again with `@below` 0
+  (formula.mjs `test`). The Threshold penalties stay. `@alsoHealthy` is 1 while it holds.
+- `scoreSet.<attr>`: the sheet now reports an error when Attribute Points are spent on that Attribute.
+
+## More vocabulary (6PA): a limit counted once per attack
+
+- A `limitKey` that starts with `attack:` (e.g. `attack:telepathicwarning2`) counts once per attack: the first use for an
+  attack (a box of the defense dialog, or a button of an event of that attack: targeted / allyTargeted, which carry its
+  card) counts one use of the limit and pays the cost; the other uses for that same attack are free. Pieces and triggers
+  that share the key share that use.
+
+## More vocabulary (6FC / 6SW): Final Chance; an Empower that goes to the effect's owner
+
+- The Final Chance Advantage works (a Signature's, or `attack.advantage.finalChance` from an effect, which needs no
+  Ultimate Signature Technique): below the Injured Health Threshold the attack dialog has a box; ticked, your Life
+  Points go to 0 at Attack Declaration and join the Ki Wager, and your Health Thresholds / Defeat wait until every
+  target of that attack is resolved (a miss, its Damage applied) or your turn ends.
+- A `maneuver` effect with `empower` that another Character uses through your effect (target `targeted`, `ally`...)
+  targets you for that Empower (Spiritual Warrior: your Bonded Ally's Empower goes to you).
+
+## More vocabulary (6AG / 6KR / 6DD / 6CS / 6GC / 6AO / 6MO / 6SW3): Allies' guards, attack events, team clashes
+
+- Event `wasHit`: your defense ended in a hit, before the Damage (other = the attacker; the card and row go with it:
+  `attackSoak`, `redefend`); `allyWasHit`: the same for an Ally of yours (`@allyMark.<slug>`, `@allyMinion`,
+  `@allyMyMinion`). Event `attackCountered`: an Opponent answered your attack with a Defend option that spends a Counter
+  Action (other = it, `@hit`).
+- Effects: `attackSoak` (+value Soak on that row before its Damage, wasHit / allyWasHit), `redefend` (the attack goes back
+  to your Defense Declaration: defend again, no second Diminishing Defense), `cancelAttack` (cancel your attack: KP,
+  Capacity, Action Cost and held Energy Charges back, then the attack dialog against the one who countered),
+  `attackMissTeam` ("targeted": the attack misses you and every Ally of yours it targets).
+- `allyGuard.defeat` (an Ally's piece, `@to.*`, limit): an Opponent's Damage that would Defeat this Ally is reduced by the
+  value before it is applied. `allyGuard.cognitiveShift`: an Opponent's Clash that makes this Ally use its Cognitive Save
+  asks whether you take it instead (you roll it, its effect goes to you). `foeGuard.critToBotch` (an Opponent's piece):
+  your first Critical Result on a Combat Roll (Strike, Dodge, Wound) becomes a Botch Result (its limit counted on them).
+- "targeted" knows `@alliesTargeted`, `@alliesTargetedMight` and `@powerShot`; a trigger's Clash check sees `@aoe`,
+  `@charges`, `@powerShot`, `@alliesTargeted`, `@alliesTargetedMight` (clash.* pieces).
+- Duration `endOfThisTurn`: until the end of the turn going on now (whoever's it is).
+- Per-attack keys may end in `+after:<key>`: a button is refused until that other per-attack key was used for this attack.
+- `attack.removeAdvantage` / `attack.removeDisadvantage` (value = how many): the attack dialog of a Signature Technique has
+  two selects; each Advantage taken off gives +2(T) Wound, each Disadvantage (6 TP or less) +1(T) KP (one kind only).
+- An adjacent Glass Tribe Ally with Glass Combat offers its Glass Profile in your attack dialog (Multi-Profile), paying its
+  2(bT) KP and its 1/Round use.
+- NPC field `minionOf` (Bio tab, a Minion's Leader): `@to.myMinion` in Ally pieces, `@allyMyMinion` in Ally events.
+- `@kiMultOther`: an effect other than a Form gives you the Ki Multiplier (a working "ki.mult" piece above 1 that is not
+  Power Battery's own). A `steadfastPass` that turns every failed Health Threshold also takes back a Stress Test only that
+  failure forced; with no Threshold failed, it makes a failed Condition Recovery succeed. A Signature's "Copied from" field
+  (`copiedFrom`, a name or uuid) gives `@copySource` to the `unitedBy.*` pieces of its United Attack.
+
+## More vocabulary (6Z): free Advantages, a free Ki Wager, the per-Round limits, sheet checks
+
+- `sigAdvFree.<advantage>` (value 1): that Advantage costs no TP on your Signature Techniques (Weapon Style, Demon
+  Warrior, Way of the Weaponmaster: `weaponAssisted`).
+- `attack.wagerFree` (an attack option, usually with an amount and a `life:@n` cost): + that much Ki Wager that costs no
+  Ki Points nor Capacity (Way of the Warrior).
+- The card warns when a Basic Attack uses a Profile (not Simple) again this Combat Round (`profileUses.<profile>`: more
+  uses; Glass Combat) and on a second Signature Technique Maneuver in a Round (`sigUses` more, `flag.sigUnlimited` none:
+  Nice Shooting); Out-of-Sequence attacks are not counted.
+- A per-attack box with `+after:<key>` in the defense dialog needs that other box ticked with it (or used for the attack).
+- Your own Compelled from a button against another Character is toward that Character (Noble Dragon).
+- The sheet warns for Enhanced Organism without an Alternate Upbringing Trait, Weapon Ports without 2 Integrated Weapons,
+  a racial Rank on Perception with Functional Purpose, Neko Majin-Dama without an Integrated Majin-Dama, and the Plating /
+  Insect Shell missing the Quality its option gives.
+
+## More vocabulary (6AR / 6MD): areas on the map, Karma costs, a new item
+
+- module/canvas/areas.mjs: a Sphere AoE as a scene Region around a token's Square (Minor 1, Standard 3, Large 4, Huge 5,
+  Destructive 6 Squares, the data's reach). An attack with Self-Explosion places its Sphere on the attacker's own Square.
+  Effect `placeArea` (value = Magnitude, resource = its kind, "Bog"): a Sphere centered on you. A sheet resource named
+  "Bog Environment" follows the token: 1 inside a Bog area, 0 outside.
+- Cost kind `karma:N` (Karma Points). Effect `createItem` (resource = name): an equipped accessory of that name (a new
+  Integrated Majin-Dama).
+
+## More vocabulary (6GL / 6PD): Glass on the map, Power Drain, Attack Absorption
+
+- Glassification's card has two buttons: a Glass Sphere centered on you (Magnitude = the times that Square was
+  targeted; move the Region onto the targeted Square if it is another one) and the Corporeal Clash against the targeted
+  Character (Slowed x the times targeted until the start of your next turn). `@onGlass`: your Square is in a Glass area;
+  `@glassSurrounded`: so is every Square around you (actors refresh when tokens move or areas change). A sheet resource
+  "<Kind> Environment" follows the token for any area kind (Bog, Glass...).
+- Effect `powerDrain` (Power Drain Maneuver's button, as the Grappler; value = Actions): the target's LP and KP lose 1/2
+  (rounded up) of your Might per Action, you regain the KP it lost (none from a Character whose KP others cannot reduce).
+- Effect `absorbAttack` (Attack Absorption Maneuver, on "dodged" after a Parry of an Energy / Magic attack): the attack's
+  Urgent Wound Roll, 1/2 of its Dice Score back as KP; at 1/5 of your Max KP a Power Up is offered.
+- NPC type `battleJacket` (Bio tab, its owner in the same "Leader / Owner" select): the owner's `jacket.<target>` pieces
+  apply to that sheet, worked out with the Jacket's own data ((bT) = its Jacket Tier). Way of the Pilot: `jacket.tp` 5(bT).
+
+## More vocabulary (6OA): Area of Rule, Glass reach, Grapple reach, Collision
+
+- `@areaOfRule` (Squares: 3, + "areaOfRule" pieces), `@alliesInRule` / `@alliesInRuleNM` (Allies within it, the second
+  without Minions); Ally pieces read `@to.distance <= @areaOfRule`. `@glassReach`: every Square within that many of you
+  is Glass (a Large Sphere is 4). A `grapple.reach` piece adds its Squares to every Grapple. Event `collided`: you take
+  Collision Damage (@damage).
+
+## More vocabulary (6E2): initiative, swapping the target, copying a Maneuver, timed areas
+
+- Effect `actAfter` (target the Ally): your Initiative goes right below that Ally's for this Round (it comes back at the end
+  of the Round). Effect `swapTarget` ("targeted", target the adjacent willing Ally): the two tokens swap places and the
+  Ally becomes the attack's target on its row. Effect `copyManeuver` ("opponentManeuver"; `@actionCost` there now): the
+  Maneuver the Opponent used, Out-of-Sequence (a Special Maneuver only if you own it).
+- `placeArea` with a `duration`: the area is removed when it ends (timed entry kind "area"). The GM is warned when more
+  than 10 Minions of a Ruler are in one encounter. Attack option pieces of different items that share a `group` share
+  its box and its @n (Way of the Warrior with Eye of the Dragon).
+
+## More vocabulary (6GS): Glass Soldiers (Glass Features on the map)
+
+- A Glass Soldier is an unlinked token of its owner's "Glass Soldier (<name>)" NPC (made once, owned by the owner's
+  players), flagged `flags.dbu-rpg.feature` {kind "glassSoldier", owner, rank 3, lp/lpMax 6, hv}. Its Square leaves the
+  Glass area (a hole: `area.holes` plus a hole shape on the Region). Module: canvas/features.mjs.
+- Effect `glassSoldiers` (value = how many; Warriors of Glass 1: amount 4, cost `actions:1; ki:@n*2*@bT`): Soldiers on
+  the free Glass Squares nearest to you. Effect `soldierTurn` (startOfTurn): your Soldiers on Glass regain all LP, the
+  others spread a Minor Glass Sphere. Effect `destroyFeature`: the Glass Soldier next to you (or next to the Ally of an
+  `allyWasHit`) is removed. Effect `originFromFeature` (Warriors of Glass 4): this turn your distances count from the
+  Glass Soldier you control on the map (`flags.dbu-rpg.originFrom`, cleared at the end of your turn).
+- `@nextToGlassFeature` (Soldiers adjacent to you), `@glassFeatureHV` (the highest Hardness Value among them); in
+  `allyWasHit`: `@allyNextToGlassFeature`, `@allyGlassFeatureHV`. The Soldiers' Squares count as Glass for
+  `@glassSurrounded` / `@glassReach` (not for `@onGlass`).
+- `attackSoak` takes `resource`: "soak" (default), "dr" (vs.dr) or "damage" (vs.damageTaken, negative).
+- Movement: an Opponent leaving a Glass Soldier's side provokes its owner's Exploit (Warriors of Glass 2); a sheet
+  resource "Glass Combat 3" at 1 checks that the next move ends on Glass (the card warns otherwise).
+
+## More vocabulary (6PL): moving another Character, placing on a Square, forced movement
+
+- Effect `moveOther` (value = Squares; the event's other Character, or your target on a use): the forced movement dialog
+  (direction, Sudden Stop, Collisions) moves it up to that many Squares (Rubbery Body 8, Namekian Biology 5:
+  `1 + @aptitudes.meleeReach`).
+- Effect `teleport`: a Square picked on the map (canvas/place.mjs: left click picks, right click / Esc cancels; three
+  tries; never onto a token). `resource` "" = you, "other" = the event's other Character / your target, "target" = your
+  target at the press (a willing Ally); `value` = at most that many Squares from you (0 or empty: anywhere). A Grappled
+  Character first makes a Cognitive Clash against its Grappler (a win ends the Grapple, a loss cancels it). The token
+  moves with `dbuPlaced` (no Movement Maneuver: nothing provoked).
+- Event `placed` (on the Character placed): `@placedNextToOpponent`, `@placedNextToAlly` (adjacent ones there).
+- Forced movement (Knockback, Launch, Thrust, `moveOther`) moves the token with `dbuForced`: the "moved" events still
+  fire (`@forced` 1) but no Exploit is provoked by leaving a Melee Range. An Ally moving an Opponent offers the Exploit
+  of a Character with Patient Sniper; Collision Damage ends the movement of a Character with Bouncy Physique.
+- `mod.<attr>` pieces may read `@apparel.<slug>.bonus` (the base Apparel Bonus, before "apparelBonus" pieces).
+
+## More vocabulary (6WJ): Battle Jacket Life Points, Exploit on purpose, guarding Allies' Clashes and knocks
+
+- Cost kind `jacket:<n>` (also `jacketlp`): Life Points of the Battle Jacket you pilot (an NPC "battleJacket" whose
+  Leader / Owner is you; paid through the GM when you do not own its sheet). Way of the Pilot: an `attack.wound` box,
+  `amount: "10(bT)"`, `cost: "jacket:@n"`. Way of the Warrior's Energy Charge is `attack.overCharges` (past the maximum).
+- Burrowed Strike: an `attackMade` button on a Physical attack with the existing effect `provoke` (resource
+  `adjacent`): the Opponents adjacent to you may use the Exploit Maneuver against you.
+- `foeGuard.steadfast` (value: how much lower; reads `@to`, the knocked Opponent): an Ally of yours knocks it through a
+  Health Threshold with an attack: its Steadfast Check is lower by the value (your own attacks use `vs.steadfast`).
+- `allyGuard.skillBonus` (value 1; reads `@to`, the Ally): that Ally's Skill Clash adds the difference when your Skill
+  Bonus for that Skill is higher (Skilled Ogre: `@to.distance <= @areaOfRule`, 1/Round).
+
+## More vocabulary (6LN): the start of your turn, Max LP for the encounter, Minions an effect creates
+
+- `@actionsPerRound` (the Actions of a turn): `@myTurn == 1 && @actions >= @actionsPerRound` = no Action spent yet this
+  turn ("at the start of your turn": Negative Ki 2, with `@vs.distance < @aptitudes.longRange` for "not at Long Range").
+- Effect `maxLifeLoss` (value): Maximum Life Points lost until the end of the Combat Encounter (flag maxLifeLoss; Life
+  Burn pays the LP with a `life:` cost and keeps a "Life Burn" resource for its +2(T), cleared on `threshold` with
+  `@failedNow == 1`).
+- Effect `createMinion` (resource: its Racial Traits from the compendium, "|" between them): an NPC Minion of yours
+  (minionOf = you) on a free Square next to you, made by the GM; its sheet is finished by hand.
+- Option pieces are relabelled "<Trait> — option: <Option>" by the extractor: two `use` triggers of one option are ONE
+  button unless their `limitKey` differs.
+- Glassification's Character button reads `@res.glasscombat6 == 0` (Glass Combat 6: 1 armed / free, 2 used, 0 at the end
+  of the turn).
+
+## More vocabulary (6UA): Unique Abilities and the Magic Trick Maneuver with their own effects
+
+- The extractor's MANEUVER_PIECES now also fills Unique Abilities (pack unique-abilities) by name. Their triggers fire on
+  `maneuverUsed` with `@via_<slug>` (`@via_healinghands`, `@via_timefreeze`, `@via_magictrick`) and read the
+  Advancements owned / Restrictions applied of that Unique Ability: `@adv.<slug>`, `@restr.<slug>` (combat/triggers.mjs
+  uaContext).
+- Magic Trick Maneuver: three buttons (Impaired after a Use Magic vs Intuition / Use Magic Clash; move the target that many
+  Squares after that Clash; place yourself within them, no Exploit), the Use Magic ranks doubled with Whimsical Magic
+  (`@item.whimsicalmagic`); a lost Clash offers the target's Exploit (`provoke` with resource `other`).
+- Healing Hands: your target regains 1d10(bT) + @ma LP (+1d10(bT) with Healing Expertise); +1 Medicine.
+- Time Freeze: the sheet resource "Frozen Turn" (1 while it lasts; a use button or the end of the turn ends it);
+  meanwhile the other Characters have −2(bT) Defense Value and −2 Perception (`ally.` / `foe.` pieces). Racial pieces read
+  `@res.frozenturn >= 1` (God of Time: +2(T) Wound, +2(T) KP Cost of Maneuvers, a warning past one attack).
+
+## More vocabulary (6F1): Factor Traits, first batch
+
+- `flag.noTraitLifeRegain` (1): the effects of your own Racial Traits / Transformations regain you no Life Points (other
+  sources still do: Undead Survival while Undying).
+- A Field of Aggression is a Large Sphere (4 Squares): `@opponentsWithin.4`; an Opponent moving into it offers the
+  Bio-Berserker's Exploit (rules/movement-watch.mjs fieldExploit; not forced movement or a placing).
+- "An Opponent with one of your Allies adjacent": `@vs.opponentsAdjacent - min(1, max(0, 2 - @vs.distance)) >= 1` (its
+  adjacent Opponents, you taken out when you are adjacent too).
+- "+3 Squares of Melee Range for a Physical attack or Grapple": `grapple.reach` 3 (the system checks reach only for the
+  Grapple Maneuvers).
+
+## More vocabulary (6F2): Factor Traits, second batch
+
+- `@allyMarkAdjacent.<slug>`: how many adjacent Allies carry that mark of yours (Tall Yardrat Genes: your Bio-Bonded Ally).
+- A mark only one Character may place on someone: `@vs.markOthers.<slug> == 0` in the mark trigger's condition.
+- Buttons of one `group` with an `amount`: their conditions are tested when the card is posted (with @n = 1), so a piece
+  that depends on the amount picked puts it in the value: `min(1, floor(@n / (4 * @bT)))` (1 from 4(bT) on). A
+  "1/Encounter" inside such a group: a sheet resource kept with it (resources reset at the end of the encounter).
+- The sheet check `DBU.Val.NoShortRange` (Cerealian Genes): no Signature Technique with the Short Range Disadvantage.
+
+## More vocabulary (6F3): another Character's turn, exclusive choices, switching another effect off
+
+- Event `otherTurnStart`: another Character's turn starts (fired on every other participant at its start; other = whose
+  turn it is; `@vs.*` of that one). Speedster 3: a Movement Maneuver button.
+- Option fields `exclusive` (a set name): the attack dialog's boxes and the Advantage select of one set exclude each
+  other (Earthling-Raised 3: an Energy Charge or an Advantage).
+- `fxOff.<ref>` (1): the pieces of that rules effect do nothing (Traces of Majin 5 switches off `majins_rubberybody_7`).
+- removeCondition `any!a!b...`: the player picks one Condition but those listed (Phantom Genes: only four allowed).
+
+## More vocabulary (6GP): Goops
+
+- Effect `createGoop`: a Goop of yours on a free Square next to you: a copy of your sheet as an NPC Minion (minionOf =
+  you) without Apparel, Weapons or Accessories (flags.dbu-rpg.goop {owner, created}); made by the GM.
+- Effect `reabsorbGoops` (value: how many, 0 = any number; resource "all" = every one without the dialog, "notThisTurn" =
+  not those created this turn): the Goops picked are Defeated (removed) and you regain 1/2 of their remaining LP.
+- A Character with From Goop: at the end of the encounter its Goops die and it regains 1/2 of their LP (combat.mjs).
+
+## More vocabulary (6IG): gear a Trait makes
+
+- `grant: "gear: <Name>"`: an item the Trait adds (and takes away with it) that is not in a compendium; its data is in
+  build/extract_content.py GEAR_GRANTS (`Plating`, `Metal Exoskeleton`: Natural Armor, made with Craftsmanship Grade =
+  base Tier of Power, max. 5; `Integrated Weapon`: Grade 4 with Regenerating in no slot; `Onboard Scouter`: the
+  equipment's Scouter [Tech] with Craft DC Master). "from" copies an equipment item by name (the equipment is now built
+  before the Racial Traits).
+
+## More vocabulary (6F5): Integrated items, random Compelled, no Damage
+
+- Effects `integrateItem` (a dialog picks an Apparel / Weapon / item to Integrate; items keep it in
+  flags.dbu-rpg.integrated) and `destroyIntegrated` (a dialog picks one of your Integrated items to delete)
+  (rules/integrate.mjs).
+- Effect `compelRandom` (value: Squares): Compelled toward a random Opponent within that many Squares.
+- `provoke` with a number of Squares (`"resource": "3"`) or `other` (the event's other Character only).
+- `attackSoak` resource `none`: that attack deals you no Damage (vs.damageMax 0). Less Damage never goes below 0 now.
+- `@bestialTraits`: the Racial Traits of the Bestial Traits group on the sheet (Dragon-like 1).
+
+## More vocabulary (6TS): switching Racial Traits for a while
+
+- Effect `traitSwitch` (value 1 on / 0 off; resource: a Racial Trait's name, `pick:<group>` one of that group picked in a
+  dialog, `all:<group>` all of it, group `*` any Racial Trait): the Trait's `active` changes for the `duration` and
+  comes back when it ends (timed kind "traitSwitch"). Wild Child 4/5 (Pseudo-Bestial Traits), Were-Beast 4.
+
+## More vocabulary (6F6): guard costs, Tension stand-in, dice in roll bonuses
+
+- `allyGuard.<kind>` pieces may have a `cost` (paid by the Ally who gives it when the piece is used; `res:<name>:all`
+  empties that resource): Dragon of Light 6 (`allyGuard.defeat` = 2(bT) per Positive Energy, all of it spent).
+- Konatsian-Raised 2: a `res:Tension:<n>` cost with no Tension left is paid with Inherited Tension.
+- A `rollBonus` value may be dice (`1d8(T)`: an Energy Charge on a Signature's Wound Roll); the validator reads the dice
+  as 1.
+
+## More vocabulary (6F7): limits used this Round, Ki Surge Surgency, Copied Techniques
+
+- `@usedLimit.<limitKey>`: the uses of that limit counted this Combat Round (Technician 5 when Technician 4 was used).
+- `surge.kiSurgency` (×, a `with` piece): the Surgency of a Ki Surge (Genie 4: 0.25). A fraction of the Surgency
+  (`surge.healSurgency` / `surge.kiSurgency`) is now rounded up.
+- A Signature tagged `copied` added to the sheet of a Neko Majin-Raised regains its KP Cost (1/Round, rules/grants.mjs).
+- Options without any piece need an `optionSwitch` piece so the sheet can switch them on (their grants follow it).
+
+## More vocabulary (6F8): what an attack's rolls spent, Positive Energy, grants in a State
+
+- `@rollSpent.strike.<resource>` / `@rollSpent.wound.<resource>`: what the roll reactions of the attack's Strike / Wound
+  Rolls spent (in the attack events and in the `roll` event of its Wound Roll): Genetic Focus: Arcosian 4, Neo-Tuffle
+  Genes 3.
+- Dragon of Light 1: a Negative Energy gain turns into Positive Energy, and Positive Energy counts as (and pays for)
+  Negative Energy (`@res.negativeenergy` includes it).
+- `@allyBelowMax`: the most Health Thresholds an Ally of your encounter is below.
+- Grants `+state:<key>`: the granted item works only while its owner is in that State (Possess while Liquid).
+
+## More vocabulary (6BC): battle conditions of the scene
+
+- The scene configuration has "DBU: battle conditions" (flags.dbu-rpg.battle {environment, weather, light}), read by
+  rules/battle.mjs: `@env.<key>` (standard, bog, soft, lava, magma, underwater; a token's height gives lowSky, highSky,
+  localSpace, deepSpace), `@weather.<key>` (hot, cold, tornado, storm, earthquake, vile) and `@weather.any`,
+  `@lightLevel` (-2 ... 2) and `@lightLevelEff` (after `lightShift` / `flag.ignoreLight`).
+- The Light Level penalties are applied (Pitch Black / Blinding halve Awareness, Defense Value and the Perception Skill
+  Bonus; Dark / Bright: -2(bT) Awareness and Defense Value, -2 Perception). `lightShift` (n): the Light Level counts n
+  steps closer to Normal; `flag.ignoreLight`: no penalty. Battle Weather and Battle Environment effects themselves are
+  not applied (the GM's).
+- A choice of Battle Weather: one option per weather on the Trait (`"option": "Hot Weather"` with `@weather.hot == 1`).
+
+## More vocabulary (6F10): permanent States, refusing movement, Duplicate Minions
+
+- `innateState.<state>` (1, no condition): always in that State while the item works (Extra Limbs: Multiple Arms).
+- `flag.noMovement` (1): the Movement Maneuver and your own placings are refused (Arboreal: Rooted). A Character moved
+  while its sheet resource "Rooted" is 1 stops being Rooted (Arboreal 5).
+- Effect `createDuplicate` (value: Size Categories, negative smaller; resource: its name): a Duplicate Minion of yours
+  (a copy without Apparel, Weapons, Accessories) next to you (Brood Parent 1).
+- Burrowing Beast: the sheet resources "Underground" (Cover) and "Cover" drive its effects.
+
+## More vocabulary (6F11): placing next to a target or a Feature, Launch without a Grapple, tagged items
+
+- Effect `teleport` resource `nextToTarget` (value: how far your target may be, e.g. `@aptitudes.speedBoosted`): you
+  go to a Square adjacent to your target (Land-Based Beast 3); resource `nearPicked` (value: the Sphere's Squares, 4 a
+  Large one): the Feature's Square is clicked first, you must be within it, then you land within it (Silk Production 3).
+- The `placed` event also has `@placedVia_<slug>` = 1 for the effect that placed you ("Dissipating Dodge (1)" →
+  `@placedVia_dissipatingdodge`), so a follow-up (a Clash against the Opponents next to the new Square) belongs to it.
+- Effect `launchOther`: the Launch Maneuver Out-of-Sequence against the event's other Character, as if you were
+  Grappling it (Super Elastic Body 3/4). Check `clash:grapple`: a Grapple Check (Strike vs Strike/Dodge with the
+  `clash.grapple` pieces).
+- Effect `tagItem` (resource `<item type>:<tag>`): a picked item of yours carries the tag; `kpCost.tag.<tag>` changes
+  its KP Cost (Unique Monstrosity 1/2).
+- Effect `absorbAttack` with a resource name: any Foundation, no Power Up, and 1(bT) of that resource per 1/5 of your
+  Max KP regained (Light Consumption 2's Light). `@vs.topNow`, `@vs.power`.
+- `@healingSurgesRound`; `flag.noHealingSurge` (a Healing Surge is refused). `grapple.freeRange` (n): no Guard Down
+  from your Grapple while the Grappled is n+ Squares away; `grapple.foeCombat`: ± Combat Rolls of the Character you
+  Grapple; `move.reduce`: Squares less on every forced movement of yours.
+- A trait use's Out-of-Sequence Maneuver now carries its effect, so that Maneuver's events see `@viaFx.<ref>`.
+
+## More vocabulary (6F12): the Incorporeal State, Stored items, Brood Parent's Duplicates, many targets
+
+- The Incorporeal State (Monster) has its effects: `vs.ignoreWoundBelow` (a Wound Roll lower than the value deals no
+  Damage; ceil(1/4 Max LP)), +2(T) `clash.grapple` while Grappled, `block.attack`, `flag.passThrough` (forced movements
+  pass through Characters and walls; your Square counts as empty), `collision.ignore`. Damage from an attack makes you
+  leave it and sets `stateBlock.incorporeal` until the end of your next turn: `stateBlock.<state>` refuses entering it
+  (`@stateBlock.<state>`).
+- Effects `storeItems` / `takeStored` / `storeWeaponOf` (rules/store.mjs): flags.dbu-rpg.stored, unequipped, the sheet
+  tag "Stored"; `storeWeaponOf` takes the other Character's equipped Weapon (op `delete` through the GM).
+- Duplicates (`createDuplicate`): `duplicateGrant.<maneuver slug>` (the Duplicate gets that Maneuver from the pack),
+  `duplicate.shrinkMax` (asked: that many more Size Categories smaller, -1(T) Soak / +1(T) DV each), `duplicate.uses`
+  (`@duplicateUses`, for a limit "(1 + @duplicateUses)/Round"). Effect `consumeMinions` (resource: the Duplicates'
+  name): Defeat ticked ones not made this Round for 1/4 of their KP. `@vs.myMinion`.
+- Trigger target `targets`: every Character the clicking user targets (each with its own check: a Cone).
+- `@targetsMe` on `opponentManeuver` / `allyManeuver`. Effect `consumeLight` (on the target; resource: the source's
+  resource): Light Dependent Transformations left without Stress Exhaustion, Power lost, the source gains them.
+  Effect `weaponQualities` (resource "A, B"; value 1 add to a wielded Weapon, 0 remove: no slot).
+- Option use buttons get the option's label: give each its own `limitKey` when one option has several buttons.
+
+## More vocabulary (6F13): reacting to the others' rolls, Break Value lost, temporary items
+
+- Events `allyRoll` / `opponentRoll`: an Ally's / Opponent's roll after its dice and before its result is used
+  (dice/roller.mjs → combat/reactions.mjs foreignRollReactions). Only `rollBonus` (no dice) and `natural`; the roll's
+  variables plus `@rollerDistance`, `@againstMe` and `@vs.*` (the roller). The reacting Character's owner is asked (on
+  this client, or by socket "rollAsk"/"rollAnswer", 60 s at most), pays the cost and counts the limit; the roll changes
+  on the roller's side (Heart of Evil 2, Yardrat Genes 2, Dragon of Light 3).
+- Event `breakValueLost` (`@via_<slug>`, `@natural`, `@n`): an Apparel piece of yours lost Break Value (Arcosian Genes 4).
+- `flag.noCounterManeuver`: no Counter Action may be spent (trigger costs, attacks, Defend warns). Maneuver key `ua1`:
+  a Unique Ability of 1 Action Out-of-Sequence. Effect `tempItem` (resource: item type; label: its name): a blank item
+  removed when the Combat Encounter ends. `size.min` is a target (the Size index, 6 = Gigantic).
+- A shared trigger roll (`rollKey`) is rolled only by automatic triggers: a button trigger (a Maneuver) rolls again on
+  its click. To act on a shared roll with a button, set a resource with the automatic one and read it in a "use".
+
+## More vocabulary (6F14): free Awakening Stacks, Legendary, copies, Avatars
+
+- Grant qualifier `+free` ("transformation: Spirit Control +free"): the Awakening comes with one free Stack (no Awakening
+  Limit, no Attribute Modifier Bonus); one already on the sheet gains a free Stack once per granting item.
+- `flag.arcosianMetamorphosis`: your Forms with the Arcosian Racial Requirement and no Line count as the Metamorphosis
+  Line (their prepared line). Legendary Saiyan (rules/grants.mjs legendaryStages): a Form / Evolved Stage with the Super
+  Saiyan Form Aspect and no Pinnacle brings the "Legendary" Evolved Stage with `original` = that Form.
+- Copies: effect `recordCopy` (resource "<List>:<max>", the event's `@copyName`: the Absorbed Character of
+  `awakeningGain`, the Grappled of the new event `grappleStart`) keeps names in flags.dbu-rpg.copies.<slug> (a full list
+  asks which to replace); effect `copyStack` (resource "<List>|<Awakening>|<level>"): a Temporary Stack holding a picked
+  copy, or the same Stack changing copy again in the encounter.
+- Effect `switchAvatar` (combat/avatar.mjs; socket "switchAvatar"): the Avatar (another sheet, picked once:
+  flags.dbu-rpg.avatar) takes the token's place, the combatant and the Combat Conditions; the Character comes back at the
+  end of the Combat Encounter. `flag.avatarTransform`: offer the Avatar the Transformation Maneuver when switching in one.
+
+## More vocabulary (6F15): rerolling a shared trigger roll, team pieces against a Studied attacker, tags off
+
+- Event `triggerRoll` (`@rollKey_<key>`, `@roll`, `@rollNatural`): a shared trigger roll (sharedRoll with a rollKey) may
+  be rolled again once by a `reroll` piece, asked through the owner (cost, limit); the new result stands for every
+  trigger of that rollKey (Genetic Focus: Demon 4).
+- `intervene.*` pieces see `@attackerVs.*` (the attacker, as the one who steps in sees it). Thrust's Prone / Guard Down
+  fire `inflict`. Effect `lifeLostAs` (value): those KP count as Life Points lost (resourceSpend of "life").
+- `flag.tailAPDouble`: the Adaptation Points pieces (group aw2) count twice on a Tail Attack's Wound Roll.
+  `attributePoints.perConvertedSI`: + Attribute Points per Skill Improvement converted from a Character Perk.
+- `tagOffNormal.<tag>` (rules on data/items.mjs grantWorks): the item an effect tagged <tag> (tagItem) does not work while
+  its owner is in its Normal State.
+
+## More vocabulary (6F16): the Terrify Maneuver, inflict via an item, borrowed Apparel
+
+- The Terrify Maneuver has its effect (extract_content.py MANEUVER_PIECES): a Skill Clash (Intimidation vs
+  Intuition/Intimidation, -2 against a higher Tier of Power) against your target within 4 Squares: Shaken until the end
+  of your next turn, Prone if it already was.
+- `inflict` now has `@via_<slug>` for the giver's item whose effect inflicted the Condition (Ominous Dragon: Terrify).
+- Effect `borrowApparel` (rules/store.mjs; `awakeningGain` with `@copyName`): the Absorbed Character's equipped Top Layer
+  is copied on, yours unequipped, until that Absorption Stack is lost (registerBorrowHooks).
+
+## More vocabulary (6F17): the Absorb Maneuver
+
+- The Absorb Maneuver has its effect (MANEUVER_PIECES; combat/absorb.mjs): effect `absorbManeuver` against your target
+  in Melee Range: Strike vs Strike/Dodge (a loss provokes its Exploit), then Corporeal: a loss leaves it Shaken until the
+  end of its next turn, a win takes it out of the Combat Encounter (combatant removed, token hidden) and gives you a
+  Temporary Level 2 Absorption Stack holding it. Resource `goop`: a Goop of yours makes it from its Square with your
+  rolls, and is Defeated on a success (Assimilation 3).
+
+## More vocabulary (6CS1): Custom Species, first batch
+
+- `@piloting` (1: you pilot a Battle Jacket). The `rolled` event has `@reacted.<fx ref>` (the effects that reacted to that
+  roll). `maneuverUsed` has `@tag_<tag>` for the item's tags (tagItem: a Racial Technique Unique Ability).
+- `allyGuard.defeatKeep` (with `@to.*`): an Ally's Defeating Damage stops 1 LP above Defeat, and the giver loses those
+  LP. `block.armed` (no Armed attacks, no Weapon equipped) and `block.grapple`. `suddenStop.extra` (more Squares off) and
+  `suddenStop.free` (no Counter Action when an Opponent moves you, once per Round).
+- Events `allyDodged` (an attack missed an Ally: `@allyDistance`, `@vs.*` the attacker) and `techniqueCopied` (`@kpCost`).
+- Effects `initiativeShift` (value ±, resource "set"; back at the end of the Round) and `tempGrant` (resource
+  "<type>:<Name>": that compendium item for this Combat Encounter).
+- A Custom Species effect labelled "(Twinned)" works only while that Trait is Twinned (system.twinned).
+
+## More vocabulary (6CS2): Custom Species, second batch
+
+- Events `opponentMoved` (an Opponent of yours moved, however far: `@squares`, `@provokes`, `@leftMine`) and
+  `endOfEncounter` (the Combat Encounter ended: onCombatDeleted).
+- `collision.ignoreRound`: the first Collision Damage of each Combat Round is 0. Effect `extendTimed` (resource: the
+  kind, "dot"; value n): those timed entries last n more of their moments (skip). `tempGrant` resource
+  "pick:<type>:<max TP>": one compendium item picked, until the end of the Combat Round (flags.dbu-rpg.roundTemp).
+- `jacket.*` pieces see `@ownerPL` (the pilot's Power Level) and skip "(Twinned)" pieces of a Trait that is not Twinned.
+  `stressReq.tag.<tag>`: ± the Stress Test Requirement of the Transformation tagged so. Inner Nature: every Form brings
+  its Rampage Form Evolved Stage (rules/grants.mjs rampageStages).
+
+## More vocabulary (6CS3): limits shared across effects, free tagged items
+
+- A limit part may carry its own key: "1/Encounter, 1/Round@killerinstinct2" — that part counts under
+  `killerinstinct2`, shared by every effect that names it (one of Killer Instinct 2's four per Round).
+- `kpCost.tagFree.<tag>`: the item carrying that tag costs no KP. `maneuverUsed` has `@kpBase` (its KP Cost before a
+  tag made it free).
+
+## More vocabulary (6CS4): late Skill Ranks, one-use Signatures
+
+- `@ranksNow.<skill>` (a late variable, on the late-pass targets): the Skill Ranks with the ones effects give
+  (`skillRank.<skill>`).
+- `stp` (Spontaneous Technique Points) and `flag.tcBaseZero`. Effect `tempItem` resource "signature!oneUse": a Signature
+  for this encounter, spent when used (refused again) and removed at the end of that turn; with `flag.tcBaseZero` it
+  starts at 0 TP with no 8 TP floor; above your `stp` its sheet warns.
+
+## More vocabulary (6T1): Transformations and Awakenings, first batch
+
+- `useInstant.<slug>` (that Maneuver's Use button charges no Action: an Instant Maneuver for you) and `useInstant.ua1`
+  (a Unique Ability of 1 Action). The Use button of a Maneuver in use-costs.mjs OWN_FLOW (Stance, Hype, Analysis...) charges
+  nothing anyway, and the system does not count Special Maneuvers' uses per Round.
+
+## More vocabulary (6T2): God Maneuver frequency, Initiative order, Awakening Stacks
+
+- `godFreq.<slug>` (n): that God Maneuver is n/Round with no per-Encounter limit (combat/divine.mjs frequencyProblem).
+- `initiativeShift` resource "first" / "last": before / after every other combatant this Round (ties by the Initiative
+  before). Effects `rerollInitiative` and `awakeningLose` (resource: the Awakening; value n, 0 = every Stack).
+- `copyStack` resource "<List>|<Awakening>|<level>|all": a Temporary Stack for each copy not held, up to 3 such Stacks.
+  `@dnaStacks`: the Absorption Stacks holding one of your DNA Copies.
+
+## More vocabulary (6T3): Conditions gained, Bonus Momentum, forbidding Combat Recovery / Empower
+
+- Event `conditionGained`: you gain a Combat Condition, or more stacks of it (actor.setCondition). `@cond_<key>` = 1,
+  `@level` (the stacks now), `@added`. A Transformation effect that works while you are not in it ("enter this
+  Transformation when you gain Sleeping") needs `"always": true` on its trigger.
+- Event `bonusMomentum`: you gained Bonus Momentum (other = the Opponent you knocked through a Health Threshold).
+- `block.combatRecovery` / `block.empower` (value 1): that Maneuver is refused (with the effect's name), as the other
+  `block.*` targets. "Using it forbids the Combat Recovery this Round" → a `resourceSet` in the same ask group and a
+  `block.combatRecovery` piece conditioned on that resource, reset at `endOfRound`.
+- "<God Maneuver> loses the [1/Round] Keyword" → `godFreq.<slug>` `99`.
+
+## More vocabulary (6T4): Vengeful / Primal Surges, marks by distance, Teammates
+
+- `flag.vengefulSurge` / `flag.primalSurge`: every Surge asks which kind it is. A Vengeful Surge regains 1d10(T)
+  (+ `surge.vengefulDice`, dice allowed) + Surgency LP and KP, then every Opponent within 4 (+ `surge.vengefulRange`)
+  Squares loses the Dice Score in LP (+ half your Surgency for those carrying your Inferior mark with
+  `surge.vengefulInferiorHalf`). A Primal Surge regains 2d10(T) + Surgency LP and KP. Both count as a Healing and a Ki
+  Surge (`surge` event: `@healingSurge` 1, `@kiSurge` 1, plus `@vengefulSurge` / `@vengefulScore` or `@primalSurge`);
+  `surge.healMult` / `surge.kiMult` (a `with`) multiply their LP / KP. Maneuver keys `vengefulSurge` / `primalSurge`.
+- `@markNearest.<slug>`: Squares to the nearest Character carrying that mark of yours (0 when none is in the encounter):
+  "an Inferior within a Large Sphere" → `@markNearest.inferior >= 1 && @markNearest.inferior <= 4`.
+- `@allyHasAwk.<slug>` on the ally events (allyHit, allyDamaged, allyDefeated, allyRoll...): the Ally of the event has
+  that Awakening ("a Teammate" = `@allyHasAwk.teamdynamic == 1`). `@vs.awk.<slug>`: the other Character has it
+  (`intervene.noCounter` with `@vs.awk.teamdynamic == 1`).
+
+## More vocabulary (6T5): the defender's Clash boxes, other Clash keys, Intuit
+
+- A Clash's defender now gets its asked / paid / amount boxes too (`mode: "ask"`, `cost`, `amount` on `clash.*` pieces
+  with `@initiated == 0`): a dialog on the client of its answering user (an active player owning it, else the GM), by
+  socket when that is another client (60 s, then only its automatic pieces). It pays and counts there. "When an Opponent
+  starts a Clash against your Cognitive Save, spend 5(bT) KP to win it" → `{ "target": "clash.autoWin", "value": "1",
+  "condition": "@initiated == 0 && @clash_cognitive == 1", "mode": "ask", "cost": "ki:5(bT)", "limit": "1/Round" }`.
+- `clashAlt.<key>` / `clashAltDef.<key>` (text: another Clash key): that key may be rolled in its place, the better one
+  rolled (`clashAltDef`: only in a Clash the other Character started). "Roll Clairvoyance in place of Use Magic" →
+  `clashAlt.useMagic` `clairvoyance`; "an Opponent's Clash against your Cognitive Save may use your Impulsive Save" →
+  `clashAltDef.cognitive` `impulsive`.
+- The Intuit Maneuver marks its target `Seen` until the end of your next turn (`@vs.mark.seen`), with +2 Skill / +1(T)
+  Save in your Clashes against a Seen Opponent.
+
+## More vocabulary (6T6): Ki Points over the maximum, Opponents below Thresholds, Allies next to the target
+
+- `kiOverMax` (n): Ki Points may be regained up to the maximum + n (`sys.ki.cap`; every KP regain and the update clamp
+  use it). "Your Ki Points may exceed your Maximum" → `99999` (with `lifeOverMax` `99999` for Life Points too).
+- `@opponentBelowMax` / `@opponentBelowMin`: the most / fewest Health Thresholds an Opponent of your encounter is below
+  (0 without Opponents). "While an Opponent is below Injured" → `@opponentBelowMax >= 2`; "while every Opponent is below
+  Bruised" → `@opponents >= 1 && @opponentBelowMin >= 1`.
+- "An Opponent with one of your Allies adjacent to it" (you not counted) →
+  `@vs.opponentsAdjacent - min(1, max(0, 2 - @vs.distance)) >= 1`.
+
+## More vocabulary (6T7): Thresholds for your own effects, hidden Guard Down, marks by side, your top Form
+
+- `belowAtLeast` (n, highest wins), `belowShift` (+n) and `belowAtMost` (n, lowest wins) change the `@below` your own
+  effects read (0..3); their conditions read the real one, and the others' effects (`@vs.below`) still see the real one
+  (`@belowForOthers`). "Always under the Critical Threshold for your effects" → `belowAtLeast` `3`; "treat yourself as
+  Healthy" → `belowAtMost` `0`; "also in the Threshold below" → `belowShift` `1`.
+- `flag.guardDownHidden`: your Guard Down is not a Combat Condition for the others' effects (`@vs.cond.guardDown`,
+  `@vs.anyCond`, `@opponentsCond.guardDown`).
+- `@markedOpponents.<slug>` / `@markedAllies.<slug>`: how many Opponents / Allies of your encounter carry that mark of yours.
+- `@activeFormTopReq` (highest ToP Requirement of the Forms you are in) and `@formTopReqMax` (of every Form you have):
+  "in your Form with the highest ToP Requirement" → `@activeFormTopReq >= 1 && @activeFormTopReq >= @formTopReqMax`.
+
+## More vocabulary (6T8): where your Health Thresholds are, Compelled without its costs
+
+- `thresholdPct.bruised` / `.injured` / `.critical` (percent of Max LP; the lowest piece wins): your Health Thresholds
+  there (`sys.thresholdFractions`: the sheet, @below, the Steadfast marks, Damage crossings and Bonus Momentum read it).
+  "Bruised at 3/4, Injured at 1/2, Critical at 1/4" → `75`, `50`, `25`; "halve your Health Thresholds" → `25`, `12.5`, `5`.
+- `flag.compelledNoWager` / `flag.compelledNoLife`: the start-of-turn Compelled reminder drops the minimum Ki Wager / the
+  Life Point loss.
+
+## More vocabulary (6T9): Legendary Surge, Ki Surge as Healing, no Counter Actions for your effects
+
+- `flag.legendarySurge`: a Ki Surge asks whether to be a Legendary Surge (2d10(T) + Surgency KP, then Surging until the
+  end of your turn; a Ki Surge for Traits: `surge` event with `@kiSurge` 1, `@healingSurge` 0, `@legendarySurge` 1).
+  Maneuver key `legendarySurge`.
+- `flag.kiSurgeAsHealing`: a Ki Surge used through an effect's button may be a Healing Surge instead (the button asks).
+- `flag.countersZero`: your effects read `@counters` as 0.
+- "Roll 1d10 at the start of your turn; on a 10 skip <another effect>" → a `roll` trigger at `endOfTurn` (and
+  `startOfEncounter`) setting a resource to `min(1, max(0, @rollNatural - 9))`, plus `fxOff.<ref>` conditioned on it.
+
+## More vocabulary (6T10): marks everyone carries, Teammates next to the target
+
+- `markAll.<slug>` (every Opponent counts as carrying that mark of yours: "every Opponent counts as your Focus" →
+  `markAll.focus`), `markAllChars.<slug>` (every other Character) and `markCompelled.<slug>` (the Character you are
+  Compelled toward). They show in `@vs.mark.<slug>` (not in `@marks.*` / `@markNearest.*`).
+- `@vs.allyAdjAwk.<slug>`: how many Characters of your side, you aside, adjacent to the other Character possess that
+  Awakening ("an Opponent adjacent to a Teammate" → `@vsAny.allyAdjAwk.teamdynamic >= 1` on attack pieces).
+
+## More vocabulary (6T11): Giga Flare, Super Combination, Genki in the attack flow
+
+- The attack dialog shows "Actions through the Super Profile" when the Signature (or an `attack.superProfile.*` piece of
+  yours) may be Giga Flare / Super Combination. Giga Flare: up to 2 Actions, each +2 Energy Charges (after the maximum)
+  and +2(T) KP; Super Combination: any number, each +1 Energy Charge and a rank of Alotta Lotta Attacks / Peppering Blows
+  (noted on the card). Genki: every Lifeforce stack (`@res.lifeforce`) is lost at declaration, +2(bT) Wound each
+  (`attack.genkiWound`). Cataclysmic Attack's AoE is the whole Battlefield: the player targets every Character in it.
+
+## More vocabulary (6T12): Charging Assault and Splitting in the attack flow
+
+- Charging Assault (a Signature's Advantage, or added by `attack.advantage.chargingAssault`): the dialog asks the Squares
+  moved in a straight line (the token is moved on the map): +1 Wound per Square after the 3rd, at most 2(T);
+  `chargingAssault.capT` (n) raises that cap to n(T) (the highest wins).
+- Splitting: -1(T) Wound per target after the first (2 targets at rank 1, 4 at rank 2).
+
+## More vocabulary (6T13): the marked Opponent's Maneuvers, its Boosted Speed
+
+- "The <marked> Opponent's other Maneuvers offer the Exploit" → an `opponentManeuver` trigger (Power Up, Energy Charge,
+  Surges, the Transformation Maneuver, Combat Recovery and the Maneuver items it uses: `@by_<slug>`, `@distance`, `@oos`,
+  `@vs.*`) with `effect` `maneuver`, `resource` `exploit`, `cost` `counters:1`; "moving away from you" → `opponentLeftMelee`.
+- `@vs.speedBoosted`: the other Character's Boosted Speed ("your Boosted Speed exceeds every target's" →
+  `@aptitudes.speedBoosted > @vsMax.speedBoosted`).
+
+## More vocabulary (6T14): Aspect maximums, God Ki as Superior, top Legendary / Transcended
+
+- `aspectMax.<key>` (on a Transformation; its condition sees `@M` / `@G`): that Aspect may reach this level (the Grade's
+  "LV G" and the summed Aspects): "the Growth Aspect may reach 4 levels" → `aspectMax.growth` `4`.
+- `flag.godKiAsSuperior`: a trigger effect that would put you in God Ki puts you in the Superior State instead (same duration).
+- `@legendTransTopReq`: the highest ToP Requirement of your active Legendary Forms and Transcended Enhancements.
+- `flag.countersZero` conditions may read `@lifeMax` ("at full Life Points": `@life >= @lifeMax`).
+
+## More vocabulary (6T15): the Class Special Maneuvers
+
+- Roar keeps the `Pumped` resource (`@res.pumped`, until the end of your next turn: +1(T) Combat Rolls and Speeds,
+  -1(T) Soak); Draconic Infusion keeps `Infused` (`@res.infused`: +1(T) Surgency, Wound, DR, -1(T) Defense Value and
+  Speeds); Dark Beam's Clash (Cognitive vs Impulsive/Corporeal, not in your Melee Range) marks the target `Doomed`
+  (`@vs.mark.doomed`, `@marks.doomed`) until the start of your next turn; Mighty Breeze marks your Allies within 4 Squares
+  `Mighty` (`@to.mark.mighty` on `ally.*` pieces: +1(T) Soak and DR) until the start of your next turn; Divine Blessing
+  heals the Allies within 3 Squares by your Surgency and, through a Clash each, takes it from the Opponents there.
+  The Curse Modifier Maneuver is not in the compendium. The Doomed +2(T) Damage taken is the GM's.
+
+## More vocabulary (6T16): your Minions, Doomed's Damage
+
+- "Your Minions get +1(T) Combat Rolls" → `{ "target": "ally.combat", "value": "1(T)", "condition": "@to.myMinion == 1" }`
+  (a Minion whose `minionOf` is you, in the encounter). `@myMinions`: how many of them are in the encounter.
+- Dark Beam's Doomed now also gives the Doomed Opponent `vs.damageTaken` 2(T) (a `foe.vs.damageTaken` piece): every
+  attack's Damage against it +2(T).
+
+## More vocabulary (6T17): areas on the map, the receiver's Power Level
+
+- `@onArea.<kind>` (your token's center is in an area of that kind: the `placeArea` kinds, lowercase: `metallic`,
+  `obscured`, `glass`, `bog`...), `@vs.onArea.<kind>` (the other Character's) and `@to.onArea.<kind>` (the Character an
+  `ally.*` / `foe.*` piece goes to; worked out at once). "On a Metallic Square: +1(T) Soak" → `@onArea.metallic >= 1`;
+  "Opponents on Metallic Squares -1(T) Combat Rolls" → `foe.combat` with `@to.onArea.metallic >= 1`.
+- `@to.pl`: the Power Level of the Character an `ally.*` / `foe.*` piece goes to ("your Minions +2 Max LP per Power Level"
+  → `ally.life.final` `2 * @to.pl` with `@to.myMinion == 1`). `jacket.life.final` / `jacket.ki.max` read the Jacket's `@PL`.
+
+## More vocabulary (6T19): DNA Copies, whose turn it is
+
+- `@dnaCopies` (how many DNA Copies you hold) next to `@dnaStacks`; both are worked out before the modifiers, so passive
+  pieces may read them. `copies.max.<slug>` (n): that copy list holds up to n ("4 DNA Copies" → `copies.max.dnacopy` `4`).
+- `@vs.isTurn`: it is the other Character's turn in its encounter ("during that Opponent's own turn").
+
+## More vocabulary (6T20): making another effect optional
+
+- `fxAsk.<ref>` (1): that effect's automatic pieces are asked instead (a trigger becomes a button, a modifier a box):
+  "the 3rd effect of Bio-Berserker becomes optional" → `fxAsk.unstableclone_bioberserker_3`.
+- "An AoE attack may leave out the Allies in it": the AoE's targets are the ones the player targets, so it is covered (a
+  use limit is the player's).
+
+## More vocabulary (6T21): the Frozen Turn, grants with a resource minimum
+
+- The Time Freeze Unique Ability keeps the `Frozen Turn` resource (`@res.frozenturn`) during your Frozen Turn: "during a
+  Frozen Turn, +1(T) Combat Rolls" → `combat` with `@res.frozenturn >= 1`.
+- Grant qualifier `+res:<slug>:<n>`: the granted item works only while that sheet resource is n+ (a split resource such
+  as Divine Battle Born counts what is placed on each roll too): "Divine Flame while you have 1+ Divine Battle Born" →
+  `grant maneuver: Divine Flame +active +res:divinebattleborn:1`.
+
+## More vocabulary (6T22): grants that follow a pick
+
+- Grant qualifier `+picked:<Option>`: the granted item works only while that option of the granting item's choices is
+  picked ("Draconic Infusion when the Warrior Class is picked" → `grant maneuver: Draconic Infusion +picked:Warrior`).
+
+## More vocabulary (6T23): Charging Assault's bonus as a variable
+
+- `@chargeWound` (attack pieces, `at: "wound"` too): the Wound bonus the attack's Charging Assault gives ("apply its
+  Wound bonus once more" → an `attack.wound` box with value `@chargeWound`). `@category` is readable at `at: "wound"`.
+- Unique Abilities' uses per Round are not counted by the system: "use X one more time per Round" is covered.
+
+## More vocabulary (6T24): the Enhanced Search mark, dice counts from a formula
+
+- The Enhanced Search Talent (5) now makes its own start-of-turn Clash (Perception/Clairvoyance vs Stealth/Concealment,
+  a box against the target, 1/Round) through the item, so the Clash carries `@via_enhancedsearch`. A win marks the
+  target `Marked` until the start of your next turn, and you get +1(T) Strike and Dodge against it. Effects that ask
+  for the "Marked" Opponent read `@vs.mark.marked`.
+- A trigger `roll` may take its number of dice from a formula: `"(@T)d6"` (Td6). Write `"value": "@roll"`, not
+  `"@roll * @T"`.
+- An Opponent's Movement Maneuver: `opponentManeuver` with `@by_movement == 1` (`@vs.*` is the one who moved).
+
+## More vocabulary (6T25): keep the higher roll, Damage dealt, marks next to a Character, attack flags
+
+- `reroll` with `resource: "high"`: the Base Die is rolled again and the higher result stands, Critical dice included
+  ("roll it twice and apply the higher"). Clashes on the "roll" event: `@inClash`, `@initiated`, `@clash_<save/skill>`.
+- `vs.damageDealtMult` (attacker side, automatic): multiplies the Damage you deal to that Character
+  (`@vs.minion == 1` → "double the Damage Minions take from you").
+- `@vs.markAdj.<slug>`: how many Characters carrying that mark of yours are adjacent to it (it and you aside).
+  `@markNearest.<slug>` is the distance to the nearest one. It is 0 when nobody carries the mark, so write `== 1` for
+  "adjacent", never `<= 1`.
+- `flag.costNoCapacity`: your attacks' Ki Point Cost lowers no Capacity (the Ki Wager still does).
+  `flag.crossCounterFullDv`: Cross Counter does not halve your Defense Value.
+  `block.energyAttack` / `block.magicAttack`: those attacks are refused.
+- A trigger Clash of a Transformation item is made through it (`@via_<transformation slug>`): `clash.might` with
+  `@via_beatdownspecialist == 1 && @initiated == 1` only counts in those Clashes.
+
+## More vocabulary (6T26): Super Stacks counted as, Weights worn, Racial Requirements in use, Light Level, Alignment
+
+- `superStacks.countAs` (lowest wins): you count as possessing at most that many Super Stacks, for the Muscle
+  Penalty and for `@superStacks`.
+- `@weightsWorn`: pieces of Weights Apparel worn ("cannot enter while wearing Weights" → `enterBlock` with
+  `@weightsWorn >= 1`).
+- `@activeRace.<race>`: the Forms and Enhancements you are in that have that Racial Requirement (slug: "saiyan",
+  "namekian"...). It counts the item itself, so "another Saiyan Transformation" is `>= 2` on a Saiyan item.
+- `@vs.lightLevel`: the Light Level where that Character is, with its own shifts.
+- `@opponentsOppositeAlign`: Opponents of the encounter with the opposite Z-Soul Alignment (Good against Evil; 0 while
+  you are Neutral).
+- New variables a piece's condition reads must sit in the early `data` object of rules/derived.mjs (before the modifier
+  stages). The final `sys.rollData` is only seen by triggers, rules and later reads.
+
+## More vocabulary (6T27): Surges that do not count, Unique Ability picks, SKI / STR worked out
+
+- `with: "surge.uncounted=1"` on a "maneuver" effect of a Surge: that Surge does not count toward the Surge
+  Maneuver's own uses. No warning, and the sheet's "Surge used" box stays as it was.
+- Maneuver keys `uaStd` / `uaTechnical` / `uaMagical`: one of your Unique Abilities that is a 1-Action Standard
+  Maneuver (any, Technical, Magical; "Technical/Magical" counts for both), Out-of-Sequence. Use them instead of
+  `standard` when the effect only allows Unique Abilities.
+- `@res.ski` / `@res.str` are worked out by the system: the Power Level Character Perks exchanged into Skill
+  Improvements / Attribute Additions. `@res.stilllearning` / `@res.onthepath` are 1 when every one of them was.
+  These replace the sheet resources the player used to set by hand.
+
+## More vocabulary (6T28): stacks treated as other stacks, Ranks with effects, Power Battery ignored
+
+- `resAdd.<resource slug>` (stage -1): adds to `@res.<slug>` for every effect ("Tension stacks count as 1 higher",
+  "the 9th Crusher Point counts as 2", "Divine Warrior Blood is treated as Warrior Blood"). `resAdd.power` adds to
+  `@power` ("All-Out Power stacks are treated as Power"). The sheet's values stay in `@resBase.<slug>` /
+  `@powerBase`. An effect excluded from the rule ("except this Trait") reads those.
+- `@ranksNow.<skill>` is also in the trigger data (Ranks with the `skillRank.<skill>` pieces). `resMax.*` /
+  `resMaxSet.*` may read it and the other late variables, since the resource maximums come after the late pass.
+- `with: "surge.ignoreKiMult=1"` on a Ki Surge: that Surge ignores the sheet's `surge.kiMult` (Power Battery's 0).
+- Bucket keys of prefix targets are stored in lowercase (`resadd.tension`): code reading them matches case-insensitively.
+
+## More vocabulary (6T29): losses without Reduced Momentum, who inflicted a Condition
+
+- `nmlife:<n>` cost (or `nmlp:`): Life Points paid whose Health Thresholds give no Reduced Momentum. Their Steadfast
+  Checks are still rolled. `safelife:` also passes the Checks.
+- A "life" effect with `resource: "noMomentum"`: the same for that loss. It combines with "safe" / "silent".
+- `flag.attackLifeNoMomentum`: paying only an attack's Life Point Cost (`attackLifeCost`, Kaioken) gives no Reduced
+  Momentum.
+- "inflict" (on the giver) fires for the Conditions of trigger effects, Unique Ability / Maneuver buttons, Condition
+  Advantages, Grapples, and every `runOps` condition op with `by: <uuid>` (Gravity Cage's Prone). It also records
+  `condBy`. Only a Condition set by hand on the sheet fires nothing.
+
+## More vocabulary (6T30): what Allies picked, ranges
+
+- `@allyPicked.<option slug>`: how many Allies of your encounter picked that option in a Transformation's choices
+  ("if any of your Allies possess this Trait, lose the 4th and 5th effects" → `fxOff.<ref>` with
+  `@allyPicked.teamcaptain >= 1`).
+- Ranges: Melee Range is `1 + @aptitudes.meleeReach`; Long Range starts at `@aptitudes.longRange` (9 + modifiers).
+  "Not at Long Range" is `@vs.distance < @aptitudes.longRange`.
+- `otherTurnStart` (another Character's turn starts, `@vs.*` of that Character) covers "at the start of an Opponent's
+  turn".
+- The system does not limit an attack's or a Unique Ability's targets by range: "may target outside your Melee Range"
+  needs nothing.
+- Copy Being and the Advantages of a United Attack's Signatures are not run by the system (Mimicry Program 3 and
+  Technician 6 stay with the GM).

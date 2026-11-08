@@ -23,7 +23,7 @@ const ROLL_VARS = ["kind_strike", "kind_dodge", "kind_wound", "kind_save", "kind
   "combatRoll", "natural", "rawNatural", "crit", "botch", "critTarget", "botchPenalty", "total", "tn", "success", "thresholdCheck",
   "inClash", "critStrike", ...ATTACK_BASE, ...(A.ATTACK_VARS ?? []), ...CLASH_SIDE];
 /** Late variables (rules/derived.mjs late pass) and the targets they may be used on. */
-const LATE = ["soakNow", "surgencyNow", "dvNow", "tp"];
+const LATE = ["soakNow", "surgencyNow", "dvNow", "tp", "ranksNow."];
 const LATE_TARGETS = ["dr", "wound", "wound.physical", "wound.energy", "wound.magic", "strike", "dodge", "combat"];
 /** Stage 1.5 targets (rlm, size, size.min) and stage 1.75 ones (sizeAs.*, apparelBonus.*): what they cannot read yet
  * (the Apparel variables are known before them, with the bonuses before the apparelBonus pieces). */
@@ -35,6 +35,11 @@ const AFTER_175 = ["sizeDv", "sizeSoak", "sizeTop"];
 export const EVENT_VARS = {
   roll: ROLL_VARS,
   rolled: ROLL_VARS,
+  // F13 the others' reactions to a roll (combat/reactions.mjs foreignRollReactions)
+  allyRoll: [...ROLL_VARS, "againstMe", "rollerDistance", "vs."],
+  opponentRoll: [...ROLL_VARS, "againstMe", "rollerDistance", "vs."],
+  // F15 a shared trigger roll rolled again
+  triggerRoll: ["roll", "rollNatural", "rollKey_"],
   clashWon: [...CLASH_SIDE, "margin", "mine", "theirs", "autoWin"],
   clashLost: [...CLASH_SIDE, "margin", "mine", "theirs", "autoWin"]
 };
@@ -115,10 +120,11 @@ export function checkModifier(m, i, ctx) {
     out.push(`${what}: ${t} value is a Size index 0-${DBU.SIZE_ORDER.length - 1} (${DBU.SIZE_ORDER.join(", ")})`);
   }
   // Late variables: only where the late pass reads them
-  const late = ctx.variables(`${m.value ?? ""} ${m.condition ?? ""}`).filter(v => LATE.includes(v));
-  const allowed = TARGET_VARS[t] ?? [];
+  const late = ctx.variables(`${m.value ?? ""} ${m.condition ?? ""}`).filter(v => LATE.includes(v) || v.startsWith("ranksNow."));
+  // (T28: the resource maximums are worked out after the late pass, so resMax.* / resMaxSet.* may read them too)
+  const allowed = /^resMax(Set)?\./.test(t) ? [...LATE, "ranksNow."] : (TARGET_VARS[t] ?? []);
   for ( const v of late ) {
-    if ( !allowed.includes(v) ) out.push(`${what}: @${v} is a late variable (only on ${v === "tp" ? "life.final and " : ""}${LATE_TARGETS.join(", ")})`);
+    if ( !allowed.includes(v) && !(v.startsWith("ranksNow.") && allowed.includes("ranksNow.")) ) out.push(`${what}: @${v} is a late variable (only on ${v === "tp" ? "life.final and " : ""}${LATE_TARGETS.join(", ")})`);
   }
   // A stage 1.5 / 1.75 piece is worked out before these variables exist (they would read 0)
   if ( STAGE_15.includes(t) || STAGE_175.test(t) ) {
@@ -136,7 +142,11 @@ export function checkModifier(m, i, ctx) {
 export function checkTrigger(t, i, ctx) {
   const out = [];
   const what = `trigger ${i}`;
-  if ( REACTION_EFFECTS.includes(t.effect) && (t.event !== "roll") ) out.push(`${what}: effect ${t.effect} only on the "roll" event`);
+  if ( REACTION_EFFECTS.includes(t.effect) && !["roll", "allyRoll", "opponentRoll", "triggerRoll"].includes(t.event) ) out.push(`${what}: effect ${t.effect} only on the "roll" event`);
+  if ( (t.event === "triggerRoll") && (t.effect !== "reroll") ) out.push(`${what}: on "triggerRoll" only reroll`);
+  if ( ["allyRoll", "opponentRoll"].includes(t.event) && !["rollBonus", "natural", "message"].includes(t.effect) ) {
+    out.push(`${what}: on "${t.event}" only rollBonus (no dice) or natural`);
+  }
   if ( (t.event === "roll") && !REACTION_EFFECTS.includes(t.effect) && (t.effect !== "message") ) {
     out.push(`${what}: on "roll" only ${REACTION_EFFECTS.join(", ")} or message (other effects: event "rolled")`);
   }
@@ -145,8 +155,8 @@ export function checkTrigger(t, i, ctx) {
     const fields = (t.event === "roll") ? ["roll", "rollKey", "check", "onCheck"] : ["check", "onCheck"];
     for ( const f of fields ) if ( String(t[f] ?? "").trim() ) out.push(`${what}: no "${f}" on the "${t.event}" event`);
   }
-  if ( (t.effect === "reroll") && !["", "base", "all"].includes(String(t.resource ?? "").trim()) ) {
-    out.push(`${what}: reroll resource "${t.resource}" (base or all)`);
+  if ( (t.effect === "reroll") && !["", "base", "all", "high"].includes(String(t.resource ?? "").trim()) ) {
+    out.push(`${what}: reroll resource "${t.resource}" (base, all or high)`);
   }
   if ( (t.effect === "breakValue") && !String(t.resource ?? "").trim() ) out.push(`${what}: breakValue needs the Apparel name (or natural) in resource`);
   out.push(...variableProblems([t.value, t.condition, t.cost, t.amount], what, ctx));

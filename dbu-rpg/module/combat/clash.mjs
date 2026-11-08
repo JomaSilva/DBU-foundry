@@ -33,7 +33,7 @@ const blank = v => !String(v ?? "").trim();
 const esc = s => foundry.utils.escapeHTML(String(s ?? ""));
 
 /** The modifier targets of a Clash (clash.duel belongs to the Duel Maneuver). */
-export const CLASH_TARGETS = ["clash.all", "clash.might", "clash.save", "clash.skill", "clash.grapple", "clash.natural", "clash.autoWin"];
+export const CLASH_TARGETS = ["clash.all", "clash.might", "clash.save", "clash.skill", "clash.grapple", "clash.natural", "clash.autoWin", "clash.autoLose"];
 
 /** "Terrify Maneuver" → terrify: lowercase letters and digits, without the word "maneuver". */
 export const viaSlug = name => String(name ?? "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
@@ -99,7 +99,7 @@ export function clashVariables(key, { initiated = false, via = [], grapple = fal
 /** Does a clash.* target count for a roll of this kind? */
 function counts(target, kind, grapple) {
   switch ( target ) {
-    case "clash.all": case "clash.natural": case "clash.autoWin": return true;
+    case "clash.all": case "clash.natural": case "clash.autoWin": case "clash.autoLose": return true;
     case "clash.might": return kind === "might";
     case "clash.save": return kind === "save";
     case "clash.skill": return kind === "skill";
@@ -147,6 +147,8 @@ function limitWriter(actor) {
 const NO_PIECES = () => ({ pieces: [], lines: [], chosen: null, O: null, actor: null, asker: false, found: [], scope: {} });
 /** Is one of these pieces a clash.autoWin that applies? */
 const autoOf = list => list.some(p => (p.target === "clash.autoWin") && (Number(p.value) > 0));
+/** RD: is one of these pieces a clash.autoLose that applies (the other side wins without rolling)? */
+const loseOf = list => list.some(p => (p.target === "clash.autoLose") && (Number(p.value) > 0));
 /** The pieces of the chosen boxes, as { target, value, label }. */
 const piecesOf = (O, chosen) => O.chosenPieces(chosen).map(p => ({ target: p.target, value: Number(p.value) || 0, label: O.pieceLabel(p) }))
   .filter(p => p.value);
@@ -172,6 +174,22 @@ async function gatherSide(actor, kind, scope, { initiator, grapple, title }) {
       if ( value ) pieces.push({ target: m.target, value, label: (m.own && (m.own !== m.label)) ? `${m.label} — ${m.own}` : m.label });
     }
     return { ...NO_PIECES(), pieces };
+  }
+  // (T5: a defender with an asked / paid box is asked too: here when this user answers for it, else by socket)
+  if ( !initiator ) {
+    const all = O.optionPieces(actor, CLASH_TARGETS, scope, { mods, side: "" });
+    if ( all.some(p => p.ask || !blank(p.cost) || !blank(p.amount)) ) {
+      const user = answeringUser(actor);
+      if ( user && (user !== game.user) ) {
+        const got = await askClashRemote(user, { actor: actor.uuid, kind, grapple: !!grapple, scope, title });
+        if ( got ) return { ...NO_PIECES(), pieces: got.pieces ?? [], lines: got.lines ?? [] };
+      }
+      else if ( user === game.user ) {
+        let mineChosen = await O.optionDialog(all, { title, hint: L("DBU.Clash.OptionsHint"), actor, scope });
+        mineChosen ??= O.autoChosen(actor, all, scope);
+        return { pieces: piecesOf(O, mineChosen), lines: [], chosen: mineChosen, O, actor, asker: true, found: all, scope };
+      }
+    }
   }
   const asker = initiator && actor.isOwner;
   let found = O.optionPieces(actor, CLASH_TARGETS, scope, { mods, side: asker ? "" : "attacker" });
@@ -207,6 +225,75 @@ async function commitSide(side, { none = false } = {}) {
   return { ...side, chosen, pieces: piecesOf(O, chosen), lines };
 }
 
+/** T5: who answers for a defender: an active player owning it (this one first), else the active GM. */
+function answeringUser(actor) {
+  const players = (game.users ?? []).filter(u => u.active && !u.isGM && actor.testUserPermission?.(u, "OWNER"));
+  return players.find(u => u === game.user) ?? players[0] ?? game.users?.activeGM ?? null;
+}
+
+const CLASH_PENDING = new Map();
+/** T5: ask a defender's owner for its Clash boxes (60 s at most; null when nobody answers). */
+function askClashRemote(user, req) {
+  const reqId = foundry.utils.randomID();
+  return new Promise(resolve => {
+    const timer = setTimeout(() => { CLASH_PENDING.delete(reqId); resolve(null); }, 60000);
+    CLASH_PENDING.set(reqId, a => { clearTimeout(timer); CLASH_PENDING.delete(reqId); resolve(a); });
+    game.socket.emit("system.dbu-rpg", { action: "clashAsk", userId: user.id, data: { ...req, reqId, from: game.user.id } });
+  });
+}
+
+/** The socket's "clashAnswer" (on the client resolving the Clash). */
+export function onClashAnswer(data) { CLASH_PENDING.get(data?.reqId)?.(data); }
+
+/** The socket's "clashAsk" (on the defender owner's client): its dialog, paid and counted here; the pieces go back. */
+export async function onClashAsk(data) {
+  let answer = { pieces: [], lines: [] };
+  try {
+    const doc = await fromUuid(data.actor);
+    const actor = (doc?.documentName === "Token") ? doc.actor : doc;
+    const O = await optionsApi();
+    if ( actor && O ) {
+      const mods = clashMods(actor).filter(m => counts(m.target, data.kind, data.grapple));
+      const scope = data.scope ?? {};
+      const found = O.optionPieces(actor, CLASH_TARGETS, scope, { mods, side: "" });
+      let chosen = (await O.optionDialog(found, { title: data.title, hint: L("DBU.Clash.OptionsHint"), actor, scope })) ?? O.autoChosen(actor, found, scope);
+      const narrow = list => (list.some(c => autoOf(c.pieces)) ? list.filter(c => autoOf(c.pieces)) : list);
+      chosen = narrow(chosen);
+      const paid = await O.payOptions(actor, chosen, { scope });
+      const lines = [];
+      if ( paid.problems.length ) {
+        ui.notifications.warn(L("DBU.Trigger.CantPay", { why: paid.problems.join(" ") }));
+        chosen = narrow(O.autoChosen(actor, found.filter(p => blank(p.cost)), scope));
+      }
+      else if ( paid.text ) lines.push(L("DBU.Trigger.Paid", { cost: paid.text }));
+      await O.countOptionLimits(limitWriter(actor), chosen);
+      answer = { pieces: piecesOf(O, chosen), lines };
+    }
+  } catch(err) { console.error("DBU | Clash ask", err); }
+  game.socket.emit("system.dbu-rpg", { action: "clashAnswer", userId: data.from, data: { reqId: data.reqId, ...answer } });
+}
+
+/**
+ * T5 "clashAlt.<key>" / "clashAltDef.<key>" (text: another key): that key may be rolled in its place ("clashAltDef": only
+ * in a Clash the other Character started); the better one is rolled.
+ */
+function withAlternatives(actor, spec, defending) {
+  const keys = String(spec || "might").split("|").map(s => s.trim()).filter(Boolean);
+  let mods = [];
+  try { mods = collectModifiers(actor, actor.system).filter(m => /^clashAlt(Def)?\./.test(String(m.target ?? ""))); } catch(err) { mods = []; }
+  if ( !mods.length ) return spec;
+  const data = actor.system?.rollData ?? {};
+  const out = [...keys];
+  for ( const m of mods ) {
+    const [fam, key] = [String(m.target).slice(0, String(m.target).indexOf(".")), String(m.target).slice(String(m.target).indexOf(".") + 1)];
+    if ( !keys.some(k => k.toLowerCase() === key.toLowerCase()) || ((fam === "clashAltDef") && !defending) ) continue;
+    if ( !test(m.condition, { ...data, ...(m.ctx ?? {}) }) ) continue;
+    const alt = String(m.value ?? "").trim();
+    if ( alt && clashKind(alt) && !out.includes(alt) ) out.push(alt);
+  }
+  return out.join("|");
+}
+
 /** Roll one side's spec with its parts and Natural Result change. */
 async function rollSide(actor, key, { extra = [], naturalMod = 0, subtitle, rollOptions = {}, other = null, scope = {} }) {
   const opts = { ...rollOptions, extra, naturalMod, scope: { inClash: 1, ...scope }, other };
@@ -215,26 +302,78 @@ async function rollSide(actor, key, { extra = [], naturalMod = 0, subtitle, roll
     case "might": case "attr": return actor.rollClash(key, opts);
     case "strike": case "dodge": return actor.rollCombat(key, opts);
     case "save": return actor.rollSave(key, opts);
-    case "skill": return actor.rollSkill(key, opts);
+    case "skill": return actor.rollSkill(key, { ...opts, extra: await skillFromAlly(actor, key, opts.extra) });
     default: return null;
   }
+}
+
+/**
+ * WJ "allyGuard.skillBonus" (Skilled Ogre): an Ally who gives it (its condition: @to.distance <= @areaOfRule) lends its
+ * Skill Bonus for this Skill Clash when it is higher than yours: the difference is added (one use of its limit).
+ */
+async function skillFromAlly(actor, key, extra = []) {
+  try {
+    const { allyGuards } = await import("../rules/allies.mjs");
+    const mine = actor.system?.skills?.[key]?.total ?? 0;
+    for ( const g of allyGuards(actor, "skillBonus") ) {
+      const theirs = g.giver.system?.skills?.[key]?.total ?? 0;
+      if ( theirs <= mine ) continue;
+      if ( g.limit && !triggerUsesLeft(g.giver, { limit: g.limit }, g.key) ) continue;
+      if ( g.limit ) {
+        const T = await import("./triggers.mjs");
+        if ( g.giver.isOwner ) await T.useTriggerLimit(g.giver, { limit: g.limit }, g.key);
+        else (await import("../socket.mjs")).emitGM("useLimit", { actorUuid: g.giver.uuid, limit: g.limit, key: g.key });
+      }
+      return [...extra, { label: L("DBU.Clash.SkillFrom", { label: g.label }), value: theirs - mine }];
+    }
+  } catch(err) { console.warn("DBU | allyGuard.skillBonus", err); }
+  return extra;
 }
 
 /**
  * Resolve a Clash between two Characters (see the top of this file).
  * @returns {Promise<object|null>}  null when the initiator's roll could not be made (no such Skill)
  */
+/**
+ * CS2 "allyGuard.cognitiveShift" (Conduit of Spirit): an Opponent's Clash that makes this Character use its Cognitive
+ * Saving Throw may be taken by the Ally who guards it (asked here: its owner, or the GM). @returns that Ally, or null.
+ */
+async function cognitiveShift(initiator, defender, label) {
+  try {
+    const V = await import("../rules/versus.mjs");
+    if ( V.versusData(defender, initiator).ally ) return null;
+    const { allyGuards } = await import("../rules/allies.mjs");
+    for ( const g of allyGuards(defender, "cognitiveShift") ) {
+      if ( g.limit && !triggerUsesLeft(g.giver, { limit: g.limit }, g.key) ) continue;
+      if ( !(g.giver.isOwner || game.user.isGM) ) continue;
+      const ok = await foundry.applications.api.DialogV2.confirm({ window: { title: g.label },
+        content: `<p>${esc(L("DBU.Clash.ShiftAsk", { name: g.giver.name, ally: defender.name, label: label || L("DBU.Clash.Title") }))}</p>` });
+      if ( !ok ) return null;
+      if ( g.limit ) { const { useTriggerLimit } = await import("./triggers.mjs"); await useTriggerLimit(g.giver, { limit: g.limit }, g.key); }
+      return g.giver;
+    }
+  } catch(err) { console.error("DBU | Cognitive shift", err); }
+  return null;
+}
+
 export async function resolveClash(initiator, defender, {
   mine = "might", theirs = mine, via = "", label = "", extra = [], defenderExtra = [], grapple = false, subtitle,
-  defenderSubtitle, rollOptions = {}, defenderRollOptions = {}, mineResult = null, card = true, events = true
+  defenderSubtitle, rollOptions = {}, defenderRollOptions = {}, mineResult = null, card = true, events = true, scope: extraScope = {}
 } = {}) {
-  const mineKey = pickSpec(initiator, mine);
-  const theirsKey = defender ? pickSpec(defender, theirs) : mineKey;
+  // CS2: a Cognitive Clash an Ally takes on itself (its effect goes to that Ally too: out.redirectTo)
+  let redirectTo = null;
+  if ( defender && initiator && /\bcognitive\b/i.test(String(theirs ?? "")) ) {
+    const shifted = await cognitiveShift(initiator, defender, label);
+    if ( shifted ) { defender = shifted; redirectTo = shifted.uuid; }
+  }
+  const mineKey = pickSpec(initiator, withAlternatives(initiator, mine, false));
+  const theirsKey = defender ? pickSpec(defender, withAlternatives(defender, theirs, true)) : mineKey;
   const vias = [via].flat().filter(Boolean);
   const mineVars = clashVariables(mineKey, { initiated: true, via: vias, grapple });
   const theirsVars = clashVariables(theirsKey, { initiated: false, via: vias, grapple });
-  const mineScope = { ...mineVars, vs: await versusOf(initiator, defender) };
-  const theirsScope = { ...theirsVars, vs: await versusOf(defender, initiator) };
+  // (SZ `scope`: what the flow knows of this Clash, for both sides: @tailGrab of a Grapple)
+  const mineScope = { ...mineVars, ...extraScope, vs: await versusOf(initiator, defender) };
+  const theirsScope = { ...theirsVars, ...extraScope, vs: await versusOf(defender, initiator) };
   const title = label || L("DBU.Clash.Title");
   // The defender's pieces apply by themselves; when one of them wins the Clash without a roll, the initiator is asked
   // nothing. The initiator's pieces are asked before anything is rolled (a shared roll against several defenders: only
@@ -242,11 +381,13 @@ export async function resolveClash(initiator, defender, {
   // automatic win only, and nothing of the other side.
   const theirsSide = defender ? await gatherSide(defender, clashKind(theirsKey), theirsScope, { initiator: false, grapple, title })
     : NO_PIECES();
-  const theirsAuto = autoOf(theirsSide.pieces);
+  const theirsAuto = autoOf(theirsSide.pieces) || false;
   const minePieces = (mineResult || theirsAuto) ? NO_PIECES()
     : await commitSide(await gatherSide(initiator, clashKind(mineKey), mineScope, { initiator: true, grapple, title }));
-  const mineAuto = autoOf(minePieces.pieces);
-  const theirsPieces = await commitSide(theirsSide, { none: mineAuto && !theirsAuto });
+  // (RD: a side's clash.autoLose is the other side's automatic win)
+  const mineAuto = autoOf(minePieces.pieces) || loseOf(theirsSide.pieces);
+  const theirsAll = theirsAuto || loseOf(minePieces.pieces);
+  const theirsPieces = await commitSide(theirsSide, { none: mineAuto && !theirsAll });
   const bonusParts = list => list.filter(p => !["clash.natural", "clash.autoWin"].includes(p.target)).map(p => ({ label: p.label, value: p.value }));
   const natural = list => list.filter(p => p.target === "clash.natural").reduce((t, p) => t + p.value, 0);
 
@@ -255,8 +396,8 @@ export async function resolveClash(initiator, defender, {
   let won;
   let a = 0;
   let b = 0;
-  const autoWin = mineAuto || theirsAuto;
-  if ( autoWin ) won = mineAuto && !theirsAuto;
+  const autoWin = mineAuto || theirsAll;
+  if ( autoWin ) won = mineAuto && !theirsAll;
   else {
     mineRoll ??= await rollSide(initiator, mineKey, { extra: [...extra, ...bonusParts(minePieces.pieces)], naturalMod: natural(minePieces.pieces),
       subtitle, rollOptions, other: defender, scope: mineVars });
@@ -270,7 +411,8 @@ export async function resolveClash(initiator, defender, {
     // Ties go to the Defender
     won = a > b;
   }
-  const out = { won, mine: a, theirs: b, margin: a - b, autoWin, tie: !autoWin && (a === b), mineKey, theirsKey, mineRoll, theirsRoll };
+  const out = { won, mine: a, theirs: b, margin: a - b, autoWin, tie: !autoWin && (a === b), mineKey, theirsKey, mineRoll, theirsRoll,
+    ...(redirectTo ? { redirectTo } : {}) };
 
   if ( card ) {
     // (an automatic win rolls nothing: no totals)
@@ -278,7 +420,7 @@ export async function resolveClash(initiator, defender, {
       ...(autoWin ? [] : [L("DBU.Clash.Mine", { name: initiator.name, what: specLabel(mineKey), total: a })]),
       ...((defender && !autoWin) ? [L("DBU.Clash.Theirs", { name: defender.name, what: specLabel(theirsKey), total: b })] : []),
       ...[...minePieces.pieces.map(p => [initiator, p]), ...theirsPieces.pieces.map(p => [defender, p])]
-        .filter(([, p]) => p.target !== "clash.autoWin")
+        .filter(([, p]) => !["clash.autoWin", "clash.autoLose"].includes(p.target))
         .map(([who, p]) => `${who.name} — ${p.label}: ${p.value > 0 ? "+" : ""}${p.value} ${L(DBU.modifierTargets[p.target] ?? p.target)}`),
       ...minePieces.lines,
       autoWin ? L("DBU.Clash.AutoWin", { name: (won ? initiator : defender)?.name ?? "" }) : "",
@@ -289,10 +431,12 @@ export async function resolveClash(initiator, defender, {
     await postInfoCard({ actor: initiator, title, subtitle: vline, lines });
   }
   if ( events && defender ) {
+    // RX: the effects that reacted to each side's roll (@reacted.<fx ref>) and the boxes each side chose (@chose.<group>)
+    const choseOf = side => { try { return side?.chosen && side?.O?.choseVars ? side.O.choseVars(side.chosen) : {}; } catch(err) { return {}; } };
     fireEvent(initiator, won ? "clashWon" : "clashLost", { other: defender,
-      scope: { ...mineScope, margin: a - b, mine: a, theirs: b, autoWin: autoWin ? 1 : 0 } });
+      scope: { ...mineScope, margin: a - b, mine: a, theirs: b, autoWin: autoWin ? 1 : 0, reacted: mineRoll?.reacted ?? {}, chose: choseOf(minePieces) } });
     fireEvent(defender, won ? "clashLost" : "clashWon", { other: initiator,
-      scope: { ...theirsScope, margin: b - a, mine: b, theirs: a, autoWin: autoWin ? 1 : 0 } });
+      scope: { ...theirsScope, margin: b - a, mine: b, theirs: a, autoWin: autoWin ? 1 : 0, reacted: theirsRoll?.reacted ?? {}, chose: choseOf(theirsPieces) } });
   }
   return out;
 }

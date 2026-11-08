@@ -43,6 +43,11 @@ export async function dbuRoll(config) {
     result.twin = { mode: config.twin, totals: [once.total, second.total] };
     stateOf(result).twinIndex = pick ? 1 : 0;
   }
+  // KR "foeGuard.critToBotch" (an Opponent's piece: Karmic Reflection): this Combat Roll's Critical Result is a Botch
+  if ( result.crit && ["strike", "dodge", "wound"].includes(config.kind) && config.actor && globalThis.game?.combats?.some?.(c => c.started) ) {
+    try { const { opponentCritToBotch } = await import("../combat/reactions.mjs"); await opponentCritToBotch(config, result); }
+    catch(err) { console.error("DBU | Critical to Botch", err); }
+  }
   // Roll reactions: the "roll" triggers of the rolling actor (after the dice, before the result is used or posted) and
   // its "rolled" event. Only on the client that owns the actor, and nothing at all without such triggers
   if ( (config.reactions !== false) && config.actor?.isOwner && hasRollTriggers(config.actor) ) {
@@ -52,12 +57,24 @@ export async function dbuRoll(config) {
       await rollReactions(config, result);
     } catch(err) { console.error("DBU | Roll reactions", err); }
   }
+  // F13 the others' reactions to this roll ("allyRoll" / "opponentRoll"), before the result is used
+  if ( (config.reactions !== false) && config.actor?.isOwner && game.combats?.some?.(c => c.started) ) {
+    try {
+      const { foreignRollReactions } = await import("../combat/reactions.mjs");
+      await foreignRollReactions(config, result);
+    } catch(err) { console.error("DBU | Foreign roll reactions", err); }
+  }
   // L: the others of the encounter that react to this Character's rolls ("opponentRolled" / "allyRolled")
   if ( (config.reactions !== false) && config.actor?.isOwner && game.combats?.some?.(c => c.started) ) {
     try {
       const { fireRollWatchers } = await import("../combat/reactions.mjs");
       fireRollWatchers(config, result);
     } catch(err) { console.error("DBU | Roll watchers", err); }
+  }
+  // RA "nextRoll": the bonuses that lasted until this Character's next roll of that kind end now
+  if ( config.actor?.isOwner && config.kind ) {
+    try { const { expireNextRoll } = await import("../combat/triggers.mjs"); await expireNextRoll(config.actor, config.kind); }
+    catch(err) { console.error("DBU | nextRoll", err); }
   }
   if ( config.toMessage === false ) return result;
   result.message = await postRollCard(config, result);
@@ -158,7 +175,7 @@ export async function settleRoll(config, result) {
   const crit2 = !noCrit && (st.natural2 !== null) && (st.natural2 >= critTarget);
   const critMain = !noCrit && ((result.natural >= critTarget) || st.forcedCrit);
   result.crit = critMain || crit2;
-  result.botch = !noBotch && !result.crit && (result.natural <= botchRange);
+  result.botch = !result.crit && (!!config.forceBotch || (!noBotch && (result.natural <= botchRange)));
   if ( cutting && !result.crit ) result.botch = true;
   const want = (result.crit && critDice.length)
     ? diceToFormula((critMain && crit2) ? critDice.map(d => ({ ...d, number: d.number * 2 })) : critDice) : "";
@@ -203,14 +220,25 @@ export async function forceCritical(config, result) {
   return settleRoll(config, result);
 }
 
-/** Roll the Base Die again: the new result stands (with the Natural Result changes already bought). */
-export async function rerollBase(config, result) {
+/** Roll the Base Die again: the new result stands (with the Natural Result changes already bought); T25 keepHigher:
+ * the higher of the two results stands ("roll twice and apply the higher"). */
+export async function rerollBase(config, result, { keepHigher = false } = {}) {
   const st = stateOf(result);
+  // (the earlier result as it was, its Critical dice too: put back whole, not settled again)
+  const prev = { rawNatural: result.rawNatural, natural: result.natural, crit: result.crit, botch: result.botch,
+    critRoll: result.critRoll, flat: result.flat, total: result.total, critFormula: st.critFormula };
   const base = await new Roll(config.baseDie ?? "1d10").evaluate();
   result.rolls.push(base);
   result.rawNatural = base.total;
   result.natural = Math.clamp(baseNatural(config, base.total) + st.naturalDelta, 1, 10);
-  return settleRoll(config, result);
+  await settleRoll(config, result);
+  if ( keepHigher && (result.total < prev.total) ) {
+    const { critFormula, ...back } = prev;
+    Object.assign(result, back);
+    st.critFormula = critFormula;
+    if ( result.twin ) result.twin.totals[st.twinIndex] = result.total;
+  }
+  return result;
 }
 
 /** Roll everything again (the kept roll of a Twin-Linked one): the new dice stand, the bonuses bought stay. */

@@ -15,6 +15,8 @@ export function onRenderChatMessage(message, html) {
     if ( attacker && !attacker.isOwner ) {
       root.querySelectorAll("[data-dbu-action='wound'], [data-dbu-action='retarget'], [data-dbu-action='knockback']").forEach(b => b.remove());
     }
+    // RB: Reflect only for the owner of who may reflect
+    root.querySelectorAll("[data-dbu-action='reflect']").forEach(b => { const d = fromUuidSync(b.dataset.actorUuid); if ( !(d?.actor ?? d)?.isOwner ) b.remove(); });
     root.querySelectorAll("[data-dbu-action='defense'], [data-dbu-action='duel']").forEach(b => {
       const t = attack.targets?.[Number(b.dataset.index)];
       const doc = t?.tokenUuid ? fromUuidSync(t.tokenUuid) : (t?.actorUuid ? fromUuidSync(t.actorUuid) : null);
@@ -58,6 +60,10 @@ async function onCardButton(event, message) {
       case "damage": await applyAttackDamage(message, Number(index)); break;
       case "knockback": await knockbackTarget(message, Number(index)); break;
       case "retarget": await retargetAttack(message); break;
+      // RB: the team Maneuvers of an attack card
+      case "united": await (await import("./combat/team-maneuvers.mjs")).unitedAttack(message); break;
+      case "intervene": await (await import("./combat/team-maneuvers.mjs")).intervene(message, Number(index)); break;
+      case "reflect": await (await import("./combat/team-maneuvers.mjs")).reflect(message, actorUuid); break;
       case "duel": {
         const { startDuel } = await import("./combat/duel.mjs");
         await startDuel(message, Number(index));
@@ -190,7 +196,14 @@ async function onCardButton(event, message) {
         if ( !local && !who.isOwner && !game.users.activeGM ) { ui.notifications.warn(game.i18n.localize("DBU.Notify.NoGM")); return; }
         // A limited trigger ("1/Round") counts when it is used (a limit that is a formula: with the Transformation's
         // variables)
-        const limited = { limit: p.limit, ctx: p.ctx ?? {} };
+        const limited = { limit: p.limit, ctx: p.ctx ?? {}, attackId: p.attackId ?? null };
+        // PA: a per-attack limit already used (and paid) for this attack: this one is free
+        const again = !!(p.attackId && p.limitKey && T.sameAttackUse(actor, p.limitKey, p.attackId));
+        // PA "+after:<key>": only once that other piece was used for this attack
+        const after = T.afterKeyOf(p.limitKey);
+        if ( after && p.attackId && !T.sameAttackUse(actor, after, p.attackId) ) {
+          return ui.notifications.warn(game.i18n.format("DBU.Trigger.NeedsFirst", { label: p.label }));
+        }
         const usedUp = () => {
           ui.notifications.warn(game.i18n.format("DBU.Trigger.LimitUsed", { label: p.label, limit: p.limit }));
           button.remove();
@@ -219,9 +232,9 @@ async function onCardButton(event, message) {
         let value = Number(p.value) || 0;
         let plan = null;
         let n = Number(p.scope?.n ?? 1) || 1;
-        if ( p.cost || p.amount ) {
+        if ( (p.cost && !again) || p.amount ) {
           if ( p.limitKey && !T.triggerUsesLeft(actor, limited, p.limitKey) ) return usedUp();
-          const use = await T.prepareTriggerUse(actor, p);
+          const use = await T.prepareTriggerUse(actor, again ? { ...p, cost: "" } : p);
           if ( !use ) return;
           if ( use.plan?.problems?.length ) {
             ui.notifications.warn(`${p.label}: ${game.i18n.format("DBU.Trigger.CantPay", { why: use.plan.problems.join(" ") })}`);
@@ -256,10 +269,11 @@ async function onCardButton(event, message) {
         // Options only some effects carry (B1 marker, B3 inflictor / State loop guard, B5 `with`, B2 resource loop guard, the
         // mark a markPlaced effect ends with)
         // (D1: the effect the piece comes from, for @viaFx and "fxUsed")
-        for ( const k of ["markerUuid", "inflictor", "with", "resEvent", "noLeave", "withMark", "quietMark", "fx", "fxOwner", "messageId"] ) if ( p[k] ) opts[k] = p[k];
+        for ( const k of ["markerUuid", "inflictor", "with", "resEvent", "noLeave", "withMark", "quietMark", "fx", "fxOwner", "messageId", "defeatForms", "rawDuration", "onDefeat", "drainer", "actAfterOf", "swapFrom", "copySlug"] ) if ( p[k] ) opts[k] = p[k];
+        if ( (p.targetIndex !== undefined) && (p.targetIndex !== null) ) opts.targetIndex = p.targetIndex;
         if ( ["mark", "unmark"].includes(p.effect) ) opts.markerUuid = actor.uuid;
         // P: an attack Maneuver of the button targets the event's other Character
-        if ( (p.effect === "maneuver") && p.otherUuid ) opts.otherUuid = p.otherUuid;
+        if ( ["maneuver", "cancelAttack", "moveOther", "teleport", "provoke"].includes(p.effect) && p.otherUuid ) opts.otherUuid = p.otherUuid;
         if ( (p.effect === "condition") && (who !== actor) && (p.event !== "inflict") ) opts.inflictor = actor.uuid;
         // "targeted": the durations "until your (next) turn" count on your turns
         if ( p.targeted ) Object.assign(opts, T.timedOptionsFor(actor, who, p.rawDuration ?? p.duration));

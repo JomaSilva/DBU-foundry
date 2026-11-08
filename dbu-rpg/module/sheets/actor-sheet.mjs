@@ -555,6 +555,10 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       hordeLabel: horde,
       actor, system: sys, source: sys._source, config: DBU, editable: this.isEditable, owner: actor.isOwner,
       isGM: game.user.isGM, isNPC: actor.type === "npc",
+      // MO: the Leaders a Minion may belong to (the world's Characters and NPCs)
+      minionOfOptions: ((actor.type === "npc") && ["minion", "battleJacket"].includes(sys._source?.npcType))
+        ? game.actors.filter(a => (a.id !== actor.id) && ["character", "npc", "adversary"].includes(a.type))
+          .map(a => ({ uuid: a.uuid, name: a.name, selected: a.uuid === sys._source?.minionOf })) : [],
       isAdversary: actor.type === "adversary", adversary: adversaryContext(sys),
       attributes, saves, skills, combatRolls, conditions, states,
       race, racialTraits: byType("racialTrait"), talents, uas, signatures,
@@ -577,7 +581,7 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       healthLabel: L(`DBU.Threshold.${sys.health.current}`),
       thresholds: DBU.thresholds.map(k => ({
         key: k, label: L(`DBU.Threshold.${k}`), below: sys.health.below[k], mark: sys.thresholds[k],
-        value: Math.floor(sys.life.max * DBU.THRESHOLD_FRACTIONS[k])
+        value: Math.floor(sys.life.max * (sys.thresholdFractions ?? DBU.THRESHOLD_FRACTIONS)[k])
       })),
       topDice: categoryLabel(Math.max(0, sys.top.current - 1)),
       chargeDice: categoryLabel(sys.chargeCategory, sys.top.current),
@@ -805,7 +809,7 @@ export class DBUActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     const cur = Number(foundry.utils.getProperty(this.actor, path)) || 0;
     let value = cur + Number(delta);
     if ( pool && this.actor.system[pool]?.max !== undefined && (pool !== "life") ) value = Math.clamp(value, 0, this.actor.system[pool].max);
-    if ( pool === "life" ) value = Math.min(value, this.actor.system.life.max);
+    if ( pool === "life" ) value = Math.min(value, this.actor.system.life.cap ?? this.actor.system.life.max);
     if ( field === "system.combat.power" ) value = Math.clamp(value, 0, this.actor.system.combat.powerMax ?? 2);
     // A Fusion holds the Karma Points of all of its Fused Characters
     if ( field === "system.karma.value" ) value = Math.clamp(value, 0, this.actor.type === "fusion" ? 99 : 4);

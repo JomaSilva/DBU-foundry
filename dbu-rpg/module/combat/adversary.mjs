@@ -83,8 +83,8 @@ export async function villainousKarmaOut(actor) {
   const life = Math.floor(sys.life.max / 4);
   const ki = Math.floor(sys.ki.max / 4);
   await actor.update({
-    ...(sys.flags?.noLifeRegain ? {} : { "system.life.value": Math.min(sys.life.max, sys.life.value + life) }),
-    "system.ki.value": Math.min(sys.ki.max, sys.ki.value + ki),
+    ...(sys.flags?.noLifeRegain ? {} : { "system.life.value": Math.min(sys.life.cap ?? sys.life.max, sys.life.value + life) }),
+    "system.ki.value": Math.min(sys.ki.cap ?? sys.ki.max, sys.ki.value + ki),
     "system.adversary.karmaOut": combat.id
   });
   await postInfoCard({ actor, title: L("DBU.Adversary.KarmaOutTitle"), lines: [L("DBU.Adversary.KarmaOut", { name: actor.name, life, ki })] });

@@ -19,14 +19,14 @@ import { allyPieces, isAllyTarget } from "./allies.mjs";
 /** Targets resolved before Attribute Modifiers exist (they may only use PL/ToP/state data). */
 const EARLY_TARGETS = new Set(["top", "ki.max", "ki.mult", "capacity.max", "capacity.mult", "topDice.extra", "fatiguedMin",
   "dotMin", "life.mult", "superStacks", "skillImprovements"]);
-const ATTRIBUTE_TARGETS = /^(score|mod)\./;
+const ATTRIBUTE_TARGETS = /^(score|mod|scoreSet)\./;
 /**
  * Targets resolved before every other one (stage -1): the Power maximum and "Power Spiked" (stage-0 bonuses may depend
  * on @powerSpiked) and the State effects ignored (they suppress built-in State modifiers of any stage).
  */
 // (H: "holdingBack.ignore" too: the Holding Back stacks are read for the Tier of Power, before stage 0)
 const PRE_TARGETS = new Set(["power.max", "flag.powerSpiked", "holdingBack.ignore"]);
-const PRE_PREFIX = /^ignoreState\./;
+const PRE_PREFIX = /^(ignoreState|resAdd)\./;
 /**
  * Targets resolved between the Attribute Modifiers and the rest, with the same formula data as stage 2: first the Racial
  * Life Modifier and the Size (stage 1.5: @rlm, @sizeNow), then the Size Categories used for the DV / Soak bonus and the
@@ -39,7 +39,7 @@ const MID_PREFIX = /^(apparelBonus|sizeAs)\./;
  * Late variables, known only after the Aptitudes (@soakNow, @surgencyNow, @dvNow) or the Technique Points (@tp): a
  * modifier naming one of them is evaluated in a late pass (stage "late"; "lateTp" for a Max LP one that only names @tp).
  */
-const LATE_VARS = /@(soakNow|surgencyNow|dvNow|tp)(?![\w.])/;
+const LATE_VARS = /@(soakNow|surgencyNow|dvNow|tp)(?![\w.])|@ranksNow\.\w+/;
 const LATE_NOT_TP = /@(soakNow|surgencyNow|dvNow)(?![\w.])/;
 const formulasOf = m => `${m.value ?? ""} ${m.condition ?? ""}`;
 /** Does a modifier name a late variable (in its value or its condition)? */
@@ -51,11 +51,13 @@ export function isLateModifier(m) {
  * without ".mult" in their name multiply too.
  */
 const ZERO_MULT = new Set(["dimDefense.mult", "surgency.mult", "soak.mult", "legend.mult", "dkp.mult", "recovery.kiMult",
-  "surge.kiMult", "surge.healSurgency", "charge.kpMult", "dimOffense.mult", "dimDefense.penaltyMult"]);
+  "surge.kiMult", "surge.healSurgency", "charge.kpMult", "dimOffense.mult", "dimDefense.penaltyMult",
+  // RT: a Health Threshold's penalty may be multiplied by 0 (none)
+  "threshold.bruisedPenaltyMult", "threshold.injuredPenaltyMult", "threshold.criticalPenaltyMult"]);
 /** Targets whose value is text, read where they are used (never summed). */
 const TEXT_TARGETS = new Set(["favoredElement", "attack.damageAttribute", "attack.aoe", "attack.state"]);
 /** Targets that may hold dice ("1d6(bT)"): read with {@link modifierTerms} where they are used. */
-const DICE_TARGETS = new Set(["recovery.bonus", "legend.bonus", "surge.healBonus"]);
+const DICE_TARGETS = new Set(["recovery.bonus", "legend.bonus", "surge.healBonus", "surge.vengefulDice"]);
 
 /** The stage of a target (-1, 0, 1, 1.5, 1.75, 2); given the modifier, "late" / "lateTp" when it names a late variable. */
 export function modifierStage(target, mod = null) {
@@ -146,7 +148,11 @@ export function collectModifiers(actor, system) {
         const lvl = Math.max(1, a.level || 0);
         const params = new Set([...(prev?.params ?? []), ...String(a.param || "").split(/[\/,]/).map(p => p.trim()).filter(Boolean)]);
         const level = prev ? (def.solo ? Math.max(prev.level, lvl) : prev.level + lvl) : lvl;
-        aspects.set(a.key, { level: def.levels ? Math.min(level, def.levels) : level, params, item });
+        // (T14 "aspectMax.<key>" pieces of the item raise the maximum)
+        const over = Math.max(0, ...Array.from(s.modifiers ?? []).filter(m => (m?.target === `aspectMax.${a.key}`) && (m.active !== false)
+          && test(m.condition, ctx ?? {})).map(m => Number(m.value) || 0));
+        const lim = def.levels ? Math.max(def.levels, over) : 0;
+        aspects.set(a.key, { level: lim ? Math.min(level, lim) : level, params, item });
         if ( a.key === "highSpeed" ) highSpeed.push({ item, ctx });
       }
     }
@@ -183,6 +189,15 @@ export function collectModifiers(actor, system) {
       }
     }
   }
+  // SZ "innateState.<state>" (unconditioned, on an item that works): you are always in that State
+  for ( const item of actor?.items ?? [] ) {
+    if ( !(item.system?.isActive ?? true) ) continue;
+    for ( const m of item.system?.modifiers ?? [] ) {
+      if ( (m.active === false) || !String(m.target ?? "").startsWith("innateState.") || String(m.condition ?? "").trim() ) continue;
+      const k = stateKeyFromName(String(m.target).slice(12));
+      if ( k ) states[k] = Math.max(states[k] ?? 0, 1);
+    }
+  }
   for ( const [key, level] of Object.entries(states) ) {
     if ( !(level > 0) ) continue;
     for ( const m of DBU.stateModifiers[key] ?? [] ) {
@@ -209,6 +224,23 @@ export function collectModifiers(actor, system) {
 
   // G1: what the items of your Allies give their Allies ("ally.<target>" pieces, rules/allies.mjs), already worked out
   for ( const p of allyPieces(actor, { fxPiece }) ) push({ target: p.target, value: p.value }, p.label);
+  // BJ: a Battle Jacket (NPC of type battleJacket) gets its owner's "jacket.<target>" pieces (worked out with the Jacket's
+  // own data: its (bT) is its Jacket Tier)
+  if ( (actor?.type === "npc") && (system?.npcType === "battleJacket") && system.minionOf ) {
+    let owner = null;
+    try { owner = globalThis.fromUuidSync?.(system.minionOf) ?? null; } catch(err) { owner = null; }
+    if ( owner?.documentName === "Token" ) owner = owner.actor;
+    for ( const item of owner?.items ?? [] ) {
+      if ( !(item.system?.isActive ?? true) ) continue;
+      for ( const m of item.system?.modifiers ?? [] ) {
+        const x = /^jacket\.(.+)$/.exec(String(m?.target ?? ""));
+        // (CS2: a "(Twinned)" piece only when that Custom Species Trait is Twinned)
+        if ( !x || (m.active === false) || twinnedOff(item, m) ) continue;
+        // (CS2 @ownerPL: the pilot's Power Level: Piloting Prowess 3)
+        push({ target: x[1], value: m.value, condition: m.condition }, `${m.label || item.name} (${owner.name})`, { ownerPL: Number(owner.system?.pl) || 1 });
+      }
+    }
+  }
 
   // Optional Rules enabled in the world
   pushOptionalModifiers(actor, system, push);
@@ -363,6 +395,10 @@ export function evaluateModifiers(mods, data, { stage, buckets = {} } = {}) {
   for ( const m of mods ) {
     if ( (stage !== undefined) && (modifierStage(m.target, m) !== stage) ) continue;
     if ( TEXT_TARGETS.has(m.target) || (DICE_TARGETS.has(m.target) && hasDice(m.value)) ) continue;
+    // (T14 aspectMax.<key>: read by the Aspects themselves)
+    if ( /^aspectMax\./.test(String(m.target ?? "")) ) continue;
+    // (T5 clashAlt.<key> / clashAltDef.<key>: text, read by combat/clash.mjs)
+    if ( /^clashAlt(Def)?\./.test(String(m.target ?? "")) ) continue;
     // fx* and aspect* pieces: read by their own passes (rules/fx.mjs)
     if ( isPassTarget(m.target) ) continue;
     // G1 "ally.<target>": given to your Allies (rules/allies.mjs), not to you
@@ -376,7 +412,7 @@ export function evaluateModifiers(mods, data, { stage, buckets = {} } = {}) {
     const value = evaluate(m.value, scope, { floor: !isMult, strict: zeroOk });
     if ( zeroOk && (!String(m.value ?? "").trim() || !Number.isFinite(value)) ) continue;
     // Q "masteryCap.<slug>": a cap of 0 Masteries counts too
-    const capKey = m.target.startsWith("masteryCap.");
+    const capKey = m.target.startsWith("masteryCap.") || m.target.startsWith("scoreSet.");
     if ( capKey && (!String(m.value ?? "").trim() || !Number.isFinite(value)) ) continue;
     if ( !value && !isMult && !capKey ) continue;
     // "ignoreState.<...>" keys are kept in lower case (ignoreState.raging.Angry.2 = ignoreState.raging.angry.2)

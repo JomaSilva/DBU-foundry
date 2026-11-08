@@ -89,7 +89,7 @@ export function checkModifier(m, i, ctx) {
   const out = [];
   const t = String(m.target ?? "");
   const what = `modifier ${i}`;
-  const fx = /^fx(Off|On|Mult|Add|Limit)\.(.+)$/.exec(t);
+  const fx = /^fx(Off|On|Mult|Add|Limit|Ask)\.(.+)$/.exec(t);
   if ( fx ) {
     if ( !knownRef(fx[2]) ) out.push(`${what}: ${t}: no effect "${fx[2]}" (reference = <item slug>_<Trait>_<n>)`);
     if ( fx[1] === "fxLimit" ) out.push(...ctx.checkLimit(String(m.value ?? ""), what));

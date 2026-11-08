@@ -1,0 +1,38 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "StateRule": {
+        "Forbids": "{state}: você não pode usar {what}.",
+        "SpectatorTarget": "Spectator: {name} não pode mirar outro personagem.",
+        "SurgingFocus": "Surging: este ataque não inclui o seu Focus.",
+        "UndyingDefeat": "{name} saiu do Undying sem Pontos de Vida: Derrotado.",
+        "What": {
+          "attack": "Attacking Maneuvers",
+          "signature": "Signature Techniques",
+          "uniqueAbility": "Unique Abilities",
+          "powerUp": "o Power Up",
+          "transformation": "a Transformation Maneuver",
+          "energyCharge": "o Energy Charge"
+        }
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "StateRule": {
+        "Forbids": "{state}: you cannot use {what}.",
+        "SpectatorTarget": "Spectator: {name} cannot target another Character.",
+        "SurgingFocus": "Surging: this attack does not include your Focus.",
+        "UndyingDefeat": "{name} left Undying with no Life Points: Defeated.",
+        "What": {
+          "attack": "Attacking Maneuvers",
+          "signature": "Signature Techniques",
+          "uniqueAbility": "Unique Abilities",
+          "powerUp": "the Power Up",
+          "transformation": "the Transformation Maneuver",
+          "energyCharge": "the Energy Charge"
+        }
+      }
+    }
+  }
+}

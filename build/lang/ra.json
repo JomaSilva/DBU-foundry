@@ -1,0 +1,56 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Target": {
+        "lifeOverMax": "PV acima do máximo (até +N)"
+      },
+      "Trigger": {
+        "EventLabel": {
+          "allyExploitTriggered": "Quando o Exploit de um aliado é provocado",
+          "allyInflict": "Quando um aliado impõe uma Condição a um oponente"
+        },
+        "Event": {
+          "allyExploitTriggered": "Exploit de aliado provocado — {name}",
+          "allyInflict": "Aliado impôs Condição — {name}"
+        },
+        "Duration": {
+          "untilDefended": "até a próxima defesa",
+          "nextRoll": "até a próxima rolagem"
+        },
+        "DefeatFormsKept": "Derrota evitada: continua em {list}",
+        "Effect": {
+          "steadfastPass": "Steadfast falhos viram sucessos"
+        },
+        "SteadfastPassShort": "Steadfast falhos → sucessos",
+        "SteadfastPassed": "{n} Steadfast falho(s) virou(aram) sucesso"
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Target": {
+        "lifeOverMax": "Life Points above the maximum (up to +N)"
+      },
+      "Trigger": {
+        "EventLabel": {
+          "allyExploitTriggered": "When an Ally's Exploit is provoked",
+          "allyInflict": "When an Ally gives an Opponent a Combat Condition"
+        },
+        "Event": {
+          "allyExploitTriggered": "Ally's Exploit provoked — {name}",
+          "allyInflict": "Ally inflicted a Condition — {name}"
+        },
+        "Duration": {
+          "untilDefended": "until the next defense",
+          "nextRoll": "until the next roll"
+        },
+        "DefeatFormsKept": "Defeat avoided: still in {list}",
+        "Effect": {
+          "steadfastPass": "Failed Steadfast Checks become successes"
+        },
+        "SteadfastPassShort": "Failed Steadfast → successes",
+        "SteadfastPassed": "{n} failed Steadfast Check(s) turned into successes"
+      }
+    }
+  }
+}

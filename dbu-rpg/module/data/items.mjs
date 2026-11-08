@@ -12,6 +12,37 @@ const { ArrayField, BooleanField, NumberField, SchemaField, StringField } = foun
  */
 export function grantWorks(data) {
   const f = data?.parent?.flags?.["dbu-rpg"];
+  // OG "+res:<slug>": only while that sheet resource of the owner is 1+ (its source data: no derived data needed)
+  if ( f?.grantRes ) {
+    const slug = String(f.grantRes).toLowerCase();
+    const list = data.parent?.actor?._source?.system?.resources ?? data.parent?.actor?.system?.resources ?? [];
+    const r = Array.from(list).find(x => String(x?.name ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "") === slug);
+    // (T21: a split resource, like Battle Born, counts what is placed on each roll too)
+    const total = (Number(r?.value) || 0) + (r?.split ? Object.values(r.alloc ?? {}).reduce((t, v) => t + (Number(v) || 0), 0) : 0);
+    if ( !(total >= (Number(f.grantResMin) || 1)) ) return false;
+  }
+  // F8 "+state:<key>": only while the owner is in that State (its source data)
+  if ( f?.grantState ) {
+    const st = data.parent?.actor?._source?.system?.states ?? data.parent?.actor?.system?.states ?? {};
+    if ( !((Number(st[f.grantState]) || 0) >= 1) ) return false;
+  }
+  // F15 "tagOffNormal.<tag>" (a piece of another item): the item tagged <tag> (an effect's tagItem) does not work while its
+  // owner is in its Normal State (no Transformation in use)
+  const tags = Object.keys(f?.tags ?? {});
+  if ( tags.length ) {
+    const items = Array.from(data.parent?.actor?.items ?? []);
+    const off = tags.some(tag => items.some(i => (i !== data.parent) && (i._source?.system?.active !== false)
+      && (i._source?.system?.modifiers ?? []).some(m => (m.target === `tagOffNormal.${tag}`) && (m.active !== false))));
+    if ( off && !items.some(i => (i.type === "transformation") && i._source?.system?.active) ) return false;
+  }
+  // (T22 "+picked:<Option>": only while the granting item's choices have that option picked)
+  if ( f?.grantPicked && f.grantedBy ) {
+    const pid = (typeof f.grantedBy === "object") ? f.grantedBy.item : f.grantedBy;
+    const pby = data.parent?.actor?.items?.get?.(pid);
+    const norm = x => String(x ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const picked = (pby?.system?.choices ?? []).flatMap(c => c.selected ?? []).map(norm);
+    if ( pby && !picked.includes(norm(f.grantPicked)) ) return false;
+  }
   if ( !(f?.grantActive || f?.grantMastery) || !f.grantedBy ) return true;
   const id = (typeof f.grantedBy === "object") ? f.grantedBy.item : f.grantedBy;
   const by = data.parent?.actor?.items?.get?.(id);
@@ -409,6 +440,8 @@ export class SignatureData extends BaseItemData {
       // Where the Signature comes from, for the effects that care (a comma list: copied, crafted, racial, fullPower,
       // quickLearner): @tag_<tag> in the attack's formulas; a "fullPower" Signature counts as a Basic Attack (@basic)
       tags: new StringField({ blank: true, initial: "" }),
+      // NM5: whose technique a Copied Technique is (its name or uuid): @copySource of the United Attack it may join
+      copiedFrom: new StringField({ blank: true, initial: "" }),
       // How the attack looks on the canvas (module/canvas/attack-fx.mjs): shape "auto" and blank colours follow the Profile
       vfx: new SchemaField({
         shape: new StringField({ initial: "auto" }),

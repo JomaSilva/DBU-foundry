@@ -23,6 +23,10 @@ export function modifiersField() {
     group: new StringField({ required: true, blank: true, initial: "" }),
     limitKey: new StringField({ required: true, blank: true, initial: "" }),
     at: new StringField({ required: true, blank: true, initial: "" }),
+    // RA: the boxes of one "exclusive" set: only one of them may be ticked in the attack dialog ("X or Y, not both")
+    exclusive: new StringField({ required: true, blank: true, initial: "" }),
+    // CC: a cost only checked when the attack is declared (summed with the other boxes'), paid later by the effect's triggers
+    checkCost: new StringField({ required: true, blank: true, initial: "" }),
     // D1: the rules effect the piece comes from ("<item slug>_<Trait>_<n>", rules/fx.mjs)
     fx: new StringField({ required: true, blank: true, initial: "" }),
     // G1: an "ally.<target>" piece reaches only the Allies within this many Squares (blank: every Ally)

@@ -61,8 +61,8 @@ const skillSelect = keys => `<div class="form-group"><label>${L("DBU.Adv.Skill")
 /** Heal an actor (directly or through the GM) and return the line for the card. */
 async function heal(target, life, ki = 0) {
   const s = target.system;
-  const data = s.flags?.noLifeRegain ? {} : { "system.life.value": Math.min(s.life.max, s.life.value + life) };
-  if ( ki ) data["system.ki.value"] = Math.min(s.ki.max, s.ki.value + ki);
+  const data = s.flags?.noLifeRegain ? {} : { "system.life.value": Math.min(s.life.cap ?? s.life.max, s.life.value + life) };
+  if ( ki ) data["system.ki.value"] = Math.min(s.ki.cap ?? s.ki.max, s.ki.value + ki);
   await safeUpdate(target, data);
   return ki ? L("DBU.Adv.Healed", { name: target.name, life, ki }) : L("DBU.Adv.HealedLife", { name: target.name, life });
 }

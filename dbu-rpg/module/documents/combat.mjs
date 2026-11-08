@@ -59,7 +59,7 @@ export class DBUCombat extends Combat {
       const roundKi = sys.roundKi ?? 0;
       if ( roundKi > 0 ) lines.push(L("DBU.Combat.RoundKi", { name: p.actor.name, n: roundKi }));
       await p.actor.update({
-        "system.ki.value": Math.min(sys.ki.max, sys.ki.value + roundKi),
+        "system.ki.value": Math.min(sys.ki.cap ?? sys.ki.max, sys.ki.value + roundKi),
         "system.capacity.value": sys.capacity.max,
         "system.combat.actions": actions,
         "system.combat.counters": sys.countersPerRound,
@@ -71,7 +71,8 @@ export class DBUCombat extends Combat {
         "system.combat.absoluteAttacks": 0,
         // B5 @chargesRound / @surgesRound
         "system.combat.chargesRound": 0,
-        "system.combat.surgesRound": 0
+        "system.combat.surgesRound": 0,
+        "system.combat.healingSurgesRound": 0
       }, { dbuSource: "regen" });
       if ( advantage ) lines.push(L("DBU.Combat.PowerAdvantage", { name: p.actor.name }));
       // Adversaries: Narrative Stamina for the round, Life and Ki Points following a new PCC
@@ -97,6 +98,18 @@ export class DBUCombat extends Combat {
   /** @override */
   async _onEndRound(context) {
     await super._onEndRound(context);
+    // E2 actAfter: the initiative moved for this Round only comes back
+    if ( game.user.isActiveGM ) {
+      // (CS2: the items an effect gave for this Combat Round go: Magical Mastery's Unique Ability)
+      for ( const c of this.combatants ) {
+        const a = c.actor;
+        const ids = (a?.items ?? []).filter(i => i.flags?.["dbu-rpg"]?.roundTemp?.combat === this.id).map(i => i.id);
+        if ( ids.length ) await a.deleteEmbeddedDocuments("Item", ids).catch(console.error);
+      }
+      for ( const c of this.combatants.filter(x => x.flags?.["dbu-rpg"]?.initRestore !== undefined) ) {
+        await c.update({ initiative: c.flags["dbu-rpg"].initRestore, "flags.dbu-rpg.-=initRestore": null }).catch(console.error);
+      }
+    }
     if ( !this.automation ) return;
     for ( const p of this._participants() ) {
       await expireTimed(p.actor, "endOfRound");
@@ -158,7 +171,8 @@ export class DBUCombat extends Combat {
     }
     if ( life !== sys.life.value ) updates["system.life.value"] = (sys._effectiveStates?.undying > 0) ? life : Math.max(0, life);
     if ( ki !== sys.ki.value ) updates["system.ki.value"] = Math.max(0, ki);
-    if ( Object.keys(updates).length ) await actor.update(updates, { dbuSelfInflicted: true, dbuSource: "dot" });
+    // (FD: a DOT loss is Damage for the resource events)
+    if ( Object.keys(updates).length ) await actor.update(updates, { dbuSelfInflicted: true, dbuSource: "dot", ...((dot > 0) ? { dbuEnvDamage: true } : {}) });
     // No Energy: Ki at 0 ends every Form/Enhancement with Stress Exhaustion (Divine Ki at 0, for God Ki ones)
     const empty = noEnergy(actor.system);
     if ( empty ) {
@@ -170,7 +184,12 @@ export class DBUCombat extends Combat {
       lines.push(L("DBU.Turn.Straining"));
       buttons.push({ action: "stressTest", label: L("DBU.Roll.Stress"), icon: "fa-solid fa-bolt", actorUuid: actor.uuid });
     }
-    if ( sys.effectiveConditions.compelled ) lines.push(L("DBU.Turn.Compelled"));
+    if ( sys.effectiveConditions.compelled ) {
+      // (T8: no Ki Wager / no Life Point loss through Compelled)
+      const noW = (sys.buckets?.["flag.compelledNoWager"]?.total ?? 0) > 0;
+      const noL = (sys.buckets?.["flag.compelledNoLife"]?.total ?? 0) > 0;
+      lines.push(L((noW && noL) ? "DBU.T8.CompelledNone" : (noW ? "DBU.T8.CompelledNoWager" : (noL ? "DBU.T8.CompelledNoLife" : "DBU.Turn.Compelled"))));
+    }
     if ( sys.combat.power > 0 ) lines.push(L("DBU.Turn.Power", { n: sys.combat.power }));
     // Flight Optional Rule: the Verticality is lost at the start of the turn
     lines.push(...await heightStartOfTurn(combatant));
@@ -178,6 +197,11 @@ export class DBUCombat extends Combat {
     // Absorption: a Defeated character loses every stack of it (6th effect of Assimilated Power)
     await defeatedLosesStacks(actor);
     await runTriggers(actor, "startOfTurn", { round: context.round, turn: context.turn });
+    // F3 "otherTurnStart": the start of another Character's turn, for the other participants (other = whose turn it is)
+    {
+      const { fireEvent } = await import("../combat/triggers.mjs");
+      for ( const p of this._participants() ) if ( p.actor && (p.actor !== actor) ) fireEvent(p.actor, "otherTurnStart", { other: actor });
+    }
     // B5 @damagedSinceTurn counts again from the start of this turn (its Start of Turn triggers saw the old count)
     if ( actor.system.combat?.damagedSinceTurn ) await actor.update({ "system.combat.damagedSinceTurn": 0 });
   }
@@ -185,6 +209,12 @@ export class DBUCombat extends Combat {
   /** @override */
   async _onEndTurn(combatant, context) {
     await super._onEndTurn(combatant, context);
+    // (CS4: the one-use Signatures spent this turn go)
+    if ( game.user.isActiveGM ) {
+      const a = combatant.actor;
+      const spent = (a?.items ?? []).filter(i => i.flags?.["dbu-rpg"]?.oneUseSpent).map(i => i.id);
+      if ( spent.length ) await a.deleteEmbeddedDocuments("Item", spent).catch(console.error);
+    }
     if ( !this.automation ) return;
     const actor = combatant.actor;
     const sys = actor?.system;
@@ -219,12 +249,20 @@ export class DBUCombat extends Combat {
     }
     if ( life !== sys.life.value ) updates["system.life.value"] = (sys._effectiveStates?.undying > 0) ? life : Math.max(0, life);
     if ( Object.keys(updates).length ) {
-      await actor.update(updates);
+      // (FD: Suffocating and Gravity losses are Damage for the resource events)
+      await actor.update(updates, (updates["system.life.value"] !== undefined) ? { dbuEnvDamage: true } : {});
       if ( updates["system.conditions.prone"] ) await actor.toggleStatusEffect("prone", { active: true }).catch(() => null);
     }
     lines.push(...await heightEndOfTurn(combatant));
     if ( lines.length ) await postInfoCard({ actor, title: L("DBU.Turn.End", { name: actor.name }), lines });
     await expireTimed(actor, "endOfTurn");
+    // GS: the attacks from a Glass Soldier's Square (Warriors of Glass) end with the turn
+    if ( actor.getFlag?.("dbu-rpg", "originFrom") ) await actor.unsetFlag("dbu-rpg", "originFrom").catch(() => null);
+    // FC: a Final Chance still waiting for its attack ends with the turn
+    if ( actor.getFlag?.("dbu-rpg", "finalChance") ) {
+      const { finalChanceOver } = await import("../combat/attack.mjs");
+      await finalChanceOver(actor).catch(console.error);
+    }
     // What this character's effects caused "until the end of your turn" on others (Thrust, Collisions)
     for ( const p of this._participants() ) await expireTimed(p.actor, "endOfTurn", { source: actor.uuid });
     await runTriggers(actor, "endOfTurn", { round: context.round, turn: context.turn });
@@ -266,6 +304,10 @@ export async function onCombatStart(combat) {
 
 /** End of a Combat Encounter: Instant Recovery and reset of encounter trackers. */
 export async function onCombatDeleted(combat) {
+  // (F14: the Characters that switched to their Avatar come back)
+  if ( game.user.isActiveGM ) {
+    try { const AV = await import("../combat/avatar.mjs"); await AV.endAvatars(combat); } catch(err) { console.error("DBU | Avatars", err); }
+  }
   if ( !game.user.isActiveGM || !game.settings.get("dbu-rpg", "combatAutomation") ) return;
   if ( !combat.started ) return;
   const done = new Set();
@@ -277,10 +319,21 @@ export async function onCombatDeleted(combat) {
     done.add(actor.uuid);
     actors.push(actor);
     await clearTimed(actor);
+    // (CS2 "endOfEncounter": the Combat Encounter is over: Fluid Physique's Mass)
+    try { await runTriggers(actor, "endOfEncounter", {}); } catch(err) { console.error("DBU | endOfEncounter", err); }
+    // (F13: the items an effect made for this Combat Encounter: Inherited Creativity's Signature Technique)
+    const temp = actor.items.filter(i => i.flags?.["dbu-rpg"]?.encounterTemp === combat.id).map(i => i.id);
+    if ( temp.length ) await actor.deleteEmbeddedDocuments("Item", temp).catch(console.error);
     if ( grappleOf(actor) ) await endGrapple(actor);
     await actor.resetEncounter({ instantRecovery: true });
     lines.push(L("DBU.Combat.InstantRecovery", { name: actor.name }));
     if ( await clearRegeneratorInjuries(actor) ) lines.push(L("DBU.Injury.RegenEncounter", { name: actor.name }));
+  }
+  // GP From Goop (8): the Goops die at the end of the encounter, their owner regains 1/2 of their Life Points
+  for ( const actor of actors ) {
+    if ( !actor.items?.some(i => (i.type === "racialTrait") && /^from goop$/i.test(i.name)) ) continue;
+    const { goopsOf, reabsorbGoops } = await import("../combat/minions.mjs");
+    if ( goopsOf(actor).length ) lines.push(`${actor.name}: ${await reabsorbGoops(actor, Infinity, { pick: false })}`);
   }
   if ( lines.length ) await postInfoCard({ title: L("DBU.Combat.End"), lines, img: "icons/svg/combat.svg" });
   // Temporary Awakenings: Level 2 ones go, the GM decides about Level 1 ones

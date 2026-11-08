@@ -69,21 +69,16 @@
   ]
  },
  "abundant-s-cells|Super Saiyan Bargain Sale|3": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "roll",
-    "condition": "@kind_stress == 1",
+    "condition": "@kind_stress == 1 && @entering == 1 && @stressAspects.superSaiyanForm >= 1",
     "effect": "rollBonus",
     "value": "1",
-    "mode": "ask"
+    "mode": "auto"
    }
-  ],
-  "note": "click it only for a Transformation with the Super Saiyan Form Aspect",
-  "code": {
-   "category": "transformationRule",
-   "spec": "the Stress Test roll does not know the Aspects of the Transformation being entered: the +1 is a button on every Stress Test"
-  }
+  ]
  },
  "abundant-s-cells|Super Saiyan Bargain Sale|4": {
   "verdict": "modifiers",
@@ -108,7 +103,7 @@
     "event": "transform",
     "effect": "actions",
     "value": "1",
-    "condition": "@enhancement == 0 && @aspects.superSaiyanForm - @active.supersaiyanpower >= 1",
+    "condition": "@form == 1 && @enteredAspects.superSaiyanForm >= 1",
     "mode": "auto",
     "limit": "1/Encounter"
    }
@@ -391,7 +386,7 @@
   }
  },
  "advanced-vocation|Monster Master|9": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "inflict",
@@ -406,10 +401,7 @@
     "limit": "1/Round"
    }
   ],
-  "code": {
-   "category": "other",
-   "spec": "also offer it when Shaken is inflicted by something other than this character's trigger effects (a Maneuver, a Clash result, an attack)"
-  }
+  "note": "'inflict' fires for the Conditions your trigger effects, Unique Abilities and Maneuvers (their buttons), Condition Advantages, Grapples and Gravity Cage give; one set by hand on the sheet is the GM's"
  },
  "advanced-vocation|Paladin|1": {
   "verdict": "narrative",
@@ -570,7 +562,7 @@
   }
  },
  "advanced-vocation|Pirate|6": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "inflict",
@@ -582,10 +574,7 @@
     "limit": "1/Round"
    }
   ],
-  "code": {
-   "category": "other",
-   "spec": "also offer it when the Combat Condition is inflicted by something other than this character's trigger effects (a Maneuver, a Clash, by hand)"
-  }
+  "note": "'inflict' fires for the Conditions your trigger effects, Unique Abilities and Maneuvers (their buttons), Condition Advantages, Grapples and Gravity Cage give; one set by hand on the sheet is the GM's"
  },
  "advanced-vocation|Sage|1": {
   "verdict": "narrative",
@@ -671,7 +660,7 @@
   "status": "narrativo"
  },
  "advanced-vocation|Vocation Training II|3": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "use",
@@ -681,7 +670,8 @@
     "condition": "@myTurn == 1",
     "limit": "1/Encounter",
     "limitKey": "vocationtraining2-3",
-    "label": "Vocation Training II (3): Tension"
+    "label": "Vocation Training II (3): Tension",
+    "with": "surge.uncounted=1"
    },
    {
     "event": "use",
@@ -691,14 +681,11 @@
     "condition": "@myTurn == 1",
     "limit": "1/Encounter",
     "limitKey": "vocationtraining2-3",
-    "label": "Vocation Training II (3): Inherited Tension"
+    "label": "Vocation Training II (3): Inherited Tension",
+    "with": "surge.uncounted=1"
    }
   ],
-  "note": "two buttons (Tension or Inherited Tension) sharing one 1/Encounter use",
-  "code": {
-   "category": "maneuverChange",
-   "spec": "the Surge used through this effect must not count toward the Surge Maneuver's own 1/Encounter use"
-  }
+  "note": "two buttons (Tension or Inherited Tension) sharing one 1/Encounter use — its Surge does not count toward the Surge Maneuver's own 1/Encounter"
  },
  "advanced-vocation|Vocation Training II|4": {
   "verdict": "covered"
@@ -1176,11 +1163,16 @@
   }
  },
  "archetypal-speedster|Quick Foe|3": {
-  "verdict": "code",
-  "code": {
-   "category": "attackOption",
-   "spec": "The Wound bonus of the Charging Assault Advantage may go up to 6(T)."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "chargingAssault.capT",
+    "value": "6",
+    "condition": ""
+   }
+  ],
+  "triggers": [],
+  "note": "the Wound bonus of Charging Assault goes up to 6(T)"
  },
  "archetypal-speedster|Quick Foe|4": {
   "verdict": "triggers",
@@ -1230,11 +1222,17 @@
   "note": "paid with 1 Adversary Action; the system does not count Break Free's own 1/Round"
  },
  "archetypal-speedster|Quick Foe|7": {
-  "verdict": "code",
-  "code": {
-   "category": "outOfSequence",
-   "spec": "At the start of each Combat Round, if no Opponent is within a Large Sphere centered on you, use Basic Attack, Signature Technique, Power Up or Energy Charge Out-of-Sequence."
-  }
+  "verdict": "triggers",
+  "triggers": [
+   {
+    "event": "startOfRound",
+    "condition": "@opponentsWithin.4 == 0",
+    "effect": "maneuver",
+    "resource": "basicAttack|signature|powerUp|energyCharge",
+    "mode": "ask"
+   }
+  ],
+  "note": "start of the Round with no Opponent within 4 Squares: a button for the Basic Attack, a Signature Technique, the Power Up or the Energy Charge Out-of-Sequence"
  },
  "archetypal-trickster|Tricky Foe|1": {
   "verdict": "covered"
@@ -1257,7 +1255,7 @@
   }
  },
  "archetypal-trickster|Tricky Foe|4": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "clash.save",
@@ -1272,13 +1270,24 @@
     "condition": "@initiated == 1 && @clash_skill == 1 && @vs.ally == 0",
     "mode": "ask",
     "cost": "aa:1"
+   },
+   {
+    "target": "clash.save",
+    "value": "1(T)",
+    "condition": "@initiated == 0 && @clash_save == 1 && @vs.ally == 0",
+    "mode": "ask",
+    "cost": "aa:1"
+   },
+   {
+    "target": "clash.skill",
+    "value": "2",
+    "condition": "@initiated == 0 && @clash_skill == 1 && @vs.ally == 0",
+    "mode": "ask",
+    "cost": "aa:1"
    }
   ],
-  "note": "the boxes cover the Clashes you start; each box costs 1 Adversary Action",
-  "code": {
-   "category": "clash",
-   "spec": "also when an Opponent starts the Clash against your Save or Skill: the defending side gets no asked or paid box, so the +1(T) / +2 for 1 Adversary Action is not offered there"
-  }
+  "note": "the boxes cover the Clashes you start and the ones an Opponent starts against you; each box costs 1 Adversary Action",
+  "triggers": []
  },
  "archetypal-trickster|Tricky Foe|5": {
   "verdict": "code",
@@ -1725,7 +1734,26 @@
   "note": "the Advantage select of the attack dialog replaces the reminder; the limitKey makes the limit count once whichever Advantage is picked"
  },
  "awoken|Awoken to the Truth|4": {
-  "verdict": "covered"
+  "verdict": "modifiers",
+  "replace": true,
+  "modifiers": [
+   {
+    "target": "stress",
+    "value": "2",
+    "condition": "@picked.pureresolve == 1"
+   },
+   {
+    "target": "wound",
+    "value": "1(T)",
+    "condition": "@picked.builtdifferent == 1"
+   },
+   {
+    "target": "soak",
+    "value": "1(T)",
+    "condition": "@picked.builtdifferent == 1"
+   }
+  ],
+  "note": "follows the Option picked for Enhancement of the Self on Cultivation of the Self"
  },
  "awoken|Awoken to the Truth|5": {
   "verdict": "code",
@@ -1786,11 +1814,16 @@
   "verdict": "covered"
  },
  "battle-brigand|Pirate Gang|1": {
-  "verdict": "code",
-  "code": {
-   "category": "versusTarget",
-   "spec": "+1(T) Combat Rolls against an Opponent that has one of your Allies adjacent to it (no @vs variable for the Allies around the target)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "vs.combat",
+    "value": "1(T)",
+    "condition": "@vs.opponentsAdjacent - min(1, max(0, 2 - @vs.distance)) >= 1"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) Combat Rolls against an Opponent with one of your Allies adjacent to it"
  },
  "battle-brigand|Pirate Gang|2": {
   "verdict": "modifiers",
@@ -1836,21 +1869,9 @@
   }
  },
  "battle-brigand|Pirate Gang|5": {
-  "verdict": "code",
-  "code": {
-   "category": "attackOption",
-   "spec": "1/Round: an AoE attack may leave out the Allies inside its area"
-  },
-  "triggers": [
-   {
-    "event": "attackMade",
-    "effect": "message",
-    "value": "",
-    "mode": "remind",
-    "label": "Pirate Gang (5)",
-    "limit": "1/Round"
-   }
-  ]
+  "verdict": "covered",
+  "triggers": [],
+  "note": "an AoE's targets are the ones the player targets: leave the Allies in it untargeted (1/Round: the player's to keep)"
  },
  "battle-yardrat|Spirit of Battle|1": {
   "verdict": "code",
@@ -1909,7 +1930,7 @@
   }
  },
  "battle-yardrat|Spirit of Battle|5": {
-  "verdict": "code",
+  "verdict": "both",
   "triggers": [
    {
     "event": "startOfTurn",
@@ -1942,13 +1963,36 @@
     "effect": "resourceSet",
     "resource": "Spirit of Battle Turn",
     "value": "0"
+   },
+   {
+    "event": "powerUp",
+    "condition": "@viaFx.battleyardrat_spiritofbattle_5 == 1",
+    "effect": "resourceSet",
+    "resource": "Spirit of Battle No Empower",
+    "value": "1"
+   },
+   {
+    "event": "startOfTurn",
+    "effect": "resourceSet",
+    "resource": "Spirit of Battle No Empower",
+    "value": "0",
+    "condition": "@res.spiritofbattlenoempower >= 1"
+   },
+   {
+    "event": "startOfEncounter",
+    "effect": "resourceSet",
+    "resource": "Spirit of Battle No Empower",
+    "value": "0"
    }
   ],
-  "note": "Power Up button beside the compiled start-of-turn reminder; Spirit of Battle Turn marks the turn for the 6th effect",
-  "code": {
-   "category": "outOfSequence",
-   "spec": "When the Power Up of this effect is used, block the Empower Maneuver until the start of your next turn."
-  }
+  "note": "Power Up button beside the compiled start-of-turn reminder; a Power Up through it forbids the Empower Maneuver until the start of your next turn; Spirit of Battle Turn marks the turn for the 6th effect",
+  "modifiers": [
+   {
+    "target": "block.empower",
+    "value": "1",
+    "condition": "@res.spiritofbattlenoempower >= 1"
+   }
+  ]
  },
  "battle-yardrat|Spirit of Battle|6": {
   "verdict": "modifiers",
@@ -2001,25 +2045,40 @@
   }
  },
  "beatdown-specialist|Debilitating Fighting Style|1": {
-  "verdict": "code",
-  "code": {
-   "category": "clash",
-   "spec": "+1(T) Might in the Might Clashes made through Debilitating Fighting Style."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "clash.might",
+    "value": "1(T)",
+    "condition": "@via_beatdownspecialist == 1 && @initiated == 1"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) in the Might Clashes of your Debilitating Fighting Style buttons (made through Beatdown Specialist)"
  },
  "beatdown-specialist|Debilitating Fighting Style|2": {
-  "verdict": "code",
-  "code": {
-   "category": "versusTarget",
-   "spec": "+1(T) Combat Rolls while at least 1 Opponent is below the Bruised Threshold."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "combat",
+    "value": "1(T)",
+    "condition": "@opponentBelowMax >= 1"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) Combat Rolls while an Opponent of the encounter is below the Bruised Threshold"
  },
  "beatdown-specialist|Debilitating Fighting Style|3": {
-  "verdict": "code",
-  "code": {
-   "category": "versusTarget",
-   "spec": "+1(T) Wound Rolls while at least 1 Opponent is below the Injured Threshold."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "wound",
+    "value": "1(T)",
+    "condition": "@opponentBelowMax >= 2"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) Wound Rolls while an Opponent of the encounter is below the Injured Threshold"
  },
  "beatdown-specialist|Debilitating Fighting Style|4": {
   "verdict": "triggers",
@@ -2416,18 +2475,28 @@
   }
  },
  "bonded-by-battle|Warrior’s Alliance|1": {
-  "verdict": "code",
-  "code": {
-   "category": "versusTarget",
-   "spec": "+1(T) Wound Rolls against an Opponent adjacent to your Partner or Rival"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "vs.wound",
+    "value": "1(T)",
+    "condition": "@vs.ally == 0 && @vs.markAdj.partnerorrival >= 1"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) Wound against an Opponent adjacent to a Character carrying your 'Partner or Rival' mark (@vs.markAdj)"
  },
  "bonded-by-battle|Warrior’s Alliance|2": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "+1(T) Soak while your Partner or Rival is adjacent to you"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "soak",
+    "value": "1(T)",
+    "condition": "@markNearest.partnerorrival == 1"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) Soak while a Character carrying your 'Partner or Rival' mark is adjacent to you (@markNearest)"
  },
  "bonded-by-battle|Warrior’s Alliance|3": {
   "verdict": "triggers",
@@ -2619,18 +2688,28 @@
   ]
  },
  "bottomless-potential|Unleash it All, the Hidden Power|4": {
-  "verdict": "code",
-  "code": {
-   "category": "attackOption",
-   "spec": "paying an Attacking Maneuver's Ki Point Cost does not lower your Capacity"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "flag.costNoCapacity",
+    "value": "1",
+    "condition": ""
+   }
+  ],
+  "triggers": [],
+  "note": "the Ki Point Cost of your attacks lowers no Capacity (the Ki Wager still does)"
  },
  "bottomless-potential|Unleash it All, the Hidden Power|5": {
-  "verdict": "code",
-  "code": {
-   "category": "versusTarget",
-   "spec": "every Opponent counts as your Focus for the Surging State's effects"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "markAll.focus",
+    "value": "1",
+    "condition": ""
+   }
+  ],
+  "triggers": [],
+  "note": "every Opponent counts as your Focus (@vs.mark.focus) for your effects, the Surging State's included"
  },
  "bottomless-potential|Unleash it All, the Hidden Power|6": {
   "verdict": "triggers",
@@ -2707,11 +2786,17 @@
   "note": "cancels the two pieces of Survivor 5 (Arcosian primary; negative LP only exist through Survivor 6)"
  },
  "boundless-evolution|Mind of the Conqueror|5": {
-  "verdict": "code",
-  "code": {
-   "category": "resourceRule",
-   "spec": "At the start of your turn, while in your Form with the highest ToP Requirement, gain 1 Overwhelm stack."
-  }
+  "verdict": "triggers",
+  "triggers": [
+   {
+    "event": "startOfTurn",
+    "condition": "@activeFormTopReq >= 1 && @activeFormTopReq >= @formTopReqMax",
+    "effect": "resource",
+    "resource": "Overwhelm",
+    "value": "1"
+   }
+  ],
+  "note": "start of your turn in your Form with the highest ToP Requirement: +1 Overwhelm"
  },
  "boundless-evolution|Mind of the Conqueror|6": {
   "verdict": "triggers",
@@ -2739,18 +2824,15 @@
   "note": "Power up to its maximum (@powerMax); Overwhelm up to its sheet maximum"
  },
  "boundless-evolution|Resplendent Aggression|1": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "grandTrigger",
     "value": "1",
-    "condition": "@inForm == 1 && @below >= 1 && @resMax.overwhelm >= 1 && @res.overwhelm >= @resMax.overwhelm"
+    "condition": "@inForm == 1 && @below >= 1 && @resMax.overwhelm >= 1 && @res.overwhelm >= @resMax.overwhelm && @activeFormTopReq >= 1 && @activeFormTopReq >= @formTopReqMax"
    }
   ],
-  "code": {
-   "category": "transformationRule",
-   "spec": "the Form must be the one with the highest ToP Requirement among those you possess"
-  }
+  "note": "Grand Trigger: below Bruised in your Form with the highest ToP Requirement, at maximum Overwhelm"
  },
  "boundless-evolution|Resplendent Aggression|2": {
   "verdict": "modifiers",
@@ -2784,22 +2866,16 @@
   ]
  },
  "boundless-evolution|Resplendent Aggression|5": {
-  "verdict": "code",
-  "code": {
-   "category": "transformationRule",
-   "spec": "1/Encounter, using the Full Awakening Maneuver also applies the effects of Legend Realized."
-  },
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "grandAwakening",
-    "effect": "message",
-    "value": "apply the effects of Legend Realized",
-    "resource": "",
-    "condition": "",
-    "target": "self",
-    "mode": "remind"
+    "effect": "legend",
+    "resource": "+extra",
+    "limit": "1/Encounter"
    }
-  ]
+  ],
+  "note": "an extra Legend Realized (+extra) of the Form you are in: the Grand Trigger already needs your highest Form, whose own Legend Realized was used on entering it"
  },
  "boundless-evolution|Resplendent Aggression|6": {
   "verdict": "code",
@@ -3033,7 +3109,7 @@
   "verdict": "covered"
  },
  "class-up|Class Selection|3": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "use",
@@ -3060,7 +3136,8 @@
     "condition": "@picked.elite == 1 && @myTurn == 1",
     "limit": "1/Encounter",
     "label": "Class Selection (Elite)",
-    "limitKey": "classselection3elite"
+    "limitKey": "classselection3elite",
+    "with": "surge.uncounted=1"
    },
    {
     "event": "use",
@@ -3081,11 +3158,7 @@
     "limitKey": "classselection3berserker"
    }
   ],
-  "note": "one Instant Maneuver button per Class; Berserker's Energy Charge is held for the attack it makes",
-  "code": {
-   "category": "maneuverChange",
-   "spec": "Elite: the Surge used through this effect must not count toward the Surge Maneuver's own 1/Encounter use"
-  }
+  "note": "one Instant Maneuver button per Class; Berserker's Energy Charge is held for the attack it makes — its Surge does not count toward the Surge Maneuver's own 1/Encounter"
  },
  "combat-connoisseur|Staggered Reveal|1": {
   "verdict": "code",
@@ -3426,11 +3499,16 @@
   "note": "cancels the -1(bT) of Leadership Methods effect 2"
  },
  "commander|Battlefield General|2": {
-  "verdict": "code",
-  "code": {
-   "category": "summon",
-   "spec": "+1(T) Combat Rolls while this Character has no Minions"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "combat",
+    "value": "1(T)",
+    "condition": "@myMinions == 0"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) Combat Rolls while you have no Minion in the encounter"
  },
  "commander|Battlefield General|3": {
   "verdict": "code",
@@ -3502,18 +3580,38 @@
   ]
  },
  "commander|Blitzkrieg Commander|1": {
-  "verdict": "code",
-  "code": {
-   "category": "summon",
-   "spec": "+1(bT) Strike and Wound Rolls for all your Minions"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "ally.strike",
+    "value": "1(bT)",
+    "condition": "@to.myMinion == 1"
+   },
+   {
+    "target": "ally.wound",
+    "value": "1(bT)",
+    "condition": "@to.myMinion == 1"
+   }
+  ],
+  "triggers": [],
+  "note": "your Minions get +1(bT) Strike and Wound Rolls"
  },
  "commander|Blitzkrieg Commander|2": {
-  "verdict": "code",
-  "code": {
-   "category": "summon",
-   "spec": "-1(bT) Defense Value and Soak Value for all your Minions"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "ally.defenseValue",
+    "value": "-1(bT)",
+    "condition": "@to.myMinion == 1"
+   },
+   {
+    "target": "ally.soak",
+    "value": "-1(bT)",
+    "condition": "@to.myMinion == 1"
+   }
+  ],
+  "triggers": [],
+  "note": "your Minions get -1(bT) Defense Value and Soak"
  },
  "commander|Blitzkrieg Commander|3": {
   "verdict": "code",
@@ -3593,18 +3691,38 @@
   }
  },
  "commander|Iron Wall Commander|1": {
-  "verdict": "code",
-  "code": {
-   "category": "summon",
-   "spec": "+1(bT) Defense Value and Soak Value for all your Minions"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "ally.defenseValue",
+    "value": "1(bT)",
+    "condition": "@to.myMinion == 1"
+   },
+   {
+    "target": "ally.soak",
+    "value": "1(bT)",
+    "condition": "@to.myMinion == 1"
+   }
+  ],
+  "triggers": [],
+  "note": "your Minions get +1(bT) Defense Value and Soak"
  },
  "commander|Iron Wall Commander|2": {
-  "verdict": "code",
-  "code": {
-   "category": "summon",
-   "spec": "-1(bT) Strike and Wound Rolls for all your Minions"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "ally.strike",
+    "value": "-1(bT)",
+    "condition": "@to.myMinion == 1"
+   },
+   {
+    "target": "ally.wound",
+    "value": "-1(bT)",
+    "condition": "@to.myMinion == 1"
+   }
+  ],
+  "triggers": [],
+  "note": "your Minions get -1(bT) Strike and Wound Rolls"
  },
  "commander|Iron Wall Commander|3": {
   "verdict": "code",
@@ -3621,11 +3739,21 @@
   "verdict": "covered"
  },
  "commander|Leadership Methods|3": {
-  "verdict": "code",
-  "code": {
-   "category": "summon",
-   "spec": "add +1(bT) to the Combat Rolls and Soak Value of every Minion owned by this Character"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "ally.combat",
+    "value": "1(bT)",
+    "condition": "@to.myMinion == 1"
+   },
+   {
+    "target": "ally.soak",
+    "value": "1(bT)",
+    "condition": "@to.myMinion == 1"
+   }
+  ],
+  "triggers": [],
+  "note": "your Minions get +1(bT) Combat Rolls and Soak"
  },
  "commander|Leadership Methods|4": {
   "verdict": "narrative",
@@ -3672,11 +3800,16 @@
   "status": "narrativo"
  },
  "commander|Minion Collector|1": {
-  "verdict": "code",
-  "code": {
-   "category": "summon",
-   "spec": "your Minions gain +2 Maximum Life Points per Power Level reached, after other modifications"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "ally.life.final",
+    "value": "2 * @to.pl",
+    "condition": "@to.myMinion == 1"
+   }
+  ],
+  "triggers": [],
+  "note": "your Minions get +2 Max LP per Power Level they reached, after every other change"
  },
  "commander|Minion Collector|2": {
   "verdict": "narrative",
@@ -3996,11 +4129,16 @@
   "verdict": "covered"
  },
  "corruption|Corrupted Body|3": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "ignore the Desolated Environmental Quality and apply an Energy Charge to every attack made from a Desolated square"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "attack.charges",
+    "value": "1",
+    "condition": "@onArea.desolated >= 1"
+   }
+  ],
+  "triggers": [],
+  "note": "attacks made from a Desolated Square (a Desolated area on the map) get an Energy Charge; the Desolated Environmental Quality's effects are the GM's (not run by the system)"
  },
  "corruption|Corrupted Body|4": {
   "verdict": "narrative",
@@ -4108,11 +4246,17 @@
   ]
  },
  "crane-school-master|Style of the Crane School|7": {
-  "verdict": "code",
-  "code": {
-   "category": "outOfSequence",
-   "spec": "1/Encounter: on gaining Bonus Momentum, offer a Basic Attack or Signature Technique Out-of-Sequence"
-  }
+  "verdict": "triggers",
+  "triggers": [
+   {
+    "event": "bonusMomentum",
+    "effect": "maneuver",
+    "resource": "basicAttack|signature",
+    "mode": "ask",
+    "limit": "1/Encounter"
+   }
+  ],
+  "note": "on gaining Bonus Momentum: a Basic Attack or Signature Technique button (1/Encounter)"
  },
  "cultivation-of-the-self|Enhancement of the Self|1": {
   "verdict": "code",
@@ -5103,32 +5247,54 @@
   }
  },
  "demonic-heart|Double or Nothing|1": {
-  "verdict": "narrative",
-  "status": "narrativo"
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "grandTrigger",
+    "value": "1",
+    "condition": "(@res.cleanpressurerounds >= 3 || @res.injuredpressuresuccesses >= 5)"
+   }
+  ],
+  "note": "the counters come from Faustian Bargain 4's entry: Combat Rounds ended in a row without a failed Pressure Check, and successful Pressure Checks made below the Injured Health Threshold (reset with the encounter)"
  },
  "demonic-heart|Double or Nothing|2": {
   "verdict": "covered"
  },
  "demonic-heart|Double or Nothing|3": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "The 4th effect of Faustian Bargain costs no Life Points."
-  }
+  "verdict": "covered"
  },
  "demonic-heart|Double or Nothing|4": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "with the Grand Awakening the 5th effect of Faustian Bargain is 1/Round instead of 1/Encounter (the 6th effect's trigger limit already does it)"
-  }
+  "verdict": "covered"
  },
  "demonic-heart|Double or Nothing|5": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "At the start of your turn roll 1d10; on a 10, skip the 3rd effect of Demonic Pressure for that turn."
-  }
+  "verdict": "both",
+  "modifiers": [
+   {
+    "target": "fxOff.demons_demonicpressure_3",
+    "value": "1",
+    "condition": "@res.doubleornothing >= 1 && @GA >= 1"
+   }
+  ],
+  "triggers": [
+   {
+    "event": "endOfTurn",
+    "condition": "@GA >= 1",
+    "roll": "1d10",
+    "effect": "resourceSet",
+    "resource": "Double or Nothing",
+    "value": "min(1, max(0, @rollNatural - 9))",
+    "label": "Double or Nothing (5)"
+   },
+   {
+    "event": "startOfEncounter",
+    "roll": "1d10",
+    "effect": "resourceSet",
+    "resource": "Double or Nothing",
+    "value": "min(1, max(0, @rollNatural - 9))",
+    "label": "Double or Nothing (5)"
+   }
+  ],
+  "note": "the 1d10 is rolled at the end of your previous turn (and at the start of the encounter): a 10 switches off Demonic Pressure 3 for your next start of turn"
  },
  "demonic-heart|Double or Nothing|6": {
   "verdict": "triggers",
@@ -5175,18 +5341,99 @@
   ]
  },
  "demonic-heart|Faustian Bargain|4": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "When making a Pressure Check, may lose 4(bT) LP to add +1 to that Pressure Check's Dice Score."
-  }
+  "verdict": "triggers",
+  "triggers": [
+   {
+    "event": "roll",
+    "condition": "@kind_pressure == 1 && @success == 0 && @GA == 0",
+    "effect": "rollBonus",
+    "value": "1",
+    "mode": "ask",
+    "cost": "life:4(bT)"
+   },
+   {
+    "event": "roll",
+    "condition": "@kind_pressure == 1 && @success == 0 && @GA >= 1",
+    "effect": "rollBonus",
+    "value": "1",
+    "mode": "ask"
+   },
+   {
+    "event": "pressureCheck",
+    "condition": "@failed == 1",
+    "effect": "resourceSet",
+    "resource": "Pressure Failed This Round",
+    "value": "1"
+   },
+   {
+    "event": "endOfRound",
+    "condition": "@res.pressurefailedthisround == 0",
+    "effect": "resource",
+    "resource": "Clean Pressure Rounds",
+    "value": "1"
+   },
+   {
+    "event": "endOfRound",
+    "condition": "@res.pressurefailedthisround >= 1",
+    "effect": "resourceSet",
+    "resource": "Clean Pressure Rounds",
+    "value": "0"
+   },
+   {
+    "event": "endOfRound",
+    "condition": "@res.pressurefailedthisround >= 1",
+    "effect": "resourceSet",
+    "resource": "Pressure Failed This Round",
+    "value": "0"
+   },
+   {
+    "event": "pressureCheck",
+    "condition": "@success == 1 && @below >= 2",
+    "effect": "resource",
+    "resource": "Injured Pressure Successes",
+    "value": "1"
+   }
+  ],
+  "note": "a roll reaction of a failed Pressure Check: +1 for 4(bT) LP, free with the Grand Awakening (Double or Nothing 3); the last five pieces keep the counters that Double or Nothing 1's Grand Trigger reads (pieces of a Grand Awakening Trait only work once it is active)"
  },
  "demonic-heart|Faustian Bargain|5": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "1/Encounter, turn a failed Pressure Check into a success; after the next application of Demonic Pressure's 3rd effect, gain 2 Demonic Fatigue."
-  }
+  "verdict": "triggers",
+  "triggers": [
+   {
+    "event": "roll",
+    "condition": "@kind_pressure == 1 && @success == 0",
+    "effect": "succeed",
+    "mode": "auto",
+    "limit": "1/Round, (1 + 99*@GA)/Encounter",
+    "limitKey": "faustian5"
+   },
+   {
+    "event": "pressureCheck",
+    "condition": "@success == 1 && @auto == 0 && @total <= 3",
+    "effect": "resource",
+    "resource": "Faustian Debt",
+    "value": "1"
+   },
+   {
+    "event": "startOfTurn",
+    "condition": "@res.faustiandebt >= 1",
+    "effect": "resource",
+    "resource": "Demonic Fatigue",
+    "value": "2*@res.faustiandebt",
+    "mode": "ask",
+    "group": "faustian5b"
+   },
+   {
+    "event": "startOfTurn",
+    "condition": "@res.faustiandebt >= 1",
+    "effect": "resourceSet",
+    "resource": "Faustian Debt",
+    "value": "0",
+    "mode": "ask",
+    "group": "faustian5b"
+   }
+  ],
+  "note": "the failed Pressure Check succeeds by itself (an automatic roll reaction; 1/Round with the Grand Awakening: Double or Nothing 4); a success with a Dice Score under 4 is that forced one and adds a Faustian Debt, paid by a button after the next start-of-turn reset of Demonic Pressure 3 (Demonic Cheat 1 raises the Dice Score instead, so it adds none)"
  },
  "demonic-heart|Faustian Bargain|6": {
   "verdict": "code",
@@ -5235,20 +5482,22 @@
   ]
  },
  "demonic-wager|Life or Death Gamble|3": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
+    "check": "pressure",
+    "onCheck": "success",
     "event": "threshold",
-    "condition": "@defeated == 1 && @roll >= 4",
-    "roll": "1d10",
+    "condition": "@defeated == 1",
     "rollKey": "lodg3",
     "effect": "life",
     "value": "max(0, ceil(@lifeMax/4) - max(0, @life))"
    },
    {
+    "check": "pressure",
+    "onCheck": "success",
     "event": "threshold",
-    "condition": "@defeated == 1 && @roll >= 4",
-    "roll": "1d10",
+    "condition": "@defeated == 1",
     "rollKey": "lodg3",
     "effect": "state",
     "resource": "superior",
@@ -5256,80 +5505,106 @@
     "duration": "endOfNextTurn"
    },
    {
+    "check": "pressure",
+    "onCheck": "success",
     "event": "threshold",
-    "condition": "@defeated == 1 && @roll >= 4",
-    "roll": "1d10",
+    "condition": "@defeated == 1",
     "rollKey": "lodg3",
     "effect": "resource",
     "resource": "Demonic Power",
     "value": "1"
    },
    {
+    "check": "pressure",
+    "onCheck": "fail",
     "event": "threshold",
-    "condition": "@defeated == 1 && @roll <= 3",
-    "roll": "1d10",
+    "condition": "@defeated == 1",
     "rollKey": "lodg3",
     "effect": "message",
     "value": "Pressure Check failed: you die"
+   },
+   {
+    "check": "pressure",
+    "onCheck": "fail",
+    "event": "threshold",
+    "condition": "@defeated == 1",
+    "rollKey": "lodg3",
+    "effect": "resource",
+    "resource": "Demonic Fatigue",
+    "value": "1"
    }
   ],
-  "note": "the Pressure Check (1d10, 4+) rolled when Defeated; a success also gives the Demonic Power stack of Demonic Pressure 2",
-  "code": {
-   "category": "resourceRule",
-   "spec": "the effects that change Pressure Checks (Demonic Cheat 1, Feeling Lucky, Power of a Determined Demon 4, Demonic Creativity, Faustian Bargain) do not reach this roll"
-  }
+  "note": "the Pressure Check of the system (its roll reactions apply); its Demonic Power / Demonic Fatigue are Demonic Pressure 2"
  },
  "demonic-wager|Life or Death Gamble|4": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
+    "check": "pressure",
+    "onCheck": "success",
     "event": "powerUp",
-    "condition": "@res.demonicpower >= 2 && @roll >= 4",
-    "roll": "1d10",
-    "rollKey": "pressure",
+    "condition": "@res.demonicpower >= 2",
+    "rollKey": "lodg4",
     "effect": "power",
     "value": "1",
-    "mode": "ask",
     "limit": "1/Round",
     "limitKey": "lodg4"
    },
    {
+    "check": "pressure",
+    "onCheck": "success",
     "event": "powerUp",
-    "condition": "@res.demonicpower >= 2 && @roll >= 4",
-    "roll": "1d10",
-    "rollKey": "pressure",
+    "condition": "@res.demonicpower >= 2",
+    "rollKey": "lodg4",
     "effect": "resource",
     "resource": "Demonic Power",
     "value": "1",
-    "mode": "ask",
     "limit": "1/Round",
     "limitKey": "lodg4"
    },
    {
+    "check": "pressure",
+    "onCheck": "fail",
     "event": "powerUp",
-    "condition": "@res.demonicpower >= 2 && @roll <= 3",
-    "roll": "1d10",
-    "rollKey": "pressure",
+    "condition": "@res.demonicpower >= 2",
+    "rollKey": "lodg4",
     "effect": "resource",
     "resource": "Demonic Fatigue",
     "value": "1",
-    "mode": "ask",
     "limit": "1/Round",
     "limitKey": "lodg4"
    }
   ],
-  "note": "one button rolls the Pressure Check (1d10, 4+) and spends the 1/Round whatever the result; its Demonic Power / Demonic Fatigue stack is Demonic Pressure 2",
-  "code": {
-   "category": "resourceRule",
-   "spec": "the effects that change Pressure Checks (Demonic Cheat 1, Feeling Lucky, Power of a Determined Demon 4, Demonic Creativity) do not reach this roll"
-  }
+  "note": "automatic: one Pressure Check of the system (its roll reactions apply) and one 1/Round use per firing (shared limitKey); its Demonic Power / Demonic Fatigue are Demonic Pressure 2"
  },
  "demonic-wager|Life or Death Gamble|5": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "1/Encounter at the start of your turn, may declare Feeling Lucky until your next turn: any Pressure Check may be rerolled once, keeping the second result."
-  }
+  "verdict": "triggers",
+  "replace": true,
+  "triggers": [
+   {
+    "event": "startOfTurn",
+    "effect": "resourceSet",
+    "resource": "Feeling Lucky",
+    "value": "1",
+    "mode": "ask",
+    "limit": "1/Encounter"
+   },
+   {
+    "event": "startOfTurn",
+    "condition": "@res.feelinglucky >= 1",
+    "effect": "resourceSet",
+    "resource": "Feeling Lucky",
+    "value": "0"
+   },
+   {
+    "event": "roll",
+    "condition": "@kind_pressure == 1 && @res.feelinglucky >= 1",
+    "effect": "reroll",
+    "resource": "base",
+    "mode": "ask"
+   }
+  ],
+  "note": "the start-of-turn button declares Feeling Lucky until your next turn starts; meanwhile each Pressure Check offers a reroll reaction whose new result stands"
  },
  "designated-target|Merciless Targeting|1": {
   "verdict": "code",
@@ -5610,11 +5885,16 @@
   }
  },
  "diverse-leader|Leadership Training|2": {
-  "verdict": "code",
-  "code": {
-   "category": "summon",
-   "spec": "Your Minions get +@Z Max LP per Power Level reached, after all other calculations."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "ally.life.final",
+    "value": "@Z * @to.pl",
+    "condition": "@to.myMinion == 1"
+   }
+  ],
+  "triggers": [],
+  "note": "your Minions get +Z Max LP per Power Level they reached, after every other change"
  },
  "diverse-leader|Leadership Training|3": {
   "verdict": "narrative",
@@ -5657,12 +5937,16 @@
   }
  },
  "divine-ascension|Awakened to Divine Power|5": {
-  "verdict": "code",
-  "note": "compiled start-of-turn reminder kept",
-  "code": {
-   "category": "resourceRule",
-   "spec": "At the start of your turn, in a Legendary Form or Transcended Enhancement with ToP Requirement 4+, regain 3(bT) Divine Ki Points."
-  }
+  "verdict": "triggers",
+  "note": "start of your turn in a Legendary Form or Transcended Enhancement with ToP Requirement 4+: regain 3(bT) Divine Ki Points",
+  "triggers": [
+   {
+    "event": "startOfTurn",
+    "condition": "@legendTransTopReq >= 4",
+    "effect": "dkp",
+    "value": "3(bT)"
+   }
+  ]
  },
  "divine-ascension|Awakened to Divine Power|6": {
   "verdict": "triggers",
@@ -5710,22 +5994,30 @@
   "note": "the God Ki Aspect keeps you in the God Ki State"
  },
  "divine-ascension|Obtained Divinity|4": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "Racial or Transformation effects that would enter the God Ki State enter the Superior State instead for their duration."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "flag.godKiAsSuperior",
+    "value": "1",
+    "condition": ""
+   }
+  ],
+  "triggers": [],
+  "note": "an effect (Racial / Transformation Trait) that would put you in God Ki puts you in the Superior State instead, for its duration"
  },
  "divine-ascension|Obtained Divinity|5": {
   "verdict": "narrative",
   "status": "narrativo"
  },
  "divine-ascension|Obtained Divinity|6": {
-  "verdict": "code",
-  "code": {
-   "category": "maneuverChange",
-   "spec": "Combat Recovery also regains 2(bT) Divine Ki Points per Action spent."
-  }
+  "verdict": "triggers",
+  "triggers": [
+   {
+    "event": "combatRecovery",
+    "effect": "dkp",
+    "value": "(2*@actions)(bT)"
+   }
+  ]
  },
  "divine-ascension|Obtained Divinity|7": {
   "verdict": "triggers",
@@ -6053,8 +6345,8 @@
     "label": "Watcher of Millenia (1)"
    },
    {
-    "event": "resourceGain",
-    "condition": "@viaRecovery == 1 && @res_ki == 1 && @res.watcherrecovery >= 1",
+    "event": "combatRecovery",
+    "condition": "@res.watcherrecovery >= 1",
     "effect": "resourceSet",
     "resource": "Watcher Recovery",
     "value": "0"
@@ -6067,10 +6359,10 @@
     "value": "0"
    }
   ],
-  "note": "press it just before a 1-Action Combat Recovery: that use provokes no Exploit",
+  "note": "press it just before a 1-Action Combat Recovery: that use provokes no Exploit (the Combat Recovery ends it)",
   "code": {
    "category": "maneuverChange",
-   "spec": "noProvoke cannot read the Actions picked in the Combat Recovery dialog: the player checks the 1 Action when pressing the button"
+   "spec": "noProvoke cannot read the Actions picked in the Combat Recovery dialog (the Exploit is provoked before the combatRecovery event): the player checks the 1 Action when pressing the button"
   }
  },
  "divine-overseer|Watcher of Millenia|2": {
@@ -6306,18 +6598,28 @@
   "verdict": "covered"
  },
  "dragon-class-up|Draconic Class|2": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "+1(T) Wound Rolls while an Opponent carries your Studied mark (@marks.studied also counts Allies)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "wound",
+    "value": "1(T)",
+    "condition": "@markedOpponents.studied >= 1"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) Wound Rolls while an Opponent carries your Studied mark"
  },
  "dragon-class-up|Draconic Class|3": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "+1(T) Soak while an Ally carries your Studied mark (@marks.studied also counts Opponents)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "soak",
+    "value": "1(T)",
+    "condition": "@markedAllies.studied >= 1"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) Soak while an Ally carries your Studied mark"
  },
  "dragon-class-up|Draconic Class|4": {
   "verdict": "triggers",
@@ -6753,11 +7055,26 @@
   "verdict": "covered"
  },
  "earthling-spirit|From A to Z, a Warrior from Earth|2": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "shift your Health Thresholds to Bruised at 3/4, Injured at 1/2 and Critical at 1/4 of Max LP"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "thresholdPct.bruised",
+    "value": "75",
+    "condition": ""
+   },
+   {
+    "target": "thresholdPct.injured",
+    "value": "50",
+    "condition": ""
+   },
+   {
+    "target": "thresholdPct.critical",
+    "value": "25",
+    "condition": ""
+   }
+  ],
+  "triggers": [],
+  "note": "Health Thresholds at 3/4 (Bruised), 1/2 (Injured) and 1/4 (Critical) of your Max LP"
  },
  "earthling-spirit|From A to Z, a Warrior from Earth|3": {
   "verdict": "code",
@@ -6923,7 +7240,7 @@
   ]
  },
  "earthling-spirit|Spirit at the Brink|6": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "attack.superProfile.allOut",
@@ -6974,11 +7291,7 @@
     "limitKey": "spiritatthebrink6"
    }
   ],
-  "note": "one Super Profile box per choice (one use per encounter); its prerequisites are the player's to check",
-  "code": {
-   "category": "attackOption",
-   "spec": "Giga Flare and Super Combination only set their @superProfile_ variable (no mechanics yet)"
-  }
+  "note": "Giga Flare / Super Combination run their Actions and Energy Charges (the attack dialog's Super Profile Actions)"
  },
  "effortless|Stamina Battle|1": {
   "verdict": "code",
@@ -8328,11 +8641,16 @@
   "status": "narrativo"
  },
  "endless-zenkai|This Pain Will Make Me Stronger…!|2": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "Treat yourself as below the Critical Threshold (@below = 3) for your own effects, whatever your LP."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "belowAtLeast",
+    "value": "3",
+    "condition": ""
+   }
+  ],
+  "triggers": [],
+  "note": "your effects count you as below the Critical Threshold (@below = 3); the others' effects see your real Threshold"
  },
  "endless-zenkai|This Pain Will Make Me Stronger…!|3": {
   "verdict": "covered"
@@ -9861,11 +10179,27 @@
     "effect": "life",
     "target": "other",
     "value": "-ceil(@might/4)"
+   },
+   {
+    "event": "clashWon",
+    "condition": "@clash_might == 1 && @via_gravitymanipulation == 1 && @vs.ally == 0",
+    "effect": "life",
+    "target": "other",
+    "value": "-ceil(@might/4)"
+   },
+   {
+    "event": "clashWon",
+    "condition": "@clash_might == 1 && @via_uniqueability == 1 && @via_gravitymanipulation == 0 && @vs.ally == 0",
+    "effect": "life",
+    "target": "other",
+    "value": "-ceil(@might/4)",
+    "mode": "ask"
    }
   ],
+  "note": "Gravity Cage and Gravity Manipulation by themselves; another Unique Ability's Might Clash gives a button, for a Gravity one",
   "code": {
    "category": "clash",
-   "spec": "also after a Might Clash started through a Gravity Unique Ability"
+   "spec": "the other Gravity Unique Abilities (bought through the 4th effect) are not known by name: their Might Clash gives a button instead of the automatic Life Point loss"
   }
  },
  "gravity-controller|Weight of Power|6": {
@@ -11002,11 +11336,16 @@
   "status": "narrativo"
  },
  "improved-core|Fully Powered|2": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "While @ki > Max Capacity, you also count as in the Healthy Health Threshold for effects (on top of your real Threshold)."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "belowAtMost",
+    "value": "0",
+    "condition": "@ki > @capacityMax"
+   }
+  ],
+  "triggers": [],
+  "note": "while your Ki Points exceed your Max Capacity, your effects count you as Healthy"
  },
  "improved-core|Fully Powered|3": {
   "verdict": "modifiers",
@@ -11272,11 +11611,16 @@
   "verdict": "covered"
  },
  "impulse|Mach Dash|4": {
-  "verdict": "code",
-  "code": {
-   "category": "clash",
-   "spec": "in a Clash started by an Opponent that uses your Cognitive Save, allow the Impulsive Save instead"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "clashAltDef.cognitive",
+    "value": "impulsive",
+    "condition": ""
+   }
+  ],
+  "triggers": [],
+  "note": "a Clash another Character starts against your Cognitive Save: your Impulsive Save is rolled instead when it is better"
  },
  "impulse|Mach Dash|5": {
   "verdict": "triggers",
@@ -11294,7 +11638,7 @@
   "note": "the movement may pass through occupied squares but not end in one"
  },
  "impulse|Mach Dash|6": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "attack.charges",
@@ -11302,24 +11646,11 @@
     "mode": "ask",
     "limit": "1/Round",
     "cost": "ki:2(bT)",
-    "condition": "@profile_combination == 1 || @opt_chargingAssault >= 1"
+    "condition": "(@profile_combination == 1 || @opt_chargingAssault >= 1) && @aptitudes.speedBoosted > @vsMax.speedBoosted"
    }
   ],
-  "code": {
-   "category": "versusTarget",
-   "spec": "only when your Boosted Speed exceeds every target's Boosted Speed (no @vs Speed variable)"
-  },
-  "triggers": [
-   {
-    "event": "attackMade",
-    "effect": "message",
-    "value": "",
-    "mode": "remind",
-    "label": "Mach Dash (6)",
-    "condition": "",
-    "limit": "1/Round"
-   }
-  ]
+  "triggers": [],
+  "note": "a box (2(bT) KP) adds an Energy Charge to a Combination or Charging Assault attack when your Boosted Speed exceeds every target's (1/Round)"
  },
  "inherited-life|Mastered Reincarnated|1": {
   "verdict": "narrative",
@@ -11386,9 +11717,10 @@
  "initial-class|Cleric|3": {
   "verdict": "code",
   "code": {
-   "category": "other",
-   "spec": "grant maneuver: Divine Blessing only when the Cleric Class is picked (grants do not follow the Class pick)"
-  }
+   "category": "grant",
+   "spec": "grant maneuver: Divine Blessing +picked:Cleric"
+  },
+  "note": "the Divine Blessing Special Maneuver works while Cleric is the Starting Class picked"
  },
  "initial-class|Cleric|4": {
   "verdict": "code",
@@ -11427,9 +11759,10 @@
  "initial-class|Mighty|3": {
   "verdict": "code",
   "code": {
-   "category": "other",
-   "spec": "grant maneuver: Mighty Breeze only when the Mighty Class is picked (grants do not follow the Class pick)"
-  }
+   "category": "grant",
+   "spec": "grant maneuver: Mighty Breeze +picked:Mighty"
+  },
+  "note": "the Mighty Breeze Special Maneuver works while Mighty is the Starting Class picked"
  },
  "initial-class|Mighty|4": {
   "verdict": "triggers",
@@ -11522,16 +11855,24 @@
  "initial-class|Warrior|3": {
   "verdict": "code",
   "code": {
-   "category": "other",
-   "spec": "grant maneuver: Draconic Infusion only when the Warrior Class is picked (grants do not follow the Class pick)"
-  }
+   "category": "grant",
+   "spec": "grant maneuver: Draconic Infusion +picked:Warrior"
+  },
+  "note": "the Draconic Infusion Special Maneuver works while Warrior is the Starting Class picked"
  },
  "initial-class|Warrior|4": {
-  "verdict": "code",
-  "code": {
-   "category": "defenseOption",
-   "spec": "1/Encounter, when hit by an attack while Infused (Draconic Infusion), you may halve the Damage of that attack."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "vs.damageMult",
+    "value": "0.5",
+    "condition": "@res.infused >= 1",
+    "mode": "ask",
+    "limit": "1/Encounter"
+   }
+  ],
+  "triggers": [],
+  "note": "hit while Infused (the Infused resource of Draconic Infusion): a box halves that attack's Damage (1/Encounter)"
  },
  "initial-class|Wonder|1": {
   "verdict": "modifiers",
@@ -11569,9 +11910,10 @@
  "initial-class|Wonder|3": {
   "verdict": "code",
   "code": {
-   "category": "other",
-   "spec": "grant maneuver: Dark Beam only when the Wonder Class is picked (grants do not follow the Class pick)"
-  }
+   "category": "grant",
+   "spec": "grant maneuver: Dark Beam +picked:Wonder"
+  },
+  "note": "the Dark Beam Special Maneuver works while Wonder is the Starting Class picked"
  },
  "initial-class|Wonder|4": {
   "verdict": "code",
@@ -11660,42 +12002,81 @@
   "note": "@via_transfiguration: the Clash made through the Transfiguration item"
  },
  "intuitive-fighter|Every Conceivable Advantage|1": {
-  "verdict": "code",
-  "code": {
-   "category": "versusTarget",
-   "spec": "+1(T) Strike and Dodge against Seen Opponents."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "vs.strike",
+    "value": "1(T)",
+    "condition": "@vs.mark.seen >= 1"
+   },
+   {
+    "target": "vs.dodge",
+    "value": "1(T)",
+    "condition": "@vs.mark.seen >= 1"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) Strike and Dodge against a Seen Opponent (marked by your Intuit Maneuver)"
  },
  "intuitive-fighter|Every Conceivable Advantage|2": {
-  "verdict": "code",
-  "code": {
-   "category": "defenseOption",
-   "spec": "1/Round, no Diminishing Defense stacks from a Seen Opponent's attack."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "vs.noDimDefense",
+    "value": "1",
+    "condition": "@vs.mark.seen >= 1",
+    "limit": "1/Round"
+   }
+  ],
+  "triggers": [],
+  "note": "no Diminishing Defense from a Seen Opponent's attack (1/Round)"
  },
  "intuitive-fighter|Every Conceivable Advantage|3": {
-  "verdict": "code",
-  "code": {
-   "category": "defenseOption",
-   "spec": "1/Round, when a Seen Opponent targets you, Intuition vs Bluff/Intimidate/Stealth Clash; on a win Defend costs no Counter Action."
-  },
+  "verdict": "both",
   "triggers": [
    {
     "event": "targeted",
-    "effect": "message",
-    "value": "",
-    "mode": "remind",
-    "label": "Every Conceivable Advantage (3)",
+    "condition": "@vs.mark.seen == 1",
+    "check": "clash:intuition vs bluff|intimidation|stealth",
+    "effect": "resourceSet",
+    "resource": "ECA Free Defend",
+    "value": "1",
+    "target": "self",
+    "mode": "ask",
+    "limit": "1/Round"
+   },
+   {
+    "event": "endOfRound",
+    "effect": "resourceSet",
+    "resource": "ECA Free Defend",
+    "value": "0",
+    "condition": "@res.ecafreedefend >= 1"
+   }
+  ],
+  "modifiers": [
+   {
+    "target": "defense.freeCounter",
+    "value": "1",
+    "condition": "@res.ecafreedefend >= 1",
     "limit": "1/Round"
    }
-  ]
+  ],
+  "note": "a Seen Opponent targets you: an Intuition vs Bluff/Intimidation/Stealth Clash button; a win lets you Defend without a Counter Action this Round (1/Round)"
  },
  "intuitive-fighter|Every Conceivable Advantage|4": {
-  "verdict": "code",
-  "code": {
-   "category": "outOfSequence",
-   "spec": "1/Round, after Intuit, Intuition vs Bluff/Intimidate/Stealth Clash; on a win an Out-of-Sequence Basic Attack at that Character."
-  }
+  "verdict": "triggers",
+  "triggers": [
+   {
+    "event": "maneuverUsed",
+    "condition": "@via_intuit == 1",
+    "check": "clash:intuition vs bluff|intimidation|stealth",
+    "effect": "maneuver",
+    "resource": "basicAttack",
+    "mode": "ask",
+    "limit": "1/Round"
+   }
+  ],
+  "note": "after the Intuit Maneuver: an Intuition vs Bluff/Intimidation/Stealth Clash button against its target; a win offers a Basic Attack (1/Round; at that Character)"
  },
  "intuitive-fighter|Every Conceivable Advantage|5": {
   "verdict": "triggers",
@@ -11969,11 +12350,16 @@
   ]
  },
  "ki-technician|Master of Energy|1": {
-  "verdict": "code",
-  "code": {
-   "category": "clash",
-   "spec": "Let the Character roll Clairvoyance in place of Use Magic in any Clash that asks for Use Magic (Prerequisites stay with the GM)."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "clashAlt.useMagic",
+    "value": "clairvoyance",
+    "condition": ""
+   }
+  ],
+  "triggers": [],
+  "note": "a Clash asking for Use Magic: your Clairvoyance is rolled instead when it is better (the Prerequisites stay with the GM)"
  },
  "ki-technician|Master of Energy|2": {
   "verdict": "narrative",
@@ -12023,7 +12409,7 @@
   ]
  },
  "ki-technician|Power-Type|3": {
-  "verdict": "code",
+  "verdict": "both",
   "modifiers": [
    {
     "target": "attack.superProfile.cataclysmic",
@@ -12033,10 +12419,6 @@
     "limit": "1/Encounter"
    }
   ],
-  "code": {
-   "category": "attackOption",
-   "spec": "Cataclysmic is only a variable in the attack flow: its effect still needs code"
-  },
   "triggers": [
    {
     "event": "attackMade",
@@ -12047,7 +12429,8 @@
     "condition": "",
     "limit": "1/Encounter"
    }
-  ]
+  ],
+  "note": "Cataclysmic Attack: its AoE is the whole Battlefield (target every Character it reaches)"
  },
  "ki-technician|Power-Type|4": {
   "verdict": "code",
@@ -12087,11 +12470,9 @@
   ]
  },
  "ki-technician|Precision Ki Control|2": {
-  "verdict": "code",
-  "code": {
-   "category": "attackOption",
-   "spec": "1/Round, a Physical/Energy attack with an AoE does not target Allies inside the AoE."
-  }
+  "verdict": "covered",
+  "triggers": [],
+  "note": "an AoE's targets are the ones the player targets: leave the Allies in it untargeted (1/Round: the player's to keep)"
  },
  "ki-technician|Precision Ki Control|3": {
   "verdict": "modifiers",
@@ -12136,21 +12517,18 @@
   "status": "narrativo"
  },
  "ki-technician|Technical Skill|4": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "use",
     "effect": "maneuver",
-    "resource": "standard",
+    "resource": "uaTechnical",
     "condition": "@myTurn == 1",
     "limit": "1/Round",
     "label": "Technical Skill (4)"
    }
   ],
-  "code": {
-   "category": "maneuverChange",
-   "spec": "only Technical Unique Abilities (the standard key offers every 1-Action Standard Maneuver)"
-  }
+  "note": "a 1-Action Standard Technical Unique Ability of yours, Out-of-Sequence"
  },
  "ki-technician|Trick up the Sleeve|1": {
   "verdict": "modifiers",
@@ -12174,20 +12552,15 @@
   "note": "Technical/Magical Unique Abilities count as Technical too; works when the useCosts setting shows or pays the cost"
  },
  "ki-technician|Trick up the Sleeve|2": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "clash.save",
     "value": "1(T)",
-    "mode": "ask",
-    "limit": "1/Round",
-    "condition": "@initiated == 1"
+    "condition": "@via_uniqueability == 1 && @initiated == 1",
+    "limit": "1/Round"
    }
-  ],
-  "code": {
-   "category": "clash",
-   "spec": "only for a Clash made through a Unique Ability's effect (the box is offered on every Save Clash you start)"
-  }
+  ]
  },
  "ki-technician|Trick up the Sleeve|3": {
   "verdict": "narrative",
@@ -12223,11 +12596,26 @@
   "note": "the extra stack beside Battle Tension's start-of-turn gain below Injured"
  },
  "konatsian-will|Final Line of Defense|4": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "shift your Health Thresholds to Bruised at 3/4, Injured at 1/2 and Critical at 1/4 of Max LP"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "thresholdPct.bruised",
+    "value": "75",
+    "condition": ""
+   },
+   {
+    "target": "thresholdPct.injured",
+    "value": "50",
+    "condition": ""
+   },
+   {
+    "target": "thresholdPct.critical",
+    "value": "25",
+    "condition": ""
+   }
+  ],
+  "triggers": [],
+  "note": "Health Thresholds at 3/4 (Bruised), 1/2 (Injured) and 1/4 (Critical) of your Max LP"
  },
  "konatsian-will|Final Line of Defense|5": {
   "verdict": "code",
@@ -12411,26 +12799,76 @@
   "note": "same as compiled plus the missing 1/Encounter limit"
  },
  "learned-path|Sought-After Capabilities|1": {
-  "verdict": "code",
-  "note": "compiled start-of-encounter reminder stays",
-  "code": {
-   "category": "resourceRule",
-   "spec": "start of the Combat Encounter: set the 'Sought Points' resource to SKI + STR"
-  }
+  "verdict": "triggers",
+  "note": "start of the Combat Encounter: + SKI + STR Sought Points",
+  "replace": true,
+  "triggers": [
+   {
+    "event": "startOfEncounter",
+    "effect": "resource",
+    "resource": "Sought Points",
+    "value": "@res.ski + @res.str",
+    "mode": "auto",
+    "label": "Sought-After Capabilities (1)"
+   }
+  ]
  },
  "learned-path|Sought-After Capabilities|2": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "while On the Path: +1 TE/FO/MA Attribute Modifier Bonus of Learned Path and +1(T) Wound Rolls and Soak Value"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "amb.te",
+    "value": "1",
+    "condition": "@res.onthepath >= 1"
+   },
+   {
+    "target": "amb.fo",
+    "value": "1",
+    "condition": "@res.onthepath >= 1"
+   },
+   {
+    "target": "amb.ma",
+    "value": "1",
+    "condition": "@res.onthepath >= 1"
+   },
+   {
+    "target": "wound",
+    "value": "1(T)",
+    "condition": "@res.onthepath >= 1"
+   },
+   {
+    "target": "soak",
+    "value": "1(T)",
+    "condition": "@res.onthepath >= 1"
+   }
+  ],
+  "note": "while On the Path (worked out): +1 TE/FO/MA Attribute Modifier Bonus, +1(T) Wound and Soak"
  },
  "learned-path|Sought-After Capabilities|3": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "while Still Learning: +1 AG/IN Attribute Modifier Bonus of Learned Path and +1(T) Strike Rolls and Surgency"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "amb.ag",
+    "value": "1",
+    "condition": "@res.stilllearning >= 1"
+   },
+   {
+    "target": "amb.in",
+    "value": "1",
+    "condition": "@res.stilllearning >= 1"
+   },
+   {
+    "target": "strike",
+    "value": "1(T)",
+    "condition": "@res.stilllearning >= 1"
+   },
+   {
+    "target": "surgency",
+    "value": "1(T)",
+    "condition": "@res.stilllearning >= 1"
+   }
+  ],
+  "note": "while Still Learning (worked out): +1 AG/IN Attribute Modifier Bonus, +1(T) Strike and Surgency"
  },
  "learned-path|Sought-After Capabilities|4": {
   "verdict": "triggers",
@@ -12489,25 +12927,21 @@
   "note": "Sought Points as a sheet resource"
  },
  "learned-path|Sought-After Capabilities|8": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "powerUp",
-    "effect": "message",
-    "value": "at 0 Sought Points you may gain SKI + STR Sought Points",
-    "resource": "",
-    "condition": "",
-    "target": "self",
-    "mode": "remind",
-    "duration": "none",
-    "limit": ""
+    "effect": "resource",
+    "resource": "Sought Points",
+    "value": "@res.ski + @res.str",
+    "condition": "@res.soughtpoints == 0",
+    "mode": "ask",
+    "limit": "1/Encounter",
+    "label": "Sought-After Capabilities (8)"
    }
   ],
-  "note": "Power Up reminder only",
-  "code": {
-   "category": "resourceRule",
-   "spec": "1/Encounter on Power Up with 0 Sought Points: gain SKI + STR Sought Points"
-  }
+  "note": "Power Up with 0 Sought Points: a box gives SKI + STR Sought Points (1/Encounter)",
+  "replace": true
  },
  "lesser-mutation|Multi-Faceted Mutation|1": {
   "verdict": "modifiers",
@@ -12707,7 +13141,7 @@
   ]
  },
  "limitless-saiyan|Charge at Full Power|6": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "attack.superProfile.allOut",
@@ -12758,11 +13192,7 @@
     "limitKey": "chargeatfullpower6"
    }
   ],
-  "note": "one box per Super Profile, one use per Encounter between them",
-  "code": {
-   "category": "attackOption",
-   "spec": "Giga Flare and Super Combination are only variables in the attack flow; the prerequisites are the player's"
-  }
+  "note": "Giga Flare / Super Combination run their Actions and Energy Charges; their Prerequisites are the player's"
  },
  "limitless-saiyan|Saiyans Have No Limits|1": {
   "verdict": "covered"
@@ -12774,11 +13204,16 @@
   "verdict": "covered"
  },
  "limitless-saiyan|Saiyans Have No Limits|4": {
-  "verdict": "code",
-  "code": {
-   "category": "maneuverChange",
-   "spec": "In your Form with the highest ToP Requirement, Power Up gives one extra Power stack."
-  }
+  "verdict": "triggers",
+  "triggers": [
+   {
+    "event": "powerUp",
+    "condition": "@activeFormTopReq >= 1 && @activeFormTopReq >= @formTopReqMax",
+    "effect": "power",
+    "value": "1"
+   }
+  ],
+  "note": "in your Form with the highest ToP Requirement, a Power Up gives one more Power stack"
  },
  "limitless-saiyan|Saiyans Have No Limits|5": {
   "verdict": "triggers",
@@ -12810,7 +13245,7 @@
   "note": "target the Opponent to lock; the 'Locked' mark (@vs.mark.locked) lasts until the end of the round"
  },
  "lockdown-fighter|Forcing an Opening|2": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "targeted",
@@ -12827,13 +13262,25 @@
     "resource": "exploit",
     "mode": "ask",
     "cost": "counters:1"
+   },
+   {
+    "event": "opponentManeuver",
+    "condition": "@vs.mark.locked == 1 && @distance <= 1 && @oos == 0 && @counters >= 1 && @vs.noProvoke == 0",
+    "effect": "maneuver",
+    "resource": "exploit",
+    "mode": "ask",
+    "cost": "counters:1"
+   },
+   {
+    "event": "opponentMoved",
+    "condition": "@vs.mark.locked == 1 && @vs.distance <= 1 && @squares >= 1 && @counters >= 1 && @vs.noProvoke == 0",
+    "effect": "maneuver",
+    "resource": "exploit",
+    "mode": "ask",
+    "cost": "counters:1"
    }
   ],
-  "note": "the attacks of the Locked Opponent in your Melee Range (on you or an Ally) offer the Exploit; its Combat Recovery, Energy Charge, Empower or a move out of your Melee Range already give the system's Exploit card",
-  "code": {
-   "category": "versusTarget",
-   "spec": "the Locked Opponent's other Maneuvers (Power Up, Surges, Transformation, Special Maneuvers, a move inside your Melee Range...) have no event of yours and should offer the Exploit Maneuver too"
-  }
+  "note": "the Locked Opponent in your Melee Range: its attacks (on you or an Ally), its other Maneuvers and its moves offer the Exploit (1 Counter Action)"
  },
  "lockdown-fighter|Forcing an Opening|3": {
   "verdict": "code",
@@ -13108,13 +13555,13 @@
   ]
  },
  "makyo-star|Power of the Homeworld|4": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
+    "check": "pressure",
+    "onCheck": "success",
     "event": "powerUp",
-    "roll": "1d10",
     "rollKey": "homeworld4",
-    "condition": "@roll >= 4",
     "effect": "resource",
     "resource": "Demonic Power",
     "value": "1",
@@ -13122,10 +13569,10 @@
     "limitKey": "homeworld4"
    },
    {
+    "check": "pressure",
+    "onCheck": "fail",
     "event": "powerUp",
-    "roll": "1d10",
     "rollKey": "homeworld4",
-    "condition": "@roll <= 3",
     "effect": "resource",
     "resource": "Demonic Fatigue",
     "value": "1",
@@ -13133,21 +13580,49 @@
     "limitKey": "homeworld4"
    },
    {
+    "check": "pressure",
+    "onCheck": "success",
     "event": "powerUp",
-    "roll": "1d10",
     "rollKey": "homeworld4",
-    "condition": "@roll >= 4 && @opponentsWithin.3 >= 1",
-    "effect": "message",
-    "value": "Pressure Check passed: Might Clash each Opponent within 3 Squares; each one beaten gets Shaken and Broken until your next turn",
+    "effect": "resourceSet",
+    "resource": "Homeworld Clash",
+    "value": "1",
     "limit": "1/Round",
-    "limitKey": "homeworld4msg"
+    "limitKey": "homeworld4"
+   },
+   {
+    "event": "resourceGain",
+    "condition": "@res_homeworldclash == 1",
+    "target": "opponents",
+    "range": "3",
+    "check": "clash:might vs might",
+    "rollKey": "homeworld4clash",
+    "effect": "condition",
+    "resource": "shaken",
+    "value": "1",
+    "duration": "startOfNextTurn"
+   },
+   {
+    "event": "resourceGain",
+    "condition": "@res_homeworldclash == 1",
+    "target": "opponents",
+    "range": "3",
+    "check": "clash:might vs might",
+    "rollKey": "homeworld4clash",
+    "effect": "condition",
+    "resource": "broken",
+    "value": "1",
+    "duration": "startOfNextTurn"
+   },
+   {
+    "event": "resourceGain",
+    "condition": "@res_homeworldclash == 1",
+    "effect": "resourceSet",
+    "resource": "Homeworld Clash",
+    "value": "0"
    }
   ],
-  "note": "the Pressure Check (1d10, 4+) with its Demonic Power / Fatigue result; Sphere = Standard = 3 Squares",
-  "code": {
-   "category": "clash",
-   "spec": "after a passed Pressure Check, one Might Clash against each Opponent within 3 Squares (Shaken and Broken until the start of your next turn on each one beaten): a Clash button cannot read the automatic Pressure Check roll of the same firing (the same rollKey should share it)"
-  }
+  "note": "automatic Pressure Check (one 1/Round use per firing); a success sets Homeworld Clash, whose gain offers the Might Clash against each Opponent within the Sphere (3 Squares: a Clash is always a button); those beaten are Shaken and Broken"
  },
  "martial-prowess|Martial Arts Expert|1": {
   "verdict": "covered"
@@ -13156,16 +13631,16 @@
   "verdict": "covered"
  },
  "martial-prowess|Martial Arts Expert|3": {
-  "verdict": "triggers",
-  "triggers": [
+  "verdict": "covered",
+  "triggers": [],
+  "modifiers": [
    {
-    "event": "maneuverUsed",
-    "condition": "@via_stance == 1",
-    "effect": "message",
-    "value": "the Stance Maneuver is an Instant Maneuver for you",
-    "mode": "remind"
+    "target": "useInstant.stance",
+    "value": "1",
+    "condition": ""
    }
-  ]
+  ],
+  "note": "the system charges no Action for the Stance Maneuver's Use button (and its piece makes it free if it ever does)"
  },
  "martial-prowess|Martial Arts Expert|4": {
   "verdict": "modifiers",
@@ -13684,7 +14159,7 @@
   ]
  },
  "master-class|Dark Warrior (Warrior)|3": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "wound",
@@ -13692,17 +14167,14 @@
     "condition": "@res.infused >= 1"
    }
   ],
-  "code": {
-   "category": "resourceRule",
-   "spec": "track the Infused status (from Draconic Infusion) as the sheet resource 'Infused' so @res.infused is 1 while Infused"
-  }
+  "note": "+2(T) Wound while Infused (the Draconic Infusion Maneuver keeps the Infused resource)"
  },
  "master-class|Dark Warrior (Warrior)|4": {
   "verdict": "narrative",
   "status": "narrativo"
  },
  "master-class|Dark Warrior (Warrior)|5": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "defense.freeCounter",
@@ -13712,10 +14184,7 @@
     "limit": "1/Round"
    }
   ],
-  "code": {
-   "category": "resourceRule",
-   "spec": "track the Infused status (from Draconic Infusion) as the sheet resource 'Infused' so @res.infused is 1 while Infused"
-  }
+  "note": "while Infused, a box: Defend without a Counter Action (1/Round)"
  },
  "master-class|Dark Warrior (Warrior)|6": {
   "verdict": "triggers",
@@ -13756,7 +14225,7 @@
   ]
  },
  "master-class|Fighter (Martial Artist)|3": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "dodge",
@@ -13764,10 +14233,7 @@
     "condition": "@res.pumped >= 1"
    }
   ],
-  "code": {
-   "category": "resourceRule",
-   "spec": "track the Pumped status as the sheet resource 'Pumped' so @res.pumped is 1 while Pumped"
-  }
+  "note": "+1(T) Dodge while Pumped (the Roar Maneuver keeps the Pumped resource)"
  },
  "master-class|Fighter (Martial Artist)|4": {
   "verdict": "code",
@@ -13850,11 +14316,15 @@
   "note": "rounded up as the text says"
  },
  "master-class|Grand Chef (Mighty)|5": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "your Allies that are Mighty get +2(T) Wound Rolls"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "ally.wound",
+    "value": "2(T)",
+    "condition": "@to.mark.mighty >= 1"
+   }
+  ],
+  "note": "your Mighty Allies (the Mighty Breeze Maneuver's mark) get +2(T) Wound Rolls"
  },
  "master-class|Grand Chef (Mighty)|6": {
   "verdict": "narrative",
@@ -13937,17 +14407,16 @@
   "status": "narrativo"
  },
  "master-class|Healing Bishop (Cleric)|4": {
-  "verdict": "triggers",
-  "triggers": [
+  "verdict": "modifiers",
+  "triggers": [],
+  "modifiers": [
    {
-    "event": "maneuverUsed",
-    "condition": "@ua == 1 && @actionCost == 1",
-    "effect": "message",
-    "value": "Healing Bishop: this Unique Ability may be an Instant Maneuver (1/Round)",
-    "mode": "remind",
-    "limit": "1/Round"
+    "target": "useInstant.ua1",
+    "value": "1",
+    "condition": ""
    }
-  ]
+  ],
+  "note": "your Unique Abilities of 1 Action cost no Action (Instant Maneuvers)"
  },
  "master-class|Healing Bishop (Cleric)|5": {
   "verdict": "triggers",
@@ -13996,7 +14465,7 @@
   ]
  },
  "master-class|Karma (Wonder)|4": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "vs.strike",
@@ -14009,17 +14478,14 @@
     "condition": "@vs.mark.doomed == 1"
    }
   ],
-  "code": {
-   "category": "resourceRule",
-   "spec": "the Maneuver that makes an Opponent Doomed must place the 'Doomed+' mark on it for as long as it stays Doomed"
-  }
+  "note": "+1(T) Strike and Dodge against an Opponent you made Doomed (the Dark Beam Maneuver's mark)"
  },
  "master-class|Karma (Wonder)|5": {
   "verdict": "narrative",
   "status": "narrativo"
  },
  "master-class|Karma (Wonder)|6": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "use",
@@ -14030,10 +14496,7 @@
     "limit": "1/Round"
    }
   ],
-  "code": {
-   "category": "resourceRule",
-   "spec": "the Maneuver that makes an Opponent Doomed must place the 'Doomed+' mark on it for as long as it stays Doomed"
-  }
+  "note": "with a Doomed Opponent: the Hype Maneuver as an Instant Maneuver (button, 1/Round)"
  },
  "master-class|Karma (Wonder)|7": {
   "verdict": "triggers",
@@ -14078,7 +14541,7 @@
   ]
  },
  "master-class|Plasma (Wonder)|3": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "vs.wound",
@@ -14086,31 +14549,25 @@
     "condition": "@vs.mark.doomed == 1"
    }
   ],
-  "code": {
-   "category": "resourceRule",
-   "spec": "the Maneuver that makes an Opponent Doomed must place the 'Doomed+' mark on it for as long as it stays Doomed"
-  }
+  "note": "+2(T) Wound against an Opponent you made Doomed (the Dark Beam Maneuver's mark)"
  },
  "master-class|Plasma (Wonder)|4": {
   "verdict": "narrative",
   "status": "narrativo"
  },
  "master-class|Plasma (Wonder)|5": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "use",
     "effect": "maneuver",
     "resource": "basicAttack",
-    "condition": "@myTurn == 1",
+    "condition": "@myTurn == 1 && @marks.doomed >= 1",
     "limit": "1/Round",
     "label": "Plasma (Wonder) — 5"
    }
   ],
-  "code": {
-   "category": "maneuverChange",
-   "spec": "the Instant Basic Attack must target a Doomed Opponent (Doomed is not tracked)"
-  }
+  "note": "with a Doomed Opponent (your Dark Beam mark): a Basic Attack button as an Instant Maneuver (1/Round; target the Doomed one)"
  },
  "master-class|Plasma (Wonder)|6": {
   "verdict": "triggers",
@@ -14155,7 +14612,7 @@
   ]
  },
  "master-class|Shadow Knight (Warrior)|3": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "surgency",
@@ -14163,17 +14620,14 @@
     "condition": "@res.infused >= 1"
    }
   ],
-  "code": {
-   "category": "resourceRule",
-   "spec": "track the Infused status (from Draconic Infusion) as the sheet resource 'Infused' (@res.infused)"
-  }
+  "note": "+2(T) Surgency while Infused (the Draconic Infusion Maneuver keeps the Infused resource)"
  },
  "master-class|Shadow Knight (Warrior)|4": {
   "verdict": "narrative",
   "status": "narrativo"
  },
  "master-class|Shadow Knight (Warrior)|5": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "attackHit",
@@ -14187,10 +14641,7 @@
     "limit": "1/Round"
    }
   ],
-  "code": {
-   "category": "resourceRule",
-   "spec": "track the Infused status as the sheet resource 'Infused' (@res.infused) so the heal on hit can check it"
-  }
+  "note": "Infused and dealing Damage: regain LP equal to your Surgency"
  },
  "master-class|Shadow Knight (Warrior)|6": {
   "verdict": "triggers",
@@ -14236,7 +14687,7 @@
   ]
  },
  "master-class|Slayer (Martial Artist)|3": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "wound",
@@ -14244,10 +14695,7 @@
     "condition": "@res.pumped >= 1"
    }
   ],
-  "code": {
-   "category": "resourceRule",
-   "spec": "track the Pumped status (from Hyper Tension Blow!!) as the sheet resource 'Pumped' so @res.pumped is 1 while Pumped"
-  }
+  "note": "+2(T) Wound while Pumped (the Roar Maneuver keeps the Pumped resource)"
  },
  "master-class|Slayer (Martial Artist)|4": {
   "verdict": "narrative",
@@ -14460,11 +14908,15 @@
   ]
  },
  "master-class|Ultimate (Mighty)|3": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "your Allies that are Mighty get +2(T) Surgency"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "ally.surgency",
+    "value": "2(T)",
+    "condition": "@to.mark.mighty >= 1"
+   }
+  ],
+  "note": "your Mighty Allies (the Mighty Breeze Maneuver's mark) get +2(T) Surgency"
  },
  "master-class|Ultimate (Mighty)|4": {
   "verdict": "narrative",
@@ -14547,21 +14999,17 @@
   ]
  },
  "master-of-ki|Refined Control|6": {
-  "verdict": "code",
-  "code": {
-   "category": "attackOption",
-   "spec": "1/Round, a Signature with Efficiency or 2+ Homing ranks gains one Advantage of up to 10 TP for that use."
-  },
-  "triggers": [
+  "verdict": "modifiers",
+  "triggers": [],
+  "modifiers": [
    {
-    "event": "attackMade",
-    "effect": "message",
-    "value": "",
-    "mode": "remind",
-    "label": "Refined Control (6)",
+    "target": "attack.advantagePick",
+    "value": "10",
+    "condition": "@signature == 1 && (@opt_efficiency >= 1 || @opt_homing >= 2)",
     "limit": "1/Round"
    }
-  ]
+  ],
+  "note": "a Signature with Efficiency or 2+ Homing ranks: pick one more Advantage of up to 10 TP for that use (1/Round)"
  },
  "master-of-ki|Refined Control|7": {
   "verdict": "modifiers",
@@ -14605,17 +15053,15 @@
   "verdict": "covered"
  },
  "master-of-many-hands|Style of Many Fists|5": {
-  "verdict": "triggers",
-  "triggers": [
+  "verdict": "modifiers",
+  "modifiers": [
    {
-    "event": "maneuverUsed",
-    "condition": "@via_extraarms == 1 && @res.flurryfiststance >= 1",
-    "effect": "message",
-    "value": "Flurry Fist Stance: Extra Arms costs 2(T) fewer KP",
-    "mode": "remind"
+    "target": "kpCost.use.extraarms",
+    "value": "-2(T)",
+    "condition": "@res.flurryfiststance >= 1"
    }
   ],
-  "note": "a reminder: the system does not charge the KP of Unique Abilities"
+  "note": "the cost of the Extra Arms Use button: needs the world setting useCosts on (shown or paid)"
  },
  "master-of-many-hands|Style of Many Fists|6": {
   "verdict": "triggers",
@@ -15265,9 +15711,20 @@
  },
  "natural-evolution|Growth and Evolution|4": {
   "verdict": "code",
+  "triggers": [
+   {
+    "event": "use",
+    "condition": "@myTurn == 1",
+    "effect": "legend",
+    "resource": "+extra",
+    "limit": "1/Encounter",
+    "label": "Growth and Evolution (4)"
+   }
+  ],
+  "note": "an extra Legend Realized (+extra) of the Form you are in",
   "code": {
-   "category": "maneuverChange",
-   "spec": "1/Encounter, apply Legend Realized as an Instant Maneuver."
+   "category": "transformationRule",
+   "spec": "outside a Form the legend effect has nothing to apply: this Awakening's Legend Realized should apply anyway"
   }
  },
  "natural-evolution|Growth and Evolution|5": {
@@ -15328,11 +15785,29 @@
     "event": "maneuverUsed",
     "condition": "@via_hiddentools == 1 && @opponentsAdjacent >= 1",
     "effect": "message",
-    "value": "a Stealth Clash against the adjacent Opponents makes this use trigger no Exploit",
-    "mode": "remind"
+    "value": "Clash made: this use of Hidden Tools does not trigger the Exploit",
+    "target": "opponents",
+    "range": "1",
+    "check": "clash:stealth vs perception|stealth",
+    "rollKey": "shinobi7",
+    "mode": "ask",
+    "limit": "1/Round"
+   },
+   {
+    "event": "maneuverUsed",
+    "condition": "@via_hiddentools == 1 && @opponentsAdjacent >= 1",
+    "effect": "message",
+    "value": "Clash made: this use of Hidden Tools does not trigger the Exploit",
+    "target": "opponents",
+    "range": "1",
+    "check": "clash:stealth vs perception|stealth",
+    "rollKey": "shinobi7",
+    "onCheck": "fail",
+    "mode": "ask",
+    "limit": "1/Round"
    }
   ],
-  "note": "the system never makes Hidden Tools provoke the Exploit: a reminder; the Clash goes through the card's Clash button"
+  "note": "one button makes the Stealth Clash against each adjacent Opponent; the system never makes Hidden Tools provoke the Exploit, so the message is for the GM"
  },
  "ninja|Shinobi Arts|8": {
   "verdict": "code",
@@ -17608,11 +18083,16 @@
   "verdict": "covered"
  },
  "ruler-of-time|Commander of Chronology|3": {
-  "verdict": "code",
-  "code": {
-   "category": "attackOption",
-   "spec": "Every Attacking Maneuver made during a Frozen Turn gains 1 Energy Charge (the system does not know a Frozen Turn)."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "attack.charges",
+    "value": "1",
+    "condition": "@res.frozenturn >= 1"
+   }
+  ],
+  "triggers": [],
+  "note": "your attacks during your Frozen Turn get an Energy Charge"
  },
  "ruler-of-time|Commander of Chronology|4": {
   "verdict": "narrative",
@@ -17674,11 +18154,16 @@
   "note": "compiled ki.max 1/5 adds 0 points; +1/5 Max KP is a 1.2 multiplier"
  },
  "ruler-of-time|Temporal Master|4": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "+1(T) Combat Rolls during Frozen Turns (Time Freeze): the system does not know a Frozen Turn"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "combat",
+    "value": "1(T)",
+    "condition": "@res.frozenturn >= 1"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) Combat Rolls during your Frozen Turn (the Frozen Turn resource of Time Freeze)"
  },
  "ruler-of-time|Temporal Master|5": {
   "verdict": "triggers",
@@ -17716,11 +18201,21 @@
   "status": "narrativo"
  },
  "rushdown-fighter|Physical Focus|1": {
-  "verdict": "code",
-  "code": {
-   "category": "attackOption",
-   "spec": "Only Physical Attacks may be used (refuse Energy and Magic Attacking Maneuvers)."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "block.energyAttack",
+    "value": "1",
+    "condition": ""
+   },
+   {
+    "target": "block.magicAttack",
+    "value": "1",
+    "condition": ""
+   }
+  ],
+  "triggers": [],
+  "note": "Energy and Magic attacks are refused"
  },
  "rushdown-fighter|Physical Focus|2": {
   "verdict": "modifiers",
@@ -17769,21 +18264,18 @@
   ]
  },
  "rushdown-fighter|Physical Focus|5": {
-  "verdict": "code",
-  "code": {
-   "category": "attackOption",
-   "spec": "1/Round, a Basic Attack may take the Charging Assault Advantage."
-  },
-  "triggers": [
+  "verdict": "modifiers",
+  "triggers": [],
+  "modifiers": [
    {
-    "event": "attackMade",
-    "effect": "message",
-    "value": "",
-    "mode": "remind",
-    "label": "Physical Focus (5)",
+    "target": "attack.advantage.chargingAssault",
+    "value": "1",
+    "condition": "@basic == 1",
+    "mode": "ask",
     "limit": "1/Round"
    }
-  ]
+  ],
+  "note": "a box gives a Basic Attack the Charging Assault Advantage (1/Round; the dialog asks the Squares moved)"
  },
  "rushdown-fighter|Physical Focus|6": {
   "verdict": "code",
@@ -18376,11 +18868,8 @@
   "status": "narrativo"
  },
  "seeking-skill|Chance for Improvement|1": {
-  "verdict": "code",
-  "code": {
-   "category": "resourceRule",
-   "spec": "keep a 'Still Learning' sheet resource at 1 when every Power Level Character Perk was exchanged for Skill Improvements (read as @res.stilllearning)"
-  }
+  "verdict": "covered",
+  "note": "SKI, STR, Still Learning and On the Path are worked out from the Character Perks exchanged (@res.ski, @res.str, @res.stilllearning, @res.onthepath)"
  },
  "seeking-skill|Chance for Improvement|2": {
   "verdict": "narrative",
@@ -18445,11 +18934,8 @@
   "note": "uses the Still Learning resource of effect 1"
  },
  "seeking-skill|Chance for Improvement|5": {
-  "verdict": "code",
-  "code": {
-   "category": "resourceRule",
-   "spec": "keep SKI (PL Character Perks exchanged into Skill Improvements) as a 'SKI' sheet resource readable as @res.ski"
-  }
+  "verdict": "covered",
+  "note": "SKI, STR, Still Learning and On the Path are worked out from the Character Perks exchanged (@res.ski, @res.str, @res.stilllearning, @res.onthepath)"
  },
  "seeking-skill|Chance for Improvement|6": {
   "verdict": "code",
@@ -18459,7 +18945,7 @@
   }
  },
  "seeking-skill|Chance for Improvement|6b": {
-  "verdict": "code",
+  "verdict": "both",
   "modifiers": [
    {
     "target": "attack.kp",
@@ -18473,11 +18959,7 @@
     "condition": ""
    }
   ],
-  "note": "reads the SKI sheet resource of the 5th effect",
-  "code": {
-   "category": "resourceRule",
-   "spec": "SKI (Power Level Character Perks exchanged into Skill Improvements) is not computed: the player sets the 'SKI' sheet resource once, and resKeep.ski now keeps it between Combat Encounters"
-  },
+  "note": "SKI, STR, Still Learning and On the Path are worked out from the Character Perks exchanged (@res.ski, @res.str, @res.stilllearning, @res.onthepath)",
   "triggers": [
    {
     "event": "attackMade",
@@ -18491,7 +18973,7 @@
   ]
  },
  "seeking-skill|Chance for Improvement|7": {
-  "verdict": "code",
+  "verdict": "both",
   "modifiers": [
    {
     "target": "vs.dodge",
@@ -18513,11 +18995,7 @@
     "condition": ""
    }
   ],
-  "note": "reads the SKI sheet resource of the 5th effect",
-  "code": {
-   "category": "resourceRule",
-   "spec": "SKI (Power Level Character Perks exchanged into Skill Improvements) is not computed: the player sets the 'SKI' sheet resource once, and resKeep.ski now keeps it between Combat Encounters"
-  },
+  "note": "SKI, STR, Still Learning and On the Path are worked out from the Character Perks exchanged (@res.ski, @res.str, @res.stilllearning, @res.onthepath)",
   "triggers": [
    {
     "event": "targeted",
@@ -18531,7 +19009,7 @@
   ]
  },
  "seeking-skill|Chance for Improvement|8": {
-  "verdict": "code",
+  "verdict": "both",
   "triggers": [
    {
     "event": "roll",
@@ -18542,11 +19020,7 @@
     "limit": "1/Encounter"
    }
   ],
-  "note": "reads the SKI sheet resource of the 5th effect",
-  "code": {
-   "category": "resourceRule",
-   "spec": "SKI (Power Level Character Perks exchanged into Skill Improvements) is not computed: the player sets the 'SKI' sheet resource once, and resKeep.ski now keeps it between Combat Encounters"
-  },
+  "note": "SKI, STR, Still Learning and On the Path are worked out from the Character Perks exchanged (@res.ski, @res.str, @res.stilllearning, @res.onthepath)",
   "modifiers": [
    {
     "target": "resKeep.ski",
@@ -18556,11 +19030,8 @@
   ]
  },
  "seeking-strength|Strength is Everything|1": {
-  "verdict": "code",
-  "code": {
-   "category": "resourceRule",
-   "spec": "keep an 'On the Path' sheet resource at 1 (read as @res.onthepath) when every Power Level Character Perk was exchanged into Attribute Additions"
-  }
+  "verdict": "covered",
+  "note": "SKI, STR, Still Learning and On the Path are worked out from the Character Perks exchanged (@res.ski, @res.str, @res.stilllearning, @res.onthepath)"
  },
  "seeking-strength|Strength is Everything|2": {
   "verdict": "code",
@@ -18609,7 +19080,7 @@
   "note": "reads the On the Path sheet resource of the 1st effect (kept between encounters by the 4th effect)"
  },
  "seeking-strength|Strength is Everything|4": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "combat",
@@ -18627,21 +19098,14 @@
     "condition": ""
    }
   ],
-  "note": "reads the On the Path sheet resource of the 1st effect, now kept when the encounter ends",
-  "code": {
-   "category": "resourceRule",
-   "spec": "work out On the Path (every Power Level Character Perk exchanged into Attribute Additions) instead of the player setting the 'On the Path' resource once (resKeep keeps it)"
-  }
+  "note": "SKI, STR, Still Learning and On the Path are worked out from the Character Perks exchanged (@res.ski, @res.str, @res.stilllearning, @res.onthepath)"
  },
  "seeking-strength|Strength is Everything|5": {
-  "verdict": "code",
-  "code": {
-   "category": "resourceRule",
-   "spec": "keep STR (Power Level Perks exchanged into Attribute Additions) as a 'STR' sheet resource readable as @res.str"
-  }
+  "verdict": "covered",
+  "note": "SKI, STR, Still Learning and On the Path are worked out from the Character Perks exchanged (@res.ski, @res.str, @res.stilllearning, @res.onthepath)"
  },
  "seeking-strength|Strength is Everything|6": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "attack.wound",
@@ -18655,14 +19119,10 @@
     "condition": ""
    }
   ],
-  "note": "reads the STR sheet resource of the 5th effect, now kept when the encounter ends",
-  "code": {
-   "category": "resourceRule",
-   "spec": "work out STR (Power Level Character Perks exchanged into Attribute Additions) instead of the player setting the 'STR' resource once (resKeep keeps it)"
-  }
+  "note": "SKI, STR, Still Learning and On the Path are worked out from the Character Perks exchanged (@res.ski, @res.str, @res.stilllearning, @res.onthepath)"
  },
  "seeking-strength|Strength is Everything|7": {
-  "verdict": "code",
+  "verdict": "both",
   "modifiers": [
    {
     "target": "vs.dr",
@@ -18671,11 +19131,7 @@
     "limit": "1/Round"
    }
   ],
-  "note": "reads the STR sheet resource of the 5th effect",
-  "code": {
-   "category": "resourceRule",
-   "spec": "work out STR instead of the player setting the 'STR' resource once (kept between encounters by the resKeep piece of the 6th effect)"
-  },
+  "note": "SKI, STR, Still Learning and On the Path are worked out from the Character Perks exchanged (@res.ski, @res.str, @res.stilllearning, @res.onthepath)",
   "triggers": [
    {
     "event": "targeted",
@@ -18689,7 +19145,7 @@
   ]
  },
  "seeking-strength|Strength is Everything|8": {
-  "verdict": "code",
+  "verdict": "both",
   "modifiers": [
    {
     "target": "attack.charges",
@@ -18699,11 +19155,7 @@
     "limit": "1/Encounter"
    }
   ],
-  "note": "reads the On the Path sheet resource of the 1st effect",
-  "code": {
-   "category": "resourceRule",
-   "spec": "work out On the Path instead of the player setting the 'On the Path' resource once (kept between encounters by the resKeep piece of the 4th effect)"
-  },
+  "note": "SKI, STR, Still Learning and On the Path are worked out from the Character Perks exchanged (@res.ski, @res.str, @res.stilllearning, @res.onthepath)",
   "triggers": [
    {
     "event": "attackMade",
@@ -19425,25 +19877,45 @@
   "status": "narrativo"
  },
  "stable-clone|Perfect Clone|3": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "the 3rd effect of Bio-Berserker becomes optional (Triggered instead of Automatic at the start of turn)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "fxAsk.unstableclone_bioberserker_3",
+    "value": "1",
+    "condition": ""
+   }
+  ],
+  "triggers": [],
+  "note": "Bio-Berserker 3 becomes optional: its start-of-turn roll is a button"
  },
  "stable-clone|Perfect Clone|4": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "+1(T) Strike and Dodge Rolls while an Opponent is inside your Field of Aggression"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "strike",
+    "value": "1(T)",
+    "condition": "@opponentsWithin.4 >= 1"
+   },
+   {
+    "target": "dodge",
+    "value": "1(T)",
+    "condition": "@opponentsWithin.4 >= 1"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) Strike and Dodge while an Opponent is in your Field of Aggression (4 Squares)"
  },
  "stable-clone|Perfect Clone|5": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "the maximum bonus of the 4th effect of Bio-Berserker becomes 3(T)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "fxAdd.unstableclone_bioberserker_4",
+    "value": "-max(0, min(5, @opponentsWithin.4) - 3) * @T",
+    "condition": ""
+   }
+  ],
+  "triggers": [],
+  "note": "the bonus of Bio-Berserker 4 goes up to 3(T) (instead of 5(T))"
  },
  "stable-clone|Perfect Clone|6": {
   "verdict": "code",
@@ -19546,11 +20018,16 @@
   "verdict": "covered"
  },
  "steel-frame|Hard as Steel|4": {
-  "verdict": "code",
-  "code": {
-   "category": "clash",
-   "spec": "in a Clash an Opponent starts against your Cognitive Save, allow the Corporeal Save instead (the Save totals are not variables of the clash pieces)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "clashAltDef.cognitive",
+    "value": "corporeal",
+    "condition": ""
+   }
+  ],
+  "triggers": [],
+  "note": "a Clash another Character starts against your Cognitive Save: your Corporeal Save is rolled instead when it is better"
  },
  "steel-frame|Hard as Steel|5": {
   "verdict": "modifiers",
@@ -19848,7 +20325,7 @@
   ]
  },
  "strongest-neko|Full Power Majin-Dama|6": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "attack.superProfile.allOut",
@@ -19883,11 +20360,7 @@
     "limitKey": "fullpowerdama6"
    }
   ],
-  "code": {
-   "category": "attackOption",
-   "spec": "Giga Flare and Super Combination are only variables of the attack (no mechanics); the Super Profile's prerequisites are checked by the player"
-  },
-  "note": "tick one of the boxes"
+  "note": "Giga Flare / Super Combination run their Actions and Energy Charges; the Super Profile's Prerequisites are the player's"
  },
  "super-android|Super Weapon|1": {
   "verdict": "modifiers",
@@ -20229,11 +20702,16 @@
   "note": "an Innate State (God Ki) on the Awakening: the God Ki State is on while it has Stacks"
  },
  "super-mutation|Greatest Golden Fruit (Body)|4": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "When a Racial or Transformation Trait would put you in the God Ki State, enter the Superior State instead for that effect's duration (the duration of the other effect is not known)."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "flag.godKiAsSuperior",
+    "value": "1",
+    "condition": ""
+   }
+  ],
+  "triggers": [],
+  "note": "an effect (Racial / Transformation Trait) that would put you in God Ki puts you in the Superior State instead, for its duration"
  },
  "super-mutation|Greatest Golden Fruit (Body)|5": {
   "verdict": "narrative",
@@ -20449,11 +20927,26 @@
   "note": "use it only when you are not Hyped"
  },
  "super-mutation|Superior Captain (Mind)|5": {
-  "verdict": "code",
-  "code": {
-   "category": "outOfSequence",
-   "spec": "1/Encounter, after using Hype offer a Ki Surge Out-of-Sequence; if used, every Ally not at Long Range regains KP equal to your PE Modifier."
-  }
+  "verdict": "triggers",
+  "triggers": [
+   {
+    "event": "maneuverUsed",
+    "condition": "@via_hype == 1",
+    "effect": "maneuver",
+    "resource": "kiSurge",
+    "mode": "ask",
+    "limit": "1/Encounter"
+   },
+   {
+    "event": "surge",
+    "condition": "@viaFx.supermutation_superiorcaptainmind_5 == 1",
+    "effect": "ki",
+    "value": "max(0, @pe)",
+    "target": "allies",
+    "range": "8"
+   }
+  ],
+  "note": "after the Hype Maneuver: a Ki Surge button (1/Encounter); that Surge gives every Ally within 8 Squares (not at Long Range) KP equal to your PE Modifier"
  },
  "super-mutation|Superior Giant (Body)|1": {
   "verdict": "narrative",
@@ -20521,11 +21014,14 @@
   ]
  },
  "super-mutation|Superior Psychic (Mind)|3": {
-  "verdict": "code",
-  "code": {
-   "category": "clash",
-   "spec": "+1(T) Dice Score on Might Clashes started by a Unique Ability's effect (a clash piece cannot tell a Unique Ability's Clash apart)."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "clash.might",
+    "value": "1(T)",
+    "condition": "@via_uniqueability == 1"
+   }
+  ]
  },
  "super-mutation|Superior Psychic (Mind)|4": {
   "verdict": "narrative",
@@ -20654,11 +21150,26 @@
   ]
  },
  "super-mutation|Superior Tactician (Mind)|5": {
-  "verdict": "code",
-  "code": {
-   "category": "outOfSequence",
-   "spec": "1/Encounter, after using Analysis offer a Ki Surge Out-of-Sequence; if used, every Ally not at Long Range regains KP equal to your SC Modifier."
-  }
+  "verdict": "triggers",
+  "triggers": [
+   {
+    "event": "maneuverUsed",
+    "condition": "@via_analysis == 1",
+    "effect": "maneuver",
+    "resource": "kiSurge",
+    "mode": "ask",
+    "limit": "1/Encounter"
+   },
+   {
+    "event": "surge",
+    "condition": "@viaFx.supermutation_superiortacticianmind_5 == 1",
+    "effect": "ki",
+    "value": "max(0, @sc)",
+    "target": "allies",
+    "range": "8"
+   }
+  ],
+  "note": "after the Analysis Maneuver: a Ki Surge button (1/Encounter); that Surge gives every Ally within 8 Squares (not at Long Range) KP equal to your SC Modifier"
  },
  "super-mutation|Superior Technician (Mind)|1": {
   "verdict": "narrative",
@@ -20702,7 +21213,7 @@
   "note": "automatic (no box), counted 1/Round"
  },
  "super-mutation|Superior Technician (Mind)|5": {
-  "verdict": "code",
+  "verdict": "both",
   "modifiers": [
    {
     "target": "attack.superProfile.allOut",
@@ -20745,11 +21256,7 @@
     "limitKey": "technician5"
    }
   ],
-  "code": {
-   "category": "attackOption",
-   "spec": "the other Super Profiles (Giga Flare, Super Combination, Cataclysmic...) are only variables, and whether one qualifies is checked by the player"
-  },
-  "note": "tick one of the boxes",
+  "note": "the Super Profiles run (Giga Flare / Super Combination: Actions and Energy Charges; Cataclysmic: target the whole Battlefield); whether one qualifies is the player's",
   "triggers": [
    {
     "event": "attackMade",
@@ -20790,11 +21297,21 @@
   ]
  },
  "super-mutation|Supreme Emperor (Body)|4": {
-  "verdict": "code",
-  "code": {
-   "category": "transformationRule",
-   "spec": "+1(T) mod.fo and mod.ma while you are in your Form with the highest Tier of Power Requirement (among the Forms you have, not only the active ones)."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "mod.fo",
+    "value": "1(T)",
+    "condition": "@activeFormTopReq >= 1 && @activeFormTopReq >= @formTopReqMax"
+   },
+   {
+    "target": "mod.ma",
+    "value": "1(T)",
+    "condition": "@activeFormTopReq >= 1 && @activeFormTopReq >= @formTopReqMax"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) FO and MA Modifiers while in your Form with the highest ToP Requirement"
  },
  "super-mutation|Supreme Emperor (Body)|5": {
   "verdict": "code",
@@ -20823,16 +21340,16 @@
   "triggers": [
    {
     "event": "grandAwakening",
-    "effect": "message",
-    "value": "",
-    "mode": "remind",
-    "label": "Supreme Emperor (Body) (6)",
+    "effect": "legend",
+    "resource": "+extra",
+    "mode": "ask",
     "limit": "1/Encounter"
    }
   ],
+  "note": "an extra Legend Realized (+extra) of the Form you are in",
   "code": {
-   "category": "maneuverChange",
-   "spec": "1/Encounter, after the Full Awakening Maneuver you may apply the effects of Legend Realized immediately (no effect applies Legend Realized by itself)."
+   "category": "transformationRule",
+   "spec": "outside a Form the legend effect has nothing to apply: this Awakening's Legend Realized should apply anyway"
   }
  },
  "super-mutation|Titanic Lord (Body)|1": {
@@ -21020,11 +21537,16 @@
   ]
  },
  "super-regeneration|Untiring (1)|1": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "Effects of other Characters cannot reduce or spend your Ki Points."
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "flag.noKiLossFromOthers",
+    "value": "1",
+    "condition": ""
+   }
+  ],
+  "triggers": [],
+  "note": "the other Characters' effects cannot reduce or spend your Ki Points"
  },
  "super-regeneration|Untiring (1)|2": {
   "verdict": "covered"
@@ -21075,11 +21597,16 @@
   ]
  },
  "superior-fission|Uneven Split of Power|4": {
-  "verdict": "code",
-  "code": {
-   "category": "versusTarget",
-   "spec": "+1(T) Combat Rolls while an Opponent of the opposite Alignment is in the encounter (Good vs Evil; never when Neutral); Opponents' Alignment is not readable"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "combat",
+    "value": "1(T)",
+    "condition": "@opponentsOppositeAlign >= 1"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) Combat Rolls while an Opponent of the encounter has the opposite Alignment (never while Neutral)"
  },
  "superior-fission|Uneven Split of Power|5": {
   "verdict": "modifiers",
@@ -21184,11 +21711,17 @@
   }
  },
  "supporter|Fervent Support|5": {
-  "verdict": "code",
-  "code": {
-   "category": "defenseOption",
-   "spec": "1/Round: when an Opponent's attack hits you, an Ally may Intervene at once without a Counter Action"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "intervene.noCounterFor",
+    "value": "1",
+    "condition": "",
+    "limit": "1/Round"
+   }
+  ],
+  "triggers": [],
+  "note": "an Ally who Intervenes for you spends no Counter Action (1/Round)"
  },
  "supporter|Fervent Support|6": {
   "verdict": "code",
@@ -21222,11 +21755,17 @@
   }
  },
  "sworn-comrades|Shared Tension|3": {
-  "verdict": "code",
-  "code": {
-   "category": "defenseOption",
-   "spec": "1/Round: Intervene costs no Counter Action"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "intervene.noCounter",
+    "value": "1",
+    "condition": "",
+    "limit": "1/Round"
+   }
+  ],
+  "triggers": [],
+  "note": "your Intervene spends no Counter Action (1/Round)"
  },
  "sworn-comrades|Shared Tension|4": {
   "verdict": "triggers",
@@ -21332,11 +21871,20 @@
   "status": "narrativo"
  },
  "team-dynamic|Team Captain|1": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "switch off Team Captain 4 and 5 while an Ally also picked the Team Captain Trait (other Characters' Trait picks are not readable)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "fxOff.teamdynamic_teamcaptain_4",
+    "value": "1",
+    "condition": "@allyPicked.teamcaptain >= 1"
+   },
+   {
+    "target": "fxOff.teamdynamic_teamcaptain_5",
+    "value": "1",
+    "condition": "@allyPicked.teamcaptain >= 1"
+   }
+  ],
+  "note": "an Ally that also picked Team Captain switches off its 4th and 5th effects (@allyPicked)"
  },
  "team-dynamic|Team Captain|2": {
   "verdict": "modifiers",
@@ -21399,11 +21947,11 @@
   }
  },
  "team-dynamic|Team Captain|5": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "allyDefeated",
-    "condition": "@allyMinion == 0",
+    "condition": "@allyMinion == 0 && @allyHasAwk.teamdynamic == 1",
     "effect": "maneuver",
     "resource": "healingSurge",
     "target": "other",
@@ -21412,17 +21960,23 @@
     "limit": "1/Encounter"
    }
   ],
-  "code": {
-   "category": "outOfSequence",
-   "spec": "only for a Teammate (an Ally with Team Dynamic): the Defeated Ally's Awakenings are not readable"
-  }
+  "note": "a Teammate (an Ally with Team Dynamic) is Defeated: pay 8(bT) KP for its Healing Surge button (1/Encounter)"
  },
  "team-dynamic|Team Mascot/Strategist|1": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "switch off Team Mascot/Strategist 4 and 5 while an Ally also picked that Trait (other Characters' Trait picks are not readable)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "fxOff.teamdynamic_teammascotstrategist_4",
+    "value": "1",
+    "condition": "@allyPicked.teammascotstrategist >= 1"
+   },
+   {
+    "target": "fxOff.teamdynamic_teammascotstrategist_5",
+    "value": "1",
+    "condition": "@allyPicked.teammascotstrategist >= 1"
+   }
+  ],
+  "note": "an Ally that also picked Team Mascot/Strategist switches off its 4th and 5th effects (@allyPicked)"
  },
  "team-dynamic|Team Mascot/Strategist|2": {
   "verdict": "modifiers",
@@ -21465,11 +22019,18 @@
   ]
  },
  "team-dynamic|Team Mascot/Strategist|4": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "1/Round when a Teammate makes a Combat Roll, offer +ceil(max(PE, SC Modifier)/4) to its Dice Score (no event for Allies' rolls)"
-  }
+  "verdict": "triggers",
+  "triggers": [
+   {
+    "event": "allyRoll",
+    "condition": "@combatRoll == 1 && @allyHasAwk.teamdynamic == 1",
+    "effect": "rollBonus",
+    "value": "ceil(max(@pe, @sc)/4)",
+    "mode": "ask",
+    "limit": "1/Round"
+   }
+  ],
+  "note": "a Teammate makes a Combat Roll: a button adds 1/4 (rounded up) of your PE or SC Modifier (the higher) to its Dice Score (1/Round)"
  },
  "team-dynamic|Team Mascot/Strategist|5": {
   "verdict": "code",
@@ -21491,11 +22052,20 @@
   }
  },
  "team-dynamic|Team Mystic|1": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "switch off Team Mystic 4 and 5 while an Ally also picked the Team Mystic Trait (other Characters' Trait picks are not readable)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "fxOff.teamdynamic_teammystic_4",
+    "value": "1",
+    "condition": "@allyPicked.teammystic >= 1"
+   },
+   {
+    "target": "fxOff.teamdynamic_teammystic_5",
+    "value": "1",
+    "condition": "@allyPicked.teammystic >= 1"
+   }
+  ],
+  "note": "an Ally that also picked Team Mystic switches off its 4th and 5th effects (@allyPicked)"
  },
  "team-dynamic|Team Mystic|2": {
   "verdict": "modifiers",
@@ -21521,18 +22091,44 @@
   "verdict": "covered"
  },
  "team-dynamic|Team Mystic|4": {
-  "verdict": "triggers",
-  "triggers": [
+  "verdict": "code",
+  "modifiers": [
    {
-    "event": "maneuverUsed",
-    "condition": "@ua == 1 && @vs.ally == 1",
-    "effect": "message",
-    "value": "Team Mystic: a Unique Ability on a Teammate may cost 2(T) KP less",
-    "mode": "remind",
-    "limit": "1/Round"
+    "target": "kpCost.ua",
+    "value": "-2(T)",
+    "condition": "@res.teammysticdiscount >= 1"
    }
   ],
-  "note": "Unique Ability KP Costs are not charged by the system: a reminder"
+  "triggers": [
+   {
+    "event": "use",
+    "condition": "@res.teammysticdiscount == 0",
+    "effect": "resourceSet",
+    "resource": "Team Mystic Discount",
+    "value": "1",
+    "limit": "1/Round",
+    "label": "Team Mystic (4)"
+   },
+   {
+    "event": "maneuverUsed",
+    "condition": "@ua == 1 && @res.teammysticdiscount >= 1",
+    "effect": "resourceSet",
+    "resource": "Team Mystic Discount",
+    "value": "0"
+   },
+   {
+    "event": "endOfRound",
+    "condition": "@res.teammysticdiscount >= 1",
+    "effect": "resourceSet",
+    "resource": "Team Mystic Discount",
+    "value": "0"
+   }
+  ],
+  "note": "press it before using a Unique Ability on a Teammate: its Use button then costs 2(T) KP less (world setting useCosts on)",
+  "code": {
+   "category": "other",
+   "spec": "the discount should apply only when the Unique Ability targets a Teammate (an Ally with Team Dynamic): the cost is worked out before the target is known, so the player presses the button first"
+  }
  },
  "team-dynamic|Team Mystic|5": {
   "verdict": "code",
@@ -21568,11 +22164,20 @@
   }
  },
  "team-dynamic|Team Powerhouse|1": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "switch off Team Powerhouse 4 and 5 while an Ally also picked the Team Powerhouse Trait (other Characters' Trait picks are not readable)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "fxOff.teamdynamic_teampowerhouse_4",
+    "value": "1",
+    "condition": "@allyPicked.teampowerhouse >= 1"
+   },
+   {
+    "target": "fxOff.teamdynamic_teampowerhouse_5",
+    "value": "1",
+    "condition": "@allyPicked.teampowerhouse >= 1"
+   }
+  ],
+  "note": "an Ally that also picked Team Powerhouse switches off its 4th and 5th effects (@allyPicked)"
  },
  "team-dynamic|Team Powerhouse|2": {
   "verdict": "modifiers",
@@ -21598,46 +22203,48 @@
   "verdict": "covered"
  },
  "team-dynamic|Team Powerhouse|4": {
-  "verdict": "code",
-  "code": {
-   "category": "defenseOption",
-   "spec": "when a Teammate is hit, allow the Intervene Maneuver on that Teammate without spending a Counter Action, 1/Round"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "intervene.noCounter",
+    "value": "1",
+    "condition": "@vs.awk.teamdynamic == 1",
+    "limit": "1/Round"
+   }
+  ],
+  "triggers": [],
+  "note": "an Intervene for a Teammate (an Ally with Team Dynamic) spends no Counter Action (1/Round)"
  },
  "team-dynamic|Team Powerhouse|5": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "attack.charges",
     "value": "1",
     "at": "wound",
-    "condition": "@hits >= 1",
+    "condition": "@hits >= 1 && @vsAny.allyAdjAwk.teamdynamic >= 1",
     "mode": "ask",
     "limit": "1/Round"
    }
   ],
-  "code": {
-   "category": "attackOption",
-   "spec": "only when the Opponent hit is adjacent to a Teammate (distance between two other Characters)"
-  },
-  "triggers": [
-   {
-    "event": "attackHit",
-    "effect": "message",
-    "value": "",
-    "mode": "remind",
-    "label": "Team Powerhouse (5)",
-    "condition": "",
-    "limit": "1/Round"
-   }
-  ]
+  "triggers": [],
+  "note": "hitting an Opponent adjacent to a Teammate (an Ally with Team Dynamic): a box adds an Energy Charge (1/Round)"
  },
  "team-dynamic|Team Speedster|1": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "switch off Team Speedster 4 and 5 while an Ally also picked the Team Speedster Trait (other Characters' Trait picks are not readable)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "fxOff.teamdynamic_teamspeedster_4",
+    "value": "1",
+    "condition": "@allyPicked.teamspeedster >= 1"
+   },
+   {
+    "target": "fxOff.teamdynamic_teamspeedster_5",
+    "value": "1",
+    "condition": "@allyPicked.teamspeedster >= 1"
+   }
+  ],
+  "note": "an Ally that also picked Team Speedster switches off its 4th and 5th effects (@allyPicked)"
  },
  "team-dynamic|Team Speedster|2": {
   "verdict": "modifiers",
@@ -21709,11 +22316,20 @@
   }
  },
  "team-dynamic|Team Striker|1": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "switch off Team Striker 4 and 5 while an Ally also picked the Team Striker Trait (other Characters' Trait picks are not readable)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "fxOff.teamdynamic_teamstriker_4",
+    "value": "1",
+    "condition": "@allyPicked.teamstriker >= 1"
+   },
+   {
+    "target": "fxOff.teamdynamic_teamstriker_5",
+    "value": "1",
+    "condition": "@allyPicked.teamstriker >= 1"
+   }
+  ],
+  "note": "an Ally that also picked Team Striker switches off its 4th and 5th effects (@allyPicked)"
  },
  "team-dynamic|Team Striker|2": {
   "verdict": "modifiers",
@@ -21739,48 +22355,32 @@
   "verdict": "covered"
  },
  "team-dynamic|Team Striker|4": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "attack.calledShot",
     "value": "1",
-    "condition": "@signature == 1",
+    "condition": "@signature == 1 && @vsAny.allyAdjAwk.teamdynamic >= 1",
     "mode": "ask",
     "limit": "1/Round"
    }
   ],
-  "code": {
-   "category": "attackOption",
-   "spec": "only when the targeted Opponent is adjacent to a Teammate (distance between two other Characters)"
-  },
-  "triggers": [
-   {
-    "event": "attackMade",
-    "effect": "message",
-    "value": "",
-    "mode": "remind",
-    "label": "Team Striker (4)",
-    "condition": "",
-    "limit": "1/Round"
-   }
-  ]
+  "triggers": [],
+  "note": "a Signature Technique at an Opponent adjacent to a Teammate: a box makes it a Called Shot (1/Round)"
  },
  "team-dynamic|Team Striker|5": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "allyHit",
-    "condition": "@allyMinion == 0",
+    "condition": "@allyMinion == 0 && @allyHasAwk.teamdynamic == 1",
     "effect": "maneuver",
     "resource": "basicAttack|signature",
     "mode": "ask",
     "limit": "1/Round"
    }
   ],
-  "code": {
-   "category": "outOfSequence",
-   "spec": "only when the attacking Ally is a Teammate (has Team Dynamic): the Ally's Awakenings are not readable"
-  }
+  "note": "a Teammate (an Ally with Team Dynamic) hits an Opponent: a Basic Attack or Signature Technique button (1/Round)"
  },
  "technique-dedication|History of a Technique|1": {
   "verdict": "modifiers",
@@ -21841,30 +22441,20 @@
   ]
  },
  "telekinetic-focus|World Shifting Force|2": {
-  "verdict": "triggers",
-  "triggers": [
+  "verdict": "modifiers",
+  "modifiers": [
    {
-    "event": "maneuverUsed",
-    "condition": "@via_telekinesis == 1",
-    "effect": "message",
-    "value": "World Shifting Force: Telekinesis costs 1(T) KP less",
-    "mode": "remind"
+    "target": "kpCost.use.telekinesis",
+    "value": "-1(T)",
+    "condition": ""
    }
   ],
-  "note": "Unique Ability KP Costs are not charged by the system: a reminder"
+  "note": "the cost of the Telekinesis Use button: needs the world setting useCosts on (shown or paid)"
  },
  "telekinetic-focus|World Shifting Force|3": {
-  "verdict": "triggers",
-  "triggers": [
-   {
-    "event": "maneuverUsed",
-    "condition": "@via_telekinesis == 1",
-    "effect": "message",
-    "value": "World Shifting Force: Telekinesis may be used once more this round",
-    "mode": "remind"
-   }
-  ],
-  "note": "Unique Ability uses per round are not counted by the system: a reminder"
+  "verdict": "covered",
+  "triggers": [],
+  "note": "the system does not count how often you use Telekinesis per Round"
  },
  "telekinetic-focus|World Shifting Force|4": {
   "verdict": "code",
@@ -21970,22 +22560,18 @@
   "status": "narrativo"
  },
  "terrifying-teamwork|Dedicated Team|5": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "allyHit",
-    "condition": "@damage >= 1 && @allyAwk.terrifyingteamwork >= 1",
+    "condition": "@damage >= 1 && @allyHasAwk.terrifyingteamwork == 1",
     "effect": "maneuver",
     "resource": "basicAttack",
     "mode": "ask",
     "limit": "1/Round"
    }
   ],
-  "note": "the Out-of-Sequence Basic Attack targets an Opponent that Ally damaged",
-  "code": {
-   "category": "outOfSequence",
-   "spec": "only when the attacking Ally is on your Villainous Team (the acting Ally's Awakenings are not readable)"
-  }
+  "note": "an Ally of your Villainous Team (with Terrifying Teamwork) damages an Opponent: a Basic Attack button (1/Round; at an Opponent it damaged)"
  },
  "terrifying-teamwork|Dedicated Team|6": {
   "verdict": "code",
@@ -22301,17 +22887,45 @@
   "status": "narrativo"
  },
  "time-skipper|Beyond the Time|4": {
-  "verdict": "triggers",
-  "triggers": [
+  "verdict": "code",
+  "modifiers": [
    {
-    "event": "maneuverUsed",
-    "condition": "@via_timeskip == 1",
-    "effect": "message",
-    "value": "Beyond the Time: no KP for Time-Skip if its attack targets an Opponent of equal or lower Power Level",
-    "mode": "remind"
+    "target": "kpCost.useFree.timeskip",
+    "value": "1",
+    "condition": "@res.timeskipfree >= 1"
    }
   ],
-  "note": "Unique Ability KP Costs are not charged by the system: a reminder"
+  "triggers": [
+   {
+    "event": "use",
+    "condition": "@res.timeskipfree == 0",
+    "effect": "resourceSet",
+    "resource": "Time-Skip Free",
+    "value": "1",
+    "label": "Beyond the Time (4)"
+   },
+   {
+    "event": "maneuverUsed",
+    "condition": "@via_timeskip == 1 && @res.timeskipfree >= 1",
+    "effect": "resourceSet",
+    "resource": "Time-Skip Free",
+    "value": "0"
+   },
+   {
+    "event": "attackMade",
+    "effect": "message",
+    "value": "",
+    "mode": "remind",
+    "label": "Beyond the Time (4)",
+    "condition": "",
+    "limit": ""
+   }
+  ],
+  "note": "press it before Time-Skip when its attack will target an Opponent of equal or lower Power Level: that use costs no KP (world setting useCosts on)",
+  "code": {
+   "category": "versusTarget",
+   "spec": "the Ki Point Cost should be waived only when the attack made through Time-Skip targets an Opponent of equal or lower Power Level (no variable for another Character's Power Level, and the cost is worked out before the target): the player presses the button first"
+  }
  },
  "time-skipper|Beyond the Time|5": {
   "verdict": "code",
@@ -22613,7 +23227,7 @@
   "note": "sets Revenge Points to their maximum (the resource's maximum must be known)"
  },
  "tuffle-masterpiece|Revenge Death Attack|6": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "attack.superProfile.allOut",
@@ -22672,11 +23286,7 @@
     "limitKey": "revengedeath6"
    }
   ],
-  "note": "one box per Super Profile, one use per Encounter between them; the player checks the prerequisites",
-  "code": {
-   "category": "attackOption",
-   "spec": "Genki, Giga Flare and Super Combination are only flagged on the attack (their mechanics are not run)"
-  }
+  "note": "Genki spends the Lifeforce stacks for +2(bT) Wound each; Giga Flare / Super Combination run their Actions and Energy Charges"
  },
  "tuffleization|Tuffle Hybrid|1": {
   "verdict": "modifiers",
@@ -23135,11 +23745,16 @@
   "status": "narrativo"
  },
  "unkillable-majin|Boundless Majin|2": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "Life Points may exceed Maximum LP by up to 1/2 of Maximum LP"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "lifeOverMax",
+    "value": "floor(@lifeMax/2)",
+    "condition": ""
+   }
+  ],
+  "triggers": [],
+  "note": "Life Points may go up to 1/2 of your Max LP over the maximum"
  },
  "unkillable-majin|Boundless Majin|3": {
   "verdict": "covered"
@@ -23310,11 +23925,16 @@
   ]
  },
  "untouched-angel|Perfectionist Combat|2": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "at full LP with 1 or fewer Counter Actions, your effects treat you as having no Counter Actions (@counters)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "flag.countersZero",
+    "value": "1",
+    "condition": "@life >= @lifeMax && @counters <= 1"
+   }
+  ],
+  "triggers": [],
+  "note": "at full Life Points with 1 or fewer Counter Actions, your effects read @counters as 0"
  },
  "untouched-angel|Perfectionist Combat|3": {
   "verdict": "modifiers",
@@ -23522,7 +24142,7 @@
   ]
  },
  "vengeful-god|Spited Divinity|8": {
-  "verdict": "code",
+  "verdict": "triggers",
   "replace": true,
   "triggers": [
    {
@@ -23565,13 +24185,25 @@
     "resource": "exploit",
     "mode": "ask",
     "cost": "counters:1"
+   },
+   {
+    "event": "opponentManeuver",
+    "condition": "@vs.mark.spited == 1 && @counters >= 1 && @vs.noProvoke == 0",
+    "effect": "maneuver",
+    "resource": "exploit",
+    "mode": "ask",
+    "cost": "counters:1"
+   },
+   {
+    "event": "opponentLeftMelee",
+    "condition": "@vs.mark.spited == 1 && @counters >= 1 && @vs.noProvoke == 0",
+    "effect": "maneuver",
+    "resource": "exploit",
+    "mode": "ask",
+    "cost": "counters:1"
    }
   ],
-  "note": "mark the Opponent; its attacks (on you or an Ally) and its moves that end next to you or enter your Melee Range offer the Exploit; its Maneuvers that provoke it by themselves give the system's Exploit card",
-  "code": {
-   "category": "versusTarget",
-   "spec": "the Spited Opponent's other Maneuvers (Power Up, Surges, Transformation, Special Maneuvers, moves away from you) have no event of yours and should offer the Exploit Maneuver too"
-  }
+  "note": "the Spited Opponent: its attacks, its other Maneuvers, entering or leaving your Melee Range offer the Exploit (1 Counter Action)"
  },
  "vocation-gain|Additional Vocation|1": {
   "verdict": "narrative",
@@ -23618,11 +24250,9 @@
   }
  },
  "warlock|Elemental Expert|1": {
-  "verdict": "code",
-  "code": {
-   "category": "attackOption",
-   "spec": "Attacks of a Profile with 'Elemental' in its name may skip Allies caught in their AoE."
-  }
+  "verdict": "covered",
+  "triggers": [],
+  "note": "an AoE's targets are the ones the player targets: leave the Allies in it untargeted"
  },
  "warlock|Elemental Expert|2": {
   "verdict": "narrative",
@@ -23690,17 +24320,16 @@
   "status": "narrativo"
  },
  "warlock|Magic Touch|2": {
-  "verdict": "triggers",
-  "triggers": [
+  "verdict": "modifiers",
+  "triggers": [],
+  "note": "the Transfiguration Maneuver costs 3(T) KP less",
+  "modifiers": [
    {
-    "event": "maneuverUsed",
-    "condition": "@via_transfiguration == 1",
-    "effect": "message",
-    "value": "Magic Touch: Transfiguration costs 3(T) KP less",
-    "mode": "remind"
+    "target": "kpCost.use.transfiguration",
+    "value": "-3(T)",
+    "condition": ""
    }
-  ],
-  "note": "the KP of Special Maneuvers used from their card are not charged by the system: a reminder"
+  ]
  },
  "warlock|Magic Touch|3": {
   "verdict": "covered"
@@ -23734,20 +24363,17 @@
   "status": "narrativo"
  },
  "warlock|Marvelous Magic|4": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "use",
     "effect": "maneuver",
-    "resource": "standard",
+    "resource": "uaMagical",
     "condition": "@myTurn == 1",
     "limit": "1/Round"
    }
   ],
-  "code": {
-   "category": "maneuverChange",
-   "spec": "restrict the pick to 1-Action Standard Magical Unique Abilities (the standard pick also lists Power Up, attacks, Movement...)"
-  }
+  "note": "a 1-Action Standard Magical Unique Ability of yours, Out-of-Sequence"
  },
  "warlock|Master of Magic|1": {
   "verdict": "modifiers",
@@ -23811,7 +24437,7 @@
   ]
  },
  "warlock|Mighty Magic|3": {
-  "verdict": "code",
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "attack.superProfile.cataclysmic",
@@ -23821,10 +24447,7 @@
     "limit": "1/Encounter"
    }
   ],
-  "code": {
-   "category": "attackOption",
-   "spec": "the Cataclysmic Super Profile is only flagged on the attack (its mechanics are not run)"
-  }
+  "note": "Cataclysmic Attack: its AoE is the whole Battlefield (target every Character it reaches)"
  },
  "warlock|Mighty Magic|4": {
   "verdict": "modifiers",
@@ -23850,11 +24473,8 @@
   }
  },
  "warlock|Wondrous White Magic|3": {
-  "verdict": "code",
-  "code": {
-   "category": "maneuverChange",
-   "spec": "Healing Hands may target any Character not at Long Range instead of only within Melee Range (ranges are the GM's)"
-  }
+  "verdict": "covered",
+  "note": "the system does not limit a Unique Ability's targets by range: Healing Hands may target any Character not at Long Range"
  },
  "warlock|Wondrous White Magic|4": {
   "verdict": "covered"
@@ -23875,11 +24495,18 @@
   "note": "the healed Ally is your Foundry target; it picks Power Up or the Transformation Maneuver"
  },
  "warlock|Wondrous White Magic|6": {
-  "verdict": "code",
-  "code": {
-   "category": "outOfSequence",
-   "spec": "1/Encounter, when an Ally not at Long Range takes Damage from an Opponent's attack, offer Healing Hands Out-of-Sequence targeting that Ally."
-  }
+  "verdict": "triggers",
+  "triggers": [
+   {
+    "event": "allyDamaged",
+    "condition": "@allyDistance <= 8",
+    "effect": "maneuver",
+    "resource": "item:Healing Hands",
+    "mode": "ask",
+    "limit": "1/Encounter"
+   }
+  ],
+  "note": "an Ally within 8 Squares (not at Long Range) takes Damage from an Opponent's attack: a Healing Hands button (1/Encounter; target that Ally)"
  },
  "warrior-of-cereal|Sharp Sight of Cereal|1": {
   "verdict": "modifiers",
@@ -23902,11 +24529,18 @@
   ]
  },
  "warrior-of-cereal|Sharp Sight of Cereal|3": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "an Opponent's Power Up should provoke your Exploit Maneuver when you or one of your Allies is adjacent to it: no event of yours fires for another Character's Power Up"
-  }
+  "verdict": "triggers",
+  "triggers": [
+   {
+    "event": "opponentManeuver",
+    "condition": "@by_powerup == 1 && (@distance <= 1 || @vs.opponentsAdjacent >= 1) && @vs.noProvoke == 0",
+    "effect": "maneuver",
+    "resource": "exploit",
+    "mode": "ask",
+    "cost": "counters:1"
+   }
+  ],
+  "note": "an Opponent's Power Up next to you or to one of your Allies (@vs.opponentsAdjacent: its adjacent Opponents) offers the Exploit"
  },
  "warrior-of-cereal|Sharp Sight of Cereal|4": {
   "verdict": "code",
@@ -23991,52 +24625,49 @@
   "note": "Ascended Signature makes it Ultimate for that attack"
  },
  "warrior-of-hera|Camaraderie of Hera|1": {
-  "verdict": "code",
-  "code": {
-   "category": "versusTarget",
-   "spec": "+1(T) Wound against Opponents adjacent to at least one of your Allies (distance between two other Characters)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "vs.wound",
+    "value": "1(T)",
+    "condition": "@vs.opponentsAdjacent - min(1, max(0, 2 - @vs.distance)) >= 1"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) Wound against an Opponent with one of your Allies adjacent to it"
  },
  "warrior-of-hera|Camaraderie of Hera|2": {
-  "verdict": "code",
-  "code": {
-   "category": "versusTarget",
-   "spec": "+1(T) Dodge against attacks by Opponents adjacent to at least one of your Allies (distance between two other Characters)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "vs.dodge",
+    "value": "1(T)",
+    "condition": "@vs.opponentsAdjacent - min(1, max(0, 2 - @vs.distance)) >= 1"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) Dodge against the attacks of an Opponent with one of your Allies adjacent to it"
  },
  "warrior-of-hera|Camaraderie of Hera|3": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "after damaging an Opponent, offer to move it to any free square within a Huge Sphere around you (unblocked, no Collision), 1/Round"
-  },
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "attackHit",
-    "effect": "message",
-    "value": "",
-    "mode": "remind",
-    "label": "Camaraderie of Hera (3)",
-    "limit": "1/Round"
+    "condition": "@damage >= 1 && @vs.ally == 0",
+    "effect": "teleport",
+    "resource": "other",
+    "value": "5",
+    "mode": "ask",
+    "limit": "1/Round",
+    "label": "Camaraderie of Hera (3)"
    }
-  ]
+  ],
+  "note": "damaging an Opponent: a button to place it on any free Square within 5 of you (no Collision; 1/Round)"
  },
  "warrior-of-hera|Camaraderie of Hera|4": {
-  "verdict": "code",
-  "code": {
-   "category": "attackOption",
-   "spec": "an AoE attack may leave out the Allies caught in it, 1/Encounter"
-  },
-  "triggers": [
-   {
-    "event": "attackMade",
-    "effect": "message",
-    "value": "",
-    "mode": "remind",
-    "label": "Camaraderie of Hera (4)",
-    "limit": "1/Encounter"
-   }
-  ]
+  "verdict": "covered",
+  "triggers": [],
+  "note": "an AoE's targets are the ones the player targets: leave the Allies in it untargeted (1/Encounter: the player's to keep)"
  },
  "warrior-of-namek|Wisdom of Namek|1": {
   "verdict": "covered"
@@ -24082,14 +24713,29 @@
   ]
  },
  "warrior-of-sadala|Pride of Sadala|3": {
-  "verdict": "code",
-  "code": {
-   "category": "clash",
-   "spec": "while Superior, a Clash against you that uses one of your Saving Throws may use your Cognitive Save instead"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "clashAltDef.impulsive",
+    "value": "cognitive",
+    "condition": "@states.superior >= 1"
+   },
+   {
+    "target": "clashAltDef.corporeal",
+    "value": "cognitive",
+    "condition": "@states.superior >= 1"
+   },
+   {
+    "target": "clashAltDef.morale",
+    "value": "cognitive",
+    "condition": "@states.superior >= 1"
+   }
+  ],
+  "triggers": [],
+  "note": "while Superior, a Clash another Character starts against one of your Saves: your Cognitive Save is rolled instead when it is better"
  },
  "warrior-of-sadala|Pride of Sadala|4": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "damaged",
@@ -24098,7 +24744,8 @@
     "value": "-(@life - floor(@lifeMax/2) + 1)",
     "mode": "ask",
     "limit": "1/Round",
-    "limitKey": "prideofsadala4"
+    "limitKey": "prideofsadala4",
+    "resource": "noMomentum"
    },
    {
     "event": "damaged",
@@ -24107,7 +24754,8 @@
     "value": "-(@life - floor(@lifeMax/4) + 1)",
     "mode": "ask",
     "limit": "1/Round",
-    "limitKey": "prideofsadala4"
+    "limitKey": "prideofsadala4",
+    "resource": "noMomentum"
    },
    {
     "event": "damaged",
@@ -24116,14 +24764,11 @@
     "value": "-(@life - floor(@lifeMax/10) + 1)",
     "mode": "ask",
     "limit": "1/Round",
-    "limitKey": "prideofsadala4"
+    "limitKey": "prideofsadala4",
+    "resource": "noMomentum"
    }
   ],
-  "note": "LP down to 1 below the next Threshold; the threshold effects follow",
-  "code": {
-   "category": "other",
-   "spec": "the Threshold crossed this way gives no Reduced Momentum"
-  }
+  "note": "the Life Points lost give no Reduced Momentum (resource noMomentum; the Steadfast Checks are still rolled)"
  },
  "warrior-of-sadala|Pride of Sadala|5": {
   "verdict": "code",
@@ -24217,12 +24862,12 @@
   "note": "pick one Surge button and pay the Action with the third; replaces the bare compiled reminder, which fired with any number of Actions"
  },
  "warrior-of-the-core-world|Reactionary Warrior|4": {
-  "verdict": "code",
+  "verdict": "triggers",
   "replace": true,
   "triggers": [
    {
     "event": "startOfTurn",
-    "condition": "@actions == 1",
+    "condition": "@actions == 1 && @vs.ally == 0 && @vs.distance <= 1 + @aptitudes.meleeReach",
     "cost": "actions:1",
     "check": "clash:cognitive|morale",
     "effect": "condition",
@@ -24232,10 +24877,7 @@
     "mode": "ask"
    }
   ],
-  "code": {
-   "category": "clash",
-   "spec": "the targeted Opponent must be within your Melee Range (not checked)"
-  }
+  "note": "start of turn with 1 Action: spend it for a Cognitive/Morale Clash against the targeted Opponent within your Melee Range (checked on the click)"
  },
  "warrior-of-the-core-world|Reactionary Warrior|5": {
   "verdict": "triggers",
@@ -24277,7 +24919,7 @@
   }
  },
  "warrior-of-the-demon-realm|Brutality of the Demon Realm|3": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "inflict",
@@ -24288,10 +24930,7 @@
     "limit": "1/Round"
    }
   ],
-  "code": {
-   "category": "other",
-   "spec": "Impediment inflicted through something other than a trigger effect (a Unique Ability, a Maneuver) must also reduce its Life Points"
-  }
+  "note": "'inflict' fires for the Conditions your trigger effects, Unique Abilities and Maneuvers (their buttons), Condition Advantages, Grapples and Gravity Cage give; one set by hand on the sheet is the GM's"
  },
  "warrior-of-the-demon-realm|Brutality of the Demon Realm|4": {
   "verdict": "triggers",
@@ -24366,11 +25005,16 @@
   ]
  },
  "weak-slayer|Superior Being|2": {
-  "verdict": "code",
-  "code": {
-   "category": "versusTarget",
-   "spec": "double the Damage Minions take from your attacks (no attacker-side Damage multiplier)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "vs.damageDealtMult",
+    "value": "2",
+    "condition": "@vs.minion == 1"
+   }
+  ],
+  "triggers": [],
+  "note": "x2 the Damage a Minion takes from your attacks (vs.damageDealtMult)"
  },
  "weak-slayer|Superior Being|3": {
   "verdict": "modifiers",
@@ -24497,11 +25141,21 @@
   ]
  },
  "wings-of-time|Beyond the Time|4": {
-  "verdict": "code",
-  "code": {
-   "category": "other",
-   "spec": "+1(T) Wound Rolls and Soak during a Frozen Turn (the Frozen Turn of Time Freeze is not run by the engine)"
-  }
+  "verdict": "modifiers",
+  "modifiers": [
+   {
+    "target": "wound",
+    "value": "1(T)",
+    "condition": "@res.frozenturn >= 1"
+   },
+   {
+    "target": "soak",
+    "value": "1(T)",
+    "condition": "@res.frozenturn >= 1"
+   }
+  ],
+  "triggers": [],
+  "note": "+1(T) Wound Rolls and Soak during your Frozen Turn"
  },
  "wings-of-time|Beyond the Time|5": {
   "verdict": "both",
@@ -24551,18 +25205,40 @@
   ]
  },
  "wings-of-time|Beyond the Time|7": {
-  "verdict": "triggers",
-  "triggers": [
+  "verdict": "modifiers",
+  "modifiers": [
    {
-    "event": "maneuverUsed",
-    "condition": "@ua == 1 && (@via_timefreeze == 1 || @via_timeskip == 1 || @via_timeseal == 1 || @via_timereversion == 1)",
-    "effect": "message",
-    "value": "Beyond the Time: this Time Unique Ability costs no KP",
-    "mode": "remind",
-    "limit": "1/Encounter"
+    "target": "kpCost.useFree.timefreeze",
+    "value": "1",
+    "condition": "@inCombat == 0 || (@usedEnc.timefreeze + @usedEnc.timeseal + @usedEnc.timereversion + @usedEnc.timeskip + @usedEnc.timelabyrinth + @usedEnc.spacetimeconnection) == 0"
+   },
+   {
+    "target": "kpCost.useFree.timeseal",
+    "value": "1",
+    "condition": "@inCombat == 0 || (@usedEnc.timefreeze + @usedEnc.timeseal + @usedEnc.timereversion + @usedEnc.timeskip + @usedEnc.timelabyrinth + @usedEnc.spacetimeconnection) == 0"
+   },
+   {
+    "target": "kpCost.useFree.timereversion",
+    "value": "1",
+    "condition": "@inCombat == 0 || (@usedEnc.timefreeze + @usedEnc.timeseal + @usedEnc.timereversion + @usedEnc.timeskip + @usedEnc.timelabyrinth + @usedEnc.spacetimeconnection) == 0"
+   },
+   {
+    "target": "kpCost.useFree.timeskip",
+    "value": "1",
+    "condition": "@inCombat == 0 || (@usedEnc.timefreeze + @usedEnc.timeseal + @usedEnc.timereversion + @usedEnc.timeskip + @usedEnc.timelabyrinth + @usedEnc.spacetimeconnection) == 0"
+   },
+   {
+    "target": "kpCost.useFree.timelabyrinth",
+    "value": "1",
+    "condition": "@inCombat == 0 || (@usedEnc.timefreeze + @usedEnc.timeseal + @usedEnc.timereversion + @usedEnc.timeskip + @usedEnc.timelabyrinth + @usedEnc.spacetimeconnection) == 0"
+   },
+   {
+    "target": "kpCost.useFree.spacetimeconnection",
+    "value": "1",
+    "condition": "@inCombat == 0 || (@usedEnc.timefreeze + @usedEnc.timeseal + @usedEnc.timereversion + @usedEnc.timeskip + @usedEnc.timelabyrinth + @usedEnc.spacetimeconnection) == 0"
    }
   ],
-  "note": "Unique Ability KP Costs are not charged by the system: a reminder on the Time Unique Abilities"
+  "note": "the first Time Unique Ability used in a Combat Encounter costs no KP (world setting useCosts on)"
  },
  "wise-yardrat|Whiskers of Wisdom|1": {
   "verdict": "modifiers",
@@ -24583,17 +25259,15 @@
   }
  },
  "wise-yardrat|Whiskers of Wisdom|3": {
-  "verdict": "triggers",
-  "triggers": [
+  "verdict": "modifiers",
+  "modifiers": [
    {
-    "event": "maneuverUsed",
-    "condition": "@uaType_spiritual == 1",
-    "effect": "message",
-    "value": "Whiskers of Wisdom: this Spiritual Unique Ability costs 1(T) KP less",
-    "mode": "remind"
+    "target": "kpCost.ua.spiritual",
+    "value": "-1(T)",
+    "condition": ""
    }
   ],
-  "note": "Unique Ability KP Costs are not charged by the system: a reminder"
+  "note": "Unique Abilities whose type is Spiritual (no compendium item has it: the player's Spiritual Unique Abilities need that type); needs the world setting useCosts on (shown or paid)"
  },
  "wise-yardrat|Whiskers of Wisdom|4": {
   "verdict": "modifiers",
@@ -24682,12 +25356,12 @@
   }
  },
  "witchcraft|Mystic Talisman|1": {
-  "verdict": "code",
+  "verdict": "both",
   "replace": true,
   "modifiers": [
    {
     "target": "resMaxSet.talismans",
-    "value": "2 * @ranks.useMagic",
+    "value": "2 * @ranksNow.useMagic",
     "condition": ""
    }
   ],
@@ -24696,30 +25370,24 @@
     "event": "startOfEncounter",
     "effect": "resourceSet",
     "resource": "Talismans",
-    "value": "2 * @ranks.useMagic"
+    "value": "2 * @ranksNow.useMagic"
    }
   ],
-  "code": {
-   "category": "resourceRule",
-   "spec": "Use Magic Skill Ranks given by effects (skillRank pieces) must count too (@ranks reads only the sheet's)"
-  }
+  "note": "Talismans: 2 per Use Magic Rank, the Ranks effects give included (@ranksNow)"
  },
  "witchcraft|Mystic Talisman|10": {
-  "verdict": "code",
+  "verdict": "triggers",
   "triggers": [
    {
     "event": "surge",
     "condition": "@kiSurge == 1",
     "effect": "resource",
     "resource": "Talismans",
-    "value": "@ranks.useMagic",
+    "value": "@ranksNow.useMagic",
     "limit": "1/Encounter"
    }
   ],
-  "code": {
-   "category": "resourceRule",
-   "spec": "Use Magic Skill Ranks given by effects (skillRank pieces) must count too (@ranks reads only the sheet's)"
-  }
+  "note": "a Ki Surge: + Talismans equal to your Use Magic Ranks, the Ranks effects give included (@ranksNow)"
  },
  "witchcraft|Mystic Talisman|2": {
   "verdict": "modifiers",
@@ -24986,17 +25654,9 @@
   "note": "compiled capacity.max +1/4 rounds to 0; +1/4 Max Capacity is the 1.25 multiplier"
  },
  "yardrat-master|Spiritual People|5": {
-  "verdict": "triggers",
-  "triggers": [
-   {
-    "event": "maneuverUsed",
-    "condition": "@uaType_spiritual == 1",
-    "effect": "message",
-    "value": "Spiritual People: each Spiritual Unique Ability may be used once more this round",
-    "mode": "remind"
-   }
-  ],
-  "note": "Unique Ability uses per round are not counted by the system: a reminder"
+  "verdict": "covered",
+  "triggers": [],
+  "note": "the system does not count how often you use the Spiritual Unique Abilities per Round"
  },
  "yardrat-master|Spiritual People|6": {
   "verdict": "triggers",
@@ -25028,19 +25688,7 @@
   ]
  },
  "zenkai|On the Brink (3)|3": {
-  "verdict": "code",
-  "triggers": [
-   {
-    "event": "threshold",
-    "condition": "@critical == 1 || @defeated == 1",
-    "effect": "state",
-    "resource": "surging",
-    "value": "1",
-    "duration": "endOfNextTurn",
-    "mode": "ask",
-    "limit": "1/Encounter"
-   }
-  ],
+  "verdict": "modifiers",
   "modifiers": [
    {
     "target": "ignoreState.surging.2",
@@ -25048,11 +25696,7 @@
     "condition": "@stateFx.surging.zenkai_onthebrink3_3 == 1"
    }
   ],
-  "note": "the moments of Born for Battle 4; take the Surging State instead of its Temporary Zenkai stack",
-  "code": {
-   "category": "other",
-   "spec": "Born for Battle 4 (itself code) must not give its Temporary Zenkai stack when this is taken"
-  }
+  "note": "the system gives the Surging State instead of Born for Battle 4's Temporary Zenkai stack (once per encounter); this piece ignores that Surging's 2nd effect"
  },
  "zenkai|Saiyan Spirit|1": {
   "verdict": "covered"

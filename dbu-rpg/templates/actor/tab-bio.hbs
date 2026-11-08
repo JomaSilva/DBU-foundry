@@ -28,9 +28,18 @@
             <option value="adversary" {{#if (eq source.npcType "adversary")}}selected{{/if}}>Adversary</option>
             <option value="boss" {{#if (eq source.npcType "boss")}}selected{{/if}} data-tooltip="{{localize 'DBU.Boss.Tip'}}">{{localize "DBU.Boss.Label"}}</option>
             <option value="minion" {{#if (eq source.npcType "minion")}}selected{{/if}}>Minion</option>
+            <option value="battleJacket" {{#if (eq source.npcType "battleJacket")}}selected{{/if}}>Battle Jacket</option>
             <option value="other" {{#if (eq source.npcType "other")}}selected{{/if}}>{{localize "DBU.Other"}}</option>
           </select>
         </label>
+        {{#if (or (eq source.npcType "minion") (eq source.npcType "battleJacket"))}}
+        <label data-tooltip="{{localize 'DBU.MinionOfTip'}}">{{#if (eq source.npcType "battleJacket")}}{{localize "DBU.JacketOwner"}}{{else}}{{localize "DBU.MinionOf"}}{{/if}}
+          <select name="system.minionOf">
+            <option value="">—</option>
+            {{#each minionOfOptions}}<option value="{{this.uuid}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>{{/each}}
+          </select>
+        </label>
+        {{/if}}
         {{/if}}
       </div>
     </div>

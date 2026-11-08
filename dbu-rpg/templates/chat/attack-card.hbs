@@ -49,6 +49,7 @@
         {{#if t.defense}}<small>{{t.defense.mode}}{{#if t.defense.total}} {{t.defense.total}}{{/if}}{{#if t.defense.cost}} ({{t.defense.cost}} {{#if t.defense.dkp}}DKP{{else}}KP{{/if}}){{/if}}</small>{{/if}}
         {{#if t.defense.strikeVs}}<small class="dbu-vs-strike">{{localize "DBU.Versus.StrikeVs" n=t.defense.strikeVsTotal}}</small>{{/if}}
         {{#if t.defense.autoDodge}}<small class="dbu-vs-autododge">{{localize "DBU.Versus.AutoDodgeCard" label=t.defense.autoDodge}}</small>{{/if}}
+        {{#if t.defense.homing}}<small class="dbu-homing">{{localize "DBU.Attack.HomingCard" rolls=t.defense.homing}}</small>{{/if}}
         {{#if t.defense.noDim}}<small class="dbu-vs-nodim">{{localize "DBU.Versus.NoDimCard" label=t.defense.noDim}}</small>{{/if}}
         {{#if t.punchDown}}<small class="dbu-punch">{{localize "DBU.Punch.DownCard"}}</small>{{/if}}
         {{#if t.punchUp}}<small class="dbu-punch">{{localize "DBU.Punch.UpCard" n=t.punchUp}}</small>{{/if}}
@@ -71,6 +72,8 @@
         {{#if @root.attack.wound}}{{#unless (or (and (eq t.result "miss") (or (not @root.attack.absolute) t.defense.noAbsolute)) (eq t.result "duel") t.duel)}}{{#unless (or (eq t.damage 0) t.damage)}}
         <button type="button" class="dbu-dmg-btn" data-dbu-action="damage" data-index="{{i}}" data-tooltip="{{localize 'DBU.Damage.Apply'}}"><i class="fa-solid fa-heart-crack"></i> {{localize "DBU.Damage.Apply"}}</button>
         {{/unless}}{{/unless}}{{/if}}
+        {{#if (lookup @root.interveneOk i)}}<button type="button" class="dbu-team-btn" data-dbu-action="intervene" data-index="{{i}}" data-tooltip="{{localize 'DBU.Team.InterveneTip'}}"><i class="fa-solid fa-shield-heart"></i></button>{{/if}}
+        {{#if t.intervened}}<small class="dbu-team">{{localize "DBU.Team.IntervenedFor" by=t.intervened.by name=t.intervened.forName}}</small>{{/if}}
         {{#if (and @root.attack.knockback (gt t.damage 0))}}{{#unless t.knockback}}
         <button type="button" class="dbu-dmg-btn dbu-kb-btn" data-dbu-action="knockback" data-index="{{i}}" data-tooltip="{{localize 'DBU.Knockback.Tip'}}"><i class="fa-solid fa-person-falling-burst"></i> Knockback</button>
         {{/unless}}{{/if}}
@@ -86,6 +89,8 @@
   <div class="dbu-card-buttons">
     {{#unless (or attack.wound attack.duelOnly)}}<button type="button" data-dbu-action="wound"><i class="fa-solid fa-burst"></i> {{localize "DBU.Wound.Roll"}}</button>{{/unless}}
     <button type="button" data-dbu-action="retarget"><i class="fa-solid fa-crosshairs"></i> {{localize "DBU.Attack.Retarget"}}</button>
+    {{#if unitedOk}}<button type="button" class="dbu-team-btn" data-dbu-action="united" data-tooltip="{{localize 'DBU.Team.UnitedTip'}}"><i class="fa-solid fa-people-group"></i> {{localize "DBU.Team.United"}}</button>{{/if}}
+    {{#each reflectable as |r|}}<button type="button" class="dbu-team-btn" data-dbu-action="reflect" data-actor-uuid="{{r.uuid}}" data-tooltip="{{localize 'DBU.Team.ReflectTip'}}"><i class="fa-solid fa-rotate-left"></i> {{localize "DBU.Team.Reflect"}} ({{r.name}})</button>{{/each}}
   </div>
   {{/unless}}
 </div>

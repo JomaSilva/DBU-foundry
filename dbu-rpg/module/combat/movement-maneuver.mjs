@@ -26,6 +26,8 @@ export function movementCosts(actor) {
 /** Use the Movement Maneuver (item: the actor's Movement Maneuver item, if any). */
 export async function useMovement(actor, { item = null } = {}) {
   const sys = actor.system;
+  // (F10 "flag.noMovement": you cannot move by yourself now: Rooted)
+  if ( (sys.buckets?.["flag.noMovement"]?.total ?? 0) > 0 ) return ui.notifications.warn(L("DBU.MoveManeuver.NoMovement", { name: actor.name }));
   const { boost, rapid, T } = movementCosts(actor);
   const normal = sys.aptitudes?.speedNormal ?? 0;
   const boosted = sys.aptitudes?.speedBoosted ?? 0;

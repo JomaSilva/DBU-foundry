@@ -50,7 +50,7 @@ async function saveMarks(marker, marks) {
  * Place a mark: `marker` marks `target` with `name`. An exclusive name leaves the Character that carried it.
  * @returns {Promise<{text: string, slug: string, moved: string[]}>}
  */
-export async function placeMark(marker, target, name, { duration = "none", label = "", event = "", quiet = false } = {}) {
+export async function placeMark(marker, target, name, { duration = "none", label = "", event = "", quiet = false, timing = null } = {}) {
   const slug = markSlug(name);
   const uuid = uuidOf(target);
   if ( !marker || !slug || !uuid ) return { text: "", slug, moved: [] };
@@ -66,7 +66,12 @@ export async function placeMark(marker, target, name, { duration = "none", label
   await saveMarks(marker, marks);
   await dropTimedEntries(marker, e => (e.kind === "mark") && leaving.some(l => e.key === `${slug}|${l.uuid}`));
   for ( const e of leaving ) await endMarkEffects(e.uuid, `${marker.uuid}|${slug}`);
-  if ( duration && (duration !== "none") ) {
+  if ( timing ) {
+    // (MT: counted on the marked Character's turns)
+    await addTimed(marker, { kind: "mark", key: `${slug}|${uuid}`, prev: 0, level: 1, duration: timing.duration, event,
+      label: entry.name, target: entry.target, source: timing.source, skip: timing.skip });
+  }
+  else if ( duration && (duration !== "none") ) {
     await addTimed(marker, { kind: "mark", key: `${slug}|${uuid}`, prev: 0, level: 1, duration, event,
       label: entry.name, target: entry.target });
   }

@@ -31,17 +31,18 @@ import { DBU } from "../config.mjs";
 import { isMinion } from "../fusion/fusion-rules.mjs";
 import { autoChosen, chosenPieces, countOptionLimits, optionMods, optionPieces } from "./options.mjs";
 import { tokenDistance } from "./proximity.mjs";
+import { possessedAwakenings } from "./awakening.mjs";
 
 /** Every vs.* target, by side: what you get against that Character when you attack it / when it attacks you. */
 export const VS_TARGETS = {
-  attacker: ["vs.strike", "vs.wound", "vs.combat", "vs.category", "vs.ignoreSoak", "vs.steadfast"],
+  attacker: ["vs.strike", "vs.wound", "vs.combat", "vs.category", "vs.ignoreSoak", "vs.steadfast", "vs.damageDealtMult"],
   defender: ["vs.dodge", "vs.defenseValue", "vs.strike", "vs.combat", "vs.soak", "vs.dr", "vs.categoryTaken", "vs.categorySet",
     "vs.damageTaken", "vs.damageMult", "vs.guardKp", "vs.guardNoCharges", "vs.redodge",
     // Package F: the hit becomes a miss; no Diminishing Defense; Damage below a value is 0; the most Damage you take
     "vs.autoDodge", "vs.noDimDefense", "vs.ignoreDamageBelow", "vs.damageMax"]
 };
 /** Targets only the attacker has (mode "ask" is refused on them). */
-export const VS_ATTACKER_ONLY = new Set(["vs.wound", "vs.category", "vs.ignoreSoak", "vs.steadfast"]);
+export const VS_ATTACKER_ONLY = new Set(["vs.wound", "vs.category", "vs.ignoreSoak", "vs.steadfast", "vs.damageDealtMult"]);
 /** The defender's pieces asked before the defense roll, by Defend option (their roll or their cost); vs.noDimDefense
  * where a defense gives Diminishing Defense (a Dodge, no defense). */
 export const VS_PRE = {
@@ -50,14 +51,16 @@ export const VS_PRE = {
 };
 /** The defender's pieces once the attack hits (vs.redodge only after a Dodge or no defense). */
 export const VS_HIT = ["vs.soak", "vs.dr", "vs.categoryTaken", "vs.categorySet", "vs.damageTaken", "vs.damageMult", "vs.redodge",
-  "vs.autoDodge", "vs.ignoreDamageBelow", "vs.damageMax"];
+  "vs.autoDodge", "vs.ignoreDamageBelow", "vs.damageMax",
+  // F12: a Wound Roll lower than the value deals no Damage (the Incorporeal State)
+  "vs.ignoreWoundBelow"];
 /**
  * Defender pieces whose use is counted only when they change the Damage (computeDamage): automatic ones (no ask, cost,
  * amount), kept with the defense and counted when the Damage is applied.
  */
-export const VS_DEFERRED = new Set(["vs.ignoreDamageBelow", "vs.damageMax"]);
+export const VS_DEFERRED = new Set(["vs.ignoreDamageBelow", "vs.damageMax", "vs.ignoreWoundBelow"]);
 /** The attacker's pieces for the Damage of one target, and for the comparison with its defense roll. */
-export const VS_ATTACK_DAMAGE = ["vs.wound", "vs.combat", "vs.category", "vs.ignoreSoak"];
+export const VS_ATTACK_DAMAGE = ["vs.wound", "vs.combat", "vs.category", "vs.ignoreSoak", "vs.damageDealtMult"];
 export const VS_ATTACK_STRIKE = ["vs.strike", "vs.combat"];
 
 /** The limit key of a vs piece. */
@@ -92,6 +95,11 @@ export function sizeIndex(actor) {
 export const NO_DISTANCE = 99;
 /** A Character's token document: its combatant's, its synthetic token, an active one. */
 function tokenOf(actor) {
+  // GS Warriors of Glass (4): this turn your attacks originate from a Glass Soldier's Square (flags.dbu-rpg.originFrom)
+  const from = actor?.flags?.["dbu-rpg"]?.originFrom;
+  if ( from ) {
+    try { const d = fromUuidSync(from); if ( d?.parent ) return d; } catch(err) { /* no such token */ }
+  }
   const cb = combatantOf(encounterOf(actor), actor);
   return cb?.token ?? actor?.token ?? actor?.getActiveTokens?.()?.[0]?.document ?? null;
 }
@@ -129,13 +137,19 @@ export function compelledTarget(actor) {
 
 export function versusData(self, other) {
   const out = { below: 0, cond: {}, anyCond: 0, dot: 0, states: {}, size: 0, sizeDiff: 0, initiative: 0, initiativeDiff: 0,
-    ally: 0, minion: 0, top: 0, capacityMax: 0, mark: {}, distance: NO_DISTANCE, compelledByMe: 0, compelledToThem: 0, noProvoke: 0 };
+    ally: 0, minion: 0, top: 0, capacityMax: 0, mark: {}, distance: NO_DISTANCE, compelledByMe: 0, compelledToThem: 0, noProvoke: 0,
+    condByMe: 0, markOthers: {}, dimDefense: 0, alliesAdjacent: 0, opponentsAdjacent: 0, awk: {}, allyAdjAwk: {}, speedBoosted: 0, onArea: {}, isTurn: 0, markAdj: {}, lightLevel: 0 };
   const o = other?.system;
   if ( !o ) return out;
+  // (T4 @vs.awk.<slug>: the Awakenings the other Character possesses: a Teammate has Team Dynamic)
+  try { out.awk = possessedAwakenings(other); } catch(err) { out.awk = {}; }
   try { out.distance = distanceBetween(self, other); } catch(err) { out.distance = NO_DISTANCE; }
   try {
-    out.below = Number(o.rollData?.below ?? o.health?.count ?? 0) || 0;
+    out.below = Number(o.rollData?.belowForOthers ?? o.rollData?.below ?? o.health?.count ?? 0) || 0;
+    // (T7 "flag.guardDownHidden": its Guard Down does not count as a Combat Condition for the others' effects)
+    const hideGd = (o.buckets?.["flag.guardDownHidden"]?.total ?? 0) > 0;
     for ( const [k, v] of Object.entries(o.effectiveConditions ?? o.conditions ?? {}) ) {
+      if ( hideGd && (k === "guardDown") ) continue;
       out.cond[k] = Number(v) || 0;
       if ( out.cond[k] > 0 ) out.anyCond += 1;
     }
@@ -153,7 +167,41 @@ export function versusData(self, other) {
     // (an NPC of the Minion type, or a Character whose Race is a Minion race)
     out.minion = isMinion(other) ? 1 : 0;
     out.top = Number(o.top?.base ?? 0) || 0;
+    // F11: its Tier of Power now and its stacks of Power (@vs.topNow, @vs.power)
+    out.topNow = Number(o.top?.current ?? o.top?.base ?? 0) || 0;
+    out.power = Number(o.combat?.power ?? 0) || 0;
+    // F12: it is a Minion of yours (@vs.myMinion)
+    out.myMinion = (self && (o.minionOf === self.uuid)) ? 1 : 0;
     out.capacityMax = Number(o.capacity?.max ?? 0) || 0;
+    // RA: Combat Conditions it suffers that you inflicted (@vs.condByMe: how many)
+    const by = other?.flags?.["dbu-rpg"]?.condBy ?? {};
+    out.condByMe = Object.entries(by).filter(([k, u]) => ((out.cond[k] ?? 0) > 0) && isCharacter(u, self)).length;
+    // RD: its Diminishing Defense penalty now (@vs.dimDefense)
+    out.dimDefense = Number(other?.system?.dimDefensePenalty ?? 0) || 0;
+    // (T19 @vs.isTurn: it is the other Character's turn now)
+    try {
+      const enc = globalThis.game?.combats?.find?.(c => c.started && c.combatants.some(cb => cb.actor?.uuid === other.uuid));
+      out.isTurn = (enc?.combatant?.actor?.uuid === other.uuid) ? 1 : 0;
+    } catch(err) { out.isTurn = 0; }
+    // (T17 @vs.onArea.<kind>: the area kinds its Square is in)
+    out.onArea = { ...(o.rollData?.onArea ?? {}) };
+    // (T13 @vs.speedBoosted: its Boosted Speed)
+    out.speedBoosted = Number(o.aptitudes?.speedBoosted ?? 0) || 0;
+    // RE: how many of its Allies / Opponents are adjacent to it (@vs.alliesAdjacent / @vs.opponentsAdjacent)
+    out.alliesAdjacent = Number(other?.system?.rollData?.alliesAdjacent ?? 0) || 0;
+    out.opponentsAdjacent = Number(other?.system?.rollData?.opponentsAdjacent ?? 0) || 0;
+    // RA: the marks the OTHER Characters of the encounter placed on it (@vs.markOthers.<mark>: how many of them)
+    const enc = encounterOf(self) ?? encounterOf(other);
+    for ( const cb of enc?.combatants ?? [] ) {
+      const a = cb.actor;
+      if ( !a || (a.uuid === self?.uuid) || (a.uuid === other?.uuid) ) continue;
+      for ( const [slug, list] of Object.entries(a.flags?.["dbu-rpg"]?.marks ?? {}) ) {
+        if ( (Array.isArray(list) ? list : []).some(m => m?.uuid && ((m.uuid === other.uuid) || (m.uuid === other.token?.uuid))) ) {
+          const k = markSlug(slug);
+          out.markOthers[k] = (out.markOthers[k] ?? 0) + 1;
+        }
+      }
+    }
     // Y: the other Character provokes no Exploit ("flag.noProvokeExploit")
     out.noProvoke = ((o.buckets?.["flag.noProvokeExploit"]?.total ?? 0) > 0) ? 1 : 0;
     // U: Compelled toward whom (the Character who inflicted it: flags.dbu-rpg.compelledBy)
@@ -166,6 +214,33 @@ export function versusData(self, other) {
       const on = (Array.isArray(list) ? list : []).some(m => m?.uuid && ((m.uuid === other.uuid) || (m.uuid === other.token?.uuid)));
       if ( on ) out.mark[markSlug(slug)] = 1;
     }
+    // (T10 "markAll.<slug>": every Opponent counts as carrying that mark of yours; "markAllChars.<slug>": every other
+    // Character; "markCompelled.<slug>": the Character you are Compelled toward)
+    for ( const [k, b] of Object.entries(self?.system?.buckets ?? {}) ) {
+      const m = /^(markAll|markAllChars|markCompelled)\.(.+)$/.exec(k);
+      if ( !m || !((Number(b?.total) || 0) > 0) ) continue;
+      if ( (m[1] === "markAll") && out.ally ) continue;
+      if ( (m[1] === "markCompelled") && !out.compelledToThem ) continue;
+      out.mark[markSlug(m[2])] = 1;
+    }
+    // (T26 @vs.lightLevel: the Light Level where it is, its own shifts included)
+    out.lightLevel = Number(other?.system?.rollData?.lightLevelEff ?? other?.system?.rollData?.lightLevel ?? 0) || 0;
+    // (T25 @vs.markAdj.<slug>: the Characters carrying that mark of yours adjacent to it, it and you aside)
+    for ( const [slug, list] of Object.entries(marks ?? {}) ) {
+      let n = 0;
+      for ( const m of (Array.isArray(list) ? list : []) ) {
+        if ( !m?.uuid || (m.uuid === other.uuid) || (m.uuid === other.token?.uuid) ) continue;
+        let doc = null;
+        try { doc = fromUuidSync(m.uuid); } catch(err) { doc = null; }
+        const a = (doc?.documentName === "Token") ? doc.actor : doc;
+        if ( a && (a !== self) && (a !== other) && (distanceBetween(a, other) <= 1) ) n += 1;
+      }
+      if ( n ) out.markAdj[markSlug(slug)] = n;
+    }
+    // (T10 @vs.allyAdjAwk.<slug>: the Characters of your side adjacent to it, you aside, that possess that Awakening)
+    const adjAwk = other?.system?.rollData?.opponentsAdjacentAwk ?? {};
+    const mineAwk = (out.distance <= 1) ? possessedAwakenings(self) : {};
+    out.allyAdjAwk = Object.fromEntries(Object.entries(adjAwk).map(([s, n]) => [s, Math.max(0, (Number(n) || 0) - (mineAwk[s] ? 1 : 0))]));
   } catch(err) { console.warn("DBU | versusData", err); }
   return out;
 }

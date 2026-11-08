@@ -84,6 +84,8 @@ export function validateActor(sys, actor) {
   for ( const a of DBU.ATTRIBUTES ) {
     const A = sys.attributes[a];
     if ( !noLimit && (A.score > A.limit) ) add("error", "attributes", "DBU.Val.ScoreLimit", { attr: attrName(a), score: A.score, limit: A.limit, top: bT });
+    // SZ "scoreSet.<attr>": that Score is fixed, so no Attribute Point can go into it (Savage: Scholarship 0)
+    if ( sys.buckets?.[`scoreSet.${a}`] && ((A.points ?? 0) > 0) ) add("error", "attributes", "DBU.Val.ScoreSetPoints", { attr: attrName(a), n: A.score });
   }
 
   /* ----- Skills ----- */
@@ -286,9 +288,43 @@ export function validateActor(sys, actor) {
   duplicates(trans).forEach(name => add("warning", "transformations", "DBU.Val.Duplicate", { name }));
   if ( sys.top.current > (bT + 2) ) add("error", "combat", "DBU.Val.TopLimit", { top: sys.top.current, base: bT });
 
+  /* ----- Z: what some Racial Traits ask the sheet to have ----- */
+  {
+    const traitOf = (name, slug) => (actor?.items ?? []).find(i => (i.type === "racialTrait") && (i.name === name) && (!slug || (i.flags?.["dbu-rpg"]?.slug === slug)));
+    const on = (item, opt) => !!item && (item.system?.modifiers ?? []).concat(item.system?.triggers ?? [])
+      .some(p => (p.active !== false) && new RegExp(`opção:\\s*${opt}\\b`, "i").test(String(p.label ?? "")));
+    const tb2 = traitOf("Technological Being", "androids");
+    if ( on(tb2, "Enhanced Organism") && !(actor?.items ?? []).some(i => (i.type === "racialTrait") && (i.flags?.["dbu-rpg"]?.slug === "alternate-upbringing")) ) {
+      add("warning", "race", "DBU.Val.EnhancedOrganism");
+    }
+    if ( on(tb2, "Weapon Ports") && ((actor?.items ?? []).filter(i => (i.type === "weapon") && i.system?.integrated).length < 2) ) add("warning", "equipment", "DBU.Val.WeaponPorts");
+    if ( traitOf("Functional Purpose", "androids") && ((sys.skills?.perception?.racial ?? 0) > 0) ) add("warning", "skills", "DBU.Val.FunctionalPerception");
+    if ( traitOf("Neko Majin-Dama", "neko-majins") && !(actor?.items ?? []).some(i => /majin-?dama/i.test(i.name) && (i.system?.integrated || i.system?.equipped)) ) add("warning", "equipment", "DBU.Val.MajinDama");
+    // F2 Cerealian Genes (2): none of your Signature Techniques may have the Short Range Disadvantage
+    if ( (actor?.items ?? []).some(i => (i.type === "racialTrait") && /^cerealian genes/i.test(i.name)) ) {
+      for ( const s of (actor?.items ?? []).filter(i => (i.type === "signature") && (i.system?.disadvantages ?? []).some(d => d?.key === "shortRange")) ) {
+        add("error", "signatures", "DBU.Val.NoShortRange", { name: s.name });
+      }
+    }
+    // the Quality an option gives the Plating / the Insect Shell (without a slot)
+    const quality = (re, q) => (actor?.items ?? []).filter(i => (i.type === "apparel") && re.test(i.name))
+      .some(i => (i.system?.qualities ?? []).some(x => new RegExp(`^${q}\\b`, "i").test(String(x?.name ?? ""))));
+    if ( on(traitOf("Survivor", "arcosians"), "Combat Plating") && !quality(/plating/i, "Armed") ) add("warning", "equipment", "DBU.Val.TraitQuality", { item: "Plating", quality: "Armed" });
+    const shell = traitOf("Difference in Shell", "arlians");
+    for ( const [opt, q] of [["King", "Leader's Insignia"], ["Queen", "Beautiful Attire"], ["Rook", "Spiked"], ["Bishop", "Parrying Armor"], ["Knight", "Armed"]] ) {
+      if ( on(shell, opt) && !quality(/insect shell/i, q) ) add("warning", "equipment", "DBU.Val.TraitQuality", { item: "Insect Shell", quality: q });
+    }
+  }
+
   /* ----- Equipment ----- */
   const apparel = sys.apparel.equipped.filter(a => !a.system.integrated && !a.system.natural);
   if ( apparel.length > 3 ) add("error", "equipment", "DBU.Val.ApparelLayers");
+  // RD "apparel.maxLayers": at most that many layers of Apparel (the lowest piece wins)
+  {
+    const caps = (sys.buckets?.["apparel.maxLayers"]?.parts ?? []).map(p => Number(p.value)).filter(Number.isFinite);
+    const cap = caps.length ? Math.min(...caps) : (sys.buckets?.["apparel.maxLayers"] ? Number(sys.buckets["apparel.maxLayers"].total) : null);
+    if ( (cap !== null) && Number.isFinite(cap) && (apparel.length > cap) ) add("error", "equipment", "DBU.Val.ApparelMaxLayers", { n: cap });
+  }
   const layers = {};
   for ( const a of apparel ) (layers[a.system.layer] ??= []).push(a.name);
   for ( const [layer, names] of Object.entries(layers) ) {
@@ -324,7 +360,7 @@ export function validateActor(sys, actor) {
   }
 
   /* ----- Resources and status ----- */
-  if ( sys.life.value > sys.life.max ) add("warning", "status", "DBU.Val.LifeOver", { v: sys.life.value, max: sys.life.max });
+  if ( sys.life.value > (sys.life.cap ?? sys.life.max) ) add("warning", "status", "DBU.Val.LifeOver", { v: sys.life.value, max: sys.life.max });
   if ( sys.ki.value > sys.ki.max ) add("warning", "status", "DBU.Val.KiOver", { v: sys.ki.value, max: sys.ki.max });
   if ( sys.capacity.value > sys.capacity.max ) add("warning", "status", "DBU.Val.CapacityOver", { v: sys.capacity.value, max: sys.capacity.max });
   // A Fusion may use the Karma Points of all of its Fused Characters

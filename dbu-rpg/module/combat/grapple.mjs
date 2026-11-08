@@ -20,8 +20,10 @@ export function grappleOf(actor) {
 
 const targetOf = () => Array.from(game.user.targets ?? [])[0] ?? null;
 
-/** Melee Range: the adjacent Squares, more for larger Size Categories. */
-const meleeRange = actor => 1 + (actor.system.size?.reach ?? 0);
+/** Melee Range: the adjacent Squares, more for larger Size Categories (RG: + the `with` grapple.reach of an effect's use). */
+// (OA: a "grapple.reach" piece adds its Squares to every Grapple too: Namekian Biology, Rubbery Body)
+const meleeRange = actor => 1 + (actor.system.size?.reach ?? 0) + Math.max(0, Math.floor(Number(actor._dbuWith?.["grapple.reach"]) || 0))
+  + Math.max(0, Math.floor(Number(actor.system.buckets?.["grapple.reach"]?.total) || 0));
 
 /** The first targeted token, after checking it is a character other than the user's within Melee Range. */
 async function meleeTarget(actor, name) {
@@ -47,9 +49,9 @@ async function meleeTarget(actor, name) {
  * Defender. The Grappler stays the Initiator of every Grapple Check of its Grapple, whoever makes it. grapple: a Grapple
  * Check (clash.grapple); via: the Maneuver (@via_grapple, @via_launch...).
  */
-async function strikeClash(initiator, defender, { label, extra = [], defenderExtra = [], via = "", grapple = false } = {}) {
+async function strikeClash(initiator, defender, { label, extra = [], defenderExtra = [], via = "", grapple = false, scope = {} } = {}) {
   const r = await resolveClash(initiator, defender, { mine: "strike", theirs: "dodge|strike", via, grapple, label, extra, defenderExtra,
-    subtitle: label, defenderSubtitle: label, card: false });
+    subtitle: label, defenderSubtitle: label, card: false, scope });
   return { win: !!r?.won, mine: r?.mine ?? 0, theirs: r?.theirs ?? 0, defense: r?.theirsKey ?? "dodge" };
 }
 
@@ -63,7 +65,8 @@ function clashLine(win, r, who, other) {
 }
 
 async function spend(actor, n) {
-  if ( encounterOf(actor) ) await actor.update(actor._spendAction(n));
+  // (RG: an Out-of-Sequence use spends no Action)
+  if ( encounterOf(actor) && !actor._dbuOutOfSequence ) await actor.update(actor._spendAction(n));
 }
 
 /** End a Grapple on both characters. */
@@ -106,6 +109,8 @@ export async function throughGrapple(actor, targetActor, label) {
 /** Grapple Maneuver [1/Round, 1 Action]: Clash (Strike vs Strike/Dodge) against a character in Melee Range. */
 export async function grapple(actor) {
   if ( grappleOf(actor) ) return ui.notifications.warn(L("DBU.Grapple.Already"));
+  // (CS1 "block.grapple": Awkward Anatomy)
+  { const { stateBlock } = await import("../rules/state-rules.mjs"); const why = stateBlock(actor, "grapple"); if ( why ) return ui.notifications.warn(why); }
   const target = await meleeTarget(actor, "Grapple");
   if ( !target ) return null;
   const other = target.actor;
@@ -142,7 +147,7 @@ export async function grapple(actor) {
   await spend(actor, 1);
   const T = actor.system.top.current;
   const r = await strikeClash(actor, other, { label: "Grapple Check", via: "grapple", grapple: true,
-    extra: tailGrab ? [{ label: "Tail Restraint", value: -2 * T }] : [] });
+    extra: tailGrab ? [{ label: "Tail Restraint", value: -2 * T }] : [], scope: { tailGrab: tailGrab ? 1 : 0 } });
   lines.push(clashLine(r.win, r, actor.name, other.name));
   if ( !r.win ) {
     lines.push(L("DBU.Grapple.Exploit", { name: other.name }));
@@ -158,18 +163,24 @@ export async function grapple(actor) {
   ]);
   lines.push(L("DBU.Grapple.Grabbed", { name: actor.name, other: other.name }));
   if ( tailGrab ) lines.push(L("DBU.Grapple.TailHeld", { name: other.name }));
+  // F14 "grappleStart": you entered a Grapple as the Grappler (other = the Grappled; @copyName: its name)
+  (await import("./triggers.mjs")).fireEvent(actor, "grappleStart", { other, scope: { copyName: other.name } });
   return postInfoCard({ actor, title: "Grapple", lines });
 }
 
-/** Launch Maneuver [1/Round, 1 Action]: Grapple Check; on a win the Grapple ends and the Grappled is thrown up to Might Squares. */
-export async function launch(actor) {
-  const { g, other, token } = await partnerOf(actor);
+/**
+ * Launch Maneuver [1/Round, 1 Action]: Grapple Check; on a win the Grapple ends and the Grappled is thrown up to Might Squares.
+ * F11 `against`: a Character Launched as if you were Grappling it (Super Elastic Body): no Grapple is needed nor ended.
+ */
+export async function launch(actor, { against = null } = {}) {
+  const partner = against ? { g: { role: "grappler" }, other: against, token: actorTokens(against)[0]?.document ?? null } : await partnerOf(actor);
+  const { g, other, token } = partner;
   if ( g?.role !== "grappler" || !other ) return ui.notifications.warn(L("DBU.Grapple.NotGrappler"));
   if ( !(await roundUse(actor, "launch", "Launch")) ) return null;
   await spend(actor, 1);
   const r = await strikeClash(actor, other, { label: "Grapple Check (Launch)", via: "launch", grapple: true });
   const lines = [clashLine(r.win, r, actor.name, other.name)];
-  await endGrapple(actor);
+  if ( !against ) await endGrapple(actor);
   if ( !r.win ) {
     lines.push(L("DBU.Grapple.Escapes", { name: other.name }));
     return postInfoCard({ actor, title: "Launch", lines });
@@ -277,6 +288,8 @@ export async function thrust(actor) {
     if ( win ) {
       await runOps([{ op: "condition", uuid: other.uuid, key: "prone", value: 1 }]);
       lines.push(L("DBU.Grapple.Prone", { name: other.name }));
+      // (F15: a Combat Condition this Maneuver inflicts is one you inflict: "inflict")
+      (await import("./triggers.mjs")).fireEvent(actor, "inflict", { other, scope: { cond_prone: 1, level: 1 } });
     }
     else {
       const op = encounterOf(actor)
@@ -284,6 +297,7 @@ export async function thrust(actor) {
         : { op: "condition", uuid: other.uuid, key: "guardDown", value: 1 };
       await runOps([op]);
       lines.push(L("DBU.Grapple.GuardDown", { name: other.name }));
+      (await import("./triggers.mjs")).fireEvent(actor, "inflict", { other, scope: { cond_guardDown: 1, level: 1 } });
     }
     return postInfoCard({ actor, title: "Thrust", lines });
   }

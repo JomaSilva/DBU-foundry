@@ -1,0 +1,50 @@
+{
+  "pt-BR": {
+    "DBU": {
+      "Wound": {
+        "DamageApplied": "O Dano deste ataque já foi aplicado: o Wound Roll não muda mais.",
+        "Bumped": "{label}: Wound Roll alterado.",
+        "Added": "{label}: +{n} no Wound Roll.",
+        "Lethal": "{label}: Dano Letal.",
+        "Category": "{label}: +{n} Categoria de Dano."
+      },
+      "Trigger": {
+        "DamageCategory": "Categoria de Dano",
+        "EventLabel": {
+          "woundRolled": "Depois do seu Wound Roll"
+        },
+        "Event": {
+          "woundRolled": "Wound Roll — {name}"
+        },
+        "Effect": {
+          "woundAdd": "Somar ao Wound Roll já feito",
+          "woundCategory": "Subir a Categoria de Dano do ataque"
+        }
+      }
+    }
+  },
+  "en": {
+    "DBU": {
+      "Wound": {
+        "DamageApplied": "This attack's Damage is already applied: its Wound Roll no longer changes.",
+        "Bumped": "{label}: Wound Roll changed.",
+        "Added": "{label}: +{n} Wound Roll.",
+        "Lethal": "{label}: Lethal Damage.",
+        "Category": "{label}: +{n} Damage Category."
+      },
+      "Trigger": {
+        "DamageCategory": "Damage Category",
+        "EventLabel": {
+          "woundRolled": "After your Wound Roll"
+        },
+        "Event": {
+          "woundRolled": "Wound Roll — {name}"
+        },
+        "Effect": {
+          "woundAdd": "Add to the Wound Roll already made",
+          "woundCategory": "Raise the attack's Damage Category"
+        }
+      }
+    }
+  }
+}

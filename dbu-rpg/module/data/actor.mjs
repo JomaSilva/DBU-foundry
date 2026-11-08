@@ -113,6 +113,8 @@ export class CharacterData extends foundry.abstract.TypeDataModel {
         // (@chargesRound, @surgesRound, @damagedSinceTurn)
         chargesRound: intField(0, { min: 0 }),
         surgesRound: intField(0, { min: 0 }),
+        // F11 Healing Surges used this Combat Round (@healingSurgesRound)
+        healingSurgesRound: intField(0, { min: 0 }),
         damagedSinceTurn: intField(0, { min: 0 })
       }),
       resources: new ArrayField(new SchemaField({
@@ -247,7 +249,10 @@ export class NpcData extends CharacterData {
   static defineSchema() {
     const schema = super.defineSchema();
     // Boss: a villain who may enter Forms above its Tier of Power (Final Form Frieza, Perfect Cell...)
-    schema.npcType = new StringField({ initial: "adversary", choices: ["adversary", "boss", "minion", "other"] });
+    schema.npcType = new StringField({ initial: "adversary", choices: ["adversary", "boss", "minion", "battleJacket", "other"] });
+    // MO: whose Minion it is (the Leader's actor uuid): "your Minions" effects (@to.myMinion, @allyMyMinion); BJ: whose Battle
+    // Jacket it is (its owner's "jacket.<target>" pieces apply to it)
+    schema.minionOf = new StringField({ initial: "" });
     schema.settings = new SchemaField({
       validate: new BooleanField({ initial: false }),
       creation: new BooleanField({ initial: false })

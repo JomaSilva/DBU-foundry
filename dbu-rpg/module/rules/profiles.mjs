@@ -1,4 +1,5 @@
 import { DBU } from "../config.mjs";
+import { encounterOthers } from "./allies.mjs";
 
 /**
  * The Profiles of an Attacking Maneuver: its own, plus the one the Multi-Profile Super Profile applies to it (that
@@ -139,8 +140,16 @@ export const MULTI_PROFILE_SOURCES = [
   {
     // Elemental Assault's Elemental Infusion option (Monstrous Traits): an item with that name
     id: "elementalInfusion", name: "Elemental Infusion",
-    item: i => /elemental infusion/i.test(i.name),
+    // (F12: or the Racial Trait Elemental Assault with its "Elemental Infusion" option switched on)
+    item: i => /elemental infusion/i.test(i.name) || ((i.type === "racialTrait") && /^elemental assault/i.test(i.name)
+      && (i.system.modifiers ?? []).some(m => /elemental infusion/i.test(m.label ?? "") && (m.active !== false))),
     attacks: "physicalEnergy", favored: true, profiles: actor => favoredElements(actor), limit: () => null
+  },
+  {
+    // F13 Genetic Focus: Glass (4): a Signature Technique may take the Glass Profile (1/Round)
+    id: "geneticFocusGlass", name: "Genetic Focus: Glass",
+    item: i => (i.type === "racialTrait") && /^genetic focus: glass/i.test(i.name),
+    attacks: "signature", profiles: () => ["glass"], limit: () => ({ per: "round", max: 1 })
   },
   {
     id: "plantMonster", name: "Plant Monster",
@@ -227,6 +236,19 @@ export function multiProfileSources(actor, profileKey, sig = null) {
     const keys = def.profiles(actor, item).filter(k => DBU.profiles[k] && !own.includes(k));
     // A technique with a Super Profile cannot gain another one (the Glass Tribe's Glass is not a Super Profile)
     sources.push({ def, item, keys, limit: def.limit(item), blocked: !!sig?.superProfile && !def.notSuper });
+  }
+  // GC4: an adjacent Glass Tribe Ally with Glass Combat: the Glass Profile's effects on your attack, its 2(bT) Ki Points
+  // and its 1/Round use on that Ally (def.payer)
+  let others = [];
+  try { others = encounterOthers(actor); } catch(err) { others = []; }
+  for ( const o of others ) {
+    if ( !o.ally || !(o.distance <= 1) ) continue;
+    const ally = o.actor;
+    const trait = ally?.items?.find(i => (i.type === "racialTrait") && /^glass combat\b/i.test(i.name) && (i.system?.active !== false));
+    if ( !trait || !ally.items.find(i => (i.type === "race") && /^glass tribe$/i.test(i.name)) ) continue;
+    const def = { id: `glassAlly_${ally.id}`, name: `Glass Combat (${ally.name})`, attacks: "any", notSuper: true, payer: ally,
+      kpFlat: () => 2 * (ally.system?.top?.base ?? 1), profiles: () => ["glass"], limit: () => ({ per: "round", max: 1 }) };
+    sources.push({ def, item: trait, keys: ["glass"].filter(k => DBU.profiles[k] && !own.includes(k)), limit: def.limit(), blocked: false });
   }
   return { blocked: !!sig?.superProfile && !sources.some(s => s.def.notSuper), sources };
 }

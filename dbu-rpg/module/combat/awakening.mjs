@@ -73,7 +73,7 @@ export async function gainStack(actor, item, { temp = 0, free = false, note = ""
   }
   // A permanent Stack goes below the Temporary ones: those are the newest, the ones the end of the encounter takes away
   if ( !temp && tempsBefore ) await sinkNewStack(actor, item.id, tempsBefore);
-  stackEvents(actor, item, { stacks: before + 1, temp, free });
+  stackEvents(actor, item, { stacks: before + 1, temp, free, note });
   return true;
 }
 
@@ -81,9 +81,10 @@ export async function gainStack(actor, item, { temp = 0, free = false, note = ""
  * E4: an Awakening gained a Stack: "stackGain" (the effects of that Awakening; its reminders are on the Stack card) and
  * "awakeningGain" (every item of the character: @awk_<slug> = 1 for the Awakening, @temp, @tempLevel, @free, @stacksNow).
  */
-function stackEvents(actor, item, { stacks = 1, temp = 0, free = false } = {}) {
+function stackEvents(actor, item, { stacks = 1, temp = 0, free = false, note = "" } = {}) {
+  // (F14 copyName: what the new Stack holds, the Absorbed Character: DNA Absorption's DNA Copies)
   const scope = { itemId: item.id, [`awk_${awakeningSlug(item.name)}`]: 1, temp: temp ? 1 : 0, tempLevel: temp || 0, free: free ? 1 : 0,
-    stacksNow: stacks };
+    stacksNow: stacks, ...(note ? { copyName: String(note) } : {}) };
   fireEvent(actor, "stackGain", { scope });
   fireEvent(actor, "awakeningGain", { scope });
 }
@@ -418,7 +419,7 @@ export async function gainAwakening(actor, name, options = {}) {
   const [item] = await actor.createEmbeddedDocuments("Item", [data]);
   if ( item ) {
     await stackCard(actor, item, 0, 1, options);
-    stackEvents(actor, item, { stacks: 1, temp: options.temp ?? 0, free: !!options.free });
+    stackEvents(actor, item, { stacks: 1, temp: options.temp ?? 0, free: !!options.free, note: options.note ?? "" });
   }
   return item ?? null;
 }
@@ -439,7 +440,8 @@ export async function bornForBattle(actor) {
   const brink = zenkai && (zenkai.system.stacks >= 3)
     && (zenkai.system.traits ?? []).map(parseTrait).some(t => /^on the brink/i.test(t.name) && (zenkai.system.stacks >= (t.level || 1)));
   if ( brink ) {
-    const text = await applyTriggerEffect(actor, "state", 1, "surging", { duration: "endOfNextTurn", label: "On the Brink" });
+    // (fx: On the Brink's own piece ignores the 2nd effect of that Surging State, @stateFx.surging.zenkai_onthebrink3_3)
+    const text = await applyTriggerEffect(actor, "state", 1, "surging", { duration: "endOfNextTurn", label: "On the Brink", fx: "zenkai_onthebrink3_3" });
     await postInfoCard({ actor, img: zenkai.img, title: "Born for Battle — On the Brink", lines: [L("DBU.Stack.Brink"), text].filter(Boolean) });
     return true;
   }

@@ -66,7 +66,8 @@ export class DBUActor extends Actor {
       const path = `system.${pool}.value`;
       if ( foundry.utils.hasProperty(changed, path) ) {
         const v = foundry.utils.getProperty(changed, path);
-        const max = this.system[pool]?.max ?? v;
+        // (T6: Ki Points up to sys.ki.cap, "kiOverMax")
+        const max = ((pool === "ki") ? (this.system.ki?.cap ?? this.system.ki?.max) : this.system[pool]?.max) ?? v;
         if ( v > max && !options.dbuAllowOver ) foundry.utils.setProperty(changed, path, max);
         if ( v < 0 ) foundry.utils.setProperty(changed, path, 0);
       }
@@ -98,7 +99,9 @@ export class DBUActor extends Actor {
     if ( userId !== game.user.id ) return;
     if ( options.dbuOldLife !== undefined ) {
       const now = this.system.life.value;
-      if ( now !== options.dbuOldLife ) this._processThresholds(options.dbuOldLife, now, options).catch(console.error);
+      // (FC: a Final Chance keeps its Health Thresholds and its Defeat until its attack is over)
+      if ( options.dbuFinalChance ) this.setFlag("dbu-rpg", "finalChance", { oldLife: options.dbuOldLife }).catch(console.error);
+      else if ( now !== options.dbuOldLife ) this._processThresholds(options.dbuOldLife, now, options).catch(console.error);
     }
     if ( (this.type === "adversary") && (options.dbuOldKarma > 0) && (this.system.karma.value === 0) && !options.dbuEncounterEnd ) {
       import("../combat/adversary.mjs").then(m => m.villainousKarmaOut(this)).catch(console.error);
@@ -198,7 +201,7 @@ export class DBUActor extends Actor {
       const d = (this.system[pool]?.value ?? 0) - old;
       const wanted = Number(options.dbuWanted?.[pool] ?? 0);
       if ( (d > 0) || ((d === 0) && (wanted > 0)) ) await resourceEvent(this, "gain", { slug: pool, n: d, wanted: Math.max(d, wanted), via });
-      else if ( d < 0 ) await resourceEvent(this, "spend", { slug: pool, n: -d, via, damage: !!options.dbuDamage });
+      else if ( d < 0 ) await resourceEvent(this, "spend", { slug: pool, n: -d, via, damage: !!options.dbuDamage || !!options.dbuEnvDamage });
     }
   }
 
@@ -230,7 +233,7 @@ export class DBUActor extends Actor {
   async _processThresholds(oldLife, newLife, options = {}) {
     const max = options.dbuLifeMax ?? this.system.life.max;
     const updates = {};
-    const fractions = DBU.THRESHOLD_FRACTIONS;
+    const fractions = this.system.thresholdFractions ?? DBU.THRESHOLD_FRACTIONS;
     // Rising above a Health Threshold removes its Steadfast mark
     if ( newLife > oldLife ) {
       for ( const k of DBU.thresholds ) {
@@ -240,14 +243,19 @@ export class DBUActor extends Actor {
       // B3: back above 0 Life Points, a new Defeat fires "allyDefeated" again
       if ( (newLife > 0) && this.getFlag("dbu-rpg", "defeatFired") ) await this.unsetFlag("dbu-rpg", "defeatFired");
       // E1: back above 0 Life Points, the Defeat ends ("defeatEnd"); not with the Instant Recovery of the encounter's end
-      if ( (oldLife <= 0) && (newLife > 0) && !options.dbuEncounterEnd ) await this._endDefeatByLife();
+      // (RC "lifeFloor": the Defeat came at −lifeFloor)
+      const floorNow = this.system.lifeFloor ?? 0;
+      if ( (oldLife <= -floorNow) && (newLife > 0) && !options.dbuEncounterEnd && !options.dbuUndyingSet ) await this._endDefeatByLife();
       return;
     }
     const crossed = DBU.thresholds.filter(k => (oldLife > max * fractions[k]) && (newLife <= max * fractions[k]));
-    if ( !crossed.length ) return;
+    // RC "lifeFloor": below 0 Life Points, the Defeat comes on reaching −lifeFloor (no Threshold is crossed then)
+    const floor = this.system.lifeFloor ?? 0;
+    const floorReached = (floor > 0) && (oldLife > -floor) && (newLife <= -floor);
+    if ( !crossed.length && !floorReached ) return;
     const self = !!options.dbuDamage?.selfInflicted || !!options.dbuSelfInflicted;
     const lines = [];
-    const defeated = (newLife <= 0) && !((this.system._effectiveStates?.undying ?? 0) > 0);
+    const defeated = (newLife <= -floor) && !((this.system._effectiveStates?.undying ?? 0) > 0);
     const flags = this.system.flags ?? {};
     const autoPassBruised = flags.autoPassBruised;
     // "flag.autoPassSteadfast": every Health Threshold Steadfast Check succeeds (it wins over "flag.autoFailSteadfast");
@@ -289,7 +297,7 @@ export class DBUActor extends Actor {
         // C3: the attacker is the Check's other Character (roll reactions)
         let by = options.dbuDamage?.attackerUuid ? await Promise.resolve(fromUuid(options.dbuDamage.attackerUuid)).catch(() => null) : null;
         if ( by?.documentName === "Token" ) by = by.actor;
-        const penalty = by ? await versusSteadfast(by, this, options.dbuDamage?.scope ?? {}) : 0;
+        const penalty = (by ? await versusSteadfast(by, this, options.dbuDamage?.scope ?? {}) : 0) - (by ? await foeGuardSteadfast(this, by) : 0);
         lowestResult = await this.rollSteadfast({ threshold: lowest, silent: false, ...(penalty ? { penalty } : {}), ...(by ? { other: by } : {}) });
         updates[`system.thresholds.${lowest}`] = lowestResult.success ? "pass" : "fail";
         anyFail ||= !lowestResult.success;
@@ -298,7 +306,8 @@ export class DBUActor extends Actor {
     await this.update(updates);
     // Dauntless (Villainous Trait) and "flag.noReducedMomentum": no Reduced Momentum
     const V = await import("../combat/villainous.mjs");
-    if ( self && !safe && game.combat?.started && !V.traitOf(this, "Dauntless") && !flags.noReducedMomentum ) {
+    // (T29 dbuNoMomentum: this one loss gives no Reduced Momentum, its Steadfast Checks are still rolled)
+    if ( self && !safe && !options.dbuNoMomentum && game.combat?.started && !V.traitOf(this, "Dauntless") && !flags.noReducedMomentum ) {
       await this.update({ "system.combat.reducedMomentum": true });
     }
     // Injury System, Foot/Leg Major Injury: failing a Steadfast Check knocks you Prone
@@ -310,6 +319,8 @@ export class DBUActor extends Actor {
       buttons.push({ action: "stressTest", label: L("DBU.Threshold.ForcedStress"), icon: "fa-solid fa-bolt", actorUuid: this.uuid });
       lines.push(L("DBU.Threshold.ForcedStressText"));
       await this.addPending("stressTest");
+      // (DR4: forced only by a failed Steadfast Check: a steadfastPass that turns it takes the Stress Test back)
+      await this.setFlag("dbu-rpg", "stressByFail", crossed.length > 1 ? false : true);
     }
     if ( defeated ) lines.push(L("DBU.Threshold.Defeated", { name: this.name }));
     if ( lines.length || buttons.length ) {
@@ -338,7 +349,8 @@ export class DBUActor extends Actor {
     // Triggers "when you cross a Health Threshold"
     const { fireEvent } = await import("../combat/triggers.mjs");
     const by = options.dbuDamage?.attackerUuid ? await fromUuid(options.dbuDamage.attackerUuid) : null;
-    fireEvent(this, "threshold", { other: by, scope: { crossed: crossed.length, defeated: defeated ? 1 : 0,
+    // (RE: a "silent" Life Point loss: nothing of yours may trigger in response to it)
+    if ( !options.dbuSilentDefeat ) fireEvent(this, "threshold", { other: by, scope: { crossed: crossed.length, defeated: defeated ? 1 : 0,
       ...Object.fromEntries(crossed.map(k => [k, 1])), failedNow: anyFail ? 1 : 0, selfInflicted: self ? 1 : 0, safeLoss: safe ? 1 : 0,
       ...(defeatForms.length ? { defeatForms } : {}) } });
   }
@@ -365,12 +377,24 @@ export class DBUActor extends Actor {
     const byUuid = options.dbuDamage?.attackerUuid ?? null;
     const by = byUuid ? dispositionOf(byUuid) : 0;
     const minion = ((this.type === "npc") && (this.system.npcType === "minion")) ? 1 : 0;
+    // (T4 @allyHasAwk.<slug>: the Defeated Ally's Awakenings)
+    const allyHasAwk = (await import("../rules/awakening.mjs")).possessedAwakenings(this);
     const seen = new Set([this.uuid]);
     for ( const c of combat.combatants ) {
       const ally = c.actor;
-      if ( !ally || seen.has(ally.uuid) || ((c.token?.disposition ?? 0) !== mine) ) continue;
+      if ( !ally || seen.has(ally.uuid) ) continue;
+      const disp = c.token?.disposition ?? 0;
+      // RE "opponentDefeated": for the Characters of the other side (other = the Defeated one; @byMe: they did it)
+      if ( disp && (disp !== mine) ) {
+        seen.add(ally.uuid);
+        const me = [ally.uuid, ally.token?.uuid, c.token?.uuid].filter(Boolean);
+        fireEvent(ally, "opponentDefeated", { other: this, scope: { opponentMinion: minion, byAttack: options.dbuDamage ? 1 : 0,
+          byMe: (byUuid && me.includes(byUuid)) ? 1 : 0 } });
+        continue;
+      }
+      if ( disp !== mine ) continue;
       seen.add(ally.uuid);
-      fireEvent(ally, "allyDefeated", { other: this, scope: { allyMinion: minion, byAttack: options.dbuDamage ? 1 : 0,
+      fireEvent(ally, "allyDefeated", { other: this, scope: { allyMinion: minion, allyHasAwk, byAttack: options.dbuDamage ? 1 : 0,
         byOpponent: (by && (by !== mine)) ? 1 : 0 } });
     }
   }
@@ -479,6 +503,30 @@ export class DBUActor extends Actor {
    * ("flag.autoFailSteadfast") without a roll. other: the Character who caused it (for the roll reactions, whose
    * @thresholdCheck is 1 for the Check of a Health Threshold); a "succeed" reaction makes it a success.
    */
+  /**
+   * Z: a Pressure Check (the Demons' 1d10, 4+ a success): + "pressure" (@pressureBonus) and the bonus given; succeeds by
+   * itself with "pressure.auto". A roll of the system (kind "pressure": its roll reactions apply, @kind_pressure), then
+   * the "pressureCheck" event (@success, @failed, @total, @natural, @auto).
+   */
+  async rollPressure({ label = "", bonus = 0, other = null } = {}) {
+    const rd = this.system.rollData ?? {};
+    const auto = (Number(rd.pressureAuto) || 0) > 0;
+    let r;
+    if ( auto ) {
+      await postInfoCard({ actor: this, title: L("DBU.Roll.Pressure"), subtitle: label, lines: [L("DBU.Pressure.Auto")] });
+      r = { total: 10, natural: 10, success: true, automatic: true };
+    }
+    else {
+      const b = (Number(rd.pressureBonus) || 0) + (Number(bonus) || 0);
+      const roll = await dbuRoll({ actor: this, kind: "pressure", title: L("DBU.Roll.Pressure"), subtitle: label, noCrit: true, noBotch: true,
+        parts: b ? [{ label: L("DBU.Bonus"), value: b }] : [], target: 4, ...(other ? { other } : {}) });
+      r = { ...roll, success: !!roll.forceSuccess || (roll.total >= 4) };
+    }
+    fireEvent(this, "pressureCheck", { other, scope: { success: r.success ? 1 : 0, failed: r.success ? 0 : 1, total: Number(r.total) || 0,
+      natural: Number(r.natural ?? 0) || 0, auto: auto ? 1 : 0, reacted: r.reacted ?? {}, rollSpent: r.rollSpent ?? {} } });
+    return r;
+  }
+
   async rollSteadfast({ threshold = null, penalty = 0, other = null } = {}) {
     const flags = this.system.flags ?? {};
     if ( threshold && (flags.autoPassSteadfast || flags.autoFailSteadfast) ) {
@@ -488,7 +536,9 @@ export class DBUActor extends Actor {
         lines: [L(success ? "DBU.Threshold.AutoPass" : "DBU.Threshold.AutoFailEffect", { t })] });
       return { total: success ? 6 : 0, success, automatic: true };
     }
-    const bonus = (this.system.stress?.steadfast ?? 0) + penalty;
+    // RT "steadfast.<threshold>": ± the Steadfast Check of that Health Threshold only
+    const own = threshold ? (Number(this.system.buckets?.[`steadfast.${threshold}`]?.total) || 0) : 0;
+    const bonus = (this.system.stress?.steadfast ?? 0) + penalty + own;
     const r = await dbuRoll({
       actor: this, kind: "steadfast", title: L("DBU.Roll.Steadfast"),
       subtitle: threshold ? L(`DBU.Threshold.${threshold}`) : "",
@@ -525,10 +575,13 @@ export class DBUActor extends Actor {
     if ( fusedForms.length && tested.length && tested.every(t => fusedForms.includes(t.name)) && sys.health.stressPenalty ) {
       parts.push({ label: "Fused Transformation", value: sys.health.stressPenalty });
     }
+    // LT: the Aspects of the Transformations tested (@stressAspects.<key>, for the roll reactions of this Stress Test)
+    const stressAspects = {};
+    for ( const t of tested ) for ( const a of t.system?.aspects ?? [] ) if ( a?.key ) stressAspects[a.key] = Math.max(stressAspects[a.key] ?? 0, Math.max(1, Number(a.level) || 0));
     const r = await dbuRoll({
       actor: this, kind: "stress", title: L("DBU.Roll.Stress"),
       subtitle: transformation ? transformation.name : sys.transformation.active.map(t => t.name).join(" + "),
-      noCrit: true, noBotch: true, parts, target: req
+      noCrit: true, noBotch: true, parts, target: req, scope: { stressAspects, entering: transformation ? 1 : 0 }
     });
     // (a "succeed" roll reaction makes it a success)
     let success = !!r.forceSuccess || (r.total >= req);
@@ -611,7 +664,9 @@ export class DBUActor extends Actor {
         const g = Math.max(1, (t === entering && grade) ? grade : t.system.grade);
         const table = String(t.system.gradeStress ?? "").split(",").map(s => s.trim()).filter(Boolean);
         const entry = table[g - 1];
-        if ( entry === undefined ) r += 2 * (g - 1);
+        // (AA "stressGradeStep.<slug>": ± the step per Grade above the first, 2 by default)
+        const step = 2 + (sys.buckets?.[`stressGradeStep.${String(t.name ?? "").toLowerCase().replace(/[^a-z0-9]/g, "")}`]?.total ?? 0);
+        if ( entry === undefined ) r += step * (g - 1);
         else if ( entry.startsWith("+") ) r += Number(entry.slice(1)) || 0;
         else r = Number(entry) || r;
       }
@@ -620,6 +675,8 @@ export class DBUActor extends Actor {
       if ( scaling ) r += 2 * Math.max(0, Math.min(Math.max(1, scaling.level), sys.top.current - t.system.topReq));
       // B5 "stressReq.<slug of its name>": ± this Transformation's Stress Test Requirement
       r += sys.buckets?.[`stressReq.${String(t.name ?? "").toLowerCase().replace(/[^a-z0-9]/g, "")}`]?.total ?? 0;
+      // (CS2 "stressReq.tag.<tag>": the Transformation an effect tagged: Inherent Transformation)
+      for ( const tag of Object.keys(t.flags?.["dbu-rpg"]?.tags ?? {}) ) r += sys.buckets?.[`stressReq.tag.${tag}`]?.total ?? 0;
       if ( t.system.aspects.some(a => a.key === "natural") && (sys.transformation.active.length <= 1) ) r = 0;
       return Math.max(0, r);
     };
@@ -674,7 +731,7 @@ export class DBUActor extends Actor {
    * Tier of Power Requirement as one used this encounter. Returns the card lines. X: also through an effect ("legend"),
    * outside of the Transformation Maneuver (outside: true, a note on the card).
    */
-  async legendRealized(item, { newLevel = false, outside = false } = {}) {
+  async legendRealized(item, { newLevel = false, outside = false, extra = false } = {}) {
     const lines = [];
     const sys = this.system;
     const ts = item?.system;
@@ -684,10 +741,11 @@ export class DBUActor extends Actor {
     // Not again from a Form of the same Form Type and Tier of Power Requirement as one used this encounter
     const twin = Array.from(used).map(id => this.items.get(id)).find(t => t && (t.id !== item.id)
       && (t.system.subtype === ts.subtype) && (t.system.topReq === ts.topReq));
-    if ( twin ) lines.push(L("DBU.Trans.LegendSameType", { name: twin.name }));
-    if ( used.has(item.id) && outside ) lines.push(L("DBU.Legend.AlreadyUsed", { name: item.name }));
-    if ( !used.has(item.id) && !twin ) {
-      const r = await new Roll(this.legendRealizedFormula()).evaluate();
+    // (Z "extra": an effect's Legend Realized on top of the once-per-encounter one: neither of those limits)
+    if ( twin && !extra ) lines.push(L("DBU.Trans.LegendSameType", { name: twin.name }));
+    if ( used.has(item.id) && outside && !extra ) lines.push(L("DBU.Legend.AlreadyUsed", { name: item.name }));
+    if ( extra || (!used.has(item.id) && !twin) ) {
+      const r = await new Roll(this.legendRealizedFormula(item)).evaluate();
       // Narrative Transformation (Villainous Trait) [1/Encounter]: twice the Life and Ki Points
       let amount = Math.floor(r.total * (newLevel ? 2 : 1) * ((await V.narrativeDouble(this)) ? 2 : 1) * this.legendRealizedMult());
       await r.toMessage({ speaker: ChatMessage.getSpeaker({ actor: this }), flavor: `Legend Realized — ${item.name}` });
@@ -697,15 +755,16 @@ export class DBUActor extends Actor {
       const lifeMult = maneuverValue(this, "legend.lifeMult", maneuverCtx(this));
       const life = Number.isFinite(lifeMult) ? Math.max(0, Math.floor(amount * lifeMult)) : amount;
       await this.update({
-        ...(noLife ? {} : { "system.life.value": Math.min(this.system.life.max, this.system.life.value + life) }),
-        "system.ki.value": Math.min(this.system.ki.max, this.system.ki.value + amount),
+        ...(noLife ? {} : { "system.life.value": Math.min(this.system.life.cap ?? this.system.life.max, this.system.life.value + life) }),
+        "system.ki.value": Math.min(this.system.ki.cap ?? this.system.ki.max, this.system.ki.value + amount),
         "system.combat.legendRealized": Array.from(used)
       }, { dbuSource: "legend", dbuWanted: { life, ki: amount } });
       lines.push(L("DBU.Trans.LegendRealized", { n: amount }));
       if ( (life !== amount) && !noLife ) lines.push(L("DBU.Legend.LifeOnly", { n: life }));
       if ( noLife ) lines.push(L("DBU.Life.NoRegain"));
       // B5 "legendRealized" triggers (@legendLife, @legendKi; X: @legendOutside)
-      fireEvent(this, "legendRealized", { scope: { itemId: item.id, legendLife: noLife ? 0 : life, legendKi: amount, legendOutside: outside ? 1 : 0 } });
+      fireEvent(this, "legendRealized", { scope: { itemId: item.id, legendLife: noLife ? 0 : life, legendKi: amount, legendOutside: outside ? 1 : 0,
+        legendExtra: extra ? 1 : 0 } });
     }
     return lines;
   }
@@ -715,6 +774,8 @@ export class DBUActor extends Actor {
     const ts = item.system;
     const problems = [];
     if ( ts.transType === "awakening" ) return ui.notifications.info(L("DBU.Trans.AwakeningAlways"));
+    // BB: a State that forbids it (Spectator)
+    { const { stateBlock } = await import("../rules/state-rules.mjs"); const why = stateBlock(this, "transformation"); if ( why ) return ui.notifications.warn(why); }
     if ( sys.effectiveConditions.stressExhaustion && !ts.aspects.some(a => a.key === "natural") ) problems.push(L("DBU.Trans.ErrExhausted"));
     if ( sys.ki.value <= 0 ) problems.push(L("DBU.Trans.ErrNoKi"));
     const topReq = ts.topReq - (ts.prelude ? 1 : 0);
@@ -818,7 +879,12 @@ export class DBUActor extends Actor {
     // Triggers "when you enter a Transformation"
     const { fireEvent } = await import("../combat/triggers.mjs");
     fireEvent(this, "transform", { scope: { itemId: item.id, form: (ts.transType === "form") ? 1 : 0, enhancement: (ts.transType === "enhancement") ? 1 : 0,
-      topReq: ts.topReq ?? 0, stage: ts.stage ?? 0, [`line_${String(ts.line ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "_")}`]: 1 } });
+      topReq: ts.topReq ?? 0, stage: ts.stage ?? 0, [`line_${String(ts.line ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "_")}`]: 1,
+      // LT: what was entered: an Alternate / Legendary Form (@enteredAlternate, @enteredLegendary), its Aspects
+      // (@enteredAspects.<key>: "upon entering a Transformation with the Super Saiyan Form Aspect")
+      enteredAlternate: ((ts.transType === "form") && (ts.subtype === "alternate")) ? 1 : 0,
+      enteredLegendary: ((ts.transType === "form") && (ts.subtype === "legendary")) ? 1 : 0,
+      enteredAspects: Object.fromEntries((ts.aspects ?? []).filter(a => a?.key).map(a => [a.key, Math.max(1, Number(a.level) || 0)])) } });
     return roll ?? { success: true };
   }
 
@@ -849,8 +915,8 @@ export class DBUActor extends Actor {
       // "flag.noLifeRegain": no Life Points
       const noLife = !!sys.flags?.noLifeRegain;
       await this.update({
-        ...(noLife ? {} : { "system.life.value": Math.min(sys.life.max, sys.life.value + Math.floor(sys.life.max / 2)) }),
-        "system.ki.value": Math.min(sys.ki.max, sys.ki.value + Math.floor(sys.ki.max / 2))
+        ...(noLife ? {} : { "system.life.value": Math.min(sys.life.cap ?? sys.life.max, sys.life.value + Math.floor(sys.life.max / 2)) }),
+        "system.ki.value": Math.min(sys.ki.cap ?? sys.ki.max, sys.ki.value + Math.floor(sys.ki.max / 2))
       });
       await postInfoCard({ actor: this, title: item.name, img: item.img,
         lines: [L("DBU.Trans.NewLevelAwakening"), ...(noLife ? [L("DBU.Life.NoRegain")] : [])] });
@@ -862,9 +928,12 @@ export class DBUActor extends Actor {
    * Roll formula of Legend Realized: 2(T)d10 + Power Level, plus the "legend.bonus" modifiers (dice allowed).
    * Used by the Transformation Maneuver and the Villainous Maneuvers (combat/villainous.mjs).
    */
-  legendRealizedFormula() {
+  legendRealizedFormula(item = null) {
     const T = this.system.top.current;
-    return joinTerms(`${2 * T}d10 + ${this.system.pl}`, [...modifierTerms(this, "legend.bonus"), ...withTerms(this, "legend.bonus")]);
+    // LT: the "legend.bonus" pieces see the Aspects of the Form whose Legend Realized it is (@legendAspects.<key>)
+    const legendAspects = Object.fromEntries((item?.system?.aspects ?? []).filter(a => a?.key).map(a => [a.key, Math.max(1, Number(a.level) || 0)]));
+    const data = { ...(this.system.rollData ?? {}), legendAspects };
+    return joinTerms(`${2 * T}d10 + ${this.system.pl}`, [...modifierTerms(this, "legend.bonus", data), ...withTerms(this, "legend.bonus")]);
   }
 
   /** "legend.mult": multiplier of the Life and Ki Points of Legend Realized (1 without one). */
@@ -944,6 +1013,8 @@ export class DBUActor extends Actor {
    */
   async powerUp() {
     const sys = this.system;
+    // BB: a State that forbids it (Spectator)
+    { const { stateBlock } = await import("../rules/state-rules.mjs"); const why = stateBlock(this, "powerUp"); if ( why ) return ui.notifications.warn(why); }
     const fighting = inCombat(this);
     if ( fighting && ((sys.combat.powerUps ?? 0) >= 2) ) return ui.notifications.warn(L("DBU.Power.RoundLimit"));
     const used = fighting ? { "system.combat.powerUps": (sys.combat.powerUps ?? 0) + 1 } : {};
@@ -1014,6 +1085,8 @@ export class DBUActor extends Actor {
    */
   async energyCharge() {
     const sys = this.system;
+    // BB: a State that forbids it (Spectator)
+    { const { stateBlock } = await import("../rules/state-rules.mjs"); const why = stateBlock(this, "energyCharge"); if ( why ) return ui.notifications.warn(why); }
     const kpMult = this._bucket("charge.kpMult", { mult: true });
     // B5: the option boxes of "charge.*" pieces (only when one applies), "charge.kp" and "kpCost.maneuver" (flat KP)
     const opts = await maneuverOptions(this, "charge.", L("DBU.Charge.Options"));
@@ -1053,18 +1126,43 @@ export class DBUActor extends Actor {
   async surge(type = "healing") {
     const sys = this.system;
     // (with a "maneuver" effect's one-shot `with` buckets for this use)
-    const bucket = k => this._bucket(k, { mult: ["surge.kiMult", "surge.healSurgency"].includes(k) });
+    const bucket = k => this._bucket(k, { mult: ["surge.kiMult", "surge.healSurgency", "surge.kiSurgency"].includes(k) });
+    // (T4 "flag.vengefulSurge" / "flag.primalSurge": any Surge may be a Vengeful Surge (Endless Vengeance 2) or a Primal
+    // Surge (Primal Saiyan Legacy 2) instead)
+    // (T9 "flag.legendarySurge": a Ki Surge may be a Legendary Surge: Legend to Divinity 3)
+    const kinds = [["vengeful", "flag.vengefulSurge"], ["primal", "flag.primalSurge"], ["legendary", "flag.legendarySurge"]]
+      .filter(([k, f]) => ((sys.buckets?.[f]?.total ?? 0) > 0) && ((k !== "legendary") || (type === "ki"))).map(([k]) => k);
+    if ( !["vengeful", "primal", "legendary"].includes(type) && kinds.length ) {
+      const pick = await DialogV2.wait({ window: { title: "Surge" }, content: `<div class="dbu-dialog"><p>${L("DBU.T4.SurgeKind")}</p></div>`,
+        buttons: [{ action: type, label: L(`DBU.Trigger.Maneuver.${type}Surge`), default: true },
+          ...kinds.map(k => ({ action: k, label: L(`DBU.Trigger.Maneuver.${k}Surge`), icon: "fa-solid fa-fire-flame-curved" })),
+          { action: "cancel", label: L("Cancel") }], rejectClose: false });
+      if ( !pick || (pick === "cancel") ) return null;
+      type = pick;
+    }
+    // F11 "flag.noHealingSurge": no other Healing Surge this Combat Round (Regenerating Beast; a Vengeful Surge is one)
+    if ( ["healing", "vengeful", "primal"].includes(type) && ((sys.buckets?.["flag.noHealingSurge"]?.total ?? 0) > 0) ) {
+      return ui.notifications.warn(L("DBU.F11.NoHealingSurge", { name: this.name }));
+    }
     // Surges used this Combat Encounter (the sheet's "surge used" box counts as one)
     const combat = encounterOf(this);
     const record = this.getFlag("dbu-rpg", "surgeUses");
     const usedNow = sys.combat.surgeUsed ? Math.max(1, (combat && (record?.combat === combat.id)) ? (record.n ?? 0) : 0) : 0;
     const allowed = 1 + Math.max(0, bucket("uses.surge") ?? 0);
-    if ( (usedNow >= allowed) && game.combat?.started ) ui.notifications.warn(L("DBU.Surge.Used"));
-    const uses = combat ? { "flags.dbu-rpg.surgeUses": { combat: combat.id, n: usedNow + 1 } } : {};
+    // (T27 "surge.uncounted": a Surge an effect gives that does not count toward the Surge Maneuver's own uses; spread
+    // after "surgeUsed: true" below, it keeps the sheet's box as it was)
+    const uncounted = (Number(bucket("surge.uncounted")) || 0) > 0;
+    if ( (usedNow >= allowed) && game.combat?.started && !uncounted ) ui.notifications.warn(L("DBU.Surge.Used"));
+    const uses = uncounted ? { "system.combat.surgeUsed": !!sys.combat.surgeUsed }
+      : (combat ? { "flags.dbu-rpg.surgeUses": { combat: combat.id, n: usedNow + 1 } } : {});
     // B5 @surgesRound: Surges used this Combat Round
-    const surges = combat ? { "system.combat.surgesRound": (sys.combat.surgesRound ?? 0) + 1 } : {};
+    const surges = combat ? { "system.combat.surgesRound": (sys.combat.surgesRound ?? 0) + 1,
+      ...(["healing", "vengeful", "primal"].includes(type) ? { "system.combat.healingSurgesRound": (sys.combat.healingSurgesRound ?? 0) + 1 } : {}) } : {};
     let surgency = sys.aptitudes.surgency;
     const lines = [];
+    if ( ["vengeful", "primal", "legendary"].includes(type) ) {
+      return this._vengefulSurge({ surgency, uses, surges, primal: type === "primal", legendary: type === "legendary" });
+    }
     if ( type === "healing" ) {
       // B5: the option boxes of "surge.*" pieces (only when one applies)
       const opts = await maneuverOptions(this, "surge.", L("DBU.Surge.Options"));
@@ -1076,7 +1174,7 @@ export class DBUActor extends Actor {
       if ( sys.flags?.noLifeRegain && !toKi ) return ui.notifications.warn(`Healing Surge: ${L("DBU.Life.NoRegain")}`);
       if ( opts.problems?.length ) return ui.notifications.error(opts.problems.join(" "));
       const healMult = bucket("surge.healSurgency");
-      if ( Number.isFinite(healMult) ) surgency = Math.floor(surgency * healMult);
+      if ( Number.isFinite(healMult) ) surgency = Math.ceil(surgency * healMult);
       // "surge.healMult" multiplies the dice (before Surgency); "surge.healBonus" adds Life Points (dice allowed)
       const diceMult = maneuverValue(this, "surge.healMult", ctx);
       let dice = `${2 * sys.top.current}d10`;
@@ -1084,12 +1182,12 @@ export class DBUActor extends Actor {
       const r = await new Roll(joinTerms(`${dice} + ${surgency}`, maneuverValue(this, "surge.healBonus", ctx) ?? [])).evaluate();
       await r.toMessage({ speaker: ChatMessage.getSpeaker({ actor: this }), flavor: `Healing Surge (Surgency ${surgency})` });
       if ( toKi ) {
-        await this.update({ "system.ki.value": Math.min(sys.ki.max, sys.ki.value + r.total), "system.capacity.value": sys.capacity.value + r.total,
+        await this.update({ "system.ki.value": Math.min(sys.ki.cap ?? sys.ki.max, sys.ki.value + r.total), "system.capacity.value": sys.capacity.value + r.total,
           "system.combat.surgeUsed": true, ...uses, ...surges }, { dbuAllowOver: true, dbuSource: "surge", dbuWanted: { ki: r.total } });
         await postInfoCard({ actor: this, title: "Healing Surge", lines: [L("DBU.Surge.ToKi", { n: r.total })] });
       }
       else {
-        await this.update({ "system.life.value": Math.min(sys.life.max, sys.life.value + r.total), "system.combat.surgeUsed": true, ...uses,
+        await this.update({ "system.life.value": Math.min(sys.life.cap ?? sys.life.max, sys.life.value + r.total), "system.combat.surgeUsed": true, ...uses,
           ...surges }, { dbuSource: "surge", dbuWanted: { life: r.total } });
       }
       await finishManeuver(this, ctx, opts);
@@ -1098,12 +1196,16 @@ export class DBUActor extends Actor {
       (await import("../combat/triggers.mjs")).fireEvent(this, "surge", { scope: { healingSurge: 1, kiSurge: 0, healed: r.total } });
       return r;
     }
-    const kiMult = bucket("surge.kiMult");
+    // (T28 "surge.ignoreKiMult" of a "maneuver" effect's `with`: the sheet's surge.kiMult (Power Battery's 0) is ignored)
+    const kiMult = ((Number(this._dbuWith?.["surge.ignoreKiMult"]) || 0) > 0) ? this._dbuWith?.["surge.kiMult"] : bucket("surge.kiMult");
+    // (F7 "surge.kiSurgency": × the Surgency of this Ki Surge, rounded up)
+    const kiSurg = bucket("surge.kiSurgency");
+    if ( Number.isFinite(kiSurg) ) surgency = Math.ceil(surgency * kiSurg);
     const kiBase = Math.floor(sys.ki.max / 4) + surgency;
     const ki = Number.isFinite(kiMult) ? Math.floor(kiBase * kiMult) : kiBase;
     const cap = Math.floor(sys.capacity.max / 4);
     await this.update({
-      "system.ki.value": Math.min(sys.ki.max, sys.ki.value + ki),
+      "system.ki.value": Math.min(sys.ki.cap ?? sys.ki.max, sys.ki.value + ki),
       "system.capacity.value": Math.min(sys.capacity.max, sys.capacity.value + cap),
       "system.combat.surgeUsed": true, ...uses, ...surges
     }, { dbuSource: "surge", dbuWanted: { ki } });
@@ -1112,9 +1214,62 @@ export class DBUActor extends Actor {
     return postInfoCard({ actor: this, title: "Ki Surge", lines });
   }
 
+  /**
+   * T4 Vengeful Surge (Endless Vengeance 2): 1d10(T) (+ "surge.vengefulDice") + Surgency Life and Ki Points ("surge.healMult"
+   * / "surge.kiMult" multiply them); then every Opponent within 4 (+ "surge.vengefulRange") Squares loses the Dice Score in
+   * Life Points (+ half your Surgency for the ones carrying your Inferior mark, "surge.vengefulInferiorHalf"). It counts as
+   * a Healing Surge and a Ki Surge ("surge" event with @healingSurge, @kiSurge, @vengefulSurge, @vengefulScore).
+   */
+  async _vengefulSurge({ surgency, uses, surges, primal = false, legendary = false }) {
+    const sys = this.system;
+    const opts = await maneuverOptions(this, "surge.", L("DBU.Surge.Options"));
+    if ( !opts ) return null;
+    if ( opts.problems?.length ) return ui.notifications.error(opts.problems.join(" "));
+    const ctx = maneuverCtx(this, opts);
+    // (a Primal Surge: 2d10(T) + Surgency LP and KP, and nothing for the Opponents)
+    // (a Legendary Surge: 2d10(T) + Surgency KP only, then Surging until the end of your turn; a Ki Surge for Traits)
+    const name = primal ? "Primal Surge" : (legendary ? "Legendary Surge" : "Vengeful Surge");
+    const r = await new Roll((primal || legendary) ? `${2 * sys.top.current}d10`
+      : joinTerms(`${sys.top.current}d10`, maneuverValue(this, "surge.vengefulDice", ctx) ?? [])).evaluate();
+    await r.toMessage({ speaker: ChatMessage.getSpeaker({ actor: this }), flavor: `${name} (Surgency ${surgency})` });
+    const score = r.total;
+    const times = (v, m) => (Number.isFinite(m) && (m !== 1)) ? Math.floor(v * m) : v;
+    const life = (sys.flags?.noLifeRegain || legendary) ? 0 : times(score + surgency, maneuverValue(this, "surge.healMult", ctx));
+    const ki = times(score + surgency, this._bucket("surge.kiMult", { mult: true }));
+    await this.update({ "system.life.value": Math.min(sys.life.cap ?? sys.life.max, sys.life.value + life),
+      "system.ki.value": Math.min(sys.ki.cap ?? sys.ki.max, sys.ki.value + ki), "system.combat.surgeUsed": true, ...uses, ...surges },
+      { dbuSource: "surge", dbuWanted: { life, ki } });
+    await finishManeuver(this, ctx, opts);
+    const T = await import("../combat/triggers.mjs");
+    if ( legendary ) {
+      await T.applyTriggerEffect(this, "state", 1, "surging", { duration: "endOfTurn", label: name });
+      await postInfoCard({ actor: this, title: name, lines: [L("DBU.T9.Legendary", { ki })] });
+      T.fireEvent(this, "surge", { scope: { healingSurge: 0, kiSurge: 1, legendarySurge: 1, healed: 0 } });
+      return r;
+    }
+    if ( primal ) {
+      await postInfoCard({ actor: this, title: name, lines: [L("DBU.T4.Primal", { life, ki })] });
+      T.fireEvent(this, "surge", { scope: { healingSurge: 1, kiSurge: 1, primalSurge: 1, healed: life } });
+      return r;
+    }
+    const range = 4 + Math.max(0, Math.floor(Number(maneuverValue(this, "surge.vengefulRange", ctx) ?? 0)) || 0);
+    const half = ((maneuverValue(this, "surge.vengefulInferiorHalf", ctx) ?? 0) > 0) ? Math.floor(surgency / 2) : 0;
+    const { opponentsInRange } = await import("../rules/allies.mjs");
+    const inferior = this.flags?.["dbu-rpg"]?.marks?.inferior ?? [];
+    const lost = [];
+    for ( const o of opponentsInRange(this, String(range)) ) {
+      const n = score + (inferior.some(e => e?.uuid === o.uuid) ? half : 0);
+      if ( n > 0 ) { await T.applyOn(this, o, { effect: "life" }, -n, { label: "Vengeful Surge" }); lost.push(`${o.name}: −${n} LP`); }
+    }
+    await postInfoCard({ actor: this, title: "Vengeful Surge", lines: [L("DBU.T4.Vengeful", { life, ki, score, range }), ...lost] });
+    T.fireEvent(this, "surge", { scope: { healingSurge: 1, kiSurge: 1, vengefulSurge: 1, vengefulScore: score, healed: life } });
+    return r;
+  }
+
   /** Combat Recovery [1/Round]: 2–3 Actions, regain 1d10(bT) Life and Ki per Action. */
   async combatRecovery() {
     const sys = this.system;
+    { const { stateBlock } = await import("../rules/state-rules.mjs"); const why = stateBlock(this, "combatRecovery"); if ( why ) return ui.notifications.warn(why); }
     // B5: the Actions it may use: from "recovery.minActions" (2 by default, at least 1) to 3, or the `with` "actions=<n>"
     const forced = Math.floor(Number(this._dbuWith?.actions));
     const min = Math.clamp(Math.floor(maneuverValue(this, "recovery.minActions", maneuverCtx(this)) ?? 2), 1, 3);
@@ -1139,6 +1294,9 @@ export class DBUActor extends Actor {
     fireEvent(this, "combatRecovery", { scope: { actions: n, condition: choice.condition ? 1 : 0 } });
     if ( choice.condition ) {
       const st = await this.rollSteadfast();
+      // (DR4: a failed Condition Recovery Steadfast Check that a steadfastPass may still turn: flags.dbu-rpg.recoveryFailed)
+      if ( !st.success ) await this.setFlag("dbu-rpg", "recoveryFailed", { n });
+      else if ( this.getFlag("dbu-rpg", "recoveryFailed") ) await this.unsetFlag("dbu-rpg", "recoveryFailed");
       return postInfoCard({ actor: this, title: "Condition Recovery",
         lines: [st.success ? L("DBU.Recovery.ConditionOk", { n }) : L("DBU.Recovery.ConditionFail")] });
     }
@@ -1160,8 +1318,8 @@ export class DBUActor extends Actor {
     const life = Number.isFinite(lifeMult) ? Math.max(0, Math.floor(r.total * lifeMult)) : r.total;
     const noLife = !!sys.flags?.noLifeRegain;
     await this.update({
-      ...(noLife ? {} : { "system.life.value": Math.min(sys.life.max, sys.life.value + life) }),
-      "system.ki.value": Math.min(sys.ki.max, sys.ki.value + ki),
+      ...(noLife ? {} : { "system.life.value": Math.min(sys.life.cap ?? sys.life.max, sys.life.value + life) }),
+      "system.ki.value": Math.min(sys.ki.cap ?? sys.ki.max, sys.ki.value + ki),
       ...this._spendAction(spent)
     }, { dbuSource: "recovery", dbuWanted: { life: noLife ? 0 : life, ki } });
     await finishManeuver(this, ctx, opts);
@@ -1245,7 +1403,22 @@ export class DBUActor extends Actor {
         case "energyCharge": return await this.energyCharge();
         case "combatRecovery": return await this.combatRecovery();
         case "healingSurge": return await this.surge("healing");
-        case "kiSurge": return await this.surge("ki");
+        case "kiSurge": {
+          // (T9 "flag.kiSurgeAsHealing": a Ki Surge through an effect may be a Healing Surge: Red Flame of Life 4)
+          if ( (this.system.buckets?.["flag.kiSurgeAsHealing"]?.total ?? 0) > 0 ) {
+            const t = await DialogV2.wait({ window: { title: L("DBU.Trigger.Maneuver.surge") },
+              content: `<div class="dbu-dialog"><p>${L("DBU.Surge.Pick")}</p></div>`,
+              buttons: [{ action: "ki", label: L("DBU.Trigger.Maneuver.kiSurge"), icon: "fa-solid fa-bolt", default: true },
+                { action: "healing", label: L("DBU.Trigger.Maneuver.healingSurge"), icon: "fa-solid fa-heart" },
+                { action: "cancel", label: L("Cancel") }], rejectClose: false });
+            return ["healing", "ki"].includes(t) ? await this.surge(t) : null;
+          }
+          return await this.surge("ki");
+        }
+        case "legendarySurge": return await this.surge("legendary");
+        // (T4: a Vengeful Surge, Endless Vengeance 2)
+        case "vengefulSurge": return await this.surge("vengeful");
+        case "primalSurge": return await this.surge("primal");
         // The Surge Maneuver: Healing Surge or Ki Surge
         case "surge": {
           const type = await DialogV2.wait({ window: { title: L("DBU.Trigger.Maneuver.surge") },
@@ -1264,6 +1437,14 @@ export class DBUActor extends Actor {
           return await useMovement(this, { item: itemNamed(this, "Movement Maneuver") });
         }
         case "basicAttack": return await this.attack(attackOpts);
+        // RG: the Grapple / Launch / Pin Maneuvers Out-of-Sequence (no Action); `with: grapple.reach=<n>` adds Squares to
+        // the Melee Range of that Grapple
+        case "grapple":
+        case "launch":
+        case "pin": {
+          const G = await import("../combat/grapple.mjs");
+          return await G[key](this);
+        }
         // An attack made through the Exploit or Feint Maneuver ("Feito através de" picked in the attack dialog)
         case "exploit":
         case "feint": return await this.attack({ ...attackOpts, via: key });
@@ -1284,6 +1465,26 @@ export class DBUActor extends Actor {
           return await transformOutOfSequence(this, L("DBU.Trigger.Maneuver.transformation"));
         }
         // E2: any Standard Maneuver with an Action Cost of 1 Action: a reminder, then a pick among the ones the system uses
+        // T27 uaStd / uaTechnical / uaMagical: one of your Unique Abilities that is a 1-Action Standard Maneuver (of that
+        // type: Technical/Magical ones count for both)
+        case "uaStd": case "uaTechnical": case "uaMagical": {
+          const type = { uaTechnical: "technical", uaMagical: "magical" }[key] ?? "";
+          const uas = this.items.filter(i => (i.type === "uniqueAbility") && /^standard/i.test(String(i.system?.maneuverType ?? ""))
+            && /^\s*1\s*action/i.test(String(i.system?.actionCost ?? ""))
+            && (!type || String(i.system?.abilityType ?? "").toLowerCase().includes(type)));
+          if ( !uas.length ) return ui.notifications.info(L("DBU.F13.NoUa1"));
+          const T = await import("../combat/triggers.mjs");
+          const picked = (uas.length === 1) ? `item:${uas[0].name}` : await T.pickManeuverKey(uas.map(i => `item:${i.name}`), L(`DBU.Trigger.Maneuver.${key}`));
+          return picked ? await this.useOutOfSequence(picked, { with: withSpec, viaFx }) : null;
+        }
+        // F13 ua1: one of your Unique Abilities with an Action Cost of 1 Action (picked)
+        case "ua1": {
+          const uas = this.items.filter(i => (i.type === "uniqueAbility") && /^\s*1\s*action/i.test(String(i.system?.actionCost ?? "")));
+          if ( !uas.length ) return ui.notifications.info(L("DBU.F13.NoUa1"));
+          const T = await import("../combat/triggers.mjs");
+          const picked = (uas.length === 1) ? `item:${uas[0].name}` : await T.pickManeuverKey(uas.map(i => `item:${i.name}`), L("DBU.Trigger.Maneuver.ua1"));
+          return picked ? await this.useOutOfSequence(picked, { with: withSpec, viaFx }) : null;
+        }
         case "standard": {
           await postInfoCard({ actor: this, title: L("DBU.Trigger.Maneuver.standard"), lines: [L("DBU.Trigger.Maneuver.standardReminder")] });
           const T = await import("../combat/triggers.mjs");
@@ -1343,10 +1544,21 @@ export class DBUActor extends Actor {
     const def = DBU.conditions[key];
     if ( !def ) return;
     const value = Math.clamp(stacks, 0, def.max);
+    // SZ "conditionLock.<condition>": it cannot be removed (lowered) while the lock holds
+    if ( (value < (this.system.conditions?.[key] ?? 0)) && ((this.system.buckets?.[`conditionLock.${key}`]?.total ?? 0) > 0) ) {
+      ui.notifications?.info(game.i18n.format("DBU.Block.ConditionLocked", { name: this.name, what: game.i18n.localize(def.label ?? `DBU.Condition.${key}`) }));
+      return;
+    }
+    const beforeCond = this.system.conditions?.[key] ?? 0;
     await this.update({ [`system.conditions.${key}`]: value });
     await this.toggleStatusEffect(key, { active: value > 0 }).catch(() => null);
+    // (T3 "conditionGained": you gain a Combat Condition, or more stacks of it)
+    if ( value > beforeCond ) (await import("../combat/triggers.mjs")).fireEvent(this, "conditionGained",
+      { scope: { [`cond_${key}`]: 1, level: value, added: value - beforeCond } });
     // U: no longer Compelled, no Compelled target
     if ( (key === "compelled") && !(value > 0) && this.getFlag("dbu-rpg", "compelledBy") ) await this.unsetFlag("dbu-rpg", "compelledBy");
+    // RA: no longer suffering it, nobody inflicted it
+    if ( !(value > 0) && this.getFlag("dbu-rpg", `condBy.${key}`) ) await this.unsetFlag("dbu-rpg", `condBy.${key}`);
   }
 
   /** noLeave: a State left without its "stateLeave" triggers (the end of the encounter, a stateLeave trigger's own effect). */
@@ -1355,6 +1567,11 @@ export class DBUActor extends Actor {
     if ( !def ) return;
     const value = Math.clamp(level, 0, def.levels);
     const before = this.system.states?.[key] ?? 0;
+    // F12 "stateBlock.<state>": that State cannot be entered now (Incorporeal after its Damage)
+    if ( (value > 0) && !(before > 0) && ((this.system.buckets?.[`stateBlock.${key}`]?.total ?? 0) > 0) ) {
+      ui.notifications.warn(L("DBU.F12.StateBlocked", { name: this.name, state: L(`DBU.State.${key}`) }));
+      return;
+    }
     // D1 @stateFx.<state>.<ref>: the effect a State was entered through (kept until it is entered again)
     const enterVia = viaFx || this._dbuViaFx || "";
     const enterFx = ((value > 0) && (before === 0) && (enterVia || this.flags?.["dbu-rpg"]?.stateFx?.[key]))
@@ -1365,6 +1582,12 @@ export class DBUActor extends Actor {
     const via = viaFx || this._dbuViaFx;
     if ( value > before ) (await import("../combat/triggers.mjs")).fireEvent(this, "stateEnter",
       { scope: { [`state_${key}`]: 1, level: value, already: 0, ...(via ? { viaFx: { [via]: 1 } } : {}) } });
+    // BB Undying (1): leaving it with 0 or negative Life Points, you are Defeated (nothing prevents it)
+    if ( (key === "undying") && (before > 0) && !(value > 0) && ((this.system.life?.value ?? 1) <= 0) ) {
+      if ( this.system.life.value < 0 ) await this.update({ "system.life.value": 0 }, { dbuSource: "undying" });
+      await this._onDefeated();
+      await postInfoCard({ actor: this, title: L("DBU.State.undying"), lines: [L("DBU.StateRule.UndyingDefeat", { name: this.name })] });
+    }
   }
 
   /** Reset per-encounter trackers (Instant Recovery is applied by the combat end hook). */
@@ -1381,12 +1604,13 @@ export class DBUActor extends Actor {
       "system.combat.stressBonus": 0, "system.combat.actions": 3, "system.combat.counters": 1,
       "system.thresholds.bruised": "", "system.thresholds.injured": "", "system.thresholds.critical": "",
       // B5 counters of the round / turn
-      "system.combat.chargesRound": 0, "system.combat.surgesRound": 0, "system.combat.damagedSinceTurn": 0
+      "system.combat.chargesRound": 0, "system.combat.surgesRound": 0, "system.combat.damagedSinceTurn": 0,
+      "system.combat.healingSurgesRound": 0
     };
     if ( instantRecovery ) {
       // "flag.noLifeRegain": no Life Points
-      if ( !sys.flags?.noLifeRegain ) updates["system.life.value"] = Math.min(sys.life.max, sys.life.value + Math.floor(sys.life.max / 10));
-      updates["system.ki.value"] = Math.min(sys.ki.max, sys.ki.value + Math.floor(sys.ki.max / 10));
+      if ( !sys.flags?.noLifeRegain ) updates["system.life.value"] = Math.min(sys.life.cap ?? sys.life.max, sys.life.value + Math.floor(sys.life.max / 10));
+      updates["system.ki.value"] = Math.min(sys.ki.cap ?? sys.ki.max, sys.ki.value + Math.floor(sys.ki.max / 10));
     }
     // G5 "resKeep.<slug>": that resource keeps its stacks after the encounter (a value the rules keep: Skill, Strength...)
     const keep = r => (sys.buckets?.[`resKeep.${resourceSlug(r.name)}`]?.total ?? 0) > 0;
@@ -1396,8 +1620,8 @@ export class DBUActor extends Actor {
     if ( this.type === "adversary" ) {
       Object.assign(updates, { "system.karma.value": 0, "system.adversary.stamina": 0, "system.adversary.karmaOut": "",
         "system.adversary.pccApplied": sys.adversaryInfo?.pcc ?? sys.adversary.pcc,
-        "system.life.value": Math.min(sys.life.max, updates["system.life.value"] ?? sys.life.value),
-        "system.ki.value": Math.min(sys.ki.max, updates["system.ki.value"] ?? sys.ki.value) });
+        "system.life.value": Math.min(sys.life.cap ?? sys.life.max, updates["system.life.value"] ?? sys.life.value),
+        "system.ki.value": Math.min(sys.ki.cap ?? sys.ki.max, updates["system.ki.value"] ?? sys.ki.value) });
     }
     await this.update(updates, { dbuEncounterEnd: true });
     // The Maximum Life Points lost for the encounter come back (Destruction, Dauntless)
@@ -1431,12 +1655,13 @@ export class DBUActor extends Actor {
  */
 const MANEUVER_TARGETS = {
   "charge.kp": "sum", "kpCost.maneuver": "sum", "surge.healBonus": "dice", "surge.healMult": "mult", "surge.toKi": "flag",
+  "surge.vengefulDice": "dice", "surge.vengefulRange": "sum", "surge.vengefulInferiorHalf": "flag",
   "recovery.lifeMult": "mult", "recovery.minActions": "min", "recovery.actions": "sum", "flag.recoveryNoDvPenalty": "flag",
   "legend.lifeMult": "mult", "empower.actions": "sum", "flag.empowerMelee": "flag", "flag.empowerMax": "flag"
 };
 /** Targets a `with` may give (with "actions"), and the ones whose value is a roll formula. */
-const WITH_TARGET = /^(surge|recovery|charge|legend|empower)\.|^(kpCost\.maneuver|flag\.recoveryNoDvPenalty|flag\.empowerMelee|flag\.empowerMax|actions)$/;
-const DICE_WITH = new Set(["surge.healBonus", "recovery.bonus", "legend.bonus"]);
+const WITH_TARGET = /^(surge|recovery|charge|legend|empower|grapple)\.|^(kpCost\.maneuver|flag\.recoveryNoDvPenalty|flag\.empowerMelee|flag\.empowerMax|actions)$/;
+const DICE_WITH = new Set(["surge.healBonus", "recovery.bonus", "legend.bonus", "surge.vengefulDice"]);
 
 /**
  * "surge.healMult=2; actions=3" → { "surge.healMult": 2, actions: 3 }: the one-shot buckets of a "maneuver" effect, worked
@@ -1591,6 +1816,32 @@ async function finishManeuver(actor, ctx, opts) {
 
 /** rules/versus.mjs (Package A), loaded once; null while it does not exist. */
 let VERSUS = undefined;
+
+/**
+ * WJ: the "foeGuard.steadfast" pieces of the knocked Character's Opponents that are Allies of the attacker (Wrath of the
+ * Dragon: an Ally knocked it through a Health Threshold): the Dice Score of its Steadfast Check is lower by their value.
+ * The attacker's own pieces are its vs.steadfast ones. Limited pieces count one use.
+ */
+async function foeGuardSteadfast(target, by) {
+  try {
+    const { allyGuards, encounterOthers } = await import("../rules/allies.mjs");
+    const allies = new Set(encounterOthers(by).filter(o => o.ally).map(o => o.actor?.uuid));
+    let cut = 0;
+    for ( const g of allyGuards(target, "steadfast", { foe: true }) ) {
+      if ( !allies.has(g.giver.uuid) ) continue;
+      if ( g.limit && !triggerUsesLeft(g.giver, { limit: g.limit }, g.key) ) continue;
+      cut += g.value;
+      if ( g.limit ) {
+        if ( g.giver.isOwner ) await useTriggerLimit(g.giver, { limit: g.limit }, g.key);
+        else (await import("../socket.mjs")).emitGM("useLimit", { actorUuid: g.giver.uuid, limit: g.limit, key: g.key });
+      }
+    }
+    return cut;
+  } catch(err) {
+    console.warn("DBU | foeGuard.steadfast", err);
+    return 0;
+  }
+}
 /** A1: the attacker's "vs.steadfast" pieces against the Character it knocked through a Health Threshold (0 without). */
 async function versusSteadfast(by, target, scope = {}) {
   if ( VERSUS === undefined ) {

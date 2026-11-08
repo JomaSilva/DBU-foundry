@@ -14,8 +14,9 @@ import { apparelPieces, apparelVariables, baseApparelBonus } from "./apparel.mjs
 import { computeSignature } from "./signature.mjs";
 import { isLateModifier, modifierStage } from "./modifiers.mjs";
 import { aspectPass, fxPass } from "./fx.mjs";
-import { proximityData } from "./proximity.mjs";
-import { encounterCounts } from "./allies.mjs";
+import { proximityData, tokenDistance } from "./proximity.mjs";
+import { encounterCounts, isMinionOf } from "./allies.mjs";
+import { battleVars, effectiveLight } from "./battle.mjs";
 
 /** Base Tier of Power from Power Level: 1-4 → 1, 5-9 → 2 ... 30 → 7. */
 export function baseTopFromPL(pl) {
@@ -43,11 +44,13 @@ export function perksForPL(pl) {
 }
 
 /** Health Threshold info for a Life Point value. */
-export function thresholdState(life, max) {
+export function thresholdState(life, max, fractions = null) {
+  // (T8: an actor's own Threshold fractions, sys.thresholdFractions)
+  const f = fractions ?? { bruised: 1 / 2, injured: 1 / 4, critical: 1 / 10 };
   const below = {
-    bruised: life <= max / 2,
-    injured: life <= max / 4,
-    critical: life <= max / 10
+    bruised: life <= max * f.bruised,
+    injured: life <= max * f.injured,
+    critical: life <= max * f.critical
   };
   const count = Object.values(below).filter(Boolean).length;
   const current = below.critical ? "critical" : below.injured ? "injured" : below.bruised ? "bruised" : "healthy";
@@ -84,6 +87,12 @@ function immunityModifiers(actor, sys) {
   for ( const m of sys.customModifiers ?? [] ) if ( m.active !== false ) add(m);
   // D1: the Surging State's 4th effect (you cannot gain the Compelled Combat Condition)
   out.push({ key: "compelled", condition: "@states.surging >= 1 && !@ignoreSurging4", ctx: {} });
+  // BB Liquid (2): you cannot be Pinned; Drunk, Plastered (1): the effects of every Combat Condition but Pinned,
+  // Suffocating, Stress Exhaustion and Transfigured are ignored
+  out.push({ key: "pinned", condition: "@states.liquid >= 1", ctx: {} });
+  for ( const k of Object.keys(DBU.conditions ?? {}) ) {
+    if ( !["pinned", "suffocating", "stressExhaustion", "transfigured"].includes(k) ) out.push({ key: k, condition: "@states.drunk >= 2", ctx: {} });
+  }
   return out;
 }
 
@@ -124,6 +133,16 @@ function resourceMaximums(resources, buckets) {
 /** Formula variables about the Transformations: Aspect levels, Lines, Masteries, Transcended ones. */
 function transformationData(transformations, active) {
   const out = { aspects: {}, inLine: {}, mastery: {}, fm: {}, transcended: {} };
+  // (F14 Emperor (2): with a "flag.arcosianMetamorphosis" piece, the Forms with the Arcosian Racial Requirement are part of
+  // the Metamorphosis Line for your effects: their prepared line is set)
+  const owner = transformations[0]?.parent;
+  const alias = (owner?.items ?? []).some(i => (i.system?.isActive ?? true)
+    && (i.system?.modifiers ?? []).some(m => (m.target === "flag.arcosianMetamorphosis") && (m.active !== false)));
+  if ( alias ) {
+    for ( const t of transformations ) {
+      if ( (t.system.transType === "form") && /arcosian/i.test(String(t.system.race ?? "")) && !String(t.system.line ?? "").trim() ) t.system.line = "Metamorphosis";
+    }
+  }
   // Summed levels of each Aspect over the Transformations in use (an Aspect without levels counts 1)
   for ( const t of transformations.filter(x => x.system.isActive) ) {
     for ( const a of t.system.aspects ?? [] ) if ( a.key ) out.aspects[a.key] = (out.aspects[a.key] ?? 0) + Math.max(1, a.level || 0);
@@ -152,8 +171,70 @@ function transformationData(transformations, active) {
  * many Allies possess each Awakening, and the highest base Tier of Power among the Opponents (opponentTop). Zero outside
  * of combat.
  */
+/**
+ * T7 the Health Thresholds you count as below for your own effects: "belowAtLeast" (the highest wins: "always under the
+ * Critical Threshold" = 3), "belowShift" (+ that many, up to 3: "also in the Threshold below") and "belowAtMost" (the
+ * lowest wins: "count as Healthy" = 0). Their conditions read the real @below.
+ */
+function thresholdFractionsOf(actor, sys) {
+  const out = { bruised: 1 / 2, injured: 1 / 4, critical: 1 / 10 };
+  const pieces = [...Array.from(actor?.items ?? []).flatMap(i => Array.from(i.system?.modifiers ?? [])), ...Array.from(sys.customModifiers ?? [])];
+  if ( !pieces.some(m => /^thresholdPct\./.test(String(m?.target ?? ""))) ) return out;
+  const set = {};
+  try {
+    for ( const m of collectModifiers(actor, sys).filter(x => /^thresholdPct\.(bruised|injured|critical)$/.test(String(x.target ?? ""))) ) {
+      const sc = { ...(sys.rollData ?? {}), ...(m.ctx ?? {}) };
+      if ( !test(m.condition, sc) ) continue;
+      const k = m.target.split(".")[1];
+      const v = Number(evaluate(m.value, sc, { floor: false }));
+      if ( Number.isFinite(v) && (v > 0) ) set[k] = Math.min(set[k] ?? Infinity, v / 100);
+    }
+  } catch(err) { return out; }
+  return { ...out, ...set };
+}
+
+/** T9: does a piece of that target (value > 0, condition met) apply now? (read before the buckets) */
+function anyPieceTrue(actor, sys, data, target) {
+  const pieces = [...Array.from(actor?.items ?? []).flatMap(i => Array.from(i.system?.modifiers ?? [])), ...Array.from(sys.customModifiers ?? [])];
+  if ( !pieces.some(m => m?.target === target) ) return false;
+  try {
+    return collectModifiers(actor, sys).filter(x => x.target === target).some(m => {
+      const sc = { ...data, ...(m.ctx ?? {}) };
+      return test(m.condition, sc) && ((Number(evaluate(m.value, sc)) || 0) > 0);
+    });
+  } catch(err) { return false; }
+}
+
+function adjustBelow(actor, sys, data, raw) {
+  const T = ["belowAtLeast", "belowShift", "belowAtMost"];
+  const pieces = [...Array.from(actor?.items ?? []).flatMap(i => Array.from(i.system?.modifiers ?? [])), ...Array.from(sys.customModifiers ?? [])];
+  if ( !pieces.some(m => T.includes(m?.target)) ) return raw;
+  let atLeast = 0, shift = 0, atMost = 3;
+  try {
+    for ( const m of collectModifiers(actor, sys).filter(x => T.includes(x.target)) ) {
+      const sc = { ...data, below: raw, ...(m.ctx ?? {}) };
+      if ( !test(m.condition, sc) ) continue;
+      const v = Math.floor(Number(evaluate(m.value, sc)) || 0);
+      if ( m.target === "belowAtLeast" ) atLeast = Math.max(atLeast, v);
+      else if ( m.target === "belowShift" ) shift += v;
+      else atMost = Math.min(atMost, v);
+    }
+  } catch(err) { return raw; }
+  return Math.clamp(Math.min(atMost, Math.max(atLeast, raw + shift)), 0, 3);
+}
+
+/** (T26 "superStacks.countAs": you count as possessing at most that many Super Stacks; the lowest piece wins) */
+function superStacksAs(buckets, n) {
+  const vals = (buckets?.["superStacks.countAs"]?.parts ?? []).map(p => Number(p.value)).filter(Number.isFinite);
+  return vals.length ? Math.max(0, Math.min(n, ...vals)) : n;
+}
+
 export function partyData(actor) {
-  const out = { allies: 0, opponents: 0, allyAwk: {}, opponentTop: 0 };
+  // (T6 @opponentBelowMax / @opponentBelowMin: the most / fewest Health Thresholds an Opponent is below; 0 without any)
+  const out = { allies: 0, opponents: 0, allyAwk: {}, opponentTop: 0, opponentBelowMax: 0, opponentBelowMin: 0, myMinions: 0,
+    opponentsOppositeAlign: 0, allyPicked: {} };
+  const myAlign = Math.sign(Number(actor.system?.zsoul?.alignment) || 0);
+  let belowMin = Infinity;
   try {
     const combat = globalThis.game?.combats?.find?.(c => c.started && c.combatants.some(cb => cb.actor?.uuid === actor.uuid));
     if ( !combat ) return out;
@@ -168,6 +249,12 @@ export function partyData(actor) {
       const disp = cb.token?.disposition ?? 0;
       if ( (disp === side) && (side !== 0) ) {
         out.allies += 1;
+        // (T16 @myMinions: your Minions among them)
+        if ( isMinionOf(other, actor) ) out.myMinions += 1;
+        // (T30 @allyPicked.<option>: the Allies that picked it in a Transformation's choices, each counted once)
+        const picks = new Set(Array.from(other.items ?? []).filter(i => i.type === "transformation")
+          .flatMap(i => (i.system?.choices ?? []).flatMap(c => c.selected ?? [])).map(o => awakeningSlug(o)).filter(Boolean));
+        for ( const p of picks ) out.allyPicked[p] = (out.allyPicked[p] ?? 0) + 1;
         for ( const [slug, n] of Object.entries(awakeningStacks(other.items)) ) if ( n > 0 ) out.allyAwk[slug] = (out.allyAwk[slug] ?? 0) + 1;
       }
       else if ( (disp !== 0) && (side !== 0) && (disp !== side) ) {
@@ -175,9 +262,16 @@ export function partyData(actor) {
         // (that actor may not be prepared yet: its base ToP from its Power Level then)
         const top = other.system?.top?.base ?? baseTopFromPL(other.system?.pl ?? 1);
         out.opponentTop = Math.max(out.opponentTop, Number(top) || 0);
+        const below = Number(other.system?.health?.count ?? 0) || 0;
+        out.opponentBelowMax = Math.max(out.opponentBelowMax, below);
+        // (T26 @opponentsOppositeAlign)
+        const oa = Math.sign(Number(other.system?.zsoul?.alignment) || 0);
+        if ( myAlign && oa && (oa === -myAlign) ) out.opponentsOppositeAlign += 1;
+        belowMin = Math.min(belowMin, below);
       }
     }
   } catch(err) { /* the world is still loading */ }
+  out.opponentBelowMin = Number.isFinite(belowMin) ? belowMin : 0;
   return out;
 }
 
@@ -193,6 +287,7 @@ export function encounterData(actor) {
   const c = actor?.system?.combat ?? {};
   const out = { inCombat: 0, initiative: 0, initiativeTop: 0, sizeTop: 0, turnAlly: 0, alliesDefeated: 0,
     chargesRound: Number(c.chargesRound) || 0, surgesRound: Number(c.surgesRound) || 0,
+    healingSurgesRound: Number(c.healingSurgesRound) || 0,
     damagedSinceTurn: Number(c.damagedSinceTurn) || 0, resGained: {}, resSpent: {}, marks: {} };
   const flags = actor?.flags?.["dbu-rpg"] ?? {};
   for ( const [slug, list] of Object.entries(flags.marks ?? {}) ) if ( Array.isArray(list) ) out.marks[slug] = list.length;
@@ -310,7 +405,9 @@ export function prepareActorData(sys, actor) {
     injuryMult = Math.max(0, injuryMult);
   }
   const prelimLifeMax = Math.floor((lifeStart + lifePerPL + ((rlmBase + (2 * rawScores.te) + (adv?.lifePerPL ?? 0)) * pl)) * injuryMult);
-  const prelimThr = thresholdState(sys.life.value, prelimLifeMax);
+  // (T8 "thresholdPct.<k>": your Health Thresholds at that percent of Max LP; the lowest piece wins)
+  sys.thresholdFractions = thresholdFractionsOf(actor, sys);
+  const prelimThr = thresholdState(sys.life.value, prelimLifeMax, sys.thresholdFractions);
 
   /* ----- Shared formula data ----- */
   const resources = {};
@@ -322,6 +419,19 @@ export function prepareActorData(sys, actor) {
     resources[slug] = r.value;
     if ( r.split ) for ( const k of DBU.splitRolls ) resources[`${slug}_${k}`] = r.alloc[k];
   }
+  // (F8 Dragon of Light 1: your Positive Energy counts as Negative Energy for your effects)
+  if ( Array.from(actor.items ?? []).some(i => (i.type === "racialTrait") && /^dragon of light$/i.test(i.name)) ) {
+    resources.negativeenergy = (resources.negativeenergy ?? 0) + (resources.positiveenergy ?? 0);
+  }
+  // (T27 @res.ski / @res.str: the Character Perks of your Power Levels exchanged into Skill Improvements / Attribute
+  // Additions; @res.stilllearning / @res.onthepath: every one of them was (Seeking Skill, Seeking Strength, Learned Path))
+  {
+    const plPerks = perksForPL(pl).perk;
+    const ski = Math.min(plPerks, Math.max(0, sys.perks?.skill ?? 0));
+    const str = Math.min(plPerks, Math.max(0, sys.perks?.attribute ?? 0));
+    Object.assign(resources, { ski, str, stilllearning: ((plPerks > 0) && (ski >= plPerks)) ? 1 : 0,
+      onthepath: ((plPerks > 0) && (str >= plPerks)) ? 1 : 0 });
+  }
   const holdingBack = Math.clamp(sys.combat.holdingBack ?? 0, 0, bT);
   // Arrogant and Unstoppable (Villainous Trait): treated as Healthy for all of its effects until its next turn
   const asHealthy = !!actor.flags?.["dbu-rpg"]?.asHealthy;
@@ -331,9 +441,29 @@ export function prepareActorData(sys, actor) {
     states: { ...sys.states }, cond, res: resources,
     transformed: sys.transformation.transformed ? 1 : 0,
     inForm: activeForms.length ? 1 : 0, inEnhancement: activeEnh.length ? 1 : 0,
+    // SZ: your tail is held in the Grapple you are in (@tailHeld: Tail Restraint)
+    tailHeld: ((actor?.flags?.["dbu-rpg"]?.grapple?.role === "grappled") && actor?.flags?.["dbu-rpg"]?.grapple?.tail) ? 1 : 0,
+    // RD: a Form gives the Ki Multiplier (@kiMultiplier)
+    kiMultiplier: kiMultiplier ? 1 : 0,
+    // RC: the character itself is a Minion (@isMinion)
+    isMinion: ((actor?.type === "npc") && (sys.npcType === "minion")) ? 1 : 0,
+    // LT: how many of the active Forms are Legendary / Alternate Forms (@legendaryForm, @alternateForm)
+    legendaryForm: activeForms.filter(t => t.system.subtype === "legendary").length,
+    // (T14 @legendTransTopReq: the highest ToP Requirement of your active Legendary Forms and Transcended Enhancements)
+    legendTransTopReq: active.filter(t => ((t.system.transType === "form") && (t.system.subtype === "legendary"))
+      || ((t.system.transType === "enhancement") && t.system.transcended)).reduce((m, t) => Math.max(m, Number(t.system.topReq) || 0), 0),
+    alternateForm: activeForms.filter(t => t.system.subtype === "alternate").length,
     enhancementCount: active.filter(t => t.system.transType === "enhancement").length,
     life: sys.life.value, ki: sys.ki.value, capacity: sys.capacity.value,
     alignment: sys.zsoul.alignment, kiLow: 0,
+    // (T26 @weightsWorn: Apparel of the Weights category worn; @activeRace.<race>: the Forms and Enhancements you are in
+    // with that Racial Requirement; known before the modifier stages)
+    weightsWorn: Array.from(actor.items ?? []).filter(i => (i.type === "apparel") && i.system.isActive && (i.system.category === "weights")).length,
+    activeRace: active.reduce((o, t) => {
+      const k = String(t.system?.race ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      if ( k ) o[k] = (o[k] ?? 0) + 1;
+      return o;
+    }, {}),
     // Stacks of each Awakening ("for every stack of Absorption you possess": @awk.absorption)
     awk: awakeningStacks(actor.items),
     // Allies and Opponents in your Combat Encounter (@allies, @opponents, @allyAwk.<slug>: Allies with that Awakening)
@@ -353,8 +483,35 @@ export function prepareActorData(sys, actor) {
     ...transformationData(transformations, active),
     highestTopReq: sys.transformation.highestTopReq, activeCount: active.length,
     // Power Ups used this Combat Round
-    powerUps: sys.combat.powerUps ?? 0
+    powerUps: sys.combat.powerUps ?? 0,
+    // (T7 @activeFormTopReq: the highest ToP Requirement of the Forms you are in; @formTopReqMax: of every Form you have)
+    activeFormTopReq: active.filter(t => t.system?.transType === "form").reduce((m, t) => Math.max(m, Number(t.system.topReq) || 0), 0),
+    formTopReqMax: transformations.filter(t => t.system?.transType === "form").reduce((m, t) => Math.max(m, Number(t.system.topReq) || 0), 0)
   };
+  // (T7: the Health Thresholds you count as below for your own effects: belowAtLeast / belowShift / belowAtMost)
+  data.belowForOthers = data.below;
+  data.below = adjustBelow(actor, sys, data, data.below);
+  // T2 @dnaStacks (T19: worked out before the modifiers): the Absorption Stacks holding one of your DNA Copies
+  {
+    const dna = actor.flags?.["dbu-rpg"]?.copies?.dnacopy ?? [];
+    const ab = dna.length ? actor.items.find(i => (i.type === "transformation") && /^absorption$/i.test(i.name)) : null;
+    data.dnaStacks = ab ? (ab.system.stackNotes ?? []).slice(0, ab.system.stacks ?? 0).filter(x => dna.includes(x)).length : 0;
+    // (T19 @dnaCopies: how many DNA Copies you hold)
+    data.dnaCopies = dna.length;
+  }
+  // (T9 "flag.countersZero": your effects read @counters as 0)
+  if ( anyPieceTrue(actor, sys, { ...data, lifeMax: data.lifeMax ?? prelimLifeMax }, "flag.countersZero") ) data.counters = 0;
+  // EC4 @kiMultOther: an effect other than a Form gives you the Ki Multiplier (a "ki.mult" piece of a working item that is
+  // not Power Battery's own: its fx androids_energycore_4)
+  // (the sheet's custom buffs count as one more item)
+  data.kiMultOther = [...Array.from(actor?.items ?? []), { system: { isActive: true, modifiers: sys.customModifiers ?? [] } }]
+    .some(i => (i.system?.isActive ?? true) && Array.from(i.system?.modifiers ?? []).some(m => (m.active !== false) && (m.target === "ki.mult")
+      && (String(m.fx ?? "") !== "androids_energycore_4") && ((Number(m.value) || 0) > 1) && test(m.condition, data))) ? 1 : 0;
+  // AH "alsoHealthy" pieces (an item that works; their condition sees the States): your effects also see you as Healthy
+  // (@alsoHealthy, read by formula.mjs test())
+  data.alsoHealthy = Array.from(actor?.items ?? []).some(i => (i.system?.isActive ?? true)
+    && Array.from(i.system?.modifiers ?? []).some(m => (m.active !== false) && (m.target === "alsoHealthy")
+      && ((Number(m.value) || 0) > 0) && test(m.condition, data))) ? 1 : 0;
   // The running encounter and the round counters (@inCombat, @initiative, @turnAlly, @resGained.<slug>, @marks.<slug>...),
   // the Weapons wielded, the Diminishing Defense stacks and the Skill Ranks written on the sheet (@ranks.<skill>: racial +
   // ranks + bonus ranks, before any effect)
@@ -372,6 +529,10 @@ export function prepareActorData(sys, actor) {
   // Abilities / items used this Combat Round and Encounter (@used.<slug>, @usedEnc.<slug>: flag maneuverUses
   // { combat, round, r: { slug: n }, e: { slug: n } }, written by the "maneuverUsed" / "itemUsed" events)
   data.item = {};
+  // (BC: the battle conditions where the Character is: @env.<key>, @weather.<key>, @lightLevel)
+  Object.assign(data, battleVars(actor));
+  // (F5 @bestialTraits: the Racial Traits of the Bestial Traits group on the sheet)
+  data.bestialTraits = Array.from(actor.items ?? []).filter(i => (i.type === "racialTrait") && /^bestial traits$/i.test(String(i.system?.group ?? ""))).length;
   for ( const i of actor.items ) {
     if ( !(i.system?.isActive ?? true) ) continue;
     for ( const slug of new Set([awakeningSlug(i.name), awakeningSlug(String(i.name).replace(/\s+maneuver$/i, ""))]) ) {
@@ -385,6 +546,11 @@ export function prepareActorData(sys, actor) {
     const sameEnc = !!mu && !!enc && (mu.combat === enc.id);
     data.usedEnc = sameEnc ? { ...(mu.e ?? {}) } : {};
     data.used = (sameEnc && (mu.round === enc.round)) ? { ...(mu.r ?? {}) } : {};
+    // (F7 @usedLimit.<key>: this Round's uses of a limit with that limitKey)
+    data.usedLimit = {};
+    for ( const [k, u] of Object.entries(actor.flags?.["dbu-rpg"]?.triggerUses ?? {}) ) {
+      if ( enc && u && (u.combat === enc.id) && (u.round === enc.round) ) data.usedLimit[String(k).toLowerCase().replace(/[^a-z0-9]/g, "")] = Number(u.r) || 0;
+    }
   }
   // D: the distances on the map to the Allies and Opponents of your encounter (@alliesWithin.<n>, rules/proximity.mjs)
   Object.assign(data, proximityData(actor));
@@ -404,8 +570,26 @@ export function prepareActorData(sys, actor) {
   let buckets = {};
 
   /* ----- Stage -1: Power maximum, Power Spiked, State effects ignored ----- */
+  // (T28 "resAdd.<slug>": + to @res.<slug> for your effects, "resAdd.power" to @power: "stacks of X are treated as Y";
+  // worked out from the sheet's values, kept as @resBase.<slug> / @powerBase)
+  const resBase = { ...data.res };
+  const powerBase = data.power;
+  data.resBase = resBase;
+  data.powerBase = powerBase;
   const stageMinus1 = () => {
+    for ( const k of Object.keys(data.res) ) if ( !(k in resBase) ) delete data.res[k];
+    Object.assign(data.res, resBase);
+    data.power = powerBase;
     evaluateModifiers(mods, data, { stage: -1, buckets });
+    for ( const [k, b] of Object.entries(buckets) ) {
+      const m = /^resadd\.(.+)$/i.exec(k);
+      if ( !m ) continue;
+      const add = Math.floor(Number(b?.total) || 0);
+      if ( !add ) continue;
+      const slug = String(m[1]).toLowerCase().replace(/[^a-z0-9_]/g, "");
+      if ( slug === "power" ) data.power = Math.max(0, powerBase + add);
+      else data.res[slug] = Math.max(0, (Number(resBase[slug]) || 0) + add);
+    }
     const powerMax = Math.max(0, 2 + sum(buckets, "power.max"));
     sys.combat.powerMax = powerMax;
     data.powerMax = powerMax;
@@ -460,7 +644,7 @@ export function prepareActorData(sys, actor) {
   const skillImprovements = perks.skill + (conv.skill ?? 0) + sum(buckets, "skillImprovements");
   data.skillImprovements = skillImprovements;
   // Super Stacks from Aspects and Grades are known now, for the bonuses that grow with them (Hefty Muscle)
-  data.superStacks = Math.clamp((sys.combat.superStacks ?? 0) + sum(buckets, "superStacks"), 0, 3);
+  data.superStacks = superStacksAs(buckets, Math.clamp((sys.combat.superStacks ?? 0) + sum(buckets, "superStacks"), 0, 3));
   let topCurrent = bT + (sys.combat.topBoost ?? 0) + sum(buckets, "top") + (sys.transformation.newLevel ? 1 : 0);
   topCurrent -= hbEff;
   if ( (hbEff >= bT) && (bT > 0) ) topCurrent = 1;
@@ -514,6 +698,8 @@ export function prepareActorData(sys, actor) {
 
   /* ----- Stage 1: Attribute Scores and Modifiers ----- */
   data.scores = { ...rawScores };
+  // (PL: @apparel.<slug>.bonus, before any "apparelBonus" piece, for a "mod.<attr>" piece: Pieces of the Hive's Queen)
+  Object.assign(data, apparelVariables(apparelPieces(actor, bT, {})));
   evaluateModifiers(mods, data, { stage: 1, buckets });
   // @amb.<attr>: Attribute Modifier Bonus of the active Transformations for that Attribute (summed), as just evaluated
   const amb = Object.fromEntries(DBU.ATTRIBUTES.map(a => [a, 0]));
@@ -528,7 +714,8 @@ export function prepareActorData(sys, actor) {
   for ( const a of DBU.ATTRIBUTES ) {
     const A = sys.attributes[a];
     A.racial = racial[a] ?? 0;
-    A.score = Math.max(1, rawScores[a] + sum(buckets, `score.${a}`));
+    // (SZ "scoreSet.<attr>": the Score is that value, 0 included; the lowest wins)
+    A.score = buckets[`scoreSet.${a}`] ? Math.max(0, Math.floor(buckets[`scoreSet.${a}`].total)) : Math.max(1, rawScores[a] + sum(buckets, `score.${a}`));
     A.scoreParts = parts(buckets, `score.${a}`);
     A.limit = limit;
     data.scores[a] = A.score;
@@ -596,7 +783,16 @@ export function prepareActorData(sys, actor) {
   sys.buckets = buckets;
   // W: Pressure Checks (a trigger roll "1d10" the Demon effects make): @pressureBonus (± its Dice Score), @pressureAuto
   data.pressureBonus = sum(buckets, "pressure");
+  // F12 @stateBlock.<state> (1: it cannot be entered now), @duplicateUses (+ uses per Round of Brood Parent's Duplicates)
+  data.stateBlock = {};
+  for ( const [k, b] of Object.entries(buckets) ) if ( k.startsWith("stateBlock.") && ((b?.total ?? 0) > 0) ) data.stateBlock[k.slice(11)] = 1;
+  data.duplicateUses = sum(buckets, "duplicate.uses");
+  // CS1 @piloting: you pilot a Battle Jacket (an NPC of type battleJacket whose Leader / Owner is you)
+  try { data.piloting = (globalThis.game?.actors ?? []).some(a => (a.system?.npcType === "battleJacket") && (a.system?.minionOf === actor.uuid)) ? 1 : 0; }
+  catch(err) { data.piloting = 0; }
   data.pressureAuto = (sum(buckets, "pressure.auto") > 0) ? 1 : 0;
+  // EN: the Entrusted State's 4th effect may go on a Signature Technique too (@entrusted4Sig)
+  data.entrusted4Sig = (sum(buckets, "entrusted4.signature") > 0) ? 1 : 0;
   const flag = key => (buckets[`flag.${key}`]?.total ?? 0) > 0;
   sys.flags = {
     greaterDice: flag("greaterDice"), ignoreThresholds: flag("ignoreThresholds"), autoHit: flag("autoHit"),
@@ -649,23 +845,54 @@ export function prepareActorData(sys, actor) {
   sys.life.max = Math.max(1, lifeMax + sum(buckets, "life.final") - maxLifeLoss);
   sys.rlm = rlm;
   data.lifeMax = sys.life.max;
+  // RC: the pieces worked out with the Max LP (they may read @lifeMax): "lifeOverMax" (Life Points may be regained up to
+  // the maximum + this: sys.life.cap) and "lifeFloor" (Life Points may go down to −this before you are Defeated)
+  const LIFE_LATE = ["lifeOverMax", "lifeFloor"];
+  const hasLate = [...Array.from(actor?.items ?? []).flatMap(i => Array.from(i.system?.modifiers ?? [])), ...Array.from(sys.customModifiers ?? [])]
+    .some(m => LIFE_LATE.includes(m?.target));
+  const withLifeMax = target => {
+    if ( !hasLate ) return 0;
+    let total = 0;
+    try {
+      for ( const m of collectModifiers(actor, sys).filter(x => x.target === target) ) {
+        const sc = { ...data, ...(m.ctx ?? {}) };
+        if ( test(m.condition, sc) ) total += Number(evaluate(m.value, sc)) || 0;
+      }
+    } catch(err) { return sum(buckets, target); }
+    return total;
+  };
+  sys.life.cap = (sys.life.max ?? 0) + Math.max(0, Math.floor(withLifeMax("lifeOverMax")));
+  // (T6 "kiOverMax": Ki Points may be regained up to the maximum + this: sys.ki.cap)
+  sys.ki.cap = (sys.ki.max ?? 0) + Math.max(0, Math.floor(sum(buckets, "kiOverMax")));
+  sys.lifeFloor = Math.max(0, Math.floor(withLifeMax("lifeFloor")));
+  data.lifeFloor = sys.lifeFloor;
 
   /* Health Thresholds and their penalties */
-  const thr = thresholdState(sys.life.value, sys.life.max);
-  const failed = DBU.thresholds.filter(k => thr.below[k] && (sys.thresholds[k] === "fail")).length;
+  const thr = thresholdState(sys.life.value, sys.life.max, sys.thresholdFractions);
+  const failedKeys = DBU.thresholds.filter(k => thr.below[k] && (sys.thresholds[k] === "fail"));
+  const failed = failedKeys.length;
   const thresholdPenaltyMult = cond.poisoned ? 2 : 1;
   const ignoreThr = sys.flags.ignoreThresholds;
+  // RT "threshold.<k>PenaltyMult": each failed Threshold's penalty multiplied (0: none, 2: doubled)
+  const weight = failedKeys.reduce((t, k) => t + Math.max(0, Number(mult(buckets, `threshold.${k}PenaltyMult`)) || 0), 0);
   sys.health = {
     ...thr, failed,
-    combatPenalty: ignoreThr ? 0 : failed * bT * thresholdPenaltyMult,
-    stressPenalty: ignoreThr ? 0 : failed * thresholdPenaltyMult,
-    defeated: sys.life.value <= 0 && !(sys._effectiveStates?.undying > 0)
+    combatPenalty: ignoreThr ? 0 : Math.floor(weight * bT * thresholdPenaltyMult),
+    stressPenalty: ignoreThr ? 0 : Math.floor(weight * thresholdPenaltyMult),
+    // (RC: the Defeat comes at −lifeFloor)
+    defeated: sys.life.value <= -(sys.lifeFloor ?? 0) && !(sys._effectiveStates?.undying > 0)
   };
   data.below = asHealthy ? 0 : thr.count;
+  data.belowForOthers = data.below;
+  data.below = adjustBelow(actor, sys, data, data.below);
+  // (T14: flag.countersZero again, with the Max LP known)
+  data.counters = anyPieceTrue(actor, sys, data, "flag.countersZero") ? 0 : (sys.combat.counters ?? 0);
   data.failed = failed;
+  // RT: which Threshold's Steadfast Check failed (@failedThr.bruised / .injured / .critical)
+  data.failedThr = Object.fromEntries(DBU.thresholds.map(k => [k, failedKeys.includes(k) ? 1 : 0]));
 
   /* Super Stacks */
-  const superStacks = Math.clamp((sys.combat.superStacks ?? 0) + sum(buckets, "superStacks"), 0, 3);
+  const superStacks = superStacksAs(buckets, Math.clamp((sys.combat.superStacks ?? 0) + sum(buckets, "superStacks"), 0, 3));
   sys.superStacks = superStacks;
   const musclePenalty = Math.max(0, ((superStacks + (superStacks >= 3 ? 1 : 0)) * bT) + sum(buckets, "muscle"));
   const massivePower = superStacks * Math.floor(attr("fo") / 4);
@@ -695,9 +922,14 @@ export function prepareActorData(sys, actor) {
   const prone = cond.prone > 0;
   let haste = Math.floor(attr("ag") / 2) + sum(buckets, "haste");
   if ( prone ) haste = Math.floor(haste / 2);
-  const awareness = attr("in") + sum(buckets, "awareness");
+  let awareness = attr("in") + sum(buckets, "awareness");
   let dv = floorTwo(attr("ag") + sum(buckets, "defenseValue") + combatClothingDV, dvSize.dv * T);
   if ( prone ) dv = Math.floor(dv / 2);
+  // BC: the Light Level (Pitch Black / Blinding: halved; Dark / Bright: -2(bT)) on Awareness and Defense Value
+  const lightNow = effectiveLight(data.lightLevel ?? 0, sum(buckets, "lightShift"), sum(buckets, "flag.ignoreLight") > 0);
+  data.lightLevelEff = lightNow;
+  if ( Math.abs(lightNow) === 2 ) { awareness = Math.floor(awareness / 2); dv = Math.floor(dv / 2); }
+  else if ( Math.abs(lightNow) === 1 ) { awareness = Math.max(0, awareness - (2 * bT)); dv -= 2 * bT; }
   dv = Math.max(0, dv);
   const slowMult = Math.max(0, 1 - (0.25 * cond.slowed));
   const speedAll = sum(buckets, "speed");
@@ -741,7 +973,10 @@ export function prepareActorData(sys, actor) {
   // The late pass: modifiers naming @soakNow, @surgencyNow, @dvNow or @tp ("DR equal to half your Soak"), for the
   // DR (worked out again) and the Combat Roll buckets read below (wound, strike, dodge, combat); Soak itself is untouched
   if ( lateStages.has("late") ) {
-    evaluateModifiers(mods, { ...data, aptitudes: sys.aptitudes, soakNow: soakFinal, surgencyNow: surgency, dvNow: dv, tp: tpTotal },
+    // (CS4 @ranksNow.<skill>: its Ranks with the ones effects give, "skillRank.<skill>")
+    const ranksNow = Object.fromEntries(Object.entries(sys.skills ?? {}).map(([k, S]) => [k,
+      (S.racial ?? 0) + (S.ranks ?? 0) + (S.bonusRanks ?? 0) + sum(buckets, `skillRank.${k}`)]));
+    evaluateModifiers(mods, { ...data, aptitudes: sys.aptitudes, soakNow: soakFinal, surgencyNow: surgency, dvNow: dv, tp: tpTotal, ranksNow },
       { stage: "late", buckets });
     sys.aptitudes.dr = armorDR + sum(buckets, "dr");
   }
@@ -800,6 +1035,12 @@ export function prepareActorData(sys, actor) {
     if ( cond.sleeping && ["perception", "clairvoyance"].includes(key) ) extra -= 2;
     S.total = Math.max(0, S.attrBonus + S.rankBonus + gifted + sizeAdj + extra + (S.bonus ?? 0)
       + sum(buckets, "skill.all", `skill.${key}`, `skill.attr.${def.attr}`));
+    // (BC: the Light Level on the Perception Skill Bonus)
+    if ( key === "perception" ) {
+      const ll = Math.abs(data.lightLevelEff ?? 0);
+      if ( ll === 2 ) S.total = Math.floor(S.total / 2);
+      else if ( ll === 1 ) S.total = Math.max(0, S.total - 2);
+    }
     S.required = !!def.required;
     S.autoFail = S.required && (totalRanks < 1);
     S.crit = Math.max(7, 10 + sum(buckets, "crit.skill", `crit.skill.${key}`));
@@ -823,6 +1064,8 @@ export function prepareActorData(sys, actor) {
   };
   const greater = sys.flags.greaterDice && !(cond.impediment && sys._effectiveStates?.superior > 0)
     ? greaterDiceCategory(T) + sum(buckets, "greaterDice.category") : 0;
+  // RD: @greaterDiceOn (the Greater Dice apply to your rolls now)
+  data.greaterDiceOn = greater > 0 ? 1 : 0;
   sys.top.extraDiceLabel = categoryLabel(topCat("strike"));
   sys.top.greaterDiceLabel = categoryLabel(greaterDiceCategory(T));
   sys.top.critDiceLabel = categoryLabel(critDiceCategory(T));
@@ -870,6 +1113,37 @@ export function prepareActorData(sys, actor) {
     };
   };
 
+  // F11 the Grapple pieces: "grapple.foeCombat" of the Grappler who holds you (± your Combat Rolls: Petrification Plating);
+  // "grapple.freeRange" (lowest wins): no Guard Down from a Grapple you make while the Grappled is that many Squares away
+  {
+    const g = actor.flags?.["dbu-rpg"]?.grapple;
+    const near = uuid => { try { let d = uuid ? globalThis.fromUuidSync?.(uuid) : null; return d ?? null; } catch(err) { return null; } };
+    if ( g?.role === "grappled" ) {
+      let gr = near(g.with);
+      if ( gr?.documentName === "Token" ) gr = gr.actor;
+      const v = Number(gr?.system?.buckets?.["grapple.foeCombat"]?.total ?? 0) || 0;
+      if ( v ) {
+        const b = buckets.combat ??= { total: 0, parts: [] };
+        b.total += v;
+        b.parts.push({ label: `Grapple (${gr.name})`, value: v });
+      }
+    }
+    const free = (buckets["grapple.freeRange"]?.parts ?? []).map(p => Number(p.value) || 0).filter(v => v > 0);
+    if ( (g?.role === "grappler") && free.length && !((sys.conditions?.guardDown ?? 0) > 0) && !statuses.has("guardDown") ) {
+      try {
+        const mine = actor.getActiveTokens?.()?.[0]?.document ?? null;
+        const theirs = near(g.token);
+        const scene = mine?.parent;
+        if ( mine && theirs && (theirs.parent === scene) ) {
+          const d = tokenDistance(mine, theirs, { size: scene.grid?.size ?? 100, unit: scene.grid?.distance ?? 1 });
+          if ( d >= Math.min(...free) ) {
+            sys.effectiveConditions.guardDown = 0;
+            if ( sys.conditionHolds?.guardDown ) sys.conditionHolds.guardDown = sys.conditionHolds.guardDown.filter(x => !String(x).startsWith("Grapple ("));
+          }
+        }
+      } catch(err) { /* no token */ }
+    }
+  }
   const common = [
     ...(powerBonus ? [{ label: game.i18n.localize("DBU.PowerStacks"), value: powerBonus }] : []),
     ...(sys.health.combatPenalty ? [{ label: game.i18n.localize("DBU.ThresholdPenalty"), value: -sys.health.combatPenalty }] : []),
@@ -899,6 +1173,8 @@ export function prepareActorData(sys, actor) {
   let dodgeStacks = sys.flags.noDimDefense ? 0 : (sys.combat.dimDefense ?? 0);
   // "dimDefense.penaltyMult": the Diminishing Defense penalty multiplied
   if ( dodgeStacks && buckets["dimDefense.penaltyMult"] ) dodgeStacks = Math.max(0, roundDown(dodgeStacks * mult(buckets, "dimDefense.penaltyMult")));
+  // RD: the Diminishing Defense penalty now (@vs.dimDefense of the others)
+  sys.dimDefensePenalty = dodgeStacks;
   const dodgeParts = [
     { label: "Defense Value", value: dv }, ...common,
     ...(musclePenalty ? [{ label: game.i18n.localize("DBU.MusclePenalty"), value: -musclePenalty }] : []),
@@ -969,6 +1245,8 @@ export function prepareActorData(sys, actor) {
   sys.progression = {
     perks, perksAvailable: Math.max(0, perks.perk), perksUsed: (conv.attribute ?? 0) + (conv.talent ?? 0) + (conv.skill ?? 0),
     attributeAdditions, attributePoints: (attributeAdditions * 2) + pl1Bonus.attributePoints + sum(buckets, "attributePoints")
+      // (F15 "attributePoints.perConvertedSI": + per Skill Improvement converted from a Character Perk: Tuffle)
+      + ((conv.skill ?? 0) * sum(buckets, "attributePoints.perConvertedSI"))
       + ((adv?.apPerTop ?? 0) * bT),
     attributePointsSpent: DBU.ATTRIBUTES.reduce((t, a) => t + (sys.attributes[a].points ?? 0), 0),
     talentAdditions, skillImprovements,
@@ -999,11 +1277,16 @@ export function prepareActorData(sys, actor) {
   sys.rollData = {
     ...data,
     T, bT, PL: pl, below: data.below, failed,
+    // (LN: the Actions of a turn; with @actions: none spent yet)
+    actionsPerRound: sys.actionsPerRound ?? 3,
     attributes: Object.fromEntries(DBU.ATTRIBUTES.map(a => [a, { score: score(a), mod: attr(a) }])),
     aptitudes: sys.aptitudes,
     life: sys.life.value, lifeMax: sys.life.max, ki: sys.ki.value, kiMax: sys.ki.max,
     capacity: sys.capacity.value, capacityMax: sys.capacity.max,
-    superStacks, power: powerStacks, stress: sys.stress.bonus
+    superStacks, power: powerStacks, stress: sys.stress.bonus,
+    // (T28 @ranksNow.<skill> for the triggers too: the Ranks with the ones effects give)
+    ranksNow: Object.fromEntries(Object.entries(sys.skills ?? {}).map(([k, S]) => [k,
+      (S.racial ?? 0) + (S.ranks ?? 0) + (S.bonusRanks ?? 0) + sum(buckets, `skillRank.${k}`)]))
   };
   // Battle Power (the scouter reading), with the world's formula
   const formula = globalThis.game?.settings?.settings?.has("dbu-rpg.battlePowerFormula")
@@ -1011,7 +1294,7 @@ export function prepareActorData(sys, actor) {
   sys.battlePower = battlePower(sys, formula);
   // The Technique Point modifiers of the Signature Techniques ("tpStart.mult.<foundation>", "tpCost.signature"): the
   // items were prepared before these buckets existed, so they are worked out again with them
-  if ( Object.keys(buckets).some(k => k.startsWith("tpStart.mult.") || (k === "tpCost.signature")) ) {
+  if ( Object.keys(buckets).some(k => k.startsWith("tpStart.mult.") || (k === "tpCost.signature") || k.startsWith("sigAdvFree.")) ) {
     for ( const i of actor.items ) {
       if ( (i.type === "signature") && i.system ) i.system.computed = computeSignature(i.system, actor, { buckets });
     }

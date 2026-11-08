@@ -81,7 +81,7 @@ export async function triggerBurstLimit(actor, item, name) {
   const updates = { "system.combat.burstUsed": true, "flags.dbu-rpg.burstCombat": c?.id ?? null };
   if ( sys.transformation.active.some(t => (t.system.transType === "enhancement") && t.system.transcended) ) {
     const gain = Math.floor(sys.ki.max / 2);
-    updates["system.ki.value"] = Math.min(sys.ki.max, sys.ki.value + gain);
+    updates["system.ki.value"] = Math.min(sys.ki.cap ?? sys.ki.max, sys.ki.value + gain);
     lines.push(L("DBU.Burst.Recovery", { n: gain }));
   }
   await actor.update(updates);
@@ -120,8 +120,8 @@ export async function fullAwakening(actor, item) {
   const life = Math.ceil(sys.life.max / 4);
   const ki = Math.ceil(sys.ki.max / 4);
   await actor.update({
-    ...(sys.flags?.noLifeRegain ? {} : { "system.life.value": Math.min(sys.life.max, sys.life.value + life) }),
-    "system.ki.value": Math.min(sys.ki.max, sys.ki.value + ki),
+    ...(sys.flags?.noLifeRegain ? {} : { "system.life.value": Math.min(sys.life.cap ?? sys.life.max, sys.life.value + life) }),
+    "system.ki.value": Math.min(sys.ki.cap ?? sys.ki.max, sys.ki.value + ki),
     ...actor._spendAction(1)
   });
   await item.update({ "system.grandAwakening": true, "flags.dbu-rpg.grandCombat": encounterOf(actor)?.id ?? null });

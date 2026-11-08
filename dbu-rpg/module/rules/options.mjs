@@ -25,14 +25,14 @@ import { DBU } from "../config.mjs";
 import { evaluate, hasDice, test } from "./formula.mjs";
 import { collectModifiers, isMultTarget } from "./modifiers.mjs";
 import { resourceSlug } from "./resources.mjs";
-import { costPlan, payTriggerCost, triggerUsesLeft, useTriggerLimit } from "../combat/triggers.mjs";
+import { costPlan, payTriggerCost, perAttackKey, sameAttackUse, triggerUsesLeft, useTriggerLimit } from "../combat/triggers.mjs";
 
 const L = (k, d) => (d ? game.i18n.format(k, d) : game.i18n.localize(k));
 const blank = v => !String(v ?? "").trim();
 const esc = s => foundry.utils.escapeHTML(String(s ?? ""));
 
 /** The fields an option piece may carry besides target / value / condition / mode / limit. */
-export const OPTION_FIELDS = ["cost", "amount", "group", "limitKey", "at"];
+export const OPTION_FIELDS = ["cost", "amount", "group", "limitKey", "at", "exclusive", "checkCost"];
 /** Option targets whose value is text (read where it is used, never evaluated). Other packages may add theirs. */
 export const OPTION_TEXT = new Set(["attack.damageAttribute", "attack.aoe", "attack.state"]);
 /** Option targets whose value keeps its fraction (1/2, 1.5). Other packages may add theirs. */
@@ -138,7 +138,7 @@ export function optionPieces(actor, prefix, scope = {}, { at, side = "", mods = 
     const g = String(m.group ?? "").trim();
     if ( !g || blank(m.amount) || groupMax.has(g) ) continue;
     // (a piece with no use left gives its group no amount)
-    if ( limits && !blank(m.limit) && !triggerUsesLeft(actor, { limit: m.limit, ctx: m.ctx }, pieceUseKey({ ...m, key: pieceKey(m) }, keyOf)) ) continue;
+    if ( limits && !blank(m.limit) && !triggerUsesLeft(actor, { limit: m.limit, ctx: m.ctx, attackId: scope.attackId }, pieceUseKey({ ...m, key: pieceKey(m) }, keyOf)) ) continue;
     groupMax.set(g, Math.max(0, Math.floor(evaluate(m.amount, pieceScope(actor, m, scope, 1)))));
   }
   const out = [];
@@ -149,6 +149,8 @@ export function optionPieces(actor, prefix, scope = {}, { at, side = "", mods = 
     Object.defineProperty(p, "actor", { value: actor, enumerable: false, configurable: true });
     p.box = boxOf(p);
     p.useKey = pieceUseKey(p, keyOf);
+    // PA: a per-attack piece already used (and paid) for this attack (scope.attackId) costs nothing again
+    if ( scope.attackId && perAttackKey(p.useKey) && sameAttackUse(actor, p.useKey, scope.attackId) ) p.cost = "";
     p.ask = (m.mode === "ask") && (side !== "attacker");
     p.max = blank(m.amount) ? 0 : Math.max(0, Math.floor(evaluate(m.amount, pieceScope(actor, p, scope, 1))));
     if ( !blank(m.amount) && (p.max < 1) ) continue;
@@ -157,7 +159,7 @@ export function optionPieces(actor, prefix, scope = {}, { at, side = "", mods = 
     const ns = nsUpTo(top);
     const usesN = !blank(m.amount) || !blank(m.group);
     if ( !ns.some(n => test(m.condition, pieceScope(actor, p, scope, usesN ? n : null))) ) continue;
-    if ( limits && !blank(m.limit) && !triggerUsesLeft(actor, { limit: m.limit, ctx: m.ctx }, p.useKey) ) continue;
+    if ( limits && !blank(m.limit) && !triggerUsesLeft(actor, { limit: m.limit, ctx: m.ctx, attackId: scope.attackId }, p.useKey) ) continue;
     out.push(p);
   }
   return out;
@@ -272,7 +274,7 @@ export async function payOptions(actor, chosen, { scope = {}, plan = null } = {}
  * Count one use of every limited chosen piece (a key counts once, however many pieces share it).
  * @returns {Promise<string[]>}  the labels of the pieces that had no use left any more
  */
-export async function countOptionLimits(actor, chosen, { keyOf = null, skip = [] } = {}) {
+export async function countOptionLimits(actor, chosen, { keyOf = null, skip = [], attackId = null } = {}) {
   const seen = new Set(skip);
   const refused = [];
   for ( const p of chosenPieces(chosen) ) {
@@ -280,7 +282,7 @@ export async function countOptionLimits(actor, chosen, { keyOf = null, skip = []
     const key = p.useKey ?? pieceUseKey(p, keyOf);
     if ( seen.has(key) ) continue;
     seen.add(key);
-    if ( !(await useTriggerLimit(actor, { limit: p.limit, ctx: p.ctx }, key)) ) refused.push(pieceLabel(p));
+    if ( !(await useTriggerLimit(actor, { limit: p.limit, ctx: p.ctx, attackId: attackId ?? p.scope?.attackId ?? null }, key)) ) refused.push(pieceLabel(p));
   }
   return refused;
 }

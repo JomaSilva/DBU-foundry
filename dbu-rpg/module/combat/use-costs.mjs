@@ -34,7 +34,7 @@ export function actionCostOf(text) {
  * What using the item costs: { kp, actions, counters, cost (the trigger cost text: "ki:6; actions:1"), free } or null
  * when it costs nothing the system knows.
  */
-export function useCostOf(actor, item) {
+export function useCostOf(actor, item, { ignoreTagFree = false } = {}) {
   const sys = actor?.system;
   const s = item?.system ?? {};
   if ( !sys || !["maneuver", "uniqueAbility"].includes(item?.type) || s.god || s.villainous ) return null;
@@ -51,13 +51,19 @@ export function useCostOf(actor, item) {
     }
     else kp += total(sys, "kpCost.maneuver");
     kp += total(sys, `kpCost.use.${slug}`);
+    // F11 "kpCost.tag.<tag>": ± KP of the item carrying that tag (an effect's tagItem: Unique Monstrosity)
+    for ( const tag of Object.keys(item.flags?.["dbu-rpg"]?.tags ?? {}) ) kp += total(sys, `kpCost.tag.${tag}`);
   }
-  const free = total(sys, `kpCost.useFree.${slug}`) > 0;
+  // (CS3 "kpCost.tagFree.<tag>": the item carrying that tag costs no KP: Racial Technique 3)
+  const tagFree = !ignoreTagFree && Object.keys(item.flags?.["dbu-rpg"]?.tags ?? {}).some(tag => total(sys, `kpCost.tagFree.${tag}`) > 0);
+  const free = (total(sys, `kpCost.useFree.${slug}`) > 0) || tagFree;
   if ( free ) kp = 0;
   kp = Math.max(0, Math.floor(kp));
   // (an Out-of-Sequence use spends no Action nor Counter Action: the effect that offered it pays what it says)
   const oos = !!actor._dbuOutOfSequence;
-  const { actions, counters } = oos ? { actions: 0, counters: 0 } : actionCostOf(s.actionCost);
+  let { actions, counters } = oos ? { actions: 0, counters: 0 } : actionCostOf(s.actionCost);
+  // (T1 "useInstant.<slug>": that Maneuver is an Instant Maneuver for you; "useInstant.ua1": a Unique Ability of 1 Action)
+  if ( actions && ((total(sys, `useInstant.${slug}`) > 0) || ((item.type === "uniqueAbility") && (actions === 1) && (total(sys, "useInstant.ua1") > 0))) ) actions = 0;
   const parts = [kp ? `ki:${kp}` : "", actions ? `actions:${actions}` : "", counters ? `counters:${counters}` : ""].filter(Boolean);
   if ( !parts.length && !free ) return null;
   return { kp, actions, counters, free, cost: parts.join("; ") };

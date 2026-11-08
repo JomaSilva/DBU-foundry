@@ -32,9 +32,14 @@ import * as Vv from "./v.mjs";
 import * as W from "./w.mjs";
 import * as X from "./x.mjs";
 import * as Y from "./y.mjs";
+import * as Z from "./z.mjs";
+import * as AA from "./aa.mjs";
+import * as RA from "./ra.mjs";
+import * as RB from "./rb.mjs";
+import * as RD from "./rd.mjs";
 
 /** The feature packages, in merge order. */
-export const PACKAGES = { a: A, b: B, c: C, d: D, e: E, f: F, g: G, i: I, l: Lp, m: M, n: N, o: O, p: P, q: Q, r: Rv, s: S, v: Vv, w: W, x: X, y: Y };
+export const PACKAGES = { a: A, b: B, c: C, d: D, e: E, f: F, g: G, i: I, l: Lp, m: M, n: N, o: O, p: P, q: Q, r: Rv, s: S, v: Vv, w: W, x: X, y: Y, z: Z, aa: AA, ra: RA, rb: RB, rd: RD };
 const LIST = Object.values(PACKAGES);
 
 /** When a trigger runs (data/fields.mjs triggersField `event`; the first one is the schema's initial value). */

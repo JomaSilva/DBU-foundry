@@ -1,4 +1,5 @@
 import { DBU } from "../config.mjs";
+import { test } from "./formula.mjs";
 
 /** The parts of an Aspect parameter: "Feral/Raging" → ["Feral", "Raging"]. */
 export function aspectParams(param) {
@@ -27,14 +28,21 @@ export function masteryAmount(c, mastery) {
  * @param {object} system   The Transformation's system data (aspects, grade, mastery, gradeAspects, masteryAspects)
  * @returns {object[]}      A new list, or the original one when nothing changes it
  */
-export function currentAspects({ aspects = [], grade = 1, mastery = 0, gradeAspects = [], masteryAspects = [] } = {}) {
+export function currentAspects({ aspects = [], grade = 1, mastery = 0, gradeAspects = [], masteryAspects = [], modifiers = [] } = {}) {
   let list = aspects.map(a => ({ ...a }));
   let changed = false;
   const rename = a => {
     a.name = aspectLabel(a);
     changed = true;
   };
-  const cap = (key, level) => Math.min(level, DBU.aspects[key]?.levels ?? Infinity);
+  // (T14 "aspectMax.<key>" pieces of this Transformation raise that Aspect's maximum level; their conditions see @M / @G)
+  const over = {};
+  for ( const m of Array.from(modifiers ?? []) ) {
+    const k = /^aspectMax\.(\w+)$/.exec(String(m?.target ?? ""))?.[1];
+    if ( !k || (m.active === false) || !test(m.condition, { M: mastery, G: grade }) ) continue;
+    over[k] = Math.max(over[k] ?? 0, Number(m.value) || 0);
+  }
+  const cap = (key, level) => Math.min(level, Math.max(DBU.aspects[key]?.levels ?? Infinity, over[key] ?? 0));
   for ( const a of list ) {
     if ( !/^LV\s*G$/i.test(a.param ?? "") ) continue;
     a.level = cap(a.key, Math.max(1, grade));

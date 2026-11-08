@@ -113,8 +113,8 @@ export async function applyLegendRealized(actor, label) {
   await r.toMessage({ speaker: ChatMessage.getSpeaker({ actor }), flavor: `Legend Realized — ${label}` });
   const sys = actor.system;
   const noLife = !!sys.flags?.noLifeRegain;
-  await actor.update({ ...(noLife ? {} : { "system.life.value": Math.min(sys.life.max, sys.life.value + amount) }),
-    "system.ki.value": Math.min(sys.ki.max, sys.ki.value + amount) });
+  await actor.update({ ...(noLife ? {} : { "system.life.value": Math.min(sys.life.cap ?? sys.life.max, sys.life.value + amount) }),
+    "system.ki.value": Math.min(sys.ki.cap ?? sys.ki.max, sys.ki.value + amount) });
   const text = L(doubled ? "DBU.Villain.LegendDouble" : "DBU.Trans.LegendRealized", { n: amount });
   return noLife ? `${text} ${L("DBU.Life.NoRegain")}` : text;
 }
@@ -303,8 +303,8 @@ export async function oneOnOneDefeated(attacker, target) {
   const sys = attacker.system;
   // "flag.noLifeRegain": only the Ki Points
   const noLife = !!sys.flags?.noLifeRegain;
-  await attacker.update({ ...(noLife ? {} : { "system.life.value": Math.min(sys.life.max, sys.life.value + Math.ceil(t.life.max / 4)) }),
-    "system.ki.value": Math.min(sys.ki.max, sys.ki.value + Math.ceil(t.ki.max / 4)) });
+  await attacker.update({ ...(noLife ? {} : { "system.life.value": Math.min(sys.life.cap ?? sys.life.max, sys.life.value + Math.ceil(t.life.max / 4)) }),
+    "system.ki.value": Math.min(sys.ki.cap ?? sys.ki.max, sys.ki.value + Math.ceil(t.ki.max / 4)) });
   await attacker.unsetFlag(FLAG, "oneOnOne");
   const item = attacker.items.get(d.itemId);
   if ( item ) await recordUse(item, -1);

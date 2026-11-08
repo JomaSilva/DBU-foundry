@@ -14,7 +14,7 @@
  *
  * Plain functions with no Foundry global at load, so that Node tests can import them.
  */
-import { tokenDistance, MAX_RANGE } from "./proximity.mjs";
+import { tokenDistance, MAX_RANGE, proximityData } from "./proximity.mjs";
 import { evaluate, test } from "./formula.mjs";
 
 /** "ally.<target>": a piece for your Allies; J "foe.<target>": for your Opponents (an aura that weakens them). */
@@ -81,6 +81,9 @@ function marksOn(marker, target) {
 }
 
 const isMinion = a => ((a?.type === "npc") && (a.system?.npcType === "minion")) ? 1 : 0;
+/** MO: is `a` a Minion of `leader` (its minionOf names the leader's actor, a token's base actor too)? */
+export const isMinionOf = (a, leader) => (isMinion(a) && !!a.system?.minionOf
+  && [leader?.uuid, leader?.id ? `Actor.${leader.id}` : null, leader?.baseActor?.uuid].includes(a.system.minionOf)) ? 1 : 0;
 
 /** Does an item work now (an inactive Transformation still has its Permanent pieces)? */
 function pieceWorks(item, m) {
@@ -102,6 +105,45 @@ export function hasAllyPieces(actor) {
  * The pieces your Allies' items give you: [{ target, value, label }] with the value already worked out (a number as
  * text). `fxPiece` (rules/fx.mjs) is passed in by modifiers.mjs so that this file does not import it.
  */
+/**
+ * AG "allyGuard.<kind>" pieces of your Allies (Intelligent Fighter: "defeat", an Opponent's Damage that would Defeat you):
+ * [{ giver, value, label, limit, key }], worked out with the Ally's formula data and @to (you), highest value first.
+ */
+export function allyGuards(actor, kind, { foe = false } = {}) {
+  const out = [];
+  let others;
+  try { others = encounterOthers(actor); } catch(err) { return out; }
+  // (KR foe: the "foeGuard.<kind>" pieces of your Opponents: Karmic Reflection's "critToBotch")
+  const target = `${foe ? "foeGuard" : "allyGuard"}.${kind}`;
+  for ( const o of others ) {
+    if ( foe ? !o.opponent : !o.ally ) continue;
+    const src = o.actor;
+    const data = src.system?.rollData;
+    if ( !data ) continue;
+    const to = { mark: marksOn(src, actor), minion: isMinion(actor), myMinion: isMinionOf(actor, src), distance: o.distance,
+      below: actor.system?.health?.count ?? 0, cond: { ...(actor.system?.conditions ?? {}) }, states: { ...(actor.system?.states ?? {}) },
+      pl: Number(actor.system?.pl ?? 1) || 1, // (T17: worked out now, the receiver's own data may be one preparation behind)
+      get onArea() { return (this._onArea ??= (proximityData(actor).onArea ?? {})); } };
+    for ( const item of src.items ?? [] ) {
+      const s = item.system;
+      for ( const m of s?.modifiers ?? [] ) {
+        if ( (String(m?.target ?? "") !== target) || !pieceWorks(item, m) ) continue;
+        if ( !blank(m.range) && !(o.distance <= Number(m.range)) ) continue;
+        const scope = { ...data, ...((item.type === "transformation") ? (s.formulaContext ?? {}) : {}), to };
+        let value;
+        try {
+          if ( !test(m.condition, scope) ) continue;
+          value = Math.floor(Number(evaluate(m.value, scope)) || 0);
+        } catch(err) { continue; }
+        if ( !(value > 0) ) continue;
+        out.push({ giver: src, value, label: `${m.label || item.name} (${src.name})`, limit: m.limit || "", cost: m.cost || "",
+          key: blank(m.limitKey) ? `guard|${item.id}|${m.label || item.name}` : String(m.limitKey).trim() });
+      }
+    }
+  }
+  return out.sort((a, b) => b.value - a.value);
+}
+
 export function allyPieces(actor, { fxPiece = null } = {}) {
   const out = [];
   let others;
@@ -115,8 +157,10 @@ export function allyPieces(actor, { fxPiece = null } = {}) {
     const data = src.system?.rollData;
     if ( !data ) continue;
     // (K: and the Conditions and States of the Character the piece goes to, as its sheet holds them)
-    const to = { mark: marksOn(src, actor), minion: isMinion(actor), distance: o.distance,
-      below: actor.system?.health?.count ?? 0, cond: { ...(actor.system?.conditions ?? {}) }, states: { ...(actor.system?.states ?? {}) } };
+    const to = { mark: marksOn(src, actor), minion: isMinion(actor), myMinion: isMinionOf(actor, src), distance: o.distance,
+      below: actor.system?.health?.count ?? 0, cond: { ...(actor.system?.conditions ?? {}) }, states: { ...(actor.system?.states ?? {}) },
+      pl: Number(actor.system?.pl ?? 1) || 1, // (T17: worked out now, the receiver's own data may be one preparation behind)
+      get onArea() { return (this._onArea ??= (proximityData(actor).onArea ?? {})); } };
     // (the custom buffs of the giver's sheet count as one more item)
     const custom = { name: globalThis.game?.i18n?.localize?.("DBU.Custom") ?? "Custom", type: "custom",
       system: { modifiers: src.system?.customModifiers ?? [], isActive: true } };
@@ -155,7 +199,9 @@ export function encounterCounts(actor, DBU) {
   const conds = Object.keys(DBU?.conditions ?? {});
   const states = Object.keys(DBU?.states ?? {});
   const zero = keys => Object.fromEntries(keys.map(k => [k, 0]));
-  const out = { opponentsCond: zero(conds), alliesCond: zero(conds), opponentsState: zero(states), alliesState: zero(states) };
+  const out = { opponentsCond: zero(conds), alliesCond: zero(conds), opponentsState: zero(states), alliesState: zero(states),
+    opponentsCondByMe: 0, markedOpponents: {}, markedAllies: {} };
+  const myMarks = Object.entries(actor?.flags?.["dbu-rpg"]?.marks ?? {});
   let others;
   try { others = encounterOthers(actor); } catch(err) { return out; }
   for ( const o of others ) {
@@ -164,14 +210,24 @@ export function encounterCounts(actor, DBU) {
     const c = sys.effectiveConditions ?? sys.conditions ?? {};
     const st = sys._effectiveStates ?? sys.states ?? {};
     const side = o.ally ? "allies" : "opponents";
-    for ( const k of conds ) if ( (c[k] ?? 0) > 0 ) out[`${side}Cond`][k] += 1;
+    // (T7 "flag.guardDownHidden": an Opponent's Guard Down is not a Combat Condition for your effects)
+    const hideGd = o.opponent && ((sys.buckets?.["flag.guardDownHidden"]?.total ?? 0) > 0);
+    for ( const k of conds ) if ( ((c[k] ?? 0) > 0) && !(hideGd && (k === "guardDown")) ) out[`${side}Cond`][k] += 1;
+    // (T7 @markedOpponents.<slug> / @markedAllies.<slug>: how many Opponents / Allies carry that mark of yours)
+    const markKey = o.ally ? "markedAllies" : "markedOpponents";
+    for ( const [slug, list] of myMarks ) {
+      if ( (list ?? []).some(e => e?.uuid === o.actor.uuid) ) out[markKey][slug] = (out[markKey][slug] ?? 0) + 1;
+    }
+    // RA: Opponents suffering a Combat Condition you inflicted (flags.dbu-rpg.condBy)
+    if ( o.opponent && Object.entries(o.actor.flags?.["dbu-rpg"]?.condBy ?? {}).some(([k, u]) => ((c[k] ?? 0) > 0)
+      && [actor.uuid, actor.token?.uuid].filter(Boolean).includes(u)) ) out.opponentsCondByMe += 1;
     for ( const k of states ) if ( (st[k] ?? 0) > 0 ) out[`${side}State`][k] += 1;
   }
   return out;
 }
 
 /** Does an actor read the encounter counts? */
-const READS_COUNTS = /@(opponentsCond|alliesCond|opponentsState|alliesState)\./;
+const READS_COUNTS = /@(opponentsCond|alliesCond|opponentsState|alliesState|markedOpponents|markedAllies)\.|@opponentsCondByMe/;
 export function readsEncounter(actor) {
   for ( const i of actor?.items ?? [] ) {
     for ( const p of [...(i.system?.modifiers ?? []), ...(i.system?.triggers ?? [])] ) {
@@ -185,7 +241,27 @@ export function readsEncounter(actor) {
  * When a Character of an encounter changes (its sheet, its items, its token), the others that read it are worked out again:
  * the Allies of one with ally pieces, and those that read the encounter counts.
  */
+/** E2 Ruler: warn the GM when more than 10 non-Defeated Minions of a Ruler (their sheet names it) join one encounter. */
+function rulerCheck(combat) {
+  if ( !globalThis.game?.user?.isActiveGM ) return;
+  const counts = new Map();
+  for ( const cb of combat.combatants ?? [] ) {
+    const a = cb.actor;
+    if ( !a || !isMinion(a) || cb.isDefeated || !a.system?.minionOf ) continue;
+    counts.set(a.system.minionOf, (counts.get(a.system.minionOf) ?? 0) + 1);
+  }
+  for ( const [uuid, n] of counts ) {
+    if ( n <= 10 ) continue;
+    let leader = null;
+    try { leader = globalThis.fromUuidSync?.(uuid) ?? null; } catch(err) { leader = null; }
+    if ( leader?.items?.some?.(i => (i.type === "racialTrait") && /^ruler$/i.test(i.name)) ) {
+      globalThis.ui?.notifications?.warn(globalThis.game.i18n.format("DBU.Val.RulerMinions", { name: leader.name, n }));
+    }
+  }
+}
+
 export function registerAllyHooks() {
+  Hooks.on("createCombatant", c => rulerCheck(c.parent));
   let pending = null;
   const refresh = (changed, moved) => {
     if ( !changed ) return;

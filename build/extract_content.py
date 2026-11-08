@@ -749,7 +749,7 @@ def add_item(pack, name, type_, system, slug, section="", structure=None, fold=N
     system.setdefault("modifiers", [])
     system.setdefault("triggers", [])
     # I1 / M: a Special Maneuver that runs its own effect (Hype, Analysis, Stance)
-    if pack == "maneuvers" and name in MANEUVER_PIECES and not system["modifiers"] and not system["triggers"]:
+    if pack in ("maneuvers", "unique-abilities") and name in MANEUVER_PIECES and not system["modifiers"] and not system["triggers"]:
         system["modifiers"] = [dict(m) for m in MANEUVER_PIECES[name]["modifiers"]]
         system["triggers"] = [dict(t) for t in MANEUVER_PIECES[name]["triggers"]]
     doc = {"_type": "Item", "_id": fid(f"{pack}:{key or (slug + ':' + name)}"), "name": name, "type": type_,
@@ -1133,6 +1133,16 @@ def build_talents():
         mods, trigs, structure = compile_effects(effects, name)
         if name == "Weapon Specialist":
             mods.append({"target": "flag.noWeaponPenalty", "value": "1", "condition": "", "label": name, "active": True, "always": False})
+        # T24 Enhanced Search 5: at the start of your turn (1/Round), a Perception/Clairvoyance vs Stealth/Concealment Clash
+        # button against the targeted Character; a win marks it 'Marked' until the start of your next turn (+1(T) Strike and
+        # Dodge against it)
+        if name == "Enhanced Search":
+            trigs = [t for t in trigs if not ((t.get("event") == "startOfTurn") and (t.get("mode") == "remind"))]
+            trigs.append({"event": "startOfTurn", "effect": "mark", "value": "1", "resource": "Marked", "condition": "", "label": "Enhanced Search (5)",
+                          "target": "targeted", "duration": "startOfNextTurn", "mode": "ask", "limit": "1/Round", "active": True, "always": False,
+                          "check": "clash:perception|clairvoyance vs stealth|concealment"})
+            for t in ("vs.strike", "vs.dodge"):
+                mods.append({"target": t, "value": "1(T)", "condition": "@vs.mark.marked >= 1", "label": "Enhanced Search (5)", "active": True, "always": False})
         fold = folder("talents", f"{category} Talents")
         system = {"category": category, "prerequisites": clean(pre), "prereq": parse_prereq(pre, names),
                   "modifiers": mods, "triggers": trigs, "summary": f"{category} · {clean(pre)}"}
@@ -1217,8 +1227,8 @@ FIELD_RE = re.compile(r"^- \*\*(.+?)[:.]\s*\*\*\s*(.*)$")
 GRADED = {
     # Grades 4-5 come with Mastery and the 6th with the Entrusted State (Mastered Kaioken Grades table)
     "Kaioken": {"bonuses": {a: "(@G>=6?4:(@G>=5?3:(@G>=3?2:1)))(T)" for a in ("ag", "fo", "ma")}, "maxGrade": 3,
-                "mods": [("dice.combat", "(@G>=6?4:(@G>=5?3:(@G>=4?2:(@G>=2?1:0))))", "Kaioken Dice"),
-                         ("wound", "(ceil(@G/2))*@T", "Exponential Power"), ("attackLifeCost", "(@G+1)(bT)", "Kaioken: custo de LP")]},
+                # (the Kaioken Dice and the Wound are Exponential Power 3 and 2's automation entries: only the LP Cost here)
+                "mods": [("attackLifeCost", "(@G+1)(bT)", "Kaioken: custo de LP")]},
     "Super Kaioken": {"bonuses": {a: "(@G>=3?3:(@G>=2?2:1))(T)" for a in ("ag", "fo", "ma")}, "maxGrade": 3,
                       "mods": [("topDice.category", "(@G>=3?2:(@G>=2?1:0))", "S-Kaioken Grade"),
                                ("attackLifeCost", "(2*@G)(bT)", "Super Kaioken: custo de LP")]},
@@ -1553,7 +1563,7 @@ def stack_overrides(name):
         t = "Spiritual Apprentice"
         uas = [re.match(r"^## \*\*(.+?)\*\*$", l.strip()).group(1) for l in read("spirit-control")
                if re.match(r"^## \*\*(.+?)\*\*$", l.strip())]
-        return ([stack_choice(t, 2, uas)], [], {(t, 2)})
+        return ([stack_choice(t, 2, uas, pack="dbu-rpg.unique-abilities")], [], {(t, 2)})
     if name == "Bio-Diversity":
         t = "Genetic Smoothie"
         return ([stack_choice(t, 1, factor_trait_names("Genetic Splicing"), pack="dbu-rpg.racial-traits")], [], {(t, 1)})
@@ -1601,7 +1611,28 @@ DUMP_GROUPS = []
 # adds them with the Trait (module/rules/grants.mjs). LAST_GRANTS collects them for the Trait being built.
 GRANT_PACKS = {"maneuver": "maneuvers", "talent": "talents", "uniqueAbility": "unique-abilities", "racialTrait": "racial-traits",
                "signature": "signature-examples", "transformation": "transformations"}
-GRANT_RE = re.compile(r"\b(maneuver|talent|uniqueAbility|racialTrait|signature|transformationLine|transformation)\s*:\s*([^;]+)")
+GRANT_RE = re.compile(r"\b(maneuver|talent|uniqueAbility|racialTrait|signature|transformationLine|transformation|gear)\s*:\s*([^;]+)")
+# IG "grant gear: Plating": an item the Trait makes, not from a compendium (GEAR_GRANTS: its data; "from" copies an
+# equipment item by name and changes it)
+_NATURAL = lambda name: {"type": "apparel", "name": name, "img": "icons/svg/shield.svg",
+                         "system": {"category": "armor", "craftsmanship": 1, "layer": "top", "natural": True, "integrated": True,
+                                    "equipped": True, "breakValue": 3, "qualities": []}}
+GEAR_GRANTS = {
+    "Plating": _NATURAL("Plating"),
+    "Metal Exoskeleton": _NATURAL("Metal Exoskeleton"),
+    "Integrated Weapon": {"type": "weapon", "name": "Integrated Weapon", "img": "icons/svg/sword.svg",
+                          "system": {"craftsmanship": 4, "integrated": True, "equipped": True, "qualities": [{"name": "Regenerating", "slots": 0}]}},
+    "Onboard Scouter": {"from": "Scouter [Tech]", "name": "Onboard Scouter", "system": {"craftDC": "Master", "equipped": True}},
+    # Weapon Ports: two Installed Weapons of Grade 2 with different Weapon Types and the Artisan Quality (1 slot)
+    # F12 Extension Attack 3 (Extending Weapon): an Integrated Physical Weapon of Grade 5, Extending and Hidden
+    "Prehensile Weapon": {"type": "weapon", "name": "Prehensile Weapon", "img": "icons/svg/sword.svg",
+                          "system": {"weaponType": "physical", "craftsmanship": 5, "integrated": True, "equipped": True,
+                                     "qualities": [{"name": "Extending", "slots": 1}, {"name": "Hidden", "slots": 1}]}},
+    "Installed Weapon (Physical)": {"type": "weapon", "name": "Installed Weapon (Physical)", "img": "icons/svg/sword.svg",
+                                    "system": {"weaponType": "physical", "craftsmanship": 2, "integrated": True, "equipped": True, "qualities": [{"name": "Artisan", "slots": 1}]}},
+    "Installed Weapon (Energy)": {"type": "weapon", "name": "Installed Weapon (Energy)", "img": "icons/svg/lightning.svg",
+                                  "system": {"weaponType": "energy", "craftsmanship": 2, "integrated": True, "equipped": True, "qualities": [{"name": "Artisan", "slots": 1}]}},
+}
 # B5 "grant transformation: Pure Form +aspect:prelude" / "transformationLine: Super Saiyan +aspect:natural:1": an Aspect
 # patch applied when the Transformation is added (module/rules/grants.mjs patchAspects)
 ASPECT_PATCH_RE = re.compile(r"\s*\+aspect:\s*([A-Za-z0-9]+)(?::\s*(\d+))?")
@@ -1609,6 +1640,16 @@ ASPECT_PATCH_RE = re.compile(r"\s*\+aspect:\s*([A-Za-z0-9]+)(?::\s*(\d+))?")
 
 # D3 "grant maneuver: Divine Flame +active": the granted item works only while the granting item does
 ACTIVE_RE = re.compile(r"\s*\+active\b", re.I)
+# OG "+option:<Name>": the granted item comes with that option of the Racial Trait (switched on) and goes with it;
+# "+res:<slug>": it works only while that sheet resource is 1+
+OPTION_G_RE = re.compile(r"\s*\+option\s*:\s*([^+;]+?)\s*(?=\+|$)", re.I)
+RES_G_RE = re.compile(r"\s*\+res\s*:\s*([A-Za-z0-9]+)(?:\s*:\s*(\d+))?", re.I)
+# F8 "+state:<key>": it works only while the owner is in that State
+STATE_G_RE = re.compile(r"\s*\+state\s*:\s*([A-Za-z0-9]+)", re.I)
+# T22 "+picked:<Option>": it works only while that option of the granting item's choices is picked (a Class)
+PICKED_G_RE = re.compile(r"\s*\+picked\s*:\s*([^+;]+?)\s*(?=\+|;|$)", re.I)
+# F14 "+free": a granted Awakening comes with a free Stack (no Awakening Limit, no Attribute Modifier Bonus)
+FREE_G_RE = re.compile(r"\s*\+free\b", re.I)
 # Q "grant maneuver: Divine Flame +mastery:1": the granted item works only once the granting item has that many Masteries
 MASTERY_RE = re.compile(r"\s*\+mastery\s*:\s*(\d+)", re.I)
 # D3 "grant pick: 2 maneuver from God Maneuvers +active": a choice of the Transformation (its picks bring their items)
@@ -1660,10 +1701,11 @@ def find_grant(kind, name):
 def grant_list(a, key):
     """[{type, name, uuid}] of an entry's grants (all resolved), or None when one of them is not in the compendiums."""
     code = a.get("code") or {}
-    if code.get("category") != "grant":
+    # (OG: an entry's own "grant" field grants too, whatever its code category: an entry still partly the GM's)
+    if code.get("category") != "grant" and not a.get("grant"):
         return []
     out = []
-    spec = code.get("spec", "")
+    spec = ";".join(x for x in [code.get("spec", "") if code.get("category") == "grant" else "", a.get("grant", "")] if x)
     # D3: "pick: <n> <kind> from <folder or group>" makes a choice of the Transformation (resolved now: the packs it
     # names are built before the Transformations)
     for n, kind, where, active, mastery in PICK_RE.findall(spec):
@@ -1681,6 +1723,16 @@ def grant_list(a, key):
     for kind, name in GRANT_RE.findall(spec):
         active = bool(ACTIVE_RE.search(name))
         name = ACTIVE_RE.sub("", name)
+        om = OPTION_G_RE.search(name)
+        rm = RES_G_RE.search(name)
+        sm = STATE_G_RE.search(name)
+        fm = FREE_G_RE.search(name)
+        pm = PICKED_G_RE.search(name)
+        name = PICKED_G_RE.sub("", name)
+        name = FREE_G_RE.sub("", STATE_G_RE.sub("", RES_G_RE.sub("", OPTION_G_RE.sub("", name))))
+        og = {**({"option": om.group(1).strip()} if om else {}), **({"res": rm.group(1).lower()} if rm else {}),
+              **({"resMin": int(rm.group(2))} if (rm and rm.group(2)) else {}), **({"state": sm.group(1)} if sm else {}),
+              **({"free": True} if fm else {}), **({"picked": pm.group(1).strip()} if pm else {})}
         mm = MASTERY_RE.search(name)
         mastery = {"mastery": int(mm.group(1))} if mm else {}
         name = MASTERY_RE.sub("", name)
@@ -1688,18 +1740,30 @@ def grant_list(a, key):
         if kind in ("transformation", "transformationLine"):
             name, aspects = split_aspects(name)
             out.append({"type": kind, "name": name, "uuid": "", "pending": key, **({"aspects": aspects} if aspects else {}),
-                        **({"active": True} if active else {}), **mastery})
+                        **({"active": True} if active else {}), **mastery, **og})
+            continue
+        if kind == "gear":
+            g = GEAR_GRANTS.get(name.strip())
+            if g and g.get("from"):
+                base = next((x for x in PACKS.get("equipment", []) if x.get("_type") == "Item" and x["name"] == g["from"]), None)
+                g = ({"type": base["type"], "name": g["name"], "img": base.get("img"), "system": {**base["system"], **g["system"]}} if base else None)
+            if not g:
+                UNRESOLVED_GRANTS.append(f"{key}: gear {name.strip()}")
+                return None
+            data = json.loads(json.dumps(g))
+            data.setdefault("flags", {}).setdefault("dbu-rpg", {})["integrated"] = True
+            out.append({"type": g["type"], "name": g["name"], "uuid": "", "data": data, **og})
             continue
         d = find_grant(kind, name)
         if not d and kind == "racialTrait":
             # A Racial Trait built later (a Monstrous Trait, a Custom Species Trait further down the page): found at the end
-            out.append({"type": "racialTrait", "name": name.strip(), "uuid": "", "pending": key, **({"active": True} if active else {}), **mastery})
+            out.append({"type": "racialTrait", "name": name.strip(), "uuid": "", "pending": key, **({"active": True} if active else {}), **mastery, **og})
             continue
         if not d:
             UNRESOLVED_GRANTS.append(f"{key}: {kind} {name.strip()}")
             return None
         out.append({"type": d["type"], "name": d["name"], "uuid": f"Compendium.dbu-rpg.{GRANT_PACKS[kind]}.Item.{d['_id']}",
-                    **({"active": True} if active else {}), **mastery})
+                    **({"active": True} if active else {}), **mastery, **og})
     return out or None
 
 
@@ -1765,7 +1829,7 @@ def apply_automation_entry(slug, trait, e, key, mods, trigs, structure, cond):
                      "always": bool(m.get("always", permanent)),
                      "mode": m.get("mode", ""), "limit": m.get("limit", ""),
                      # Option pieces (attack.*, vs.*, defense.*, clash.*...): only written when set
-                     **{k: str(m[k]) for k in ("cost", "amount", "group", "limitKey", "at", "range") if m.get(k)}})
+                     **{k: str(m[k]) for k in ("cost", "amount", "group", "limitKey", "at", "range", "exclusive", "checkCost") if m.get(k)}})
     for t in a.get("triggers", []):
         trigs.append({"event": t["event"], "effect": t["effect"], "value": str(t.get("value", "")), "resource": t.get("resource", ""),
                       "condition": " && ".join(x for x in [t.get("condition", ""), cond] if x), "mode": t.get("mode", "auto"),
@@ -1776,7 +1840,7 @@ def apply_automation_entry(slug, trait, e, key, mods, trigs, structure, cond):
                          if t.get(k)},
                       "always": bool(t.get("always", permanent))})
     code = a.get("code") or {}
-    implemented = (code.get("category") and code.get("key") in IMPLEMENTED_CODE) or bool(grants) or picked
+    implemented = (code.get("category") and code.get("key") in IMPLEMENTED_CODE) or (bool(grants) and code.get("category") == "grant") or picked
     if implemented and code.get("key"):
         CODE_EFFECTS.setdefault(slug, {})[key] = code["key"]
     data = bool(a.get("modifiers")) or any(t["effect"] != "message" for t in a.get("triggers", []))
@@ -2236,13 +2300,35 @@ def field_after(seg, label):
     return ""
 
 
-def build_unique_abilities():
-    lines = read("unique-abilities")
+# Transformation pages with Unique Abilities of their own (the "## **Name**" blocks with an Ability Type); a block ends
+# at the page's end ("Previous") or at a Trait heading after it (Grand Awakening, Burst Limit, Mastery Trait...)
+UA_EXTRA_PAGES = ["spirit-control", "gravity-controller", "manifested-willpower", "energy-consumption", "time-power",
+                  "appointed-god", "warlock", "time-skipper", "shinigami-factor", "ruler-of-time"]
+UA_BLOCK_END = re.compile(r"^(Previous|Return to Top)$|^#### \*\*(Grand Awakening|Burst Limit|Mastery Trait|Legendary Trait|Factor Trait)")
+
+
+def ua_blocks(slug, extra=False):
+    lines = read(slug)
     heads = [i for i, l in enumerate(lines) if re.match(r"^## \*\*[^*]+\*\*\s*$", l.strip())]
     heads.append(len(lines))
     for a, b in zip(heads, heads[1:]):
         name = re.match(r"^## \*\*([^*]+)\*\*", lines[a].strip()).group(1).strip()
         seg = lines[a:b]
+        if extra:
+            if not field_after(seg[:20], "Ability Type"):
+                continue
+            cut = next((k for k, l in enumerate(seg) if k and UA_BLOCK_END.match(l.strip())), None)
+            if cut is not None:
+                seg = seg[:cut]
+        yield name, seg
+
+
+def build_unique_abilities():
+    blocks = [("unique-abilities", n, s) for n, s in ua_blocks("unique-abilities")]
+    seen = {n for _, n, _ in blocks}
+    for page in UA_EXTRA_PAGES:
+        blocks += [(page, n, s) for n, s in ua_blocks(page, extra=True) if n not in seen]
+    for slug, name, seg in blocks:
         tp = re.search(r"(\d+)", field_after(seg[:20], "TP Cost") or "")
         passive = field_after(seg[:20], "Passive Bonus")
         mods = compile_passive(passive, f"{name} (Passive Bonus)") if passive and passive.upper() != "N/A" else []
@@ -2276,7 +2362,7 @@ def build_unique_abilities():
         structure = [f"Advancements: {', '.join(x['name'] for x in advancements) or '—'}",
                      f"Restrictions: {', '.join(x['name'] for x in restrictions) or '—'}",
                      f"Passive Bonus: {'automatizado' if mods else ('manual' if passive and passive.upper() != 'N/A' else '—')}"]
-        add_item("unique-abilities", name, "uniqueAbility", system, "unique-abilities", name, structure)
+        add_item("unique-abilities", name, "uniqueAbility", system, slug, name, structure)
 
 
 # ---------------------------------------------------------------------------
@@ -2338,10 +2424,102 @@ MANEUVER_PIECES = {
                       _m("defenseValue", "-1(T)", "@res.stonestance >= 1", "Stone Stance")],
         "triggers": [_t("maneuverUsed", "resourcePick", "1", "Flame Stance|Wind Stance|Wave Stance|Stone Stance|* Stance",
                         "@via_stance == 1", "Stance", mode="ask")]},
+    # GL: each Action targets a Square (a Glass Sphere on the map: Magnitude = the times it was targeted, Standard at 1)
+    # or a Character (a Clash Corporeal vs any Saving Throw: Slowed x the times it was targeted until your next turn)
+    "Glassification": {
+        "modifiers": [],
+        "triggers": [{**_t("maneuverUsed", "placeArea", "@n", "Glass", "@via_glassification == 1", "Glassification: Square", mode="ask"), "amount": "3"},
+                     {**_t("maneuverUsed", "condition", "@n", "slowed", "@via_glassification == 1 && @res.glasscombat6 == 0", "Glassification: Character",
+                           target="targeted", duration="startOfNextTurn", mode="ask"), "amount": "3",
+                      "check": "clash:corporeal vs impulsive|corporeal|cognitive|morale"}]},
+    # UA: one of three effects (a button each): an Opponent in Melee Range Impaired after a Use Magic Clash, a Character in
+    # Melee Range moved (Use Magic ranks Squares) after that Clash, or yourself placed within your Use Magic ranks (no
+    # Exploit); a lost Clash offers the target's Exploit. (Whimsical Magic doubles the Use Magic ranks of these effects)
+    # F16 Terrify: a Skill Clash (Intimidation vs Intuition/Intimidation, -2 against a higher Tier of Power) against an
+    # Opponent within 4 Squares: Shaken until the end of your next turn, and Prone if it already was Shaken
+    # F17 Absorb: the two Clashes against your target, then Shaken or absorbed (combat/absorb.mjs)
+    "Absorb Maneuver": {
+        "modifiers": [],
+        "triggers": [_t("maneuverUsed", "absorbManeuver", "", "", "@via_absorb == 1", "Absorb", mode="ask")]},
+    "Terrify Maneuver": {
+        "modifiers": [_m("clash.skill", "-2", "@via_terrify == 1 && @vs.top > @bT", "Terrify: higher Tier of Power")],
+        "triggers": [{**_t("maneuverUsed", "condition", "1", "prone", "@via_terrify == 1 && @vs.cond.shaken >= 1 && @vs.distance <= 4",
+                           "Terrify", target="targeted", mode="ask"), "check": "clash:intimidation vs intuition|intimidation", "rollKey": "terrify"},
+                     {**_t("maneuverUsed", "condition", "1", "shaken", "@via_terrify == 1 && @vs.distance <= 4", "Terrify",
+                           target="targeted", duration="endOfNextTurn", mode="ask"), "check": "clash:intimidation vs intuition|intimidation", "rollKey": "terrify"}]},
+    "Magic Trick Maneuver": {
+        "modifiers": [],
+        "triggers": [{**_t("maneuverUsed", "condition", "1", "impaired", "@via_magictrick == 1", "Magic Trick: Impaired",
+                           target="targeted", duration="startOfNextTurn", mode="ask"), "check": "clash:useMagic vs intuition|useMagic"},
+                     {**_t("maneuverUsed", "moveOther", "@ranks.useMagic * (1 + min(1, @item.whimsicalmagic))", "", "@via_magictrick == 1", "Magic Trick: move the target",
+                           mode="ask"), "check": "clash:useMagic vs intuition|useMagic"},
+                     _t("maneuverUsed", "teleport", "@ranks.useMagic * (1 + min(1, @item.whimsicalmagic))", "", "@via_magictrick == 1", "Magic Trick: move yourself", mode="ask"),
+                     _t("clashLost", "provoke", "", "other", "@via_magictrick == 1", "Magic Trick (Exploitable)")]},
+    # UA Healing Hands (Unique Ability): your target regains 1d10(bT) + your Magic Modifier LP (+1d10(bT) with Healing
+    # Expertise); the passive +1 to Medicine
+    "Healing Hands": {
+        "modifiers": [_m("skill.medicine", "1", "", "Healing Hands (passive)")],
+        "triggers": [{**_t("maneuverUsed", "life", "@roll + @ma", "", "@via_healinghands == 1", "Healing Hands", target="other"), "roll": "1d10(bT)"},
+                     {**_t("maneuverUsed", "life", "@roll", "", "@via_healinghands == 1 && @adv.healingexpertise == 1",
+                           "Healing Hands: Healing Expertise", target="other"), "roll": "1d10(bT)"}]},
+    # UA Time Freeze (Unique Ability): a Frozen Turn (the sheet resource "Frozen Turn" while it lasts: until you end it or
+    # the end of the turn); meanwhile the other Characters have -2(bT) Defense Value and -2 Perception
+    "Time Freeze": {
+        "modifiers": [_m("ally.defenseValue", "-2(bT)", "@res.frozenturn >= 1", "Time Freeze: Frozen Turn"),
+                      _m("foe.defenseValue", "-2(bT)", "@res.frozenturn >= 1", "Time Freeze: Frozen Turn"),
+                      _m("ally.skill.perception", "-2", "@res.frozenturn >= 1", "Time Freeze: Frozen Turn"),
+                      _m("foe.skill.perception", "-2", "@res.frozenturn >= 1", "Time Freeze: Frozen Turn")],
+        "triggers": [_t("maneuverUsed", "resourceSet", "1", "Frozen Turn", "@via_timefreeze == 1", "Time Freeze: Frozen Turn"),
+                     {**_t("maneuverUsed", "message", "Frozen Turn: 2 Actions, Standard Maneuvers only (no Ki Wager, Instant / Out-of-Sequence Maneuvers, Combat Recovery, Power Up, Energy Charge, Unique Abilities or Special Maneuvers on others); the others use no Counter, Instant or Out-of-Sequence Maneuvers (Surges allowed)",
+                           "", "@via_timefreeze == 1", "Time Freeze"), "mode": "remind"},
+                     _t("use", "resourceSet", "0", "Frozen Turn", "@res.frozenturn >= 1", "Time Freeze: end the Frozen Turn"),
+                     _t("endOfTurn", "resourceSet", "0", "Frozen Turn", "@res.frozenturn >= 1", "Time Freeze: the Frozen Turn ends")]},
+    # PD: as the Grappler, target the Grappled: up to 3 Actions, each 1/2 of your Might off its LP and KP (you regain them)
+    "Power Drain Maneuver": {
+        "modifiers": [],
+        "triggers": [{**_t("maneuverUsed", "powerDrain", "@n", "", "@via_powerdrain == 1 && @grappling == 1", "Power Drain",
+                           target="targeted", mode="ask"), "amount": "3", "cost": "actions:@n"}]},
+    # PD: a Parry that avoids an Energy / Magic attack may absorb it: its Urgent Wound Roll, 1/2 of it back as KP
+    "Attack Absorption Maneuver": {
+        "modifiers": [],
+        "triggers": [_t("dodged", "absorbAttack", "", "", "@parry == 1 && (@energy == 1 || @magic == 1)", "Attack Absorption", mode="ask")]},
     "Analysis Maneuver": {
         "modifiers": [_m("vs.combat", "1(T)+ceil(@sc/4)", "@vs.mark.analyzed >= 1", "Analyzed")],
         "triggers": [_t("maneuverUsed", "mark", "1", "Analyzed+", "@via_analysis == 1", "Analyzed", target="targeted",
                         duration="endOfNextTurn")]},
+    # T5 Intuit: the targeted Opponent is 'Seen' until the end of your next turn; +2 to your Skill Checks and +1(T) to your
+    # Saving Throws in Clashes against a Seen Opponent
+    "Intuit Maneuver": {
+        "modifiers": [_m("clash.skill", "2", "@vs.mark.seen >= 1", "Seen"), _m("clash.save", "1(T)", "@vs.mark.seen >= 1", "Seen")],
+        "triggers": [_t("maneuverUsed", "mark", "1", "Seen+", "@via_intuit == 1", "Seen", target="targeted", duration="endOfNextTurn")]},
+    # T15 the Class Special Maneuvers (Initial Class): Pumped (Roar) / Infused (Draconic Infusion) until the end of your next
+    # turn (the resource counts your turn ends: 2 when used in your turn, else 1); Doomed (Dark Beam) and Mighty (Mighty
+    # Breeze) marks until the start of your next turn; Divine Blessing heals the Allies and harms the Opponents in a Sphere
+    "Roar Maneuver": {
+        "modifiers": [_m("combat", "1(T)", "@res.pumped >= 1", "Pumped"), _m("speed", "1(T)", "@res.pumped >= 1", "Pumped"),
+                      _m("soak", "-1(T)", "@res.pumped >= 1", "Pumped")],
+        "triggers": [_t("maneuverUsed", "resourceSet", "1 + @myTurn", "Pumped", "@via_roar == 1", "Pumped"),
+                     _t("endOfTurn", "resource", "-1", "Pumped", "@res.pumped >= 1", "Pumped"),
+                     _t("startOfEncounter", "resourceSet", "0", "Pumped", "", "Pumped")]},
+    "Draconic Infusion Maneuver": {
+        "modifiers": [_m("surgency", "1(T)", "@res.infused >= 1", "Infused"), _m("wound", "1(T)", "@res.infused >= 1", "Infused"),
+                      _m("dr", "1(T)", "@res.infused >= 1", "Infused"), _m("defenseValue", "-1(T)", "@res.infused >= 1", "Infused"),
+                      _m("speed", "-1(T)", "@res.infused >= 1", "Infused")],
+        "triggers": [_t("maneuverUsed", "resourceSet", "1 + @myTurn", "Infused", "@via_draconicinfusion == 1", "Infused"),
+                     _t("endOfTurn", "resource", "-1", "Infused", "@res.infused >= 1", "Infused"),
+                     _t("startOfEncounter", "resourceSet", "0", "Infused", "", "Infused")]},
+    "Dark Beam Maneuver": {
+        "modifiers": [_m("foe.vs.damageTaken", "2(T)", "@to.mark.doomed >= 1", "Doomed")],
+        "triggers": [{**_t("maneuverUsed", "mark", "1", "Doomed+", "@via_darkbeam == 1 && @vs.distance >= 2", "Dark Beam: Doomed",
+                           target="targeted", duration="startOfNextTurn", mode="ask"), "check": "clash:cognitive vs impulsive|corporeal"}]},
+    "Mighty Breeze Maneuver": {
+        "modifiers": [{**_m("ally.soak", "1(T)", "@to.mark.mighty >= 1", "Mighty")}, {**_m("ally.dr", "1(T)", "@to.mark.mighty >= 1", "Mighty")}],
+        "triggers": [{**_t("maneuverUsed", "mark", "1", "Mighty+", "@via_mightybreeze == 1", "Mighty", target="allies", duration="startOfNextTurn"), "range": "4"}]},
+    "Divine Blessing Maneuver": {
+        "modifiers": [],
+        "triggers": [{**_t("maneuverUsed", "life", "@aptitudes.surgency", "", "@via_divineblessing == 1", "Divine Blessing: Allies", target="allies"), "range": "3"},
+                     {**_t("maneuverUsed", "life", "-@aptitudes.surgency", "", "@via_divineblessing == 1", "Divine Blessing: Opponents",
+                           target="opponents", mode="ask"), "range": "3", "check": "clash:cognitive vs impulsive|corporeal"}]},
 }
 
 
@@ -2620,10 +2798,11 @@ build_talents()
 build_unique_abilities()
 build_maneuvers()
 build_signatures()
+# (IG: the equipment before the Racial Traits: a Trait's gear grant may copy an item of it)
+build_items()
 build_races()
 build_transformations()
 build_villainous_traits()
-build_items()
 
 # Effects run by the system's code: each Transformation lists its own ("slug|Trait|n" → key)
 for doc in PACKS.get("transformations", []):
@@ -2659,9 +2838,11 @@ for doc in PACKS.get("racial-traits", []) + PACKS.get("transformations", []):
                 UNRESOLVED_GRANTS.append(f"{g['pending']}: {g['type']} {g['name']} (the item lists it, without effect)")
                 continue
             for k, d in enumerate(found):
+                # (OG: the grant's +active / +mastery / +option / +res go with it)
                 grants.insert(at + k, {"type": "transformation", "name": d["name"],
                                        "uuid": f"Compendium.dbu-rpg.transformations.Item.{d['_id']}",
-                                       **({"aspects": g["aspects"]} if g.get("aspects") else {})})
+                                       **({"aspects": g["aspects"]} if g.get("aspects") else {}),
+                                       **{x: g[x] for x in ("active", "mastery", "option", "res", "resMin", "state", "free", "picked") if g.get(x)}})
             continue
         d = find_grant("racialTrait", g["name"])
         if d:

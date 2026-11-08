@@ -10,7 +10,7 @@ export const targets = {};
  * aspect.<key>[.<param>] / aspectSet.<key>[.<param>] / aspectAll.<key>[.<param>] / aspectOf.<slug>.<key>[.<param>]:
  * the Aspects of a Transformation.
  */
-export const prefixes = ["fxOff.", "fxOn.", "fxMult.", "fxAdd.", "fxLimit.", "aspect.", "aspectSet.", "aspectAll.", "aspectOf."];
+export const prefixes = ["fxOff.", "fxOn.", "fxMult.", "fxAdd.", "fxLimit.", "fxAsk.", "aspect.", "aspectSet.", "aspectAll.", "aspectOf."];
 /** fxUsed: a piece of an effect was applied (@fxUsed.<ref> = 1). */
 export const events = ["fxUsed"];
 export const effects = [];

@@ -274,6 +274,16 @@ DBU.STATE_LEVEL_NAMES = {
  * modifiers (value 1) suppress it.
  */
 DBU.stateModifiers = {
+  // F12 Incorporeal (Monster): (1) an attack whose Wound Roll is below 1/4 of your Max LP deals no Damage; (3) +2(T) to
+  // your Grapple Checks as the Grappled; (4) no Attacking Maneuvers; (5) you pass through Characters and Features
+  // (forced movements) and your Square counts as empty; (6) no Collision Damage
+  incorporeal: [
+    { target: "vs.ignoreWoundBelow", value: "ceil(@lifeMax/4)", n: 1 },
+    { target: "clash.grapple", value: "2(T)", condition: "@grappled == 1", n: 3 },
+    { target: "block.attack", value: "1", n: 4 },
+    { target: "flag.passThrough", value: "1", n: 5 },
+    { target: "collision.ignore", value: "1", n: 6 }
+  ],
   // D1 Surging (1): an Energy Charge on every Attacking Maneuver that includes your Focus (the "Focus" mark) as a target
   surging: [
     { target: "attack.charges", value: "1", condition: "@vsAny.mark.focus >= 1", n: 1 }
@@ -304,13 +314,22 @@ DBU.stateModifiers = {
   ],
   undying: [{ target: "combat", value: "-1(T)", n: 3 }],
   determined: [{ target: "flag.ignoreThresholds", value: "1", n: 2 }, { target: "flag.autoHit", value: "1", n: 1 }],
-  entrusted: [{ target: "flag.greaterDice", value: "1", n: 1 }, { target: "stress", value: "1", n: 2 }],
+  entrusted: [{ target: "flag.greaterDice", value: "1", n: 1 }, { target: "stress", value: "1", n: 2 },
+    // EN (4) [1/Encounter]: a Basic Attack (a Signature with "entrusted4.signature") may take Full Wager and All-or-Nothing,
+    // with the Capacity reset to its maximum first: one box of the attack dialog (group entrusted4)
+    { target: "attack.advantage.fullWager", value: "1", condition: "(@basic == 1 || (@signature == 1 && @entrusted4Sig >= 1))", mode: "ask", group: "entrusted4", limit: "1/Encounter", n: 4 },
+    { target: "attack.advantage.allOrNothing", value: "1", condition: "(@basic == 1 || (@signature == 1 && @entrusted4Sig >= 1))", mode: "ask", group: "entrusted4", n: 4 },
+    { target: "attack.capacityFull", value: "1", condition: "(@basic == 1 || (@signature == 1 && @entrusted4Sig >= 1))", mode: "ask", group: "entrusted4", n: 4 }],
   godKi: [{ target: "wound", value: "3(T)", n: 3 }, { target: "soak", value: "3(T)", n: 3 }],
   deadState: [
     { target: "stress", value: "2", n: 1 }, { target: "steadfast", value: "1", n: 1 },
     { target: "combat", value: "-1(bT)", n: 4 }, { target: "soak", value: "-1(bT)", n: 4 }
   ],
-  liquid: [{ target: "size", value: "-1", n: 1 }, { target: "skill.stealth", value: "2", n: 3 }],
+  liquid: [{ target: "size", value: "-1", n: 1 }, { target: "skill.stealth", value: "2", n: 3 },
+    // BB (4): your movement provokes no Exploit
+    { target: "noProvoke.movement", value: "1", n: 4 }],
+  // BB Multiple Arms: (2) one more Counter Action each Combat Round; (6) Diminishing Offense starts after the 4th attack
+  multipleArms: [{ target: "counters", value: "1", n: 2 }, { target: "dimOffenseStart", value: "1", n: 6 }],
   drunk: [
     // Tipsy (1): −L(T) Saving Throws and Combat Rolls; (2): +L Natural Result of Strike and Dodge
     { target: "save.all", value: "-@L(T)", n: 1, lv: 1 }, { target: "combat", value: "-@L(T)", n: 1, lv: 1 },
@@ -332,6 +351,12 @@ DBU.stateModifiers = {
  * Defeat your Focus (you may leave the State then, ignoring its 2nd effect).
  */
 DBU.stateTriggers = [
+  // F12 Incorporeal (2): Damage from an attack makes you leave it, and you cannot enter it again until the end of your
+  // next turn ("stateBlock.incorporeal")
+  { state: "incorporeal", n: 2, event: "damaged", condition: "@states.incorporeal >= 1 && @damage > 0", effect: "buff",
+    resource: "stateBlock.incorporeal", value: "1", duration: "endOfNextTurn" },
+  { state: "incorporeal", n: 2, event: "damaged", condition: "@states.incorporeal >= 1 && @damage > 0", effect: "leaveState",
+    resource: "incorporeal" },
   { state: "surging", n: 1, event: "stateEnter", condition: "@state_surging == 1 && @already == 0", effect: "mark", resource: "Focus",
     target: "targeted", duration: "none", mode: "ask" },
   { state: "surging", n: 1, event: "stateLeave", condition: "@state_surging == 1", effect: "unmark", resource: "Focus", target: "self" },
@@ -340,7 +365,44 @@ DBU.stateTriggers = [
   { state: "surging", n: 4, event: "stateEnter", condition: "@state_surging == 1 && @cond.compelled >= 1", effect: "removeCondition",
     resource: "compelled", value: "" },
   { state: "surging", n: 5, event: "attackHit", condition: "@states.surging >= 1 && @defeated == 1 && @vs.mark.focus == 1",
-    effect: "message", value: "Focus Defeated: you may leave the Surging State, ignoring its 2nd effect", mode: "remind" }
+    effect: "message", value: "Focus Defeated: you may leave the Surging State, ignoring its 2nd effect", mode: "remind" },
+  // BB Raging, Apoplectic (1): entering it and at the start of your turn, a Basic Attack Out-of-Sequence (1/Round)
+  { state: "raging", n: 1, lv: 3, event: "stateEnter", condition: "@state_raging == 1 && @level >= 3", effect: "maneuver",
+    resource: "basicAttack", mode: "ask", limit: "1/Round", limitKey: "state-apoplectic-1" },
+  { state: "raging", n: 1, lv: 3, event: "startOfTurn", condition: "@states.raging >= 3", effect: "maneuver",
+    resource: "basicAttack", mode: "ask", limit: "1/Round", limitKey: "state-apoplectic-1" },
+  // BB Mindful, Zen (1): a Counter Maneuver used (a Counter Action spent) regains 2L(bT) Ki Points
+  { state: "mindful", n: 1, lv: 2, event: "counterSpent", condition: "@states.mindful >= 2", effect: "ki", value: "2*@states.mindful*@bT" },
+  // BB Mindful, Tranquil (1): entering it gives a Counter Action (each Combat Round: its built-in modifier)
+  { state: "mindful", n: 1, lv: 3, event: "stateEnter", condition: "@state_mindful == 1 && @level >= 3 && @already == 0", effect: "counters", value: "1" },
+  // BB Determined (3): at the start of your turn you leave it and skip that turn
+  { state: "determined", n: 3, event: "startOfTurn", condition: "@states.determined >= 1", effect: "leaveState", resource: "determined" },
+  { state: "determined", n: 3, event: "startOfTurn", condition: "@states.determined >= 1", effect: "message",
+    value: "Determined: skip this turn", mode: "remind" },
+  // BB Entrusted (3): entering it gives 1 Action
+  { state: "entrusted", n: 3, event: "stateEnter", condition: "@state_entrusted == 1 && @already == 0", effect: "actions", value: "1" },
+  // BB Multiple Arms (2): entering it gives a Counter Action for this Combat Round; (4) the Strike Roll of a Combination
+  // attack rolled again (1/Round)
+  { state: "multipleArms", n: 2, event: "stateEnter", condition: "@state_multipleArms == 1 && @already == 0", effect: "counters", value: "1" },
+  { state: "multipleArms", n: 4, event: "roll", condition: "@states.multipleArms >= 1 && @kind_strike == 1 && @profile_combination == 1",
+    effect: "reroll", value: "1", mode: "ask", limit: "1/Round" },
+  // BB Spectator: (1) entering it and at the start of your turn, +1(bT) Combat Rolls to an Ally (your target) until the start
+  // of your next turn; (2) at the start of your turn you may leave it; (3) if you stay: lose your Actions, regain 2d10(bT)
+  // Life and Ki Points (and end your turn)
+  { state: "spectator", n: 1, event: "stateEnter", condition: "@state_spectator == 1 && @already == 0", effect: "buff", resource: "combat",
+    value: "1*@bT", target: "targeted", duration: "startOfNextTurn", mode: "ask" },
+  { state: "spectator", n: 1, event: "startOfTurn", condition: "@states.spectator >= 1", effect: "buff", resource: "combat",
+    value: "1*@bT", target: "targeted", duration: "startOfNextTurn", mode: "ask" },
+  { state: "spectator", n: 2, event: "startOfTurn", condition: "@states.spectator >= 1", effect: "leaveState", resource: "spectator", mode: "ask" },
+  { state: "spectator", n: 3, event: "startOfTurn", condition: "@states.spectator >= 1", effect: "life", value: "@roll", roll: "2d10(bT)",
+    rollKey: "spectator3", mode: "ask" },
+  { state: "spectator", n: 3, event: "startOfTurn", condition: "@states.spectator >= 1", effect: "ki", value: "@roll", roll: "2d10(bT)",
+    rollKey: "spectator3", mode: "ask" },
+  { state: "spectator", n: 3, event: "startOfTurn", condition: "@states.spectator >= 1", effect: "actions", value: "-99", roll: "2d10(bT)",
+    rollKey: "spectator3", mode: "ask" },
+  // BB Feral, Unhinged (1): a Critical Result on the Strike or the Wound Roll of an attack raises its Damage Category by 1 (once)
+  { state: "feral", n: 1, lv: 2, event: "woundRolled", condition: "@states.feral >= 2 && (@crit == 1 || @critStrike == 1)",
+    effect: "woundCategory", value: "1" }
 ];
 
 /** Transformation Aspects. auto = automated by the system; levels = has [LV]. */

@@ -63,7 +63,7 @@ export const PREFIX_RE = [/^tag_/];
 /** The option fields A2 adds to modifiers, allowed only on option targets. */
 const FIELDS = ["cost", "amount", "group", "limitKey", "at"];
 /** vs targets only the attacker has: never asked, nothing pays them nor picks their @n (no cost, no amount). */
-const ATTACKER_ONLY = new Set(["vs.wound", "vs.category", "vs.ignoreSoak", "vs.steadfast"]);
+const ATTACKER_ONLY = new Set(["vs.wound", "vs.category", "vs.ignoreSoak", "vs.steadfast", "vs.damageDealtMult"]);
 /** The attack.* targets an `at: "wound"` piece may have (combat/attack.mjs WOUND_TARGETS: what the Wound Roll and the
  * Damage still read). */
 const WOUND_TARGETS = new Set(["attack.wound", "attack.greaterDice", "attack.crit.wound", "attack.natural.wound",
@@ -71,14 +71,24 @@ const WOUND_TARGETS = new Set(["attack.wound", "attack.greaterDice", "attack.cri
   // 6F: Energy Charges, their Category and the Damage Attribute again, added on the hit
   "attack.charges", "attack.chargeCategory", "attack.damageAttrTimes"]);
 /** The keys of @vs (rules/versus.mjs versusData) and the ones that need a sub-key. */
-const VS_KEYS = new Set(["below", "anyCond", "dot", "size", "sizeDiff", "initiative", "initiativeDiff", "ally", "minion", "top", "capacityMax",
+const VS_KEYS = new Set(["myMinion", "topNow", "power", "below", "anyCond", "dot", "size", "sizeDiff", "initiative", "initiativeDiff", "ally", "minion", "top", "capacityMax",
   // 6F: Squares between you and the other Character (rules/proximity.mjs)
   "distance",
   // 6U: Compelled toward whom (rules/versus.mjs versusData)
   "compelledByMe", "compelledToThem",
   // 6Y: the other Character provokes no Exploit (its flag.noProvokeExploit)
-  "noProvoke"]);
-const VS_SUBKEYS = new Set(["cond", "states", "mark"]);
+  "noProvoke",
+  // RA: how many of its Combat Conditions you inflicted
+  "condByMe",
+  // RD: its Diminishing Defense penalty now
+  "dimDefense",
+  // RE: its adjacent Allies / Opponents
+  "alliesAdjacent", "opponentsAdjacent",
+  // T13: its Boosted Speed; T19: it is its turn now
+  "speedBoosted", "isTurn",
+  // T26: the Light Level where it is
+  "lightLevel"]);
+const VS_SUBKEYS = new Set(["cond", "states", "mark", "markOthers", "awk", "allyAdjAwk", "onArea", "markAdj"]);
 const VS_ROOTS = new Set(["vs", "vsMax", "vsMin", "vsAny", "vsCount"]);
 
 /** The @vs / @vsMax... variables of a formula checked against versusData's keys and the tables. */

@@ -26,7 +26,8 @@ function usesOf(actor, id) {
 /** How many more times a source can be used now (Infinity without a limit or outside a Combat Encounter). */
 export function usesLeft(actor, source) {
   if ( !source.limit ) return Infinity;
-  const used = usesOf(actor, source.def.id);
+  // (GC4: a source of an Ally counts its uses on that Ally)
+  const used = usesOf(source.def.payer ?? actor, source.def.id);
   if ( !used ) return Infinity;
   return Math.max(0, source.limit.max - ((source.limit.per === "round") ? used.round : used.encounter));
 }
@@ -109,11 +110,14 @@ export function resolveMultiProfile(actor, { value = "", profileKey, sig = null,
   const resource = source.def.resource
     ? (actor.system.resources ?? []).find(r => resourceSlug(r.name) === resourceSlug(source.def.resource)) : null;
   if ( resource && ((resource.value ?? 0) < 1) ) problems.push(L("DBU.MultiProfile.ErrResource", { source: name, name: resource.name }));
-  // The Glass Tribe's Glass costs a fixed amount of Ki Points instead of the Multi-Profile's (T)
-  const flatKp = source.def.kpFlat ? source.def.kpFlat(actor) : 0;
-  const cost = flatKp ? 0 : multiProfileCost(key);
-  return { source, key, cost, flatKp, problems, resource: resource?.name ?? null,
-    note: flatKp ? L("DBU.MultiProfile.NoteFlat", { source: name, profile: DBU.profiles[key].label, n: flatKp })
+  // The Glass Tribe's Glass costs a fixed amount of Ki Points instead of the Multi-Profile's (T); GC4: an Ally's (payer) pays it
+  const flatOf = source.def.kpFlat ? source.def.kpFlat(actor) : 0;
+  const payer = source.def.payer ?? null;
+  if ( payer && ((payer.system?.ki?.value ?? 0) < flatOf) ) problems.push(L("DBU.MultiProfile.ErrPayerKi", { name: payer.name, n: flatOf }));
+  const flatKp = payer ? 0 : flatOf;
+  const cost = flatOf ? 0 : multiProfileCost(key);
+  return { source, key, cost, flatKp, payerKp: payer ? flatOf : 0, problems, resource: resource?.name ?? null,
+    note: flatOf ? L("DBU.MultiProfile.NoteFlat", { source: name, profile: DBU.profiles[key].label, n: flatOf })
       : L("DBU.MultiProfile.Note", { source: name, profile: DBU.profiles[key].label, n: cost }) };
 }
 
@@ -125,14 +129,26 @@ async function recordUse(actor, id) {
   const uses = (flag.combat === used.combat.id) ? (flag.uses ?? {}) : {};
   const e = uses[id] ?? {};
   uses[id] = { round: used.combat.round, roundCount: used.round + 1, total: (e.total ?? 0) + 1 };
-  await actor.setFlag("dbu-rpg", FLAG, { combat: used.combat.id, uses });
+  // (GC4: an Ally's use is written through the GM when the user does not own it)
+  const { safeUpdate } = await import("../socket.mjs");
+  await safeUpdate(actor, { [`flags.dbu-rpg.${FLAG}`]: { combat: used.combat.id, uses } });
 }
 
 /** Count the use (per Combat Round / Encounter) and spend the resource, once the attack is paid. Returns notes. */
 export async function spendMultiProfile(actor, mp) {
   if ( !mp?.source ) return [];
   const notes = [];
-  await recordUse(actor, mp.source.def.id);
+  const payer = mp.source.def.payer ?? null;
+  await recordUse(payer ?? actor, mp.source.def.id);
+  // GC4: the Ally pays its Ki Points (and Capacity) for the Glass Profile it gives
+  if ( payer && mp.payerKp ) {
+    const { safeUpdate } = await import("../socket.mjs");
+    const { ignoresCapacity } = await import("./adversary.mjs");
+    const ps = payer.system;
+    await safeUpdate(payer, { "system.ki.value": Math.max(0, (ps.ki?.value ?? 0) - mp.payerKp),
+      ...(ignoresCapacity(payer) ? {} : { "system.capacity.value": Math.max(0, (ps.capacity?.value ?? 0) - mp.payerKp) }) });
+    notes.push(L("DBU.MultiProfile.PayerPaid", { name: payer.name, n: mp.payerKp }));
+  }
   if ( mp.source.def.resource ) {
     if ( mp.resource ) {
       await changeStacks(actor, mp.resource, -1, { label: mp.source.def.name });

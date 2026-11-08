@@ -4,7 +4,8 @@
 import { DBU } from "../../../../dbu-rpg/module/config.mjs";
 import * as E from "./e.mjs";
 
-const ALLY_EVENTS = ["allyHit", "allyDamaged", "allyAttack", "allyPowerUp", "allySurge", "allyTargeted"];
+// (RA: the events of an Ally's Exploit provoked / Condition inflicted set the Ally too)
+const ALLY_EVENTS = ["allyHit", "allyDamaged", "allyAttack", "allyPowerUp", "allySurge", "allyTargeted", "allyExploitTriggered", "allyInflict", "allyWasHit"];
 /** What every Ally event carries (combat/triggers.mjs fireAllyEvents). */
 const ALLY = ["allyMinion", "allyMark.", "allyDistance"];
 
@@ -46,7 +47,7 @@ const STATES = Object.keys(DBU.states);
 const RANGE = /^([1-9]|1[0-2])$/;
 // Targets an Ally piece cannot carry: option and rule families (read by their own flows, not summed on the sheet)
 const NOT_FOR_ALLIES = /^(attack|defense|vs|clash|ally|foe|fx(Off|On|Mult|Add|Limit)|aspect(Set|All|Of)?|enterBlock\w*|resMax|resMaxSet|resKeep|ignoreState|immune|flag)\.|^(enterBlock|combineBlock|leaveBlock|leaveWhen|grandTrigger)$/;
-const TO_VARS = ["mark", "minion", "distance", "below", "cond", "states"];
+const TO_VARS = ["mark", "minion", "myMinion", "distance", "below", "cond", "states", "pl", "onArea"];
 
 /** Problems of the encounter counts and @to.* a formula reads. */
 function countProblems(formulas, what, ctx, { to = false } = {}) {
@@ -58,7 +59,7 @@ function countProblems(formulas, what, ctx, { to = false } = {}) {
       if ( ["opponentsState", "alliesState"].includes(root) && (!STATES.includes(key) || more) ) out.push(`${what}: @${v}: "${key}" is not a State key`);
       if ( root === "to" ) {
         if ( !to ) out.push(`${what}: @${v}: @to.* is only for "ally.<target>" pieces`);
-        else if ( !TO_VARS.includes(key) || (["mark", "cond", "states"].includes(key) !== !!more) ) out.push(`${what}: @${v}: @to.mark.<slug>, @to.cond.<condition>, @to.states.<state>, @to.minion, @to.distance, @to.below`);
+        else if ( !TO_VARS.includes(key) || (["mark", "cond", "states", "onArea"].includes(key) !== !!more) ) out.push(`${what}: @${v}: @to.mark.<slug>, @to.cond.<condition>, @to.states.<state>, @to.minion, @to.distance, @to.below`);
         else if ( (key === "cond") && !CONDS.includes(more) ) out.push(`${what}: @${v}: "${more}" is not a Condition key`);
         else if ( (key === "states") && !STATES.includes(more) ) out.push(`${what}: @${v}: "${more}" is not a State key`);
       }
@@ -84,7 +85,8 @@ export function checkModifier(m, i, ctx) {
     else if ( !RANGE.test(String(m.range).trim()) ) out.push(`${what}: range is a number of Squares, 1 to 12`);
   }
   if ( /^resKeep\./.test(t) && (String(m.value ?? "").trim() !== "1") ) out.push(`${what}: ${t}: the value is 1`);
-  out.push(...countProblems([m.value, m.condition], what, ctx, { to: !!ally }));
+  // (AG: an "allyGuard.<kind>" piece also reads @to: the Ally it guards)
+  out.push(...countProblems([m.value, m.condition], what, ctx, { to: !!ally || /^(allyGuard|foeGuard)\./.test(t) }));
   return out;
 }
 

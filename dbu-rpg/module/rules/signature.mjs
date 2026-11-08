@@ -286,6 +286,10 @@ export function computeSignature(sig, actor = null, { buckets = null } = {}) {
   const breakdown = [];
   // Advantages a Profile gives for free (Launching: Knockback, Blitz: Charging Assault...)
   const free = new Set(fx.freeAdvantages);
+  // Z "sigAdvFree.<key>" (Weapon Style, Demon Warrior, Way of the Weaponmaster): that Advantage costs no TP on your techniques
+  for ( const [k, b] of Object.entries(buckets ?? actor?.system?.buckets ?? {}) ) {
+    if ( k.startsWith("sigAdvFree.") && ((b?.total ?? 0) > 0) ) free.add(k.slice(11));
+  }
   const ctx = { sig, profileKey, profile, profiles: fx.list, isProfile: k => fx.has(k), foundation: sig.foundation,
     has, rank, aoe, ultimate, actor };
   for ( const list of [sig.advantages, sig.disadvantages] ) {
@@ -328,13 +332,20 @@ export function computeSignature(sig, actor = null, { buckets = null } = {}) {
 
   // TP Cost: starts at 8 (Simple: 4), Ultimate +4 at the end, never below 8
   let start = fx.sigStart;
+  // (CS4 Technique Crafter 4: a Signature of Technique Crafter 3 starts at 0 TP, and has no 8 TP floor)
+  const zeroBase = !!sig.parent?.flags?.["dbu-rpg"]?.baseTpZero;
+  if ( zeroBase ) start = 0;
   const startMult = buckets?.[`tpStart.mult.${sig.foundation}`];
   if ( startMult ) start = Math.max(0, Math.floor((start * startMult.total) + 1e-9));
   let tp = start + tpAdv - tpDis;
   if ( ultimate ) tp += 4;
   tp += sig.tpAdjust ?? 0;
   const tpRaw = tp;
-  tp = Math.max(8, tp);
+  tp = Math.max(zeroBase ? 0 : 8, tp);
+  // (CS4 Technique Crafter 3: a one-use Super Signature's TP Cost is at most your Spontaneous Technique Points, "stp")
+  if ( sig.parent?.flags?.["dbu-rpg"]?.oneUse && buckets?.stp && (tp > (buckets.stp.total ?? 0)) ) {
+    warnings.push(game.i18n.format("DBU.CS4.OverStp", { tp, stp: buckets.stp.total ?? 0 }));
+  }
 
   // KP Cost in units of (T)
   let profileKp = profile?.kp ?? 0;
@@ -398,6 +409,9 @@ export function computeSignature(sig, actor = null, { buckets = null } = {}) {
   };
 }
 
+/** FC: Advantages an effect may add whatever their requirement (Revenge Bomber: Final Chance on any technique). */
+const ADDED_WITHOUT_REQUIREMENT = new Set(["finalChance"]);
+
 /**
  * Package F: the Advantages / Disadvantages and the Super Profile that effects add to ONE attack (attack.advantage.<key>,
  * attack.superProfile.<key>). The technique is worked out again with them, but the effects give them for free: the Ki
@@ -460,7 +474,9 @@ export function grantedSignature(sig, grants, actor = null, { buckets = null, pr
     // (checked on the technique as it was, before Ascended Signature makes it an Ultimate for this attack)
     const probe = (next.level !== base.level) ? computeSignature({ ...next, level: base.level }, actor, { buckets }) : comp;
     const fresh = (probe.errors ?? []).filter(e => !(baseComp.errors ?? []).includes(e));
-    const bad = wanted.map(([k]) => k).filter(k => SIGNATURE_OPTIONS[k] && fresh.some(e => e.includes(SIGNATURE_OPTIONS[k].name)));
+    // (FC: Final Chance added by an effect needs no Ultimate Signature Technique: Revenge Bomber says so)
+    const bad = wanted.map(([k]) => k).filter(k => SIGNATURE_OPTIONS[k] && !ADDED_WITHOUT_REQUIREMENT.has(k)
+      && fresh.some(e => e.includes(SIGNATURE_OPTIONS[k].name)));
     if ( bad.length ) {
       for ( const k of bad ) {
         const def = SIGNATURE_OPTIONS[k];

@@ -7070,18 +7070,39 @@
     "skills": [],
     "race": ""
    },
-   "modifiers": [],
+   "modifiers": [
+    {
+     "target": "vs.strike",
+     "value": "1(T)",
+     "condition": "@vs.mark.marked >= 1",
+     "label": "Enhanced Search (5)",
+     "active": true,
+     "always": false
+    },
+    {
+     "target": "vs.dodge",
+     "value": "1(T)",
+     "condition": "@vs.mark.marked >= 1",
+     "label": "Enhanced Search (5)",
+     "active": true,
+     "always": false
+    }
+   ],
    "triggers": [
     {
      "event": "startOfTurn",
-     "effect": "message",
-     "value": "",
-     "resource": "",
+     "effect": "mark",
+     "value": "1",
+     "resource": "Marked",
      "condition": "",
-     "mode": "remind",
-     "duration": "none",
-     "label": "Enhanced Search",
-     "active": true
+     "label": "Enhanced Search (5)",
+     "target": "targeted",
+     "duration": "startOfNextTurn",
+     "mode": "ask",
+     "limit": "1/Round",
+     "active": true,
+     "always": false,
+     "check": "clash:perception|clairvoyance vs stealth|concealment"
     }
    ],
    "summary": "Skill · 2+ Skill Ranks in the Clairvoyance Skill and/or Perception Skill",

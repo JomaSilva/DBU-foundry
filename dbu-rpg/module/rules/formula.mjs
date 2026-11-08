@@ -113,7 +113,13 @@ export function test(condition, data = {}) {
   const expr = toExpression(condition);
   try {
     const replaced = Roll.replaceFormulaData(expr, data, { missing: "0", warn: false });
-    return !!Roll.safeEval(replaced);
+    const ok = !!Roll.safeEval(replaced);
+    // AH @alsoHealthy (Divine Physique in the Superior State): you are also in the Healthy Threshold for your effects, so a
+    // condition on @below also holds as if Healthy
+    if ( !ok && data?.alsoHealthy && (Number(data.below) > 0) && /@below\b/.test(String(condition)) ) {
+      return test(condition, { ...data, below: 0, alsoHealthy: 0 });
+    }
+    return ok;
   } catch(err) {
     console.warn(`DBU | Could not evaluate condition "${condition}"`, err);
     return false;

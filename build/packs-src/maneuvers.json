@@ -19,7 +19,22 @@
    },
    "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
    "modifiers": [],
-   "triggers": []
+   "triggers": [
+    {
+     "event": "maneuverUsed",
+     "effect": "absorbManeuver",
+     "value": "",
+     "resource": "",
+     "condition": "@via_absorb == 1",
+     "label": "Absorb",
+     "target": "self",
+     "duration": "none",
+     "mode": "ask",
+     "limit": "",
+     "active": true,
+     "always": false
+    }
+   ]
   },
   "effects": [],
   "folder": null,
@@ -107,7 +122,22 @@
    },
    "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
    "modifiers": [],
-   "triggers": []
+   "triggers": [
+    {
+     "event": "dodged",
+     "effect": "absorbAttack",
+     "value": "",
+     "resource": "",
+     "condition": "@parry == 1 && (@energy == 1 || @magic == 1)",
+     "label": "Attack Absorption",
+     "target": "self",
+     "duration": "none",
+     "mode": "ask",
+     "limit": "",
+     "active": true,
+     "always": false
+    }
+   ]
   },
   "effects": [],
   "folder": null,
@@ -594,8 +624,44 @@
     "url": "https://dbu-rpg.com/special-maneuvers/"
    },
    "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
-   "modifiers": [],
-   "triggers": []
+   "modifiers": [
+    {
+     "target": "clash.skill",
+     "value": "2",
+     "condition": "@vs.mark.seen >= 1",
+     "label": "Seen",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    },
+    {
+     "target": "clash.save",
+     "value": "1(T)",
+     "condition": "@vs.mark.seen >= 1",
+     "label": "Seen",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    }
+   ],
+   "triggers": [
+    {
+     "event": "maneuverUsed",
+     "effect": "mark",
+     "value": "1",
+     "resource": "Seen+",
+     "condition": "@via_intuit == 1",
+     "label": "Seen",
+     "target": "targeted",
+     "duration": "endOfNextTurn",
+     "mode": "auto",
+     "limit": "",
+     "active": true,
+     "always": false
+    }
+   ]
   },
   "effects": [],
   "folder": null,
@@ -657,7 +723,66 @@
    },
    "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
    "modifiers": [],
-   "triggers": []
+   "triggers": [
+    {
+     "event": "maneuverUsed",
+     "effect": "condition",
+     "value": "1",
+     "resource": "impaired",
+     "condition": "@via_magictrick == 1",
+     "label": "Magic Trick: Impaired",
+     "target": "targeted",
+     "duration": "startOfNextTurn",
+     "mode": "ask",
+     "limit": "",
+     "active": true,
+     "always": false,
+     "check": "clash:useMagic vs intuition|useMagic"
+    },
+    {
+     "event": "maneuverUsed",
+     "effect": "moveOther",
+     "value": "@ranks.useMagic * (1 + min(1, @item.whimsicalmagic))",
+     "resource": "",
+     "condition": "@via_magictrick == 1",
+     "label": "Magic Trick: move the target",
+     "target": "self",
+     "duration": "none",
+     "mode": "ask",
+     "limit": "",
+     "active": true,
+     "always": false,
+     "check": "clash:useMagic vs intuition|useMagic"
+    },
+    {
+     "event": "maneuverUsed",
+     "effect": "teleport",
+     "value": "@ranks.useMagic * (1 + min(1, @item.whimsicalmagic))",
+     "resource": "",
+     "condition": "@via_magictrick == 1",
+     "label": "Magic Trick: move yourself",
+     "target": "self",
+     "duration": "none",
+     "mode": "ask",
+     "limit": "",
+     "active": true,
+     "always": false
+    },
+    {
+     "event": "clashLost",
+     "effect": "provoke",
+     "value": "",
+     "resource": "other",
+     "condition": "@via_magictrick == 1",
+     "label": "Magic Trick (Exploitable)",
+     "target": "self",
+     "duration": "none",
+     "mode": "auto",
+     "limit": "",
+     "active": true,
+     "always": false
+    }
+   ]
   },
   "effects": [],
   "folder": null,
@@ -719,7 +844,24 @@
    },
    "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
    "modifiers": [],
-   "triggers": []
+   "triggers": [
+    {
+     "event": "maneuverUsed",
+     "effect": "powerDrain",
+     "value": "@n",
+     "resource": "",
+     "condition": "@via_powerdrain == 1 && @grappling == 1",
+     "label": "Power Drain",
+     "target": "targeted",
+     "duration": "none",
+     "mode": "ask",
+     "limit": "",
+     "active": true,
+     "always": false,
+     "amount": "3",
+     "cost": "actions:@n"
+    }
+   ]
   },
   "effects": [],
   "folder": null,
@@ -966,8 +1108,52 @@
     "url": "https://dbu-rpg.com/special-maneuvers/"
    },
    "description": "<p><a href=\"https://dbu-rpg.com/special-maneuvers/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/special-maneuvers</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
-   "modifiers": [],
-   "triggers": []
+   "modifiers": [
+    {
+     "target": "clash.skill",
+     "value": "-2",
+     "condition": "@via_terrify == 1 && @vs.top > @bT",
+     "label": "Terrify: higher Tier of Power",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    }
+   ],
+   "triggers": [
+    {
+     "event": "maneuverUsed",
+     "effect": "condition",
+     "value": "1",
+     "resource": "prone",
+     "condition": "@via_terrify == 1 && @vs.cond.shaken >= 1 && @vs.distance <= 4",
+     "label": "Terrify",
+     "target": "targeted",
+     "duration": "none",
+     "mode": "ask",
+     "limit": "",
+     "active": true,
+     "always": false,
+     "check": "clash:intimidation vs intuition|intimidation",
+     "rollKey": "terrify"
+    },
+    {
+     "event": "maneuverUsed",
+     "effect": "condition",
+     "value": "1",
+     "resource": "shaken",
+     "condition": "@via_terrify == 1 && @vs.distance <= 4",
+     "label": "Terrify",
+     "target": "targeted",
+     "duration": "endOfNextTurn",
+     "mode": "ask",
+     "limit": "",
+     "active": true,
+     "always": false,
+     "check": "clash:intimidation vs intuition|intimidation",
+     "rollKey": "terrify"
+    }
+   ]
   },
   "effects": [],
   "folder": null,
@@ -1104,7 +1290,39 @@
    },
    "description": "<p><a href=\"https://dbu-rpg.com/glass-tribe/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/glass-tribe</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
    "modifiers": [],
-   "triggers": []
+   "triggers": [
+    {
+     "event": "maneuverUsed",
+     "effect": "placeArea",
+     "value": "@n",
+     "resource": "Glass",
+     "condition": "@via_glassification == 1",
+     "label": "Glassification: Square",
+     "target": "self",
+     "duration": "none",
+     "mode": "ask",
+     "limit": "",
+     "active": true,
+     "always": false,
+     "amount": "3"
+    },
+    {
+     "event": "maneuverUsed",
+     "effect": "condition",
+     "value": "@n",
+     "resource": "slowed",
+     "condition": "@via_glassification == 1 && @res.glasscombat6 == 0",
+     "label": "Glassification: Character",
+     "target": "targeted",
+     "duration": "startOfNextTurn",
+     "mode": "ask",
+     "limit": "",
+     "active": true,
+     "always": false,
+     "amount": "3",
+     "check": "clash:corporeal vs impulsive|corporeal|cognitive|morale"
+    }
+   ]
   },
   "effects": [],
   "folder": "xIBadD2q7rrqhuIO",
@@ -1531,8 +1749,82 @@
     "url": "https://dbu-rpg.com/initial-class/"
    },
    "description": "<p><a href=\"https://dbu-rpg.com/initial-class/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/initial-class</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
-   "modifiers": [],
-   "triggers": []
+   "modifiers": [
+    {
+     "target": "combat",
+     "value": "1(T)",
+     "condition": "@res.pumped >= 1",
+     "label": "Pumped",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    },
+    {
+     "target": "speed",
+     "value": "1(T)",
+     "condition": "@res.pumped >= 1",
+     "label": "Pumped",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    },
+    {
+     "target": "soak",
+     "value": "-1(T)",
+     "condition": "@res.pumped >= 1",
+     "label": "Pumped",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    }
+   ],
+   "triggers": [
+    {
+     "event": "maneuverUsed",
+     "effect": "resourceSet",
+     "value": "1 + @myTurn",
+     "resource": "Pumped",
+     "condition": "@via_roar == 1",
+     "label": "Pumped",
+     "target": "self",
+     "duration": "none",
+     "mode": "auto",
+     "limit": "",
+     "active": true,
+     "always": false
+    },
+    {
+     "event": "endOfTurn",
+     "effect": "resource",
+     "value": "-1",
+     "resource": "Pumped",
+     "condition": "@res.pumped >= 1",
+     "label": "Pumped",
+     "target": "self",
+     "duration": "none",
+     "mode": "auto",
+     "limit": "",
+     "active": true,
+     "always": false
+    },
+    {
+     "event": "startOfEncounter",
+     "effect": "resourceSet",
+     "value": "0",
+     "resource": "Pumped",
+     "condition": "",
+     "label": "Pumped",
+     "target": "self",
+     "duration": "none",
+     "mode": "auto",
+     "limit": "",
+     "active": true,
+     "always": false
+    }
+   ]
   },
   "effects": [],
   "folder": "2L3OUJUWlUAT4cul",
@@ -1563,8 +1855,102 @@
     "url": "https://dbu-rpg.com/initial-class/"
    },
    "description": "<p><a href=\"https://dbu-rpg.com/initial-class/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/initial-class</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
-   "modifiers": [],
-   "triggers": []
+   "modifiers": [
+    {
+     "target": "surgency",
+     "value": "1(T)",
+     "condition": "@res.infused >= 1",
+     "label": "Infused",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    },
+    {
+     "target": "wound",
+     "value": "1(T)",
+     "condition": "@res.infused >= 1",
+     "label": "Infused",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    },
+    {
+     "target": "dr",
+     "value": "1(T)",
+     "condition": "@res.infused >= 1",
+     "label": "Infused",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    },
+    {
+     "target": "defenseValue",
+     "value": "-1(T)",
+     "condition": "@res.infused >= 1",
+     "label": "Infused",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    },
+    {
+     "target": "speed",
+     "value": "-1(T)",
+     "condition": "@res.infused >= 1",
+     "label": "Infused",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    }
+   ],
+   "triggers": [
+    {
+     "event": "maneuverUsed",
+     "effect": "resourceSet",
+     "value": "1 + @myTurn",
+     "resource": "Infused",
+     "condition": "@via_draconicinfusion == 1",
+     "label": "Infused",
+     "target": "self",
+     "duration": "none",
+     "mode": "auto",
+     "limit": "",
+     "active": true,
+     "always": false
+    },
+    {
+     "event": "endOfTurn",
+     "effect": "resource",
+     "value": "-1",
+     "resource": "Infused",
+     "condition": "@res.infused >= 1",
+     "label": "Infused",
+     "target": "self",
+     "duration": "none",
+     "mode": "auto",
+     "limit": "",
+     "active": true,
+     "always": false
+    },
+    {
+     "event": "startOfEncounter",
+     "effect": "resourceSet",
+     "value": "0",
+     "resource": "Infused",
+     "condition": "",
+     "label": "Infused",
+     "target": "self",
+     "duration": "none",
+     "mode": "auto",
+     "limit": "",
+     "active": true,
+     "always": false
+    }
+   ]
   },
   "effects": [],
   "folder": "2L3OUJUWlUAT4cul",
@@ -1596,7 +1982,39 @@
    },
    "description": "<p><a href=\"https://dbu-rpg.com/initial-class/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/initial-class</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
    "modifiers": [],
-   "triggers": []
+   "triggers": [
+    {
+     "event": "maneuverUsed",
+     "effect": "life",
+     "value": "@aptitudes.surgency",
+     "resource": "",
+     "condition": "@via_divineblessing == 1",
+     "label": "Divine Blessing: Allies",
+     "target": "allies",
+     "duration": "none",
+     "mode": "auto",
+     "limit": "",
+     "active": true,
+     "always": false,
+     "range": "3"
+    },
+    {
+     "event": "maneuverUsed",
+     "effect": "life",
+     "value": "-@aptitudes.surgency",
+     "resource": "",
+     "condition": "@via_divineblessing == 1",
+     "label": "Divine Blessing: Opponents",
+     "target": "opponents",
+     "duration": "none",
+     "mode": "ask",
+     "limit": "",
+     "active": true,
+     "always": false,
+     "range": "3",
+     "check": "clash:cognitive vs impulsive|corporeal"
+    }
+   ]
   },
   "effects": [],
   "folder": "2L3OUJUWlUAT4cul",
@@ -1627,8 +2045,45 @@
     "url": "https://dbu-rpg.com/initial-class/"
    },
    "description": "<p><a href=\"https://dbu-rpg.com/initial-class/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/initial-class</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
-   "modifiers": [],
-   "triggers": []
+   "modifiers": [
+    {
+     "target": "ally.soak",
+     "value": "1(T)",
+     "condition": "@to.mark.mighty >= 1",
+     "label": "Mighty",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    },
+    {
+     "target": "ally.dr",
+     "value": "1(T)",
+     "condition": "@to.mark.mighty >= 1",
+     "label": "Mighty",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    }
+   ],
+   "triggers": [
+    {
+     "event": "maneuverUsed",
+     "effect": "mark",
+     "value": "1",
+     "resource": "Mighty+",
+     "condition": "@via_mightybreeze == 1",
+     "label": "Mighty",
+     "target": "allies",
+     "duration": "startOfNextTurn",
+     "mode": "auto",
+     "limit": "",
+     "active": true,
+     "always": false,
+     "range": "4"
+    }
+   ]
   },
   "effects": [],
   "folder": "2L3OUJUWlUAT4cul",
@@ -1659,8 +2114,35 @@
     "url": "https://dbu-rpg.com/initial-class/"
    },
    "description": "<p><a href=\"https://dbu-rpg.com/initial-class/\" target=\"_blank\" rel=\"noopener\">dbu-rpg.com/initial-class</a></p><p><em>Texto completo da regra: aba Descrição › “Carregar texto oficial”.</em></p>",
-   "modifiers": [],
-   "triggers": []
+   "modifiers": [
+    {
+     "target": "foe.vs.damageTaken",
+     "value": "2(T)",
+     "condition": "@to.mark.doomed >= 1",
+     "label": "Doomed",
+     "active": true,
+     "always": false,
+     "mode": "",
+     "limit": ""
+    }
+   ],
+   "triggers": [
+    {
+     "event": "maneuverUsed",
+     "effect": "mark",
+     "value": "1",
+     "resource": "Doomed+",
+     "condition": "@via_darkbeam == 1 && @vs.distance >= 2",
+     "label": "Dark Beam: Doomed",
+     "target": "targeted",
+     "duration": "startOfNextTurn",
+     "mode": "ask",
+     "limit": "",
+     "active": true,
+     "always": false,
+     "check": "clash:cognitive vs impulsive|corporeal"
+    }
+   ]
   },
   "effects": [],
   "folder": "2L3OUJUWlUAT4cul",

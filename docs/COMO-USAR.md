@@ -942,6 +942,26 @@ A quarta rodada de automação ensinou o sistema a olhar para os outros personag
   bônus que só valem nesses Clashes).
 - **Legend Realized fora da manobra:** traços que deixam aplicar o Legend Realized da Forma em outro momento têm um botão
   que faz isso (uma vez por encontro por Forma, como na regra).
+- **States e Special States:** os efeitos das regras de States agora rodam sozinhos: os botões do Apoplectic (Basic Attack
+  fora de sequência), do Spectator (bônus ao aliado, sair, recuperar) e do Multiple Arms (rerrolar o Strike de
+  Combination); KP no Zen ao gastar Counter Action; Counter Action no Tranquil, Entrusted e Multiple Arms; Undying põe a
+  Vida em 1 e derrota ao sair com Vida negativa; Determined sai do State no início do turno; Liquid não pode ser Pinned
+  nem atacar; Feral não usa Signatures nem Unique Abilities; Plastered ignora as Condições; Spectator bloqueia o que a
+  regra proíbe e só roda os próprios efeitos de início de turno.
+- **Traços raciais (pacote RA):** novos gatilhos “quando o Exploit de um aliado é provocado” e “quando um aliado impõe
+  uma Condição a um oponente”; bônus que duram “até a próxima defesa” ou “até a próxima rolagem” somem sozinhos; opções
+  de ataque “ou isto ou aquilo” não deixam marcar as duas; o sistema conta quantas vezes cada Signature/Profile foi usada
+  no encontro e na rodada; PV acima do máximo (até o limite do traço); e sabe quem impôs cada Condição.
+- **Legendary Traits e Derrota:** as Legendary Traits valem sempre que você tem a Forma Lendária (como diz a regra),
+  estando nela ou não. Os efeitos [Triggered/Defeated] das Formas rodam mesmo com a Derrota tirando você delas, e se
+  um deles deixa você de pé (Vida acima de 0, Undying...), as Formas que a Derrota encerrou voltam a ficar ativas.
+- **United Attack, Intervene e Reflect:** o cartão do ataque tem um botão **United Attack** (um aliado adjacente paga 1
+  Ação e o KP do mesmo Profile e soma metade da Força, ou da Magia, mais o Ki Wager no Wound), um botão **Intervene** em
+  cada alvo atingido (Defense Wall, Deflect ou Distant Deflect, com o Might Clash e o excesso de Dano passando para o
+  aliado) e um botão **Reflect** para quem fez Parry ou Deflect contra um ataque de Energia ou Magia (5(T) KP, um novo
+  cartão contra o Oponente que você mirar, com o Wound do atacante original). Mover o token continua com o jogador.
+- **PV abaixo de 0:** traços como o Survivor dos Arcosians deixam o Dano levar a Vida até um valor negativo (−1/4 do
+  máximo); a Derrota só vem ao chegar nele. Os traços de PV acima do máximo que dependem do PV máximo já funcionam.
 
 ## Battle Born, Progress e Power
 

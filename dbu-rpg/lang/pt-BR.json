@@ -361,7 +361,8 @@
       "Natural": "Dado base (natural)",
       "CritDice": "Dados de Crítico",
       "Breakdown": "Detalhes da rolagem",
-      "Roll": "Rolar"
+      "Roll": "Rolar",
+      "Pressure": "Pressure Check"
     },
     "Attack": {
       "Basic": "Ataque Básico",
@@ -463,7 +464,29 @@
       "DamageAttrTimes": "Atributo de Dano ×{n} a mais",
       "AdvantagePick": "Vantagem à escolha (até {n} TP)",
       "ConditionWound": "Vantagem Condition: +{n} Wound (o alvo já está {condition})",
-      "CompelledMiss": "Compelled: este ataque não inclui {name}, o alvo do Compelled."
+      "CompelledMiss": "Compelled: este ataque não inclui {name}, o alvo do Compelled.",
+      "CapacityFull": "Capacidade restaurada ao máximo ({n})",
+      "CritBotched": "{label}: o Crítico do Strike virou Botch",
+      "CritBotchLate": "Alguém já se defendeu deste ataque: o Crítico não pode mais virar Botch.",
+      "Homing": "Homing",
+      "HomingBonus": "Homing ({n}º erro)",
+      "HomingCard": "Homing: {rolls}",
+      "FinalChanceBox": "Final Chance: LP a 0 (+{n} no Ki Wager); a Derrota só vem depois do ataque",
+      "FinalChanceNote": "Final Chance: +{n} Ki Wager dos LP (a Derrota vem depois do ataque)",
+      "TargetSoak": "{label}: +{n} Soak para {name} neste ataque",
+      "Reopened": "{label}: o ataque volta à Defense Declaration para {name}",
+      "Cancelled": "Cancelado",
+      "CancelledText": "{label}: ataque cancelado (+{kp} KP, {charges} Energy Charge(s) de volta)",
+      "MissTeam": "{label}: o ataque erra você e seus Aliados",
+      "RemovePick": "Tirar da técnica (até 2, só Advantages ou só Disadvantages)",
+      "RemoveAdv": "Advantage: {name} (+2(T) Wound)",
+      "RemoveDis": "Disadvantage: {name} (+1(T) KP)",
+      "ProfileRoundUsed": "⚠ O Basic Attack já usou o Profile {profile} nesta rodada (1 vez por rodada, exceto Simple).",
+      "SigRoundUsed": "⚠ Mais de uma Signature Technique Maneuver nesta rodada (1/Round).",
+      "Swapped": "{name} troca de lugar com {ally}, que vira o alvo do ataque",
+      "TargetDr": "{label}: +{n} DR para {name} neste ataque",
+      "TargetLess": "{label}: −{n} de Dano para {name} neste ataque",
+      "TargetNone": "{label}: {name} não recebe Dano deste ataque"
     },
     "Defense": {
       "Hit": "Atingido",
@@ -481,7 +504,12 @@
     },
     "Wound": {
       "Roll": "Rolar Dano (Wound)",
-      "Already": "O Wound deste ataque já foi rolado."
+      "Already": "O Wound deste ataque já foi rolado.",
+      "DamageApplied": "O Dano deste ataque já foi aplicado: o Wound Roll não muda mais.",
+      "Bumped": "{label}: Wound Roll alterado.",
+      "Added": "{label}: +{n} no Wound Roll.",
+      "Lethal": "{label}: Dano Letal.",
+      "Category": "{label}: +{n} Categoria de Dano."
     },
     "Damage": {
       "Apply": "Aplicar dano",
@@ -497,7 +525,8 @@
       "DivineFlex": "Divine Flex: −1 Damage Category (conta como Direct Hit).",
       "DivineFlexReflect": "Divine Flex sem dano: o atacante perde {n} LP (o Soak do defensor), se nada mais absorveu o ataque.",
       "Absolute": "Absolute Attack: errou, mas 1/2 do Wound ({n}) vai contra Soak e RD.",
-      "Lethal": "Lethal: Categoria de Dano 3, que não pode ser reduzida."
+      "Lethal": "Lethal: Categoria de Dano 3, que não pode ser reduzida.",
+      "AllyGuard": "{label}: −{n} de Dano (evitando a Derrota)"
     },
     "Momentum": {
       "Title": "Bonus Momentum",
@@ -595,7 +624,9 @@
       "WarnMultiProfile": "Multi-Profile: escolha o segundo Perfil (diferente do primeiro) para os efeitos dele valerem.",
       "ErrProfileAccess": "O Perfil {profile} só vem com {from}.",
       "Tags": "Tags",
-      "TagsHint": "Lista separada por vírgulas: copied, crafted, racial, fullPower, quickLearner (@tag_<tag> nas fórmulas)"
+      "TagsHint": "Lista separada por vírgulas: copied, crafted, racial, fullPower, quickLearner (@tag_<tag> nas fórmulas)",
+      "CopiedFrom": "Copiada de",
+      "CopiedFromHint": "Nome (ou uuid) do personagem de quem esta técnica foi copiada: Neko Mimicry"
     },
     "SuperProfileReq": {
       "allOut": "LP abaixo de Injured",
@@ -709,7 +740,16 @@
       "StackTop": "{name}: o {n}º stack pede Tier of Power base {req}+ (você tem {top}).",
       "BestialLimit": "Bestial Limit: {n} Bestial Traits ligados; só 4 valem ao mesmo tempo (desligue os outros).",
       "Twinned": "Custom Species: {n} traços marcados como Twinned (o normal são 2).",
-      "RacialRanksBudget": "Ranks raciais: {race} da raça {fx} de efeitos = {max}."
+      "RacialRanksBudget": "Ranks raciais: {race} da raça {fx} de efeitos = {max}.",
+      "ApparelMaxLayers": "Mais camadas de Apparel do que o permitido ({n}).",
+      "ScoreSetPoints": "{attr} está fixo em {n}: nenhum Attribute Point pode ser gasto nele.",
+      "EnhancedOrganism": "Enhanced Organism: adicione um Traço do Factor Alternate Upbringing (X-Raised).",
+      "WeaponPorts": "Weapon Ports: crie as 2 Installed Weapons (Integrated, Grade 2, Artisan).",
+      "FunctionalPerception": "Functional Purpose: o Rank racial não pode ir para Perception.",
+      "MajinDama": "Neko Majin-Dama: crie o Majin-Dama (Special Accessory) Integrated.",
+      "TraitQuality": "{item}: adicione a Quality {quality} (sem ocupar slot).",
+      "RulerMinions": "{name} tem {n} Minions no encontro (Ruler: no máximo 10).",
+      "NoShortRange": "Cerealian Genes: a Signature {name} não pode ter a Disadvantage Short Range."
     },
     "Prog": {
       "Title": "Progressão — PL {pl}",
@@ -1195,7 +1235,108 @@
       "collisionIgnore": "Não recebe Collision Damage (1)",
       "attackAdvantagePick": "Uma Vantagem à escolha no ataque (até N TP)",
       "pressure": "Pressure Check (± no resultado)",
-      "pressureAuto": "Pressure Check sempre passa (1)"
+      "pressureAuto": "Pressure Check sempre passa (1)",
+      "lifeOverMax": "PV acima do máximo (até +N)",
+      "interveneNoCounter": "Intervene sem Counter Action",
+      "interveneNoCounterFor": "Quem intervém por você não gasta Counter Action",
+      "unitedNoAction": "United Attack sem gastar Ação",
+      "unitedByNoAction": "Quem se junta ao seu ataque (United) não gasta Ação",
+      "unitedWound": "+ Wound no ataque em que você se junta (United)",
+      "unitedByCharges": "+ Energy Charges quando alguém se junta ao seu ataque",
+      "reflectStrike": "+ Strike no Reflect",
+      "lifeFloor": "PV podem ficar negativos até −N antes da Derrota",
+      "clashAutoLose": "Clash: o outro lado vence sem rolar",
+      "apparelMaxLayers": "No máximo N camadas de Apparel",
+      "flagLifeOneAtFloor": "Abaixo de 0 PV, \"ficar com 1 PV\" é 1 acima do mínimo",
+      "optionSwitch": "Liga a opção (só concede itens)",
+      "grappleReach": "Grapple por efeito: + Squares de Melee Range",
+      "flagEmpowerForceMax": "Empower: dá o máximo possível",
+      "empoweredToLife": "Empower recebido: o KP vira PV",
+      "thrBruisedMult": "Penalidade do Bruised: multiplicador (0 = nenhuma)",
+      "thrInjuredMult": "Penalidade do Injured: multiplicador (0 = nenhuma)",
+      "thrCriticalMult": "Penalidade do Critical: multiplicador (0 = nenhuma)",
+      "steadfastBruised": "Steadfast do Bruised",
+      "steadfastInjured": "Steadfast do Injured",
+      "steadfastCritical": "Steadfast do Critical",
+      "blockAttack": "Proíbe Attacking Maneuvers",
+      "blockSignature": "Proíbe Signature Techniques",
+      "blockUA": "Proíbe Unique Abilities",
+      "blockPowerUp": "Proíbe Power Up",
+      "blockCharge": "Proíbe Energy Charge",
+      "blockTransformation": "Proíbe a Transformation Maneuver",
+      "flagNoKiLossFromOthers": "Efeitos de outros personagens não tiram seu KP",
+      "attackAdvantagePickCopied": "Ataque: uma Advantage das suas Copied Techniques (até N TP)",
+      "attackWagerMax": "Ataque: Ki Wager máximo (o menor vale)",
+      "attackCapacityFull": "Ataque: Capacidade cheia antes do ataque",
+      "entrusted4Signature": "Entrusted (4) também na Signature Technique",
+      "alsoHealthy": "Seus efeitos também te veem como Healthy",
+      "allyGuardDefeat": "Aliado: −valor de Dano que o Derrotaria",
+      "foeGuardCritToBotch": "Oponentes: um Crítico numa Combat Roll vira Botch",
+      "removeAdvantage": "Tirar Advantages da Signature (+2(T) Wound cada)",
+      "removeDisadvantage": "Tirar Disadvantages da Signature (+1(T) KP cada)",
+      "allyGuardCognitiveShift": "Aliado: você pode assumir um Clash Cognitivo de Oponente contra ele",
+      "wagerFree": "Ki Wager sem KP nem Capacity",
+      "sigUses": "+ Signature Technique Maneuvers por rodada",
+      "sigUnlimited": "Signature Technique Maneuver sem limite por rodada",
+      "areaOfRule": "+ Squares da Area of Rule",
+      "foeGuardSteadfast": "Oponente derrubado por um Aliado: −valor no Steadfast Check",
+      "allyGuardSkillBonus": "Aliado: usa o seu Skill Bonus num Skill Clash",
+      "noTraitLifeRegain": "Sem LP pelos seus traços",
+      "surgeKiSurgency": "Ki Surge: × Surgency",
+      "lightShift": "Light Level mais perto de Normal",
+      "ignoreLight": "Ignorar penalidades de Light Level",
+      "noMovement": "Não pode se mover",
+      "noHealingSurge": "Sem outro Healing Surge nesta rodada",
+      "grappleFreeRange": "Sem Guard Down do seu Grapple a partir de N Squares",
+      "grappleFoeCombat": "± Combat Rolls de quem você agarra",
+      "moveReduce": "Squares a menos em todo movimento",
+      "ignoreWoundBelow": "Wound Roll abaixo disso não causa dano",
+      "passThrough": "Atravessa personagens e Features",
+      "duplicateUses": "+ usos por rodada dos Duplicates",
+      "duplicateShrinkMax": "Duplicates até N Size Categories menores",
+      "noCounterManeuver": "Sem Counter Maneuver",
+      "sizeMin": "Size Category mínima (índice)",
+      "arcosianMetamorphosis": "Formas Arcosian na linha Metamorphosis",
+      "avatarTransform": "Avatar pode se transformar ao trocar",
+      "tailAPDouble": "Adaptation Points em dobro no Wound da Tail Attack",
+      "attrPerConvertedSI": "Attribute Points por Skill Improvement convertido",
+      "allyGuardDefeatKeep": "Aliado adjacente fica 1 LP acima da derrota (você perde a diferença)",
+      "blockArmed": "Sem Weapons nem ataques Armed",
+      "blockGrapple": "Sem Grapple",
+      "suddenStopExtra": "Sudden Stop: Squares a mais",
+      "suddenStopFree": "Sudden Stop sem Counter Action contra oponente",
+      "collisionIgnoreRound": "Primeiro Collision Damage da rodada é 0",
+      "stp": "Spontaneous Technique Points",
+      "tcBaseZero": "Signature do Technique Crafter começa em 0 TP",
+      "useInstantUa1": "Unique Ability de 1 Action como Instant",
+      "blockCombatRecovery": "Proíbe a Combat Recovery",
+      "blockEmpower": "Proíbe o Empower",
+      "flagVengefulSurge": "Qualquer Surge pode ser um Vengeful Surge",
+      "surgeVengefulDice": "Vengeful Surge: + Dice Score",
+      "surgeVengefulRange": "Vengeful Surge: + quadrados da AoE",
+      "surgeVengefulInferiorHalf": "Vengeful Surge: Inferiors perdem + 1/2 Surgency",
+      "flagPrimalSurge": "Qualquer Surge pode ser um Primal Surge",
+      "kiOverMax": "KP acima do máximo (até +)",
+      "belowAtLeast": "Conta como abaixo de pelo menos N limiares (seus efeitos)",
+      "belowShift": "Conta como N limiares mais abaixo (seus efeitos)",
+      "belowAtMost": "Conta como abaixo de no máximo N limiares (seus efeitos)",
+      "guardDownHidden": "Seu Guard Down não conta como Condition para os outros",
+      "compelledNoWager": "Sem Ki Wager pelo Compelled",
+      "compelledNoLife": "Sem perda de LP pelo Compelled",
+      "flagLegendarySurge": "Um Ki Surge pode ser um Legendary Surge",
+      "kiSurgeAsHealing": "Ki Surge de um efeito pode ser Healing Surge",
+      "countersZero": "Seus efeitos leem 0 Counter Actions",
+      "chargingAssaultCapT": "Charging Assault: bônus de Wound até N(T)",
+      "godKiAsSuperior": "God Ki de um efeito vira o Superior State",
+      "vsDamageDealtMult": "Contra ele: × o Dano que você causa",
+      "costNoCapacity": "O Custo em KP dos seus ataques não reduz a Capacity",
+      "crossCounterFullDv": "Cross Counter não reduz seu Defense Value",
+      "blockEnergyAttack": "Proíbe ataques Energy",
+      "blockMagicAttack": "Proíbe ataques Magic",
+      "superStacksCountAs": "Conta como no máximo N Super Stacks",
+      "surgeUncounted": "Este Surge não conta para o uso do Surge Maneuver",
+      "surgeIgnoreKiMult": "Este Ki Surge ignora o Power Battery (surge.kiMult)",
+      "attackLifeNoMomentum": "O Custo em PV do ataque não dá Reduced Momentum"
     },
     "Combat": {
       "Round": "Rodada {n}",
@@ -1714,7 +1855,12 @@
         "provokedExploit": "Quando você provoca o Exploit de oponentes",
         "opponentManeuver": "Quando um oponente usa uma manobra",
         "allyManeuver": "Quando um aliado usa uma manobra",
-        "combatRecovery": "Quando você usa Combat Recovery"
+        "combatRecovery": "Quando você usa Combat Recovery",
+        "pressureCheck": "Quando você faz um Pressure Check",
+        "woundRolled": "Depois do seu Wound Roll",
+        "allyExploitTriggered": "Quando o Exploit de um aliado é provocado",
+        "allyInflict": "Quando um aliado impõe uma Condição a um oponente",
+        "opponentDefeated": "Quando um oponente é derrotado"
       },
       "Effect": {
         "life": "Recuperar/perder LP",
@@ -1750,7 +1896,40 @@
         "resourcePick": "Escolher um dos recursos (o escolhido fica 1, os outros 0)",
         "attackWound": "Wound do ataque do momento (±)",
         "legend": "Legend Realized (fora da Transformation Maneuver)",
-        "provoke": "Provocar o Exploit"
+        "provoke": "Provocar o Exploit",
+        "woundAdd": "Somar ao Wound Roll já feito",
+        "woundCategory": "Subir a Categoria de Dano do ataque",
+        "steadfastPass": "Steadfast falhos viram sucessos",
+        "equip": "Equipar um item (pelo nome)",
+        "unequip": "Desequipar um item (pelo nome)",
+        "critToBotch": "O Crítico do Strike do ataque vira Botch",
+        "attackSoak": "+N Soak neste ataque",
+        "redefend": "O ataque volta à sua Defense Declaration",
+        "cancelAttack": "Cancelar seu ataque e atacar de novo",
+        "attackMissTeam": "O ataque erra você e seus Aliados",
+        "createItem": "Criar item (Integrated)",
+        "placeArea": "Area no mapa (Magnitude N)",
+        "powerDrain": "Power Drain (N Ações)",
+        "absorbAttack": "Absorver o ataque",
+        "actAfter": "Agir logo depois deste Aliado nesta rodada",
+        "swapTarget": "Trocar de lugar: o Aliado vira o alvo",
+        "copyManeuver": "Usar a mesma manobra (Out-of-Sequence)",
+        "glassSoldiers": "Criar N Glass Soldier(s)",
+        "soldierTurn": "Glass Soldiers no início do turno",
+        "destroyFeature": "Destruir o Glass Feature adjacente",
+        "originFromFeature": "Atacar a partir de um Glass Soldier",
+        "moveOther": "Mover o outro personagem",
+        "teleport": "Colocar num Square do mapa",
+        "provokeExploit": "Provocar o Exploit dos adjacentes",
+        "maxLifeLoss": "Perder LP Máximos (encontro)",
+        "createMinion": "Criar um Minion",
+        "createGoop": "Criar um Goop",
+        "reabsorbGoops": "Reabsorver Goops",
+        "integrateItem": "Integrar um item",
+        "destroyIntegrated": "Destruir um item Integrado",
+        "compelRandom": "Compelled aleatório",
+        "traitSwitch": "Ligar / desligar um traço",
+        "createDuplicate": "Criar um Minion duplicado"
       },
       "Mode": {
         "auto": "Automático",
@@ -1818,7 +1997,20 @@
         "provokedExploit": "Você provocou o Exploit — {name}",
         "opponentManeuver": "Manobra de oponente — {name}",
         "allyManeuver": "Manobra de aliado — {name}",
-        "combatRecovery": "Combat Recovery — {name}"
+        "combatRecovery": "Combat Recovery — {name}",
+        "pressureCheck": "Pressure Check — {name}",
+        "woundRolled": "Wound Roll — {name}",
+        "allyExploitTriggered": "Exploit de aliado provocado — {name}",
+        "allyInflict": "Aliado impôs Condição — {name}",
+        "opponentDefeated": "Oponente derrotado — {name}",
+        "wasHit": "Você foi atingido (antes do Dano)",
+        "allyWasHit": "Um Aliado foi atingido (antes do Dano)",
+        "attackCountered": "Um Oponente respondeu seu ataque com uma Counter",
+        "collided": "Você sofreu Collision Damage",
+        "placed": "{name} foi colocado num Square",
+        "otherTurnStart": "{name}: começa o turno de outro personagem",
+        "conditionGained": "Você ganhou uma Combat Condition",
+        "bonusMomentum": "Você ganhou Bonus Momentum"
       },
       "DurationLabel": "Duração",
       "Duration": {
@@ -1832,7 +2024,11 @@
         "endOfNextRound": "até o fim da próxima rodada",
         "endOfTheirTurn": "até o fim do turno dele",
         "endOfTheirNextTurn": "até o fim do próximo turno dele",
-        "startOfTheirNextTurn": "até o início do próximo turno dele"
+        "startOfTheirNextTurn": "até o início do próximo turno dele",
+        "untilDefended": "até a próxima defesa",
+        "nextRoll": "até a próxima rolagem",
+        "untilDefendedRound": "até a próxima defesa ou o fim do Round",
+        "endOfThisTurn": "Até o fim deste turno"
       },
       "Expired": "{label}: {what} terminou",
       "ExpiredTitle": "Efeitos encerrados — {name}",
@@ -1868,7 +2064,17 @@
         "exploit": "Exploit Maneuver",
         "feint": "Feint Maneuver",
         "standardReminder": "Use uma Standard Maneuver de 1 Ação como Out-of-Sequence (sem gastar Ação): escolha uma das que o sistema usa, ou faça a sua na ficha / no mapa.",
-        "itemMissing": "{actor} não tem \"{name}\" na ficha."
+        "itemMissing": "{actor} não tem \"{name}\" na ficha.",
+        "grapple": "Grapple",
+        "launch": "Launch",
+        "pin": "Pin",
+        "ua1": "Unique Ability de 1 Action",
+        "vengefulSurge": "Vengeful Surge",
+        "primalSurge": "Primal Surge",
+        "legendarySurge": "Legendary Surge",
+        "uaStd": "Unique Ability Standard de 1 Action",
+        "uaTechnical": "Unique Ability Technical Standard de 1 Action",
+        "uaMagical": "Unique Ability Magical Standard de 1 Action"
       },
       "BuffNoCombat": "{what} — só vale num combate (fora dele não acabaria)",
       "ManeuverPick": "Qual manobra usar fora de sequência (sem gastar Ação)?",
@@ -1931,7 +2137,89 @@
       "PickAsk": "Escolha",
       "PickShort": "escolher: {what}",
       "TheAttack": "o ataque",
-      "NothingApplies": "nenhum efeito vale agora (nada foi gasto)."
+      "NothingApplies": "nenhum efeito vale agora (nada foi gasto).",
+      "DamageCategory": "Categoria de Dano",
+      "DefeatFormsKept": "Derrota evitada: continua em {list}",
+      "SteadfastPassShort": "Steadfast falhos → sucessos",
+      "SteadfastPassed": "{n} Steadfast falho(s) virou(aram) sucesso",
+      "NoItem": "Não há item chamado {name}",
+      "Equipped": "{name} equipado",
+      "Unequipped": "{name} desequipado",
+      "EquipShort": "Equipar {name}",
+      "UnequipShort": "Desequipar {name}",
+      "CritToBotchShort": "Crítico → Botch",
+      "AttackSoakShort": "+{n} Soak neste ataque",
+      "RedefendShort": "O ataque volta à sua Defense Declaration",
+      "CancelAttackShort": "Cancelar seu ataque e atacar de novo",
+      "MissTeamShort": "O ataque erra você e seus Aliados",
+      "NeedsFirst": "{label}: só depois do efeito anterior neste ataque.",
+      "StressUndone": "O Stress Test forçado por essa falha não é mais necessário.",
+      "ItemCreated": "{name} criado e equipado (Integrated)",
+      "CreateItemShort": "Criar {name} (Integrated)",
+      "PlaceAreaShort": "{name} no mapa (Magnitude {n})",
+      "PowerDrainShort": "Power Drain ({n} Ações)",
+      "AbsorbShort": "Absorver o ataque",
+      "ActAfterShort": "Agir logo depois deste Aliado nesta rodada",
+      "SwapTargetShort": "Trocar de lugar: o Aliado vira o alvo",
+      "CopyManeuverShort": "Usar a mesma manobra (Out-of-Sequence)",
+      "GlassSoldiersShort": "Criar {n} Glass Soldier(s)",
+      "SoldierTurnShort": "Glass Soldiers no início do turno",
+      "DestroyFeatureShort": "Destruir o Glass Feature adjacente",
+      "OriginFromFeatureShort": "Atacar a partir de um Glass Soldier",
+      "AttackDrShort": "+{n} DR neste ataque",
+      "AttackLessShort": "−{n} de Dano deste ataque",
+      "MoveOtherShort": "Mover o alvo até {n} Square(s)",
+      "TeleportShort": "Colocar {who} em qualquer Square",
+      "TeleportNearShort": "Colocar {who} a até {n} Squares de você",
+      "TeleportWho": {
+        "self": "você",
+        "other": "o alvo",
+        "target": "o Aliado alvo"
+      },
+      "NoJacket": "Você não pilota um Battle Jacket (NPC Battle Jacket com você como Leader / Owner).",
+      "JacketLp": "LP do Battle Jacket",
+      "NoAdjacentOpponent": "Nenhum Oponente adjacente.",
+      "ProvokedExploit": "{n} Oponente(s) adjacente(s) podem usar o Exploit",
+      "ProvokeExploitShort": "Os Oponentes adjacentes podem usar o Exploit",
+      "MaxLifeLossDone": "−{n} LP Máximos até o fim do encontro",
+      "MaxLifeLossShort": "−{n} LP Máximos (encontro)",
+      "CreateMinionShort": "Criar um Minion ao seu lado",
+      "NoTraitLifeRegain": "Seus traços não recuperam LP agora (Undying).",
+      "CreateGoopShort": "Criar um Goop",
+      "ReabsorbGoopsShort": "Derrotar até {n} Goop(s) e recuperar 1/2 do LP deles",
+      "IntegrateItemShort": "Integrar um item seu",
+      "DestroyIntegratedShort": "Destruir um item Integrado",
+      "CompelRandomShort": "Compelled contra um Oponente aleatório a até {n} Squares",
+      "AttackNoneShort": "Nenhum Dano deste ataque",
+      "TraitOnShort": "Ligar o traço: {what}",
+      "TraitOffShort": "Desligar o traço: {what}",
+      "CreateDuplicateShort": "Criar um Minion duplicado",
+      "LaunchOtherShort": "Launch contra ele (como se o agarrasse)",
+      "TagItemShort": "marcar a Unique Ability escolhida",
+      "TeleportNextShort": "você vai para um Square ao lado do alvo",
+      "TeleportFeatureShort": "você vai para um Square a até {n} da Feature",
+      "ConsumeMinionsShort": "derrotar Minions seus por 1/4 dos KP deles",
+      "StoreItemsShort": "guardar itens no corpo",
+      "TakeStoredShort": "tirar / equipar itens guardados",
+      "StoreWeaponShort": "guardar a Weapon do atacante",
+      "ConsumeLightShort": "consumir a luz e o Power do alvo ({what})",
+      "QualitiesAddShort": "{what} numa Weapon empunhada",
+      "QualitiesRemoveShort": "tirar {what} da Weapon",
+      "TempItemShort": "um item só para este encontro",
+      "RecordCopyShort": "guardar uma {what}",
+      "CopyStackShort": "Absorption temporária de uma {what}",
+      "SwitchAvatarShort": "trocar para o seu Avatar",
+      "LifeLostAsShort": "{n} KP contam como LP perdida",
+      "BorrowApparelShort": "vestir a Top Layer do absorvido",
+      "AbsorbShort2": "Absorb contra o seu alvo",
+      "AbsorbGoopShort": "um Goop seu usa o Absorb",
+      "InitiativeShiftShort": "Initiative {n} até o fim da rodada",
+      "InitiativeSetShort": "Initiative = {n} nesta rodada",
+      "TempGrantShort": "{name} só neste encontro",
+      "TempPickShort": "uma Unique Ability de até {n} TP nesta rodada",
+      "ExtendTimedShort": "{what} dura mais uma vez",
+      "RerollInitShort": "Initiative rolada de novo",
+      "AwakeningLoseShort": "perder os stacks de {name}"
     },
     "Name": "Nome",
     "Split": {
@@ -2529,7 +2817,8 @@
       "Away": "Em linha reta, para longe de você",
       "Double": "Dano de colisão em dobro",
       "Effect": "Efeito",
-      "MightHint": "Seu Might: {might} (metade: {half})."
+      "MightHint": "Seu Might: {might} (metade: {half}).",
+      "BouncyStop": "Bouncy Physique: {name} encerra o deslocamento aqui."
     },
     "Hard": {
       "Title": "Dureza",
@@ -2810,7 +3099,9 @@
       "HyperCharges": "Hyper Elemental: precisa de 3+ Energy Charges da Energy Charge Maneuver.",
       "HyperAoe": "Hyper Elemental: {aoe} AoE.",
       "HyperElement": "Hyper Elemental: + {profile}, sem custo de KP.",
-      "HyperMagnitude": "AoE +{n} Magnitude (Hyper Elemental)."
+      "HyperMagnitude": "AoE +{n} Magnitude (Hyper Elemental).",
+      "ErrPayerKi": "{name} não tem {n} KP para dar o Glass Profile.",
+      "PayerPaid": "{name} gastou {n} KP no Glass Profile deste ataque."
     },
     "Adversary": {
       "Title": "Adversário",
@@ -3097,7 +3388,9 @@
       "Natural": "natural {before} → {natural}",
       "Bonus": "Dice Score {before} → {total}",
       "Critical": "Critical Result ({total})",
-      "Succeed": "conta como sucesso"
+      "Succeed": "conta como sucesso",
+      "FlatBonus": "Efeitos de Natural / Critical Target",
+      "CritToBotch": "{label}: o Crítico vira Botch"
     },
     "Clash": {
       "Title": "Clash",
@@ -3117,7 +3410,9 @@
       "ViaLabel": "Através de (manobra / UA)",
       "Hint": "Empates vão para o Defender (quem não começou o Clash). Os efeitos clash.* entram sozinhos.",
       "OptionsHint": "Efeitos que você pode usar neste Clash.",
-      "Tip": "Clash contra o personagem mirado: a sua rolagem, a dele e a manobra usada."
+      "Tip": "Clash contra o personagem mirado: a sua rolagem, a dele e a manobra usada.",
+      "ShiftAsk": "{name} assume no lugar de {ally} o Clash Cognitivo de {label}? O efeito (inclusive o de perder) vai para {name}.",
+      "SkillFrom": "{label}: Skill Bonus emprestado"
     },
     "TransRule": {
       "EnterBlocked": "{name}: não pode entrar agora ({why}).",
@@ -3159,7 +3454,8 @@
       "Boosted": "Boosted Speed ({n} quadrados, {kp} KP)",
       "Rapid": "Rapid Movement (+{kp} KP: +1(T) Strike até o fim do turno)",
       "LineNormal": "Move até {n} quadrados (Normal Speed).",
-      "LineBoosted": "Move até {n} quadrados (Boosted Speed)."
+      "LineBoosted": "Move até {n} quadrados (Boosted Speed).",
+      "NoMovement": "{name} não pode se mover agora (Rooted)."
     },
     "MoveWatch": {
       "Title": "Exploit provocado",
@@ -3182,6 +3478,298 @@
       "ProvokeEffect": "Provoca o Exploit dos oponentes",
       "ProvokedShort": "Exploit provocado ({n})",
       "NoneProvoked": "Nenhum oponente no alcance para o Exploit."
+    },
+    "Pressure": {
+      "Auto": "Sucesso automático (efeito)."
+    },
+    "StateRule": {
+      "Forbids": "{state}: você não pode usar {what}.",
+      "SpectatorTarget": "Spectator: {name} não pode mirar outro personagem.",
+      "SurgingFocus": "Surging: este ataque não inclui o seu Focus.",
+      "UndyingDefeat": "{name} saiu do Undying sem Pontos de Vida: Derrotado.",
+      "What": {
+        "attack": "Attacking Maneuvers",
+        "signature": "Signature Techniques",
+        "uniqueAbility": "Unique Abilities",
+        "powerUp": "o Power Up",
+        "transformation": "a Transformation Maneuver",
+        "energyCharge": "o Energy Charge",
+        "armed": "Weapons e ataques Armed",
+        "grapple": "Grapple",
+        "combatRecovery": "a Combat Recovery",
+        "empower": "o Empower",
+        "energyAttack": "ataques Energy",
+        "magicAttack": "ataques Magic"
+      }
+    },
+    "Team": {
+      "Who": "Quem usa",
+      "Go": "Usar",
+      "United": "United Attack",
+      "UnitedTip": "Um aliado adjacente se junta a este ataque (1 Ação + KP do mesmo Profile)",
+      "UnitedClosed": "Este ataque não aceita mais United Attack.",
+      "NoUnited": "Nenhum personagem seu está adjacente ao atacante, aliado, com uma Ação e sem ter usado United Attack nesta rodada.",
+      "UnitedText": "{name} paga 1 Ação e {kp} KP e soma {bonus} ({attr} ÷ 2) ao Wound Roll.",
+      "UnitedWager": "Ki Wager extra (até {max})",
+      "UnitedLabel": "United Attack ({name})",
+      "UnitedNote": "United Attack de {name}: +{n} no Wound (Ki Wager {wager})",
+      "UnitedAdvantages": "United Attack: até {n} ranks de Advantages da Signature de quem se juntou ficam com a mesa.",
+      "Intervene": "Intervene",
+      "InterveneTip": "Intervene: um aliado entra na frente deste golpe (1 Counter Action)",
+      "InterveneClosed": "Não dá mais para usar Intervene neste alvo.",
+      "NoIntervene": "Nenhum personagem seu é aliado deste alvo, fora dos alvos do ataque, com Counter Action e fora de Long Range dele.",
+      "InterveneText": "{name} intervém por {ally} contra {attack}:",
+      "InterveneHint": "Mover o token para a casa entre o aliado e o atacante fica com o jogador.",
+      "DefenseWall": "Defense Wall",
+      "Deflect": "Deflect",
+      "DistantDeflect": "Distant Deflect",
+      "Deflected": "Desviado",
+      "InterveneUsed": "{name} usou Intervene ({what}) por {ally}",
+      "WallDone": "{name} toma o Wound Roll no lugar de {ally}.",
+      "DeflectPenalty": "Energy Charges / Power Shot",
+      "DeflectWon": "{name} desviou o ataque de todos os alvos.",
+      "DeflectLost": "{name} perdeu o Clash e toma o golpe no lugar de {ally}, com +1 Categoria de Dano.",
+      "DistantLost": "{name} perdeu o Clash: nada muda.",
+      "IntervenedFor": "{by} interveio por {name}",
+      "CategoryUp": "Deflect perdido: +1 Categoria de Dano",
+      "Excess": "Excesso de {n} de Dano além dos PV de {name}",
+      "Reflect": "Reflect",
+      "ReflectTip": "Reflect (5(T) KP): Strike contra o Oponente que você mirar; o atacante original rola o Wound",
+      "ReflectClosed": "Não dá mais para usar Reflect neste ataque.",
+      "ReflectTarget": "Mire o Oponente que vai receber o Reflect.",
+      "ReflectNote": "{name} refletiu o ataque; o Wound Roll é de {attacker}.",
+      "NoActionSpent": "Sem gastar Ação ({what})",
+      "UnitedCharges": "+{n} Energy Charge(s) ({what})",
+      "NoCounterShort": "sem Counter",
+      "NoCounterSpent": "Sem gastar Counter Action ({what})"
+    },
+    "Block": {
+      "Refused": "Não é possível: {what} ({by}).",
+      "KiWard": "{name} não perde KP por efeitos de outros",
+      "ConditionLocked": "{name} não pode tirar {what} agora."
+    },
+    "MinionOf": "Líder (Minion de)",
+    "MinionOfTip": "De quem este Minion é: os efeitos de \"seus Minions\" do Líder valem para ele",
+    "Area": {
+      "Placed": "{name}: Sphere de {n} Squares colocada no mapa"
+    },
+    "Absorb": {
+      "Urgent": "Urgent Wound Roll (absorvido)",
+      "Gained": "Absorvido: +{n} KP (metade de {total})",
+      "PowerUp": "Os KP absorvidos chegam a 1/5 do seu Máximo: usar o Power Up como Out-of-Sequence?"
+    },
+    "Drain": {
+      "Done": "{by} drena {name}: −{n} LP, −{ki} KP (recuperados por {by})",
+      "Warded": "{by} drena {name}: −{n} LP (os KP de {name} não podem ser reduzidos)"
+    },
+    "JacketOwner": "Dono (piloto)",
+    "Copy": {
+      "NoAccess": "Você não tem acesso a essa manobra ({slug})."
+    },
+    "InitiativeMove": {
+      "NotLower": "{name} não tem Iniciativa menor que a sua.",
+      "After": "{name} age logo depois de {ally} nesta rodada"
+    },
+    "Feature": {
+      "Created": "{n} Glass Soldier(s) nos Squares de Glass mais próximos (mova-os para onde quiser)",
+      "NoGlass": "Nenhum Square de Glass livre para os Glass Soldiers.",
+      "Destroyed": "{name} destruído",
+      "SoldiersTurn": "Glass Soldiers: {healed} curado(s), {spread} espalhou(aram) Glass",
+      "NoSoldier": "Você não tem um Glass Soldier no mapa.",
+      "Origin": "Neste turno seus ataques partem do Square de {name} (selecione o Soldier antes de apertar)",
+      "GlassMoveOff": "{name} terminou o Movimento Instantâneo do Glass Combat (3) fora de um Square de Glass: ele deve terminar em Glass."
+    },
+    "Place": {
+      "NoToken": "{name} não tem token nesta cena.",
+      "PickAny": "Clique no Square para onde {name} vai (botão direito ou Esc cancela).",
+      "PickRange": "Clique num Square a até {n} Squares de você para {name} (botão direito ou Esc cancela).",
+      "Outside": "Esse Square está fora do Battlefield.",
+      "Far": "Longe demais: no máximo {n} Squares (esse está a {d}).",
+      "Occupied": "Esse Square está ocupado.",
+      "Cancelled": "Nenhum Square escolhido: o efeito não foi aplicado.",
+      "Placed": "{name} foi colocado no Square escolhido.",
+      "Moved": "{name} moveu {n} Square(s).",
+      "ClashLost": "{name} perdeu o Clash (Cognitive) contra {other}: o efeito falha.",
+      "ClashWon": "{name} venceu o Clash (Cognitive) contra {other}: o Grapple acaba.",
+      "TargetFar": "{name} está a {d} Squares (máx. {n}).",
+      "PickFeature": "Clique no Square da Feature mais próxima (Sphere de {n} Squares).",
+      "NotInSphere": "{name} está a {d} Squares dessa Feature (máx. {n})."
+    },
+    "Minion": {
+      "Created": "{name} foi criado ao seu lado.",
+      "Asked": "O mestre cria o Minion.",
+      "Finish": "Termine a ficha dele (Pontos de Atributo, o resto da Raça).",
+      "NoneToConsume": "Nenhum Minion que possa ser consumido (os criados nesta rodada não contam).",
+      "ConsumePick": "Quais Minions derrotar?",
+      "Consumed": "{n} Minion(s) derrotado(s): +{kp} KP.",
+      "Shrink": "Quantas Size Categories a mais a diminuir (máx. {n})?"
+    },
+    "Goop": {
+      "Created": "{name} surgiu ao seu lado.",
+      "None": "Nenhum Goop seu disponível.",
+      "Pick": "Escolha até {n} Goop(s) para Derrotar:",
+      "Absorb": "Derrotar",
+      "Absorbed": "{n} Goop(s) Derrotado(s): +{lp} LP"
+    },
+    "Integrate": {
+      "Pick": "Escolher",
+      "Title": "Integrar qual item?",
+      "DestroyTitle": "Destruir qual item Integrado?",
+      "None": "Nenhum item para Integrar.",
+      "NoneIntegrated": "Nenhum item Integrado.",
+      "Done": "{name} foi Integrado.",
+      "Destroyed": "{name} foi destruído."
+    },
+    "TraitSwitch": {
+      "None": "Nenhum traço para trocar.",
+      "Title": "Qual traço?",
+      "On": "Ligar",
+      "Off": "Desligar",
+      "Done": "Ligado: {names}",
+      "DoneOff": "Desligado: {names}"
+    },
+    "Battle": {
+      "Title": "DBU: condições de batalha",
+      "Environment": "Battle Environment",
+      "Weather": "Battle Weather",
+      "Light": "Light Level",
+      "Hint": "Valem para todos os personagens da cena (a altura do token define os High Battle Environments). As penalidades de Light Level são aplicadas.",
+      "Env": {
+        "standard": "Standard",
+        "bog": "Bog",
+        "soft": "Soft",
+        "lava": "Lava",
+        "magma": "Magma",
+        "underwater": "Underwater"
+      },
+      "W": {
+        "none": "Nenhum",
+        "hot": "Hot",
+        "cold": "Cold",
+        "tornado": "Tornado",
+        "storm": "Storm",
+        "earthquake": "Earthquake",
+        "vile": "Vile"
+      },
+      "L": {
+        "0": "Normal (0)",
+        "1": "Bright (1)",
+        "2": "Blinding (2)",
+        "-2": "Pitch Black (−2)",
+        "-1": "Dark (−1)"
+      }
+    },
+    "Tag": {
+      "Title": "Escolher item",
+      "Pick": "Qual item este efeito marca?",
+      "None": "Nenhum item desse tipo na ficha.",
+      "Done": "{name} marcado."
+    },
+    "F11": {
+      "NoHealingSurge": "{name} não pode usar outro Healing Surge nesta rodada."
+    },
+    "Store": {
+      "Title": "Guardar itens",
+      "TakeTitle": "Itens guardados",
+      "Pick": "Quais itens guardar no corpo?",
+      "None": "Nenhum item para guardar.",
+      "NoneStored": "Nenhum item guardado.",
+      "Done": "Guardados: {names}.",
+      "Taken": "Tirados: {names}.",
+      "Keep": "Manter guardado",
+      "Out": "Tirar",
+      "Equip": "Tirar e equipar",
+      "NoWeapon": "{name} não empunha nenhuma Weapon.",
+      "TookWeapon": "{name} guarda {weapon} de {other}.",
+      "NoAbsorbed": "Nenhuma ficha chamada {name}.",
+      "NoTop": "{name} não veste Top Layer.",
+      "Borrowed": "{name} veste {item} de {other} enquanto tiver esse stack."
+    },
+    "F12": {
+      "StateBlocked": "{name} não pode entrar em {state} agora.",
+      "LeftLight": "{name} sai de {forms} (sem Stress Exhaustion).",
+      "LostPower": "{name} perde {n} stack(s) de Power.",
+      "NothingToConsume": "{name} não tem Power nem Transformação Light Dependent.",
+      "GainedLight": "{name}: +{n} {what}.",
+      "QualitiesAdded": "{name} ganha {what}.",
+      "QualitiesRemoved": "Qualities tiradas de {names}.",
+      "NoWeaponFor": "Nenhuma Weapon empunhada sem {what}."
+    },
+    "F13": {
+      "OtherRolled": "{name} rolou {title}: {total} (natural {natural}). Reagir?",
+      "NoCounterManeuver": "{name} não pode usar Counter Maneuver agora.",
+      "NoUa1": "Nenhuma Unique Ability de 1 Action.",
+      "TempItem": "{name} criado para este encontro (some quando ele acabar)."
+    },
+    "F14": {
+      "Legendary": "Legendary Saiyan: Legendary para {names}.",
+      "CopyFull": "{list}: já tem {max}. Substituir qual por {name}?",
+      "Replace": "Substituir",
+      "Keep": "Manter",
+      "CopyKept": "{list}: mantidas.",
+      "CopyAdded": "{list}: {name} ({all}).",
+      "NoCopies": "Nenhuma {list}.",
+      "CopySwapped": "{name}: agora com {copy}.",
+      "CopyStack": "{name} temporária com {copy}."
+    },
+    "Avatar": {
+      "None": "Nenhuma outra ficha sua para ser o Avatar.",
+      "Pick": "Escolher o Avatar",
+      "PickHint": "Qual ficha é o seu Avatar? (fica gravado)",
+      "NoCombat": "Só num Combat Encounter.",
+      "Switched": "{name} troca para {avatar} até o fim do encontro.",
+      "Transform": "{avatar} pode usar a Transformation Maneuver Out-of-Sequence."
+    },
+    "F15": {
+      "Rerolled": "rolado de novo",
+      "LifeLostAs": "{n} KP contam como LP perdida."
+    },
+    "Absorb2": {
+      "NoGoop": "Nenhum Goop seu.",
+      "Far": "{name} está a {d} Squares (Melee Range {n}).",
+      "FirstLost": "{name} perde o primeiro Clash contra {other}.",
+      "SecondLost": "{other} escapa e fica Shaken até o fim do próximo turno dele.",
+      "Absorbed": "{name} absorve {other}: fora do encontro, Absorption temporária (nível 2).",
+      "GoopGone": "{name} é derrotado."
+    },
+    "CS1": {
+      "NoWeapons": "{name} não pode equipar Weapons.",
+      "FreeStop": "Sem Counter Action (movido por um oponente).",
+      "Initiative": "{name}: Initiative {n} até o fim da rodada.",
+      "TempGrant": "{name} ganha {item} até o fim do encontro."
+    },
+    "CS2": {
+      "TempRound": "{name} ganha {item} até o fim da rodada.",
+      "Extended": "{name}: {n} efeito(s) duram mais."
+    },
+    "CS4": {
+      "OverStp": "TP {tp} acima dos seus STP ({stp}).",
+      "OneUseSpent": "{name} já foi usada (uso único)."
+    },
+    "T2": {
+      "Rerolled": "{name}: Initiative rolada de novo.",
+      "StacksLost": "{name}: {n} stack(s) perdido(s)."
+    },
+    "T4": {
+      "VengefulAsk": "Usar um Vengeful Surge no lugar deste Surge? (1d10(T) + Surgency de LP e KP; os Opponents a até 4 quadrados perdem LP igual ao Dice Score)",
+      "Vengeful": "Recuperou {life} LP e {ki} KP (Dice Score {score}); Opponents a até {range} quadrados perdem LP:",
+      "SurgeKind": "Que tipo de Surge?",
+      "Primal": "Recuperou {life} LP e {ki} KP."
+    },
+    "T8": {
+      "CompelledNone": "Compelled: gaste 2 Ações atacando o alvo (sem Wager mínimo e sem perder LP).",
+      "CompelledNoWager": "Compelled: gaste 2 Ações atacando o alvo (sem Wager mínimo) ou perca 1/10 do LP no fim do turno.",
+      "CompelledNoLife": "Compelled: gaste 2 Ações atacando o alvo (Wager mínimo de 1/10 da Max Capacity); você não perde LP por ele."
+    },
+    "T9": {
+      "Legendary": "Recuperou {ki} KP; Surging até o fim do turno."
+    },
+    "T11": {
+      "SuperActions": "Ações pelo Super Profile (Giga Flare: até 2, +2 Energy Charges e +2(T) KP cada; Super Combination: +1 Energy Charge cada)",
+      "SuperCombo": "Super Combination: +{n} rank(s) de Alotta Lotta Attacks e Peppering Blows (podem passar do máximo)."
+    },
+    "T12": {
+      "ChargeSquares": "Quadrados percorridos em linha reta (Charging Assault: +1 Wound por quadrado após o 3º, até 2(T))"
     }
   }
 }

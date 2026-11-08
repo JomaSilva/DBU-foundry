@@ -72,12 +72,22 @@ export async function applyOps(ops) {
         case "life": {
           const sys = doc.system;
           const next = sys.life.value - o.amount;
-          await doc.update({ "system.life.value": (sys._effectiveStates?.undying > 0) ? next : Math.max(0, next) });
+          await doc.update({ "system.life.value": (sys._effectiveStates?.undying > 0) ? next : Math.max(0, next) }, { dbuEnvDamage: true });
           break;
         }
         case "condition": {
           const cur = doc.system.conditions?.[o.key] ?? 0;
           await doc.setCondition(o.key, o.add ? cur + o.add : o.value);
+          // (T29 o.by: the Character who inflicted it, "inflict" as for a trigger effect)
+          const now = doc.system.conditions?.[o.key] ?? 0;
+          if ( o.by && (o.by !== doc.uuid) && (now > cur) ) {
+            const by = await fromUuid(o.by).catch(() => null);
+            const giver = (by?.documentName === "Token") ? by.actor : by;
+            if ( giver ) {
+              await doc.setFlag("dbu-rpg", `condBy.${o.key}`, giver.uuid).catch(() => null);
+              (await import("./triggers.mjs")).fireEvent(giver, "inflict", { other: doc, scope: { [`cond_${o.key}`]: 1, level: now } });
+            }
+          }
           break;
         }
         case "timed": {
@@ -88,6 +98,8 @@ export async function applyOps(ops) {
           break;
         }
         case "dot": await doc.update({ "system.combat.dot": (doc.system.combat.dot ?? 0) + o.add }); break;
+        // F12: an item taken from another Character (Slimy Consistency's Stored Weapon)
+        case "delete": await doc.delete(); break;
         case "counter": await doc.update({ "system.combat.counters": Math.max(0, (doc.system.combat.counters ?? 0) - 1) }); break;
         case "flag":
           if ( o.value === null ) await doc.unsetFlag("dbu-rpg", o.key);
@@ -153,6 +165,15 @@ export function collisionDamage(actor, h, { bonus = 0, double = false, halve = 0
   if ( double ) damage *= 2;
   // Q "collision.ignore": no Collision Damage at all
   if ( (actor?.system?.buckets?.["collision.ignore"]?.total ?? 0) > 0 ) return { damage: 0, rank };
+  // CS2 "collision.ignoreRound": the first Collision Damage of each Combat Round is 0 (Dense Body 7)
+  if ( (damage > 0) && ((actor?.system?.buckets?.["collision.ignoreRound"]?.total ?? 0) > 0) ) {
+    const combat = (game.combats ?? []).find(c => c.started && c.combatants.some(cb => cb.actor?.uuid === actor.uuid));
+    const f = actor.flags?.["dbu-rpg"]?.collisionFree;
+    if ( combat && !(f && (f.combat === combat.id) && (f.round === combat.round)) ) {
+      runOps([{ op: "flag", uuid: actor.uuid, key: "collisionFree", value: { combat: combat.id, round: combat.round } }]).catch(() => null);
+      return { damage: 0, rank };
+    }
+  }
   // Q "collision.halve": the Collision Damage this actor takes is halved (once, however many pieces)
   const own = ((actor?.system?.buckets?.["collision.halve"]?.total ?? 0) > 0) ? 1 : 0;
   const halves = halve + own + ((h?.bouncy || h?.rubbery || h?.fragile) ? 1 : 0);
@@ -169,6 +190,8 @@ function turnActorUuid(actor) {
 function collisionOps(actor, h, damage, lines) {
   const ops = [];
   if ( damage > 0 ) ops.push({ op: "life", uuid: actor.uuid, amount: damage });
+  // (OA "collided": you take Collision Damage: Bouncy Physique)
+  if ( damage > 0 ) import("./triggers.mjs").then(T => T.fireEvent(actor, "collided", { scope: { damage } })).catch(() => null);
   if ( !h ) return ops;
   const source = turnActorUuid(actor);
   const timed = (key, label) => source
@@ -240,10 +263,13 @@ const overlaps = (a, b) => (a.i0 <= b.i1) && (b.i0 <= a.i1) && (a.j0 <= b.j1) &&
 /** Another character in the way at that position and height (Character Collision), or null. Square grids only. */
 function blockerAt(tdoc, pos, sameHeight, ignore) {
   if ( !canvas.grid.isSquare ) return null;
+  // (F12 "flag.passThrough": an Incorporeal Character passes through the others, and its Square counts as empty)
+  const through = a => (a?.system?.buckets?.["flag.passThrough"]?.total ?? 0) > 0;
+  if ( through(tdoc.actor) ) return null;
   const fp = footprint(tdoc, pos);
   for ( const t of canvas.tokens.placeables ) {
     const d = t.document;
-    if ( (d === tdoc) || ignore.has(d.uuid) || d.hidden || !t.actor ) continue;
+    if ( (d === tdoc) || ignore.has(d.uuid) || d.hidden || !t.actor || through(t.actor) ) continue;
     if ( overlaps(fp, footprint(d)) && sameHeight(d) ) return d;
   }
   return null;
@@ -299,13 +325,15 @@ export async function forcedMove({ source = null, target, squares, exact = false
     ui.notifications.warn(L("DBU.Move.OtherScene"));
     return null;
   }
-  squares = Math.max(0, Math.floor(squares));
+  // F11 "move.reduce": the Squares the moved Character goes through by any means are reduced (Petrification Plating)
+  squares = Math.max(0, Math.floor(squares) - Math.max(0, Math.floor(Number(actor.system?.buckets?.["move.reduce"]?.total ?? 0) || 0)));
   const mode = heightMode();
   const h0 = tokenHeight(tdoc);
   const sourceToken = source ? actorTokens(source)[0] : null;
   const sourceCenter = sourceToken ? sourceToken.document.getCenterPoint(positionOf(sourceToken.document)) : null;
   const tMight = actor.system.aptitudes?.might ?? 0;
-  const stopMax = Math.floor(tMight / 2);
+  // (CS1 "suddenStop.extra": more Squares off with the Sudden Stop: Dense Body)
+  const stopMax = Math.floor(tMight / 2) + Math.max(0, Math.floor(Number(actor.system?.buckets?.["suddenStop.extra"]?.total ?? 0) || 0));
 
   let vertical = "";
   if ( mode === "flight" ) {
@@ -376,7 +404,17 @@ export async function forcedMove({ source = null, target, squares, exact = false
       h1 = h0.value + (Math.sign(dv) * Math.max(0, Math.abs(dv) - cut));
     }
     lines.push(L("DBU.Move.SuddenStopUsed", { name: tdoc.name }));
-    if ( encounterOf(actor) ) ops.push({ op: "counter", uuid: actor.uuid });
+    // (CS1 "suddenStop.free": moved by an Opponent's effect, no Counter Action, once per Combat Round: Dense Body 4)
+    const combat = encounterOf(actor);
+    const freeMark = actor.flags?.["dbu-rpg"]?.suddenStopFree;
+    const freeNow = combat && source && (source !== actor) && ((actor.system?.buckets?.["suddenStop.free"]?.total ?? 0) > 0)
+      && !(freeMark && (freeMark.combat === combat.id) && (freeMark.round === combat.round))
+      && ((tdoc.disposition ?? 0) !== (sourceToken?.document?.disposition ?? 0));
+    if ( freeNow ) {
+      ops.push({ op: "flag", uuid: actor.uuid, key: "suddenStopFree", value: { combat: combat.id, round: combat.round } });
+      lines.push(L("DBU.CS1.FreeStop"));
+    }
+    else if ( combat ) ops.push({ op: "counter", uuid: actor.uuid });
   }
 
   /* ----- The way: Features, Characters, the edge of the Battlefield ----- */
@@ -398,7 +436,8 @@ export async function forcedMove({ source = null, target, squares, exact = false
   const center = pos => tdoc.getCenterPoint({ x: pos.x, y: pos.y });
   for ( const pos of path ) {
     if ( !insideScene(tdoc, pos) ) { lines.push(L("DBU.Move.Edge")); break; }
-    if ( token?.checkCollision(center(pos), { origin: center(final), type: "move", mode: "any" }) ) {
+    const passes = (actor.system?.buckets?.["flag.passThrough"]?.total ?? 0) > 0;
+    if ( !passes && token?.checkCollision(center(pos), { origin: center(final), type: "move", mode: "any" }) ) {
       const h = await askHardness({ actor, what: "feature", title: L("DBU.Move.FeatureTitle", { name: tdoc.name }) });
       if ( !h ) break;
       if ( !h.pass ) {
@@ -412,6 +451,8 @@ export async function forcedMove({ source = null, target, squares, exact = false
           { n: featureDmg, lp: featureLp }));
         ops.push(...collisionOps(actor, h, damage, lines));
         if ( !fragile ) break;
+        // PL Bouncy Physique (3): Collision Damage ends the movement it would go on suffering
+        if ( (damage > 0) && hasTrait(actor, "bouncy physique") ) { lines.push(L("DBU.Move.BouncyStop", { name: tdoc.name })); break; }
         fragileHit = true;
       }
     }
@@ -459,10 +500,35 @@ export async function forcedMove({ source = null, target, squares, exact = false
   // The token moves first, then the damage (the Steadfast Checks come after the landing)
   const elevation = elevationFor(tdoc, h1, mode);
   const moveOp = ((final.x !== start.x) || (final.y !== start.y) || (elevation !== start.elevation))
-    ? { op: "update", uuid: tdoc.uuid, data: { x: final.x, y: final.y, elevation } } : null;
+    ? { op: "update", uuid: tdoc.uuid, data: { x: final.x, y: final.y, elevation }, options: { dbuForced: true } } : null;
   await runOps([moveOp, ...ops]);
   await postInfoCard({ actor: source ?? actor, title: label, subtitle: tdoc.name, lines, img: "icons/svg/thrust.svg" });
+  if ( moveOp && source ) await sniperExploit(source, tdoc).catch(err => console.error("DBU | patient sniper", err));
   return { moved, total, height: h1, hitGround: hitsGround };
+}
+
+/** Has the actor a Racial Trait of that name (lower case)? */
+function hasTrait(actor, name) {
+  return !!actor?.items?.some(i => (i.type === "racialTrait") && (String(i.name).trim().toLowerCase() === name));
+}
+
+/**
+ * PL Patient Sniper (1): an Ally moving an Opponent triggers your Exploit Maneuver against it (the Allies of the one who
+ * moved it, on its side of the encounter).
+ */
+async function sniperExploit(source, tdoc) {
+  const combat = encounterOf(source);
+  const moved = tdoc.actor;
+  if ( !combat || !moved ) return;
+  const mine = combat.combatants.find(c => c.actor?.uuid === source.uuid)?.token;
+  const side = mine?.disposition ?? 0;
+  const theirs = tdoc.disposition ?? 0;
+  if ( !side || !theirs || (side === theirs) ) return;
+  const snipers = combat.combatants.filter(c => c.actor && (c.actor.uuid !== source.uuid) && !c.isDefeated
+    && ((c.token?.disposition ?? 0) === side) && hasTrait(c.actor, "patient sniper")).map(c => c.actor);
+  if ( !snipers.length ) return;
+  const { provokeExploit } = await import("../rules/exploit.mjs");
+  await provokeExploit(moved, "patientsniper", { opponents: snipers, token: tdoc, name: "Patient Sniper" });
 }
 
 /* -------------------------------------------- */

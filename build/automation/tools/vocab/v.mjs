@@ -20,7 +20,8 @@ export const PREFIX_RE = [];
 export function checkModifier(m, i, ctx) { return []; }
 // eslint-disable-next-line no-unused-vars
 export function checkTrigger(t, i, ctx) {
-  if ( (t?.effect === "life") && String(t.resource ?? "").trim() && !/^safe$/i.test(String(t.resource).trim()) ) return [`trigger ${i}: life resource "${t.resource}" (only "safe")`];
+  // (T29 "noMomentum": the loss gives no Reduced Momentum)
+  if ( (t?.effect === "life") && String(t.resource ?? "").trim() && !/^(safe|silent|noMomentum)(\s+(safe|silent|noMomentum))*$/i.test(String(t.resource).trim()) ) return [`trigger ${i}: life resource "${t.resource}" (only "safe" / "silent" / "noMomentum")`];
   return [];
 }
 // eslint-disable-next-line no-unused-vars

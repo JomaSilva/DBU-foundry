@@ -21,7 +21,7 @@ export const PREFIX_RE = [];
 export function checkModifier(m, i, ctx) { return []; }
 // eslint-disable-next-line no-unused-vars
 export function checkTrigger(t, i, ctx) {
-  if ( (t?.effect === "provoke") && String(t.resource ?? "").trim() && !["adjacent", "melee", "notLong"].includes(String(t.resource).trim()) ) {
+  if ( (t?.effect === "provoke") && String(t.resource ?? "").trim() && !["adjacent", "melee", "notLong", "other"].includes(String(t.resource).trim()) && !/^\d+$/.test(String(t.resource).trim()) ) {
     return [`trigger ${i}: provoke resource "${t.resource}" (adjacent | melee | notLong)`];
   }
   return [];
